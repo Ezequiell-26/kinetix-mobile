@@ -7,6 +7,8 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input, Label } from "@/components/ui/input";
 import { PhotoCompare } from "@/components/photo-compare";
+import { PrTracker } from "@/components/pr-tracker";
+import { MuscleMap } from "@/components/muscle-map";
 import { FileUpload } from "@/components/file-upload";
 import { ExportActions } from "@/components/export-actions";
 import { 
@@ -95,6 +97,8 @@ export default function ProgressPage(){
     } catch {}
     setLoading(false);
   }
+
+  const volumeByMuscle: Record<string,number> = (()=>{ const m: Record<string,number>={}; for(const log of workoutLogs) for(const s of log.sets) { const k=(s.exerciseName.split(" ")[0]||"General"); m[k]=(m[k]||0)+1; } return m; })();
 
   useEffect(() => {
     loadData();
@@ -435,7 +439,9 @@ export default function ProgressPage(){
               <Badge variant="muted">Privado</Badge>
             </CardHeader>
             <CardContent className="p-4 space-y-4">
-              <PhotoCompare
+              <PrTracker sets={workoutLogs.flatMap(w=> w.sets.map(s=> ({exerciseName: s.exerciseName, weight: s.weight, reps: s.reps, date: w.date, rir: s.rir})))} />
+      <MuscleMap volumeByMuscle={volumeByMuscle} />
+      <PhotoCompare
                 beforeUrl={beforePhoto?.url}
                 afterUrl={currentPhoto?.url || beforePhoto?.url}
                 beforeLabel={beforePhoto ? `Inicio (${new Date(beforePhoto.date).toLocaleDateString("es-AR", { day: "numeric", month: "short" })})` : "Antes"}

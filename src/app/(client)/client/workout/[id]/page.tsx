@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
+import { GymMode } from "@/components/gym-mode";
 import { 
   ArrowLeft, 
   CheckCircle, 
@@ -87,6 +88,7 @@ export default function WorkoutExecutionPage(){
   // Session timing
   const [startTime] = useState<number>(Date.now());
   const [finished, setFinished] = useState<boolean>(false);
+  const [gymMode, setGymMode] = useState<boolean>(false);
   const [finalComment, setFinalComment] = useState<string>("");
   const [savingLog, setSavingLog] = useState<boolean>(false);
 
@@ -345,6 +347,16 @@ export default function WorkoutExecutionPage(){
     );
   }
 
+  if(gymMode && workout){
+    return (
+      <GymMode
+        exercises={workout.exercises.map(e=>({id:e.id, name:e.exercise.name, sets:e.sets, reps:e.reps, restSec:e.restSec, image:e.exercise.image, instructions:e.exercise.instructions || e.notes, muscleGroup:e.exercise.muscleGroup}))}
+        onExit={()=>setGymMode(false)}
+        onFinish={()=>{ setGymMode(false); setFinished(true); }}
+      />
+    );
+  }
+
   return (
     <div className="space-y-4 pb-12 select-none">
       {/* Top Session Progress Bar */}
@@ -354,9 +366,9 @@ export default function WorkoutExecutionPage(){
             <ArrowLeft size={16} /> Salir
           </button>
           <p className="font-bold text-white truncate max-w-[200px]">{workout.name}</p>
-          <Badge variant="accent" className="font-bold">
+          <div className="flex items-center gap-2"><Badge variant="accent" className="font-bold">
             {currentExIdx + 1} / {workout.exercises.length}
-          </Badge>
+          </Badge><button onClick={()=>setGymMode(true)} className="text-[11px] font-black bg-[#D6FF2A] text-black px-2.5 py-1 rounded-full">GYM MODE</button></div>
         </div>
         <Progress value={progressPercent} className="h-2 bg-zinc-800" />
         <div className="flex justify-between text-[11px] text-zinc-400">

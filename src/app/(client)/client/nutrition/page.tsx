@@ -3,6 +3,7 @@ import { CalorieCalculator, OneRMCalculator } from "@/components/calorie-calcula
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { BarcodeScanner } from "@/components/barcode-scanner";
+import { FoodDatabase } from "@/components/food-database";
 import { HiitTimer } from "@/components/hiit-timer";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
@@ -32,6 +33,7 @@ export default function NutritionPage(){
       </div>
 
       <CalorieCalculator />
+      <FoodDatabase onAdd={(f)=>console.log("food added", f)} />
       <BarcodeScanner onFood={(f)=>console.log("food", f)} />
       <OneRMCalculator />
       <HiitTimer />
