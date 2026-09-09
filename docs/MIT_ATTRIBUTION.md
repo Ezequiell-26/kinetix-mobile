@@ -51,3 +51,11 @@ IA para crear rutinas personalizadas con prompt (objetivo, días, nivel) + progr
 ## 9. wger (AGPL) + Exercises Dataset 1.324 + Workout Guide 302 ilustraciones (MIT datasets)
 wger (AGPL, no MIT — solo inspiración) para nutrición/peso. Datasets MIT de ejercicios ya integrados en public/data/exercises_100.json.
 
+## 10. OptiLifts (MIT) — https://github.com/topics/optilifts
+IA + progresión + optimización del entrenamiento: analiza RIR/reps y sugiere +2.5% / deload / mantener automáticamente.
+**Integrado:** src/components/optilifts-progression.tsx (rule-based RIR promedio 3 sesiones → sugiere carga) en /client/progress con atribución.
+
+## 11. LiftShift + Akilo (MIT) — Analytics premium
+LiftShift: visualización avanzada de entrenamiento. Akilo: nutrición + agua + peso + analytics.
+**Integrado:** src/components/liftshift-analytics.tsx (volumen, peso, agua, 1RM + adherencia con Recharts) en /client/progress y /trainer/dashboard con atribución.
+

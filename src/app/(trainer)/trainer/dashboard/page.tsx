@@ -1,5 +1,6 @@
 import { prisma } from "@/lib/db";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { LiftShiftAnalytics } from "@/components/liftshift-analytics";
 import { Badge } from "@/components/ui/badge";
 import { ChangelogNotification } from "@/components/changelog-notification";
 import { AdherenceChart, RevenueChart, CheckinDonut } from "@/components/analytics-charts";

@@ -8,6 +8,8 @@ import { Button } from "@/components/ui/button";
 import { Input, Label } from "@/components/ui/input";
 import { PhotoCompare } from "@/components/photo-compare";
 import { PrTracker } from "@/components/pr-tracker";
+import { OptiLiftsProgression } from "@/components/optilifts-progression";
+import { LiftShiftAnalytics } from "@/components/liftshift-analytics";
 import { MuscleMap } from "@/components/muscle-map";
 import { FileUpload } from "@/components/file-upload";
 import { ExportActions } from "@/components/export-actions";
@@ -439,7 +441,9 @@ export default function ProgressPage(){
               <Badge variant="muted">Privado</Badge>
             </CardHeader>
             <CardContent className="p-4 space-y-4">
-              <PrTracker sets={workoutLogs.flatMap(w=> w.sets.map(s=> ({exerciseName: s.exerciseName, weight: s.weight, reps: s.reps, date: w.date, rir: s.rir})))} />
+              <OptiLiftsProgression logs={workoutLogs.flatMap(w=> w.sets.map(s=> ({exercise:s.exerciseName, weight:s.weight||0, reps:s.reps||0, rir:s.rir, date:w.date})))} />
+      <LiftShiftAnalytics data={[]} />
+      <PrTracker sets={workoutLogs.flatMap(w=> w.sets.map(s=> ({exerciseName: s.exerciseName, weight: s.weight, reps: s.reps, date: w.date, rir: s.rir})))} />
       <MuscleMap volumeByMuscle={volumeByMuscle} />
       <PhotoCompare
                 beforeUrl={beforePhoto?.url}
