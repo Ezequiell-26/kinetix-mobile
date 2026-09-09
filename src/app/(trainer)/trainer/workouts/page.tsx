@@ -5,6 +5,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input, Label } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
+import { AiRoutineGenerator } from "@/components/ai-routine-generator";
 import { Dumbbell, Plus, Trash2, ArrowUp, ArrowDown, Check, Copy } from "lucide-react";
 
 type ExerciseOption = {
@@ -355,6 +356,29 @@ export default function WorkoutsPage(){
           <button onClick={() => setStatusMsg(null)} className="text-xs opacity-70 hover:opacity-100">✕</button>
         </div>
       )}
+
+      <AiRoutineGenerator onGenerate={(prog)=>{
+          const newWeeks = prog.weeks.map((w: {weekNumber:number; name:string; days:Array<{name:string; exercises:Array<{name:string; sets:number; reps:string; rir:number; restSec:number}>}>})=>({
+            id: Math.random().toString(36).slice(2),
+            weekNumber: w.weekNumber,
+            name: w.name,
+            days: w.days.map((d: {name:string; exercises:Array<{name:string; sets:number; reps:string; rir:number; restSec:number}>}, di:number)=>({
+              id: Math.random().toString(36).slice(2),
+              name: d.name,
+              // @ts-ignore
+              dayNumber: di+1,
+              estimatedMin: 60,
+              exercises: d.exercises.map((e: {name:string; sets:number; reps:string; rir:number; restSec:number})=>{
+                const lib = libraryExercises.find(x=> x.name.toLowerCase()===e.name.toLowerCase()) || libraryExercises[0];
+                return {id: Math.random().toString(36).slice(2), exerciseId: lib?.id || "", name: e.name, sets: e.sets, reps: e.reps, rir: e.rir, rpe: null, restSec: e.restSec, tempo: "", load: "", notes: ""};
+              })
+            }))
+          }));
+          setWeeks(newWeeks as unknown as typeof weeks);
+          setProgramName(prog.name);
+          setDescription("Generado con IA • " + prog.durationWeeks + " semanas • " + prog.frequency + "d/sem");
+          window.scrollTo({top:0, behavior:"smooth"});
+        }} />
 
       {/* Program selector */}
       {existingPrograms.length > 0 && (

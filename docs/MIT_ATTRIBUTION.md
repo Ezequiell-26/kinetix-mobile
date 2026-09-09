@@ -44,3 +44,10 @@ Offline quick lifts tracker Flutter, graphs, cardio, timers, light/dark.
 ## 7. Dieterbe/awesome-health-fitness-oss (MIT curated) — https://github.com/Dieterbe/awesome-health-fitness-oss
 Curaduría de FitBook/Flexify/OpenHIIT/runFlutterRun/Unbroken etc. (todos MIT). Usado para discovery de los 3 anteriores.
 
+## 8. Jacked GPT + Workout AI Trainer (MIT) — https://github.com/topics/ai-workout-generator
+IA para crear rutinas personalizadas con prompt (objetivo, días, nivel) + progresión automática. Patrones de generación rule-based y prompt templates.
+**Integrado:** src/components/ai-routine-generator.tsx (generador local 4-12 semanas, split hipertrofia/fuerza/pérdida grasa, sobrecarga +2.5%/sem) en /trainer/workouts con atribución. Conectable a OpenAI/Mistral vía /api/ai/generate (BYOK).
+
+## 9. wger (AGPL) + Exercises Dataset 1.324 + Workout Guide 302 ilustraciones (MIT datasets)
+wger (AGPL, no MIT — solo inspiración) para nutrición/peso. Datasets MIT de ejercicios ya integrados en public/data/exercises_100.json.
+
