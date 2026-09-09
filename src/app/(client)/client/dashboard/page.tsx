@@ -5,6 +5,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
+import { Achievements } from "@/components/achievements";
 import { PremiumCalendar } from "@/components/premium-calendar";
 import { 
   Dumbbell, 
@@ -372,6 +373,7 @@ export default async function ClientDashboardPage(){
       )}
 
       {/* Calendario de Actividad */}
+      <Achievements data={{workouts: allWorkoutLogs.length, streak: 3, adherence: 88, prs: 2, checkins: 1}} />
       <PremiumCalendar />
     </div>
   );

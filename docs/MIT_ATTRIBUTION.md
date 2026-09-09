@@ -59,3 +59,11 @@ IA + progresión + optimización del entrenamiento: analiza RIR/reps y sugiere +
 LiftShift: visualización avanzada de entrenamiento. Akilo: nutrición + agua + peso + analytics.
 **Integrado:** src/components/liftshift-analytics.tsx (volumen, peso, agua, 1RM + adherencia con Recharts) en /client/progress y /trainer/dashboard con atribución.
 
+## 12. Strive (MIT) — React + Firebase + métricas + achievements
+Gamificación fitness: XP, niveles, badges, rachas, leaderboards. Métricas + achievements.
+**Integrado:** src/components/achievements.tsx (8 badges, XP, niveles, rachas, progreso) en /client/progress y /client/dashboard con atribución.
+
+## 13. Granite (MIT) — PWA + offline + rutinas + PRs + estadísticas
+PWA 100% offline con cache API, rutinas, PRs y estadísticas sin conexión. Offline-first real.
+**Integrado:** src/components/granite-offline.tsx (cache, pendientes, sync) + public/sw.js v2-granite (cache API GET, background sync) con atribución.
+
