@@ -1,0 +1,47 @@
+{
+  "name": "ezequiel-coaching",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "dev": "next dev -p 3001",
+    "build": "next build",
+    "start": "next start -p 3001",
+    "lint": "next lint",
+    "db:generate": "prisma generate",
+    "db:migrate": "prisma migrate dev",
+    "db:seed": "tsx prisma/seed.ts",
+    "postinstall": "prisma generate"
+  },
+  "dependencies": {
+    "next": "15.3.5",
+    "react": "19.1.0",
+    "react-dom": "19.1.0",
+    "prisma": "^6.8.2",
+    "@prisma/client": "^6.8.2",
+    "bcryptjs": "^3.0.2",
+    "jose": "^6.0.11",
+    "framer-motion": "^12.15.0",
+    "lucide-react": "^0.511.0",
+    "recharts": "^2.13.0",
+    "date-fns": "^4.1.0",
+    "zod": "^3.24.4",
+    "react-hook-form": "^7.56.4",
+    "@hookform/resolvers": "^5.0.1",
+    "clsx": "^2.1.1",
+    "tailwind-merge": "^3.3.0"
+  },
+  "devDependencies": {
+    "typescript": "^5.8.3",
+    "@types/node": "^22.15.21",
+    "@types/react": "^19.1.6",
+    "@types/react-dom": "^19.1.2",
+    "@types/bcryptjs": "^2.4.6",
+    "tailwindcss": "^3.4.17",
+    "postcss": "^8.5.3",
+    "autoprefixer": "^10.4.21",
+    "eslint": "^9.27.0",
+    "eslint-config-next": "15.3.5",
+    "tsx": "^4.19.4",
+    "ts-node": "^10.9.2"
+  }
+}

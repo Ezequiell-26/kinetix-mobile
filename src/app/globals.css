@@ -1,0 +1,87 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Space+Grotesk:wght@500;600;700&display=swap');
+
+:root {
+  --background: 0 0% 3.5%;
+  --foreground: 0 0% 98%;
+  --card: 0 0% 7%;
+  --card-foreground: 0 0% 98%;
+  --border: 0 0% 14%;
+  --accent: 68 100% 52%;
+  --safe-top: env(safe-area-inset-top);
+  --safe-bottom: env(safe-area-inset-bottom);
+}
+* { border-color: hsl(var(--border)); }
+html { scroll-behavior: smooth; -webkit-text-size-adjust: 100%; transition: background-color 0.3s ease; }
+body {
+  background: #080808;
+  color: #FAFAFA;
+  font-family: 'Inter', system-ui, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  overscroll-behavior-y: contain;
+  -webkit-tap-highlight-color: transparent;
+  padding-top: env(safe-area-inset-top);
+  transition: background-color 0.3s ease, color 0.3s ease;
+}
+h1,h2,h3 { font-family: 'Space Grotesk', sans-serif; letter-spacing: -0.02em; }
+::-webkit-scrollbar { width: 6px; height: 6px; }
+::-webkit-scrollbar-thumb { background: #27272A; border-radius: 999px; transition: background 0.2s; }
+::-webkit-scrollbar-track { background: transparent; }
+/* Premium selection */
+::selection { background: #D6FF2A; color: #000; }
+html.light ::selection { background: #0A0A0A; color: #fff; }
+/* Premium focus */
+*:focus-visible { outline: 2px solid #D6FF2A; outline-offset: 2px; }
+html.light *:focus-visible { outline-color: #0A0A0A; }
+/* PWA standalone */
+@media (display-mode: standalone) {
+  body { background: #080808; }
+}
+@media (display-mode: standalone) {
+  html.light body { background: #FFFFFF; }
+}
+/* iOS safe bottom for fixed navs */
+@supports (padding: env(safe-area-inset-bottom)) {
+  .safe-bottom { padding-bottom: env(safe-area-inset-bottom); }
+}
+
+/* ===== TEMA CLARO PREMIUM BLANCO Y NEGRO ===== */
+html.light {
+  --background: 0 0% 100%;
+  --foreground: 0 0% 3.5%;
+  --card: 0 0% 98%;
+  --card-foreground: 0 0% 3.5%;
+  --border: 0 0% 90%;
+}
+html.light body {
+  background: #FFFFFF;
+  color: #0A0A0A;
+}
+html.light h1, html.light h2, html.light h3 { color: #0A0A0A; }
+html.light ::-webkit-scrollbar-thumb { background: #E5E5E5; }
+/* Fondos */
+html.light .bg-\[\#080808\] { background-color: #FFFFFF !important; }
+html.light .bg-\[\#080808\]\/80 { background-color: rgba(255,255,255,0.8) !important; }
+html.light .bg-\[\#0F0F0F\] { background-color: #FFFFFF !important; }
+html.light .bg-\[\#111111\] { background-color: #FFFFFF !important; border-color: #E8E8E8 !important; }
+html.light .bg-zinc-900 { background-color: #F2F2F2 !important; }
+html.light .bg-zinc-800 { background-color: #E8E8E8 !important; }
+html.light .bg-black\/60 { background-color: rgba(0,0,0,0.08) !important; }
+/* Bordes */
+html.light .border-zinc-800 { border-color: #E8E8E8 !important; }
+html.light .border-zinc-900 { border-color: #EDEDED !important; }
+/* Textos */
+html.light .text-white { color: #0A0A0A !important; }
+html.light .text-zinc-100 { color: #0A0A0A !important; }
+html.light .text-zinc-300 { color: #52525B !important; }
+html.light .text-zinc-400 { color: #71717A !important; }
+html.light .text-zinc-500 { color: #A1A1AA !important; }
+/* Botones y acentos se mantienen pero con contraste premium */
+html.light .bg-white { background-color: #0A0A0A !important; color: white !important; }
+html.light .text-black { color: white !important; }
+html.light .hover\:bg-zinc-900:hover { background-color: #F5F5F5 !important; }
+html.light .hover\:text-white:hover { color: #0A0A0A !important; }
+
