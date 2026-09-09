@@ -59,3 +59,8 @@ coverage
 # Misc
 .cache
 .parcel-cache
+*.txt
+cookies*.txt
+test*.txt
+tmp-gym
+tmp-gym/

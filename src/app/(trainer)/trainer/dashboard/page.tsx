@@ -1,6 +1,8 @@
 import { prisma } from "@/lib/db";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { ChangelogNotification } from "@/components/changelog-notification";
+import { AdherenceChart, RevenueChart, CheckinDonut } from "@/components/analytics-charts";
 import { Progress } from "@/components/ui/progress";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
@@ -135,6 +137,7 @@ export default async function TrainerDashboard(){
 
   return (
     <div className="space-y-6">
+      <ChangelogNotification />
       {/* Welcome & Top Actions */}
       <div className="flex flex-col sm:flex-row justify-between sm:items-center gap-4">
         <div>
