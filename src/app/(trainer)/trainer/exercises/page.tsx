@@ -5,6 +5,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { ExerciseIllustrationGrid } from "@/components/exercise-illustration";
 import { SearchableDropdown } from "@/components/searchable-dropdown";
 import { useDebounce } from "@/hooks/use-debounce";
 
@@ -117,6 +118,7 @@ export default function ExercisesPage(){
           ))}
         </div>
       </CardContent></Card>
+      <ExerciseIllustrationGrid exercises={exercises.slice(0,8).map(e=>({name:e.name, muscleGroup:e.muscleGroup}))} />
       <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-3">
         {filtered.map(e=>(
           <Card key={e.id} className="overflow-hidden hover:border-zinc-700 transition group">

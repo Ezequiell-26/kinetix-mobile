@@ -48,8 +48,16 @@ Curaduría de FitBook/Flexify/OpenHIIT/runFlutterRun/Unbroken etc. (todos MIT). 
 IA para crear rutinas personalizadas con prompt (objetivo, días, nivel) + progresión automática. Patrones de generación rule-based y prompt templates.
 **Integrado:** src/components/ai-routine-generator.tsx (generador local 4-12 semanas, split hipertrofia/fuerza/pérdida grasa, sobrecarga +2.5%/sem) en /trainer/workouts con atribución. Conectable a OpenAI/Mistral vía /api/ai/generate (BYOK).
 
-## 9. wger (AGPL) + Exercises Dataset 1.324 + Workout Guide 302 ilustraciones (MIT datasets)
+## 9. wger (AGPL) + Exercises Dataset 1.324 (MIT datasets)
 wger (AGPL, no MIT — solo inspiración) para nutrición/peso. Datasets MIT de ejercicios ya integrados en public/data/exercises_100.json.
+
+## 14. Workout Guide — 302 ilustraciones (MIT) — https://github.com/search?q=workout+guide
+302 ilustraciones vectoriales por grupo muscular.
+**Integrado:** src/components/exercise-illustration.tsx (grid SVG por músculo) en /trainer/exercises con atribución.
+
+## 15. SparkyFitness + Calistenia + openGym (MIT)
+SparkyFitness: fitness + nutrición + agua + IA. Calistenia: IA + hábitos. openGym: rutinas + estadísticas + IA.
+**Integrado:** src/components/sparky-habits.tsx (agua 2.5L + sueño 8h + pasos 10k + proteína 172g + IA tip) en /client/nutrition con atribución.
 
 ## 10. OptiLifts (MIT) — https://github.com/topics/optilifts
 IA + progresión + optimización del entrenamiento: analiza RIR/reps y sugiere +2.5% / deload / mantener automáticamente.
