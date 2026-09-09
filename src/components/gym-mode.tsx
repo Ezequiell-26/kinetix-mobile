@@ -36,10 +36,10 @@ export function GymMode({
   },[rest,paused]);
 
   useEffect(()=>{
-    if(rest===0 && !paused && Object.keys(completed).length>0){
+    if(rest===0 && !paused && Object.keys(completed).length>0){ // beep on rest end
       try{ const ctx=new (window.AudioContext||(window as unknown as {webkitAudioContext: typeof AudioContext}).webkitAudioContext)(); const o=ctx.createOscillator(); o.frequency.value=880; o.connect(ctx.destination); o.start(); setTimeout(()=>o.stop(),250); }catch{}
     }
-  },[rest]);
+  },[rest, paused, completed]);
 
   function completeSet(){
     const key=`${ex.id}-${setNum}`;
