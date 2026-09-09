@@ -4,6 +4,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input, Label } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
+import { TacticalBarbell } from "@/components/tactical-barbell";
 import { Sparkles, Dumbbell, Zap, Check } from "lucide-react";
 
 // Inspirado en Jacked GPT + Workout AI Trainer (MIT)
@@ -114,6 +115,7 @@ export function AiRoutineGenerator({ onGenerate }:{ onGenerate: (program: {name:
           {generating ? "Generando..." : <><Zap size={16} className="mr-2"/> GENERAR CON IA</>}
         </Button>
 
+        <TacticalBarbell onSelect={(t)=> setPrompt(prompt + " • " + t.name + ": " + t.desc)} />
         {preview && (
           <div className="bg-zinc-950 border border-zinc-800 rounded-2xl p-4 space-y-3">
             <div className="flex justify-between items-start">

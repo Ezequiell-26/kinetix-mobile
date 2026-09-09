@@ -5,6 +5,7 @@ import { Badge } from "@/components/ui/badge";
 import { BarcodeScanner } from "@/components/barcode-scanner";
 import { FoodDatabase } from "@/components/food-database";
 import { SparkyHabits } from "@/components/sparky-habits";
+import { OpenHiitPro } from "@/components/openhiit-pro";
 import { HiitTimer } from "@/components/hiit-timer";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
@@ -38,6 +39,7 @@ export default function NutritionPage(){
       <BarcodeScanner onFood={(f)=>console.log("food", f)} />
       <OneRMCalculator />
       <SparkyHabits />
+      <OpenHiitPro />
       <HiitTimer />
 
       <Card>

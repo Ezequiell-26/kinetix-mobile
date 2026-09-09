@@ -94,3 +94,19 @@ iTrack: workout tracking timeline. My-Workouts: rutinas premium + scheduling. Fi
 ## 20. GitHub Fitness Topic — 4.000+ repos — https://github.com/topics/fitness
 Curaduría completa del topic fitness para discovery de los 19 anteriores. Todos los anteriores provienen de aquí.
 
+## 21. Unbroken (MIT) — PWA Tactical Barbell — https://github.com/Bruno-366/Unbroken
+React PWA para strength & cardio tracking basado en Tactical Barbell (Operator/Fighter/Zulu/Grey Man). Offline-first.
+**Integrado:** src/components/tactical-barbell.tsx (plantillas 4x) + openhiit-pro con atribución.
+
+## 22. Simple (MIT) — https://github.com/basarsubasi/simplefitnessapp
+Create, schedule, track, analyze lifting workouts locally (TS). Offline, local-first.
+**Integrado:** Patrones de scheduling + premium-calendar + gym-mode offline con atribución.
+
+## 23. OpenHIIT (MIT) — https://github.com/a-mabe/OpenHIIT
+Cross-platform HIIT y Tabata interval timer con timers custom y audio cues (Flutter).
+**Integrado:** src/components/openhiit-pro.tsx (Tabata/EMOM/AMRAP/HIIT con audio) en /client/nutrition + mejora hiit-timer con atribución.
+
+## 24. Local Image Cache (Granite offline MIT + Free Exercise DB Unlicense + hasaneyldrm)
+Fotos 100% offline: 36 free + 64 hasaneyldrm copiadas a public/exercises/ (200 OK), sin depender de raw.githubusercontent. Fix fotos rotas + ExerciseImage fallback SVG por músculo.
+**Integrado:** public/exercises/free/*.jpg + hasaneyldrm/*.jpg (100) + src/components/exercise-image.tsx con fallback robusto + seed local.
+

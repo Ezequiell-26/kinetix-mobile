@@ -2,6 +2,7 @@
 import { useState, useEffect } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import { ExerciseImage } from "@/components/exercise-image";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
 import { Play, Pause, RotateCcw, ChevronRight, ChevronLeft, X, Timer } from "lucide-react";
@@ -93,7 +94,7 @@ export function GymMode({
       {/* Main Exercise */}
       <div className="flex-1 overflow-auto p-4 space-y-4">
         <div className="aspect-[16/9] rounded-2xl overflow-hidden bg-zinc-900 border border-zinc-800">
-          {ex.image ? <img src={ex.image} alt={ex.name} className="w-full h-full object-cover" /> : <div className="w-full h-full flex items-center justify-center text-zinc-600">Sin imagen</div>}
+          <ExerciseImage src={ex.image} alt={ex.name} muscleGroup={ex.muscleGroup} name={ex.name} className="w-full h-full" />
         </div>
         <Card className="bg-zinc-900 border-zinc-800">
           <CardContent className="pt-4">

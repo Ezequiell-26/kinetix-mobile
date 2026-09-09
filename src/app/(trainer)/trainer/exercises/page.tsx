@@ -5,6 +5,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { ExerciseImage } from "@/components/exercise-image";
 import { ExerciseIllustrationGrid } from "@/components/exercise-illustration";
 import { SearchableDropdown } from "@/components/searchable-dropdown";
 import { useDebounce } from "@/hooks/use-debounce";
@@ -124,7 +125,7 @@ export default function ExercisesPage(){
         {filtered.map(e=>(
           <Card key={e.id} className="overflow-hidden hover:border-zinc-700 transition group">
             <div className="h-36 bg-zinc-900 relative overflow-hidden cursor-pointer" onClick={()=>setSelected(e)}>
-              {e.image ? <img src={e.image} alt={e.name} className="w-full h-full object-cover group-hover:scale-[1.02] transition" /> : <div className="w-full h-full flex items-center justify-center text-zinc-600">Sin imagen</div>}
+              <ExerciseImage src={e.image} alt={e.name} muscleGroup={e.muscleGroup} name={e.name} className="w-full h-full" />
               <div className="absolute top-2 left-2 flex gap-1"><Badge variant="muted">{e.muscleGroup}</Badge><Badge variant="accent">{e.level}</Badge></div>
             </div>
             <CardContent className="pt-4">
@@ -147,7 +148,7 @@ export default function ExercisesPage(){
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 backdrop-blur-sm" onClick={()=>setSelected(null)}>
           <div className="bg-zinc-900 rounded-2xl max-w-lg w-full max-h-[90vh] overflow-auto border border-zinc-800" onClick={e=>e.stopPropagation()}>
             <div className="relative h-48 bg-zinc-800">
-              {selected.image ? <img src={selected.image} alt={selected.name} className="w-full h-full object-cover" /> : <div className="w-full h-full flex items-center justify-center text-zinc-600">Sin imagen</div>}
+              <ExerciseImage src={selected.image} alt={selected.name} muscleGroup={selected.muscleGroup} name={selected.name} className="w-full h-full" />
               <button onClick={()=>setSelected(null)} className="absolute top-3 right-3 w-8 h-8 rounded-full bg-black/60 text-white flex items-center justify-center text-lg leading-none hover:bg-black/80">×</button>
               <div className="absolute bottom-3 left-3 flex gap-2"><Badge variant="muted">{selected.muscleGroup}</Badge><Badge variant="accent">{selected.level}</Badge></div>
             </div>
