@@ -1,6 +1,9 @@
+"use client";
 import { CalorieCalculator, OneRMCalculator } from "@/components/calorie-calculator";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { BarcodeScanner } from "@/components/barcode-scanner";
+import { HiitTimer } from "@/components/hiit-timer";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 
@@ -29,7 +32,9 @@ export default function NutritionPage(){
       </div>
 
       <CalorieCalculator />
+      <BarcodeScanner onFood={(f)=>console.log("food", f)} />
       <OneRMCalculator />
+      <HiitTimer />
 
       <Card>
         <CardHeader><CardTitle>Hábitos VIP</CardTitle><p className="text-xs text-zinc-500">Check diario — racha y adherencia</p></CardHeader>
@@ -58,7 +63,7 @@ export default function NutritionPage(){
         </CardContent>
       </Card>
 
-      <p className="text-xs text-center text-zinc-500">VIP: todo integrado — entrenamiento + nutrición + hábitos + progreso en una app prolija, minimalista y blanca/negra.</p>
+      <p className="text-xs text-center text-zinc-500">VIP: todo integrado — entrenamiento + nutrición + hábitos + progreso en una app prolija, minimalista y blanca/negra. MIT FitBook + HIIT Timer.</p>
     </div>
   );
 }

@@ -26,18 +26,23 @@ async function main(){
   const trainer = await prisma.user.create({data:{email:"ezequiel@ezequielcoaching.com", password:hashedTrainer, name:"Ezequiel", role:"TRAINER"}});
   await prisma.trainerProfile.create({data:{userId:trainer.id, bio:"Coach certificado • 8 años transformando físicos", specialty:"Hipertrofia & Recomposición"}});
 
-  const exercisesData = [
-    {name:"Press Banca con Barra", muscleGroup:"Pecho", pattern:"Empuje", equipment:"Barra", level:"Intermedio", instructions:"Acuéstate, retrae escápulas, baja controlado al pecho y empuja.", image:"https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?w=400"},
-    {name:"Sentadilla Libre", muscleGroup:"Piernas", pattern:"Sentadilla", equipment:"Barra", level:"Intermedio", instructions:"Pies al ancho de hombros, rompe paralelo, rodillas alineadas.", image:"https://images.unsplash.com/photo-1434608519340-334ff72da56d?w=400"},
-    {name:"Peso Muerto Convencional", muscleGroup:"Espalda", pattern:"Bisagra", equipment:"Barra", level:"Avanzado", instructions:"Bisagra de cadera, espalda neutra, empuja el piso.", image:"https://images.unsplash.com/photo-1581009146145-b5ef050c2e1e?w=400"},
-    {name:"Dominadas Pronas", muscleGroup:"Espalda", pattern:"Tracción", equipment:"Barra", level:"Avanzado", instructions:"Cuelga, deprime escápulas y lleva el pecho a la barra.", image:"https://images.unsplash.com/photo-1594381898411-846e7d193883?w=400"},
-    {name:"Press Militar", muscleGroup:"Hombros", pattern:"Empuje Vertical", equipment:"Barra", level:"Intermedio", instructions:"Core firme, barra al mentón y empuja vertical.", image:"https://images.unsplash.com/photo-1532029837206-abbe2b7620e3?w=400"},
-    {name:"Hip Thrust", muscleGroup:"Glúteos", pattern:"Bisagra", equipment:"Barra", level:"Intermedio", instructions:"Espalda en banco, empuja cadera arriba, pausa 1s.", image:"https://images.unsplash.com/photo-1517836357463-d25dfeac3438?w=400"},
-    {name:"Remo con Barra", muscleGroup:"Espalda", pattern:"Tracción", equipment:"Barra", level:"Intermedio", instructions:"Torso 45°, rema al ombligo, sin balanceo.", image:"https://images.unsplash.com/photo-1583454110551-21f2fa2afe61?w=400"},
-    {name:"Curl Bíceps", muscleGroup:"Bíceps", pattern:"Aislamiento", equipment:"Mancuernas", level:"Principiante", instructions:"Codos pegados, controla excéntrica.", image:"https://images.unsplash.com/photo-1581009146145-b5ef050c2e1e?w=400"},
-    {name:"Plancha Abdominal", muscleGroup:"Core", pattern:"Anti-extensión", equipment:"Peso corporal", level:"Principiante", instructions:"Cuerpo rígido, respira, no dejes caer cadera.", image:"https://images.unsplash.com/photo-1571019614242-c5c5dee9f50b?w=400"},
-    {name:"Prensa 45°", muscleGroup:"Piernas", pattern:"Sentadilla", equipment:"Máquina", level:"Principiante", instructions:"Espalda apoyada, baja controlado.", image:"https://images.unsplash.com/photo-1534438327276-14e5300c3a48?w=400"},
+  // Carga desde Free Exercise DB (Unlicense, 876 ejercicios) - top 50 diversos
+  const fs = await import("fs");
+  let top50: Array<{name:string; muscleGroup:string; equipment:string; level:string; instructions:string; image:string|null; id:string}> | null = null;
+  try{ const raw = fs.readFileSync("public/data/exercises_100.json","utf-8"); top50 = JSON.parse(raw); }catch{ try{ const raw2 = fs.readFileSync("public/data/exercises_top50.json","utf-8"); top50 = JSON.parse(raw2); }catch{ top50 = null; } }
+  const fallback = [
+    {name:"Press Banca con Barra", primaryMuscles:["chest"], equipment:"barbell", level:"beginner", instructions:["Acuéstate, retrae escápulas"], id:"fallback1", images:[], force:"push"},
   ];
+  const exercisesDataRaw = top50 || fallback;
+  const exercisesData = exercisesDataRaw.map(e=>({
+    name: e.name,
+    muscleGroup: (e as {muscleGroup?:string}).muscleGroup || "General",
+    pattern: (e as {force?:string}).force || "General",
+    equipment: e.equipment || "Desconocido",
+    level: e.level ? e.level.charAt(0).toUpperCase()+e.level.slice(1) : "Intermedio",
+    instructions: (e as {instructions?:string}).instructions || "Controla la técnica, respira y progresa.",
+    image: (e as {image?:string|null}).image || "https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?w=400",
+  }));
   const exercises = [];
   for(const e of exercisesData){ const ex = await prisma.exercise.create({data:e}); exercises.push(ex); }
 

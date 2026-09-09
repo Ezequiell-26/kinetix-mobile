@@ -64,3 +64,8 @@ cookies*.txt
 test*.txt
 tmp-gym
 tmp-gym/
+
+# tmp datasets (local only, regenerated)
+tmp-*/
+tmp-exercises-dataset/
+tsconfig.tsbuildinfo
