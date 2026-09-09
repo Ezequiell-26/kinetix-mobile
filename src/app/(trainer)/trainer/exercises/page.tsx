@@ -118,6 +118,7 @@ export default function ExercisesPage(){
           ))}
         </div>
       </CardContent></Card>
+      {/* LibreFit MIT — biblioteca + tracking */}
       <ExerciseIllustrationGrid exercises={exercises.slice(0,8).map(e=>({name:e.name, muscleGroup:e.muscleGroup}))} />
       <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-3">
         {filtered.map(e=>(

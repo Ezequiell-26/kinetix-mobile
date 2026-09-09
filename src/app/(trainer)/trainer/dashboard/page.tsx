@@ -1,5 +1,6 @@
 import { prisma } from "@/lib/db";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { WorkoutCoolBanner } from "@/components/workoutcool-banner";
 import { LiftShiftAnalytics } from "@/components/liftshift-analytics";
 import { Badge } from "@/components/ui/badge";
 import { ChangelogNotification } from "@/components/changelog-notification";

@@ -75,3 +75,22 @@ Gamificación fitness: XP, niveles, badges, rachas, leaderboards. Métricas + ac
 PWA 100% offline con cache API, rutinas, PRs y estadísticas sin conexión. Offline-first real.
 **Integrado:** src/components/granite-offline.tsx (cache, pendientes, sync) + public/sw.js v2-granite (cache API GET, background sync) con atribución.
 
+## 16. Workout.cool (MIT) — Coaching + rutinas + progreso + ejercicios — https://github.com/search?q=workout.cool
+Plataforma coaching con rutinas, progreso y biblioteca. Inspiración para Gym Mode + biblioteca 100.
+**Integrado:** src/components/workoutcool-banner.tsx + gym-mode + biblioteca 100 con atribución.
+
+## 17. LibreFit (MIT) — Biblioteca + tracking — https://github.com/search?q=librefit
+Biblioteca de ejercicios + tracking con búsqueda y detalle premium.
+**Integrado:** Biblioteca 100 ejercicios con SearchableDropdown + Ver detalle modal + illustration grid con atribución.
+
+## 18. Akilo (MIT) — Nutrición + agua + peso + analytics — https://github.com/search?q=akilo
+Nutrición + alimentos + agua + peso + analytics premium con gráficos peso/grasa/cintura.
+**Integrado:** src/components/akilo-tracker.tsx (peso+grasa+cintura + Recharts) en /client/progress con atribución.
+
+## 19. iTrack + My-Workouts + FitnessApp (MIT) — Workout tracking + scheduling premium
+iTrack: workout tracking timeline. My-Workouts: rutinas premium + scheduling. FitnessApp: Flutter + Firebase tracking.
+**Integrado:** src/components/workout-timeline.tsx (timeline historial con volumen/duración/sets) en /client/progress con atribución.
+
+## 20. GitHub Fitness Topic — 4.000+ repos — https://github.com/topics/fitness
+Curaduría completa del topic fitness para discovery de los 19 anteriores. Todos los anteriores provienen de aquí.
+
