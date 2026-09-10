@@ -229,3 +229,15 @@ Go/Svelte webapp para 5/3/1 Jim Wendler: 3 semanas + deload, % TM.
 Strong/Hevy CSV import (Lyftr roadmap) — Date, Exercise, Weight, Reps → historial.
 **Integrado:** src/components/hevy-import-pro.tsx (upload CSV + preview + import) en /client/progress con atribución.
 
+## 55. OpenScale (MIT) — https://github.com/oliexdev/openScale
+Bluetooth scale tracker: peso, grasa, músculo, agua, hueso auto-sync, open source.
+**Integrado:** src/components/openscale-sync.tsx (Xiaomi Body Comp 2 + 3 métricas) en /client/progress con atribución.
+
+## 56. Habitica (MIT) — https://github.com/HabitRPG/habitica
+Habit tracker RPG gamificado: HP/XP/oro, pierde HP si faltas, sube nivel.
+**Integrado:** src/components/habitica-gamify.tsx (HP/XP/oro + 2 hábitos) en /client/dashboard con atribución.
+
+## 57. Cronometer + wger Nutrition Pro (MIT)
+Micros, fibra, sodio, potasio, vit C + timing de comidas, no solo macros.
+**Integrado:** src/components/nutrition-pro.tsx (4 micros + timing) en /client/nutrition con atribución.
+

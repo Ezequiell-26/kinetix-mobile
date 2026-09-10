@@ -6,6 +6,7 @@ import { BarcodeScanner } from "@/components/barcode-scanner";
 import { FoodDatabase } from "@/components/food-database";
 import { SparkyHabits } from "@/components/sparky-habits";
 import { CalculatorsHub } from "@/components/calculators-hub";
+import { NutritionPro } from "@/components/nutrition-pro";
 import { TimersHub } from "@/components/timers-hub";
 import { AiMealPlanner } from "@/components/ai-meal-planner";
 import { OpenHiitPro } from "@/components/openhiit-pro";
@@ -51,6 +52,7 @@ export default function NutritionPage(){
       <SparkyHabits />
       <CalculatorsHub />
       <AiMealPlanner />
+      <NutritionPro />
       <TimersHub />
       <OpenHiitPro />
       <HiitTimer />
