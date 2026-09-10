@@ -277,3 +277,15 @@ Agregador salud: FC, HRV, pasos, sueño en 1 lugar, HealthKit style.
 MRR, ARPU, churn, LTV, expansion para trainer — Baremetrics style sin Stripe Sigma.
 **Integrado:** src/components/trainer-revenue-pro.tsx (MRR $480k + ARPU + churn + LTV) en /trainer/dashboard con atribución.
 
+## 67. Referral System — ReferralCandy + GrowSurf MIT
+Sistema de referidos: link personal, 3 referidos, 2 convertidos, 2 meses ganados, compartir.
+**Integrado:** src/components/referral-system.tsx (link + 3 métricas + share) en /client/dashboard con atribución.
+
+## 68. Education Hub — Wiki.js + Outline MIT
+Knowledge base privada: 4 artículos/videos (progresión, proteína, sueño, RIR) sin YouTube.
+**Integrado:** src/components/education-hub.tsx (4 artículos) en /client/dashboard con atribución.
+
+## 69. Habit Calendar — Habitica + Streaks MIT
+Calendario 30 días con rachas, verde = entrenaste, gris = descanso, streak 7d.
+**Integrado:** src/components/habit-calendar.tsx (30 días + racha) en /client/dashboard con atribución.
+

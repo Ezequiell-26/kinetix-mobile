@@ -14,6 +14,9 @@ import { RecoveryBreathing } from "@/components/recovery-breathing";
 import { HabiticaGamify } from "@/components/habitica-gamify";
 import { HabitStore } from "@/components/habit-store";
 import { Challenges } from "@/components/challenges";
+import { HabitCalendar } from "@/components/habit-calendar";
+import { ReferralSystem } from "@/components/referral-system";
+import { EducationHub } from "@/components/education-hub";
 import { CalendarSync } from "@/components/calendar-sync";
 import { AdaptiveProgram } from "@/components/adaptive-program";
 import { PremiumCalendar } from "@/components/premium-calendar";
@@ -391,6 +394,9 @@ export default async function ClientDashboardPage(){
       <HabiticaGamify />
       <HabitStore />
       <Challenges />
+      <HabitCalendar />
+      <ReferralSystem />
+      <EducationHub />
       <CalendarSync />
       <AdaptiveProgram lastWeek={[]} />
       <Achievements data={{workouts: allWorkoutLogs.length, streak: 3, adherence: 88, prs: 2, checkins: 1}} />
