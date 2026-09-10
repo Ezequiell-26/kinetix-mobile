@@ -17,6 +17,8 @@ import { SocialShare } from "@/components/social-share";
 import { Challenges } from "@/components/challenges";
 import { WearablesHub } from "@/components/wearables-hub";
 import { ExportCenter } from "@/components/export-center";
+import { HevyImportPro } from "@/components/hevy-import-pro";
+import { RunTracker } from "@/components/run-tracker";
 import { GpxTracker } from "@/components/gpx-tracker";
 import { WorkoutTimeline } from "@/components/workout-timeline";
 import { GraniteOffline } from "@/components/granite-offline";
@@ -461,6 +463,8 @@ export default function ProgressPage(){
       <Challenges />
       <WearablesHub />
       <ExportCenter type="client" />
+      <HevyImportPro />
+      <RunTracker />
       <GpxTracker />
       <WorkoutTimeline items={workoutLogs.map(w=> ({id:w.id, date:w.date, name:w.workout.name, durationMin:w.durationMin, sets:w.sets.length, volume: w.sets.reduce((a,s)=>a+((s.weight||0)*(s.reps||0)),0), completed:true}))} />
       <GraniteOffline />

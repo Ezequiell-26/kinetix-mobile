@@ -217,3 +217,15 @@ Auto-tuner revisa check-ins + RIR + volumen y propone cambios a programa (5×5, 
 Compartir progreso sin exponer datos privados: IG, WhatsApp, imagen, badge Antes→Después.
 **Integrado:** src/components/social-share.tsx (card progreso + 3 botones) en /client/progress con atribución.
 
+## 52. runFlutterRun (MIT) — Outdoor tracker + social — https://github.com/BenjaminCanape/RunFlutterRun
+Flutter + Java, outdoor activity tracker & viewer con social (comments). Running + GPX + feed.
+**Integrado:** src/components/run-tracker.tsx (5.2km + comments + feed) en /client/progress con atribución.
+
+## 53. Stronk (MIT) — Go/Svelte 5/3/1 — https://github.com/bcspragu/stronk
+Go/Svelte webapp para 5/3/1 Jim Wendler: 3 semanas + deload, % TM.
+**Integrado:** src/components/stronk-531.tsx (4 lifts + 4 semanas + % TM) en /trainer/workouts con atribución.
+
+## 54. Hevy/Strong CSV Import Pro — Lyftr + workout-tracker MIT
+Strong/Hevy CSV import (Lyftr roadmap) — Date, Exercise, Weight, Reps → historial.
+**Integrado:** src/components/hevy-import-pro.tsx (upload CSV + preview + import) en /client/progress con atribución.
+

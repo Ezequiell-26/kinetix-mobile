@@ -5,6 +5,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input, Label } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
+import { Stronk531 } from "@/components/stronk-531";
 import { AiRoutineGenerator } from "@/components/ai-routine-generator";
 import { Dumbbell, Plus, Trash2, ArrowUp, ArrowDown, Check, Copy } from "lucide-react";
 
@@ -357,6 +358,7 @@ export default function WorkoutsPage(){
         </div>
       )}
 
+      <Stronk531 />
       <AiRoutineGenerator onGenerate={(prog)=>{
           const newWeeks = prog.weeks.map((w: {weekNumber:number; name:string; days:Array<{name:string; exercises:Array<{name:string; sets:number; reps:string; rir:number; restSec:number}>}>})=>({
             id: Math.random().toString(36).slice(2),
