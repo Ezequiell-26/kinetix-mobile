@@ -205,3 +205,15 @@ Insights automáticos nocturnos: Sofía en riesgo, Lucas estancado, Martín/Vale
 Asignación masiva de programa a varios clientes a la vez (4 clientes + select programa).
 **Integrado:** src/components/bulk-assign.tsx (select multi + programa) en /trainer/dashboard con atribución.
 
+## 49. Risk ML — TensorFlow.js + OptiLifts MIT
+ML local churn prediction 7d antes: 4 features (adherencia, días sin entrenar, RIR, check-in), regresión logística sin cloud.
+**Integrado:** src/components/risk-ml.tsx (3 clientes con % riesgo + acción) en /trainer/dashboard con atribución.
+
+## 50. Program Tuner — OptiLifts + Jacked GPT MIT
+Auto-tuner revisa check-ins + RIR + volumen y propone cambios a programa (5×5, +2.5kg, 120s).
+**Integrado:** src/components/program-tuner.tsx (propuesta Lucas) en /trainer/dashboard con atribución.
+
+## 51. Social Share — FitBook + Strive MIT
+Compartir progreso sin exponer datos privados: IG, WhatsApp, imagen, badge Antes→Después.
+**Integrado:** src/components/social-share.tsx (card progreso + 3 botones) en /client/progress con atribución.
+

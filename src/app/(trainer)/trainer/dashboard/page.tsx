@@ -2,6 +2,8 @@ import { prisma } from "@/lib/db";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { TrainerControlCenter } from "@/components/trainer-control-center";
 import { TrainerInsights } from "@/components/trainer-insights";
+import { RiskMl } from "@/components/risk-ml";
+import { ProgramTuner } from "@/components/program-tuner";
 import { BulkAssign } from "@/components/bulk-assign";
 import { CrmPipeline } from "@/components/crm-pipeline";
 import { LiveSession } from "@/components/live-session";
