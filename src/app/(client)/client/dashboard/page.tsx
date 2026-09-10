@@ -20,6 +20,8 @@ import { EducationHub } from "@/components/education-hub";
 import { CalendarSync } from "@/components/calendar-sync";
 import { AdaptiveProgram } from "@/components/adaptive-program";
 import { PremiumCalendar } from "@/components/premium-calendar";
+import { CommandPalettePro } from "@/components/command-palette-pro";
+import { UiPremiumStrip, FadeIn, StaggerContainer, StaggerItem } from "@/components/ui-premium";
 import { 
   Dumbbell, 
   CheckCircle2, 
@@ -195,6 +197,10 @@ export default async function ClientDashboardPage(){
   return (
     <div className="space-y-5">
       {/* Saludo y Objetivo */}
+      <div className="flex flex-wrap items-center justify-between gap-3">
+        <UiPremiumStrip />
+        <CommandPalettePro role="client" />
+      </div>
       <div className="space-y-1">
         <h1 className="text-2xl font-display font-bold text-white tracking-tight">
           Hola, {displayName.split(" ")[0]} 👋

@@ -12,6 +12,7 @@ import { NutritionPro } from "@/components/nutrition-pro";
 import { TimersHub } from "@/components/timers-hub";
 import { AiMealPlanner } from "@/components/ai-meal-planner";
 import { OpenHiitPro } from "@/components/openhiit-pro";
+import { MacroTiming } from "@/components/macro-timing";
 import { HiitTimer } from "@/components/hiit-timer";
 import { Tabs } from "@/components/ui/tabs";
 import Link from "next/link";
@@ -64,6 +65,7 @@ export default function NutritionPage(){
                 <CalculatorsHub />
                 <OneRMCalculator />
                 <NutritionPro />
+                <MacroTiming />
               </div>
             )}
             {active==="alimentos" && (
@@ -90,7 +92,7 @@ export default function NutritionPage(){
           </>
         )}
       </Tabs>
-      <p className="text-[11px] text-zinc-600 text-center">Super clean — 4 tabs, sin scroll infinito • 45 MIT organizados</p>
+      <p className="text-[11px] text-zinc-600 text-center">Super clean — 4 tabs, sin scroll infinito • 71 MIT + timing premium</p>
     </div>
   );
 }

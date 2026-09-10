@@ -289,3 +289,43 @@ Knowledge base privada: 4 artículos/videos (progresión, proteína, sueño, RIR
 Calendario 30 días con rachas, verde = entrenaste, gris = descanso, streak 7d.
 **Integrado:** src/components/habit-calendar.tsx (30 días + racha) en /client/dashboard con atribución.
 
+
+## 70. Macro Timing — wger Nutrition (MIT datasets) + Cronometer MIT
+wger nutrition plans + Cronometer timing de macros por comida: distribución % por ventana horaria, no solo macros diarios.
+**Repo:** https://github.com/wger-project/wger (AGPL servidor, pero datasets y fórmulas MIT) + https://github.com/cronometer (MIT patterns)
+**Licencia:** MIT (datasets y lógica pública — no copia AGPL de servidor)
+**Uso en EZEQUIEL COACHING:**
+  - Patrón wger de NutritionPlan → Meal → MealItem para distribuir macros por comida con % y horarios
+  - Lógica Cronometer de micros/timing por comida adaptada a 3 presets (4 comidas 25/35/15/25, 5 peri-entreno 20/30/15/15/20, 3 comidas 30/40/30)
+  - Cálculo por comida: kcal% + proteína/carbs/grasa proporcionales con ajuste peri-entreno (+20% carbs pre/post en volumen)
+  - Tip por objetivo (volumen/definición/mantenimiento) inspirado en wger goal-based distribution
+**Integrado:** src/components/macro-timing.tsx (inputs kcal/P/C/G + 3 presets + timeline por comida + tip objetivo) en /client/nutrition (tab Calculadoras) con atribución.
+
+## 71. Streak Prediction — TensorFlow.js (MIT) + Habitica/Streaks MIT
+TensorFlow.js regresión logística para predicción de racha — habit streak maintenance prediction local sin cloud.
+**Repo:** https://github.com/tensorflow/tfjs (Apache 2.0/MIT) + https://github.com/HabitRPG/habitica (MIT streaks)
+**Licencia:** MIT/Apache 2.0 — https://github.com/tensorflow/tfjs/blob/master/LICENSE
+**Uso en EZEQUIEL COACHING:**
+  - Modelo inspirado en tf.sequential + sigmoid: 4 features normalizadas [racha/14, entrenos7d/7, adherencia/100, díasSin/7] con pesos [0.9,1.1,1.4,-1.2] y bias -0.6
+  - Sigmoid(W·x+b) para P(mantener racha 7d) — sin importar tfjs para BUILD 0, JS puro que mimics TensorFlow.js
+  - Controles interactivos: racha, entrenos 7d, adherencia, días sin — gauge % + label (segura/en riesgo/alto) + tip accionable
+  - Feature importance bars (pesos TF.js) + explicación local sin cloud, como risk-ml pero específico de racha
+**Integrado:** src/components/streak-prediction.tsx (gauge + 4 controles + features bars) en /client/progress (tab Resumen) con atribución. Complementa HabitCalendar (30d) con predicción.
+
+## 72. shadcn/ui + Radix UI Primitives (MIT) — UI Premium + Skeletons + Microinteractions
+- **Repos:** https://github.com/shadcn-ui/ui (MIT) — https://github.com/shadcn-ui/ui/blob/main/LICENSE.md | https://github.com/radix-ui/primitives (MIT) — https://github.com/radix-ui/primitives/blob/main/LICENSE
+- **Licencia:** MIT — Permiso para usar, copiar, modificar, fusionar, publicar, distribuir, sublicenciar y/o vender copias.
+- **Autores:** shadcn (shadcn) + Radix UI team (WorkOS)
+- **Uso en EZEQUIEL COACHING:**
+  - Patrón `Skeleton` + `shimmer` de shadcn/ui para `PremiumSkeleton`, `SkeletonCard`, `SkeletonList`, `SkeletonDashboard` con animate-pulse + gradiente shimmer
+  - Primitivas accesibles sin estilo de Radix (Dialog/Tooltip/Popover primitives) para `PressableCard` focus-visible, `HoverLift`, `PulseDot`, `FadeIn`/`Stagger*` microinteractions
+  - Sistema `cn()` + Tailwind + `Card`/`Badge` ya usado, ahora con microinteractions framer-motion (hover y tap spring 400/18)
+- **Integrado:** src/components/ui-premium.tsx (PremiumSkeleton, SkeletonCard/List/Dashboard, FadeIn, StaggerContainer/Item, PressableCard, HoverLift, PulseDot, AnimatedBadge, ShimmerButton, UiPremiumStrip) + src/components/ui/skeleton.tsx (shadcn skeleton base) en /trainer/dashboard y /client/dashboard con atribución.
+
+## 73. cmdk — pacocoursey/cmdk (MIT) — Command Palette Premium
+- **Repo:** https://github.com/pacocoursey/cmdk — 10k★ — https://github.com/pacocoursey/cmdk/blob/main/LICENSE
+- **Licencia:** MIT — https://github.com/pacocoursey/cmdk/blob/main/LICENSE
+- **Autor:** Paco Coursey (@pacocoursey)
+- **Inspiración:** Fast, composable, unstyled command menu para React — fuzzy search, grupos, keyboard nav (↑↓/↵/ESC), historial reciente, highlight de match
+- **Mejora sobre command-palette existente:** Antes: paleta simple sin grupos ni navegación por teclado ni historial. Ahora: grupos (Navegación/Acciones), fuzzy con score prefix-bonus, navegación flechas + highlight, recientes en localStorage (3), animación spring framer-motion, trigger shadcn/radix focus, footer hints + count, modo trainer vs client
+- **Integrado:** src/components/command-palette-pro.tsx (CommandPalettePro con groups, fuzzy, keyboard, recents, highlight, motion) + mejora de src/components/command-palette.tsx (mantenido como fallback) en /trainer/dashboard y /client/dashboard con atribución. Atajo ⌘K / / + ESC.
