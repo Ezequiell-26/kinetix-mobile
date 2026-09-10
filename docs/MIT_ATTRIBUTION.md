@@ -126,3 +126,15 @@ IA Coach local rule-based + BYOK OpenAI, predicción de meseta con regresión, p
 Chat móvil 100dvh + safe-area + 44px touch + quick replies + 2-pantallas trainer (lista↔chat) + forwardRef Input.
 **Integrado:** src/app/(client)/client/messages/page.tsx + trainer/messages/page.tsx + ui/input.tsx
 
+## 29. Wearables Hub — python-garminconnect + react-native-health + open-wearables (MIT)
+Garmin Connect, Apple HealthKit, Google Fit, Fitbit, Oura, Whoop — sync hub con OAuth listo para prod.
+**Integrado:** src/components/wearables-hub.tsx (5 wearables + sync) en /client/progress con atribución.
+
+## 30. Voice Coach — Web Speech API + VitaFlex voice (MIT)
+Voz nativa en entreno: cuenta reps, siguiente ejercicio, motivación, sin librería.
+**Integrado:** src/components/voice-coach.tsx (speak/stop, siguiente, cuenta, motivar) en /client/workout/[id] + gym-mode con atribución.
+
+## 31. Export Center — workout-tracker + Simple MIT (CSV/PDF/iCal/GPX ZIP)
+Export ZIP de GPX/CSV/PDF/iCal — Strong/Hevy compatible + Google Calendar + PDF reporte.
+**Integrado:** src/components/export-center.tsx (CSV, iCal, PDF, GPX ZIP) en /client/progress y /trainer/dashboard con atribución.
+
