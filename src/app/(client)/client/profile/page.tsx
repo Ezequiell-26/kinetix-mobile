@@ -4,7 +4,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input, Label } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { User, Check, ShieldCheck, Dumbbell, Calendar, CreditCard } from "lucide-react";
+import { LogOut, User, Check, ShieldCheck, Dumbbell, Calendar, CreditCard } from "lucide-react";
 
 type ClientProfileData = {
   id: string;
@@ -278,6 +278,15 @@ export default function ClientProfilePage(){
           <p className="text-[11px] text-zinc-500 text-center pt-1">
             🔒 Pagos y renovaciones gestionadas de forma segura. No se almacenan datos de tarjetas.
           </p>
+        </CardContent>
+      </Card>
+
+      <Card className="border-red-500/20 bg-red-500/5">
+        <CardContent className="pt-4">
+          <button onClick={async()=>{ try{ await fetch("/api/auth/logout",{method:"POST"}); }catch{} location.href="/login"; }} className="w-full h-12 rounded-xl border border-red-500/20 bg-zinc-950 text-red-400 font-bold flex items-center justify-center gap-2 hover:bg-red-500/10">
+            <LogOut size={16}/> Cerrar sesión
+          </button>
+          <p className="text-[11px] text-zinc-600 text-center mt-2">Salir te lleva al login. Tus programas quedan guardados.</p>
         </CardContent>
       </Card>
     </div>
