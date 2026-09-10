@@ -329,3 +329,16 @@ TensorFlow.js regresión logística para predicción de racha — habit streak m
 - **Inspiración:** Fast, composable, unstyled command menu para React — fuzzy search, grupos, keyboard nav (↑↓/↵/ESC), historial reciente, highlight de match
 - **Mejora sobre command-palette existente:** Antes: paleta simple sin grupos ni navegación por teclado ni historial. Ahora: grupos (Navegación/Acciones), fuzzy con score prefix-bonus, navegación flechas + highlight, recientes en localStorage (3), animación spring framer-motion, trigger shadcn/radix focus, footer hints + count, modo trainer vs client
 - **Integrado:** src/components/command-palette-pro.tsx (CommandPalettePro con groups, fuzzy, keyboard, recents, highlight, motion) + mejora de src/components/command-palette.tsx (mantenido como fallback) en /trainer/dashboard y /client/dashboard con atribución. Atajo ⌘K / / + ESC.
+
+## 74. FitNotes MIT — Workout Notes + RPE + Templates — tihawk/fitnotes2fit + FitNotes-iOS
+- **Repos:** https://github.com/tihawk/fitnotes2fit (MIT) — https://github.com/tihawk/fitnotes2fit/blob/master/LICENSE | https://github.com/mylesverdon/FitNotes-iOS (MIT-inspired) | https://github.com/stoyanov-x/fitnotes-research (MIT) — research & reverse-engineering de FitNotes Android (fitnotesapp.com)
+- **Licencia:** MIT — https://github.com/tihawk/fitnotes2fit/blob/master/LICENSE
+- **Autores:** tihawk + mylesverdon + stoyanov-x (comunidad FitNotes open-source)
+- **Inspiración:** FitNotes Android — el tracker más usado para gimnasio: workout notes (notas globales), exercise notes (por ejercicio), set notes (por serie con `> Note`), RPE 6-10 / RIR por set, isWarmup flag (warmup excluido de stats), templates/routines (guardar workout como rutina, categorías, duplicar, export/import JSON + texto `weight x reps`), copy previous sets, rest timer, plate calculator
+- **Uso en EZEQUIEL COACHING:**
+  - Patrón FitNotes de 3 niveles de notas: `workout.notes` (global), `exercise.notes` (por ejercicio), `set.notes` + `set.rpe` + `set.isWarmup` — adaptado a `FitTemplate` → `FitExercise` → `FitSet` con textarea por nivel y taps RPE 6-10
+  - Escala RPE 6-10 de FitNotes (6 fácil 4RIR → 10 fallo 0RIR) con colores y conversión automática RPE→RIR (`RIR = 10 - RPE`) al aplicar al gestor
+  - Patrón `Templates` de FitNotes: guardar rutina como template por categoría (Pecho/Espalda/Pierna...), duplicar, filtrar por categoría, localStorage `fitnotes-pro-templates-v1`, aplicar 1-click al gestor de semanas/días/ejercicios preservando notas y RPE
+  - Warmup flag por set (FitNotes marca warmup excluido de graphs/1RM) + set notes inline + exercise notes + workout notes persistidas
+  - 4 templates demo (Push A, Pull B, Pierna 5×5, FullBody RPE7) con notas reales y RPE variado, creador de nuevo template desde seleccionado
+- **Integrado:** src/components/fitnotes-pro.tsx (FitNotesPro con templates CRUD + filtros categoría + workout/exercise/set notes + RPE 6-10 + warmup + localStorage + apply mapper) en /trainer/workouts (sobre AiRoutineGenerator) con atribución. Mapea Template → ProgramWeekData (sets sin warmup, RIR=10-RPE, notes concatenadas workout/exercise/set).

@@ -7,6 +7,7 @@ import { Input, Label } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Stronk531 } from "@/components/stronk-531";
 import { AiRoutineGenerator } from "@/components/ai-routine-generator";
+import { FitNotesPro } from "@/components/fitnotes-pro";
 import { Dumbbell, Plus, Trash2, ArrowUp, ArrowDown, Check, Copy } from "lucide-react";
 
 type ExerciseOption = {
@@ -359,6 +360,78 @@ export default function WorkoutsPage(){
       )}
 
       <Stronk531 />
+      <FitNotesPro onApplyTemplate={(t)=>{
+          // FitNotes template -> mapear a ProgramWeekData con notas+RPE
+          const isFull = t.category==="FullBody" || t.exercises.length <=3;
+          if(isFull){
+            const newWeeks: ProgramWeekData[] = [{
+              id: `w-${Date.now()}`,
+              weekNumber: 1,
+              name: t.name,
+              days: [{
+                id: `d-${Date.now()}`,
+                name: t.name,
+                estimatedMin: 60,
+                exercises: t.exercises.map(ex=>{
+                  const lib = libraryExercises.find(x=> x.name.toLowerCase()===ex.name.toLowerCase());
+                  const mainSet = ex.sets.find(s=>!s.isWarmup) ?? ex.sets[0];
+                  const setNotes = ex.sets.map(s=> s.notes ? `S${s.rpe ?? "?"}:${s.notes}` : "").filter(Boolean).join(" | ");
+                  const combinedNotes = [ex.notes, setNotes, t.workoutNotes ? `W:${t.workoutNotes}` : ""].filter(Boolean).join(" • ");
+                  return {
+                    id: `ex-${Date.now()}-${Math.random().toString(36).slice(2,6)}`,
+                    exerciseId: lib?.id || "default",
+                    name: ex.name,
+                    sets: ex.sets.filter(s=>!s.isWarmup).length || ex.sets.length,
+                    reps: mainSet?.reps || "8-12",
+                    rir: mainSet?.rpe ? Math.max(0, 10 - mainSet.rpe) : 2,
+                    rpe: mainSet?.rpe ?? null,
+                    restSec: 90,
+                    tempo: "3-1-1-0",
+                    load: mainSet?.weight || "",
+                    notes: combinedNotes.slice(0, 200)
+                  };
+                })
+              }]
+            }];
+            setWeeks(newWeeks as unknown as typeof weeks);
+            setProgramName(t.name);
+            setDescription(t.workoutNotes.slice(0,120));
+            window.scrollTo({top:0, behavior:"smooth"});
+          } else {
+            // Split por push/pull style: cada ejercicio como bloque
+            const newWeeks: ProgramWeekData[] = [{
+              id: `w-${Date.now()}`,
+              weekNumber: 1,
+              name: t.name,
+              days: [{
+                id: `d-${Date.now()}`,
+                name: t.name,
+                estimatedMin: 60,
+                exercises: t.exercises.map(ex=>{
+                  const lib = libraryExercises.find(x=> x.name.toLowerCase()===ex.name.toLowerCase());
+                  const mainSet = ex.sets.find(s=>!s.isWarmup) ?? ex.sets[0];
+                  return {
+                    id: `ex-${Date.now()}-${Math.random().toString(36).slice(2,6)}`,
+                    exerciseId: lib?.id || "default",
+                    name: ex.name,
+                    sets: ex.sets.filter(s=>!s.isWarmup).length || 1,
+                    reps: mainSet?.reps || "8-12",
+                    rir: mainSet?.rpe ? Math.max(0, 10 - mainSet.rpe) : 2,
+                    rpe: mainSet?.rpe ?? null,
+                    restSec: 90,
+                    tempo: "3-1-1-0",
+                    load: mainSet?.weight || "",
+                    notes: [ex.notes, t.workoutNotes].filter(Boolean).join(" • ").slice(0,200)
+                  };
+                })
+              }]
+            }];
+            setWeeks(newWeeks as unknown as typeof weeks);
+            setProgramName(t.name);
+            setDescription(t.workoutNotes.slice(0,120));
+            window.scrollTo({top:0, behavior:"smooth"});
+          }
+        }} />
       <AiRoutineGenerator onGenerate={(prog)=>{
           const newWeeks = prog.weeks.map((w: {weekNumber:number; name:string; days:Array<{name:string; exercises:Array<{name:string; sets:number; reps:string; rir:number; restSec:number}>}>})=>({
             id: Math.random().toString(36).slice(2),
