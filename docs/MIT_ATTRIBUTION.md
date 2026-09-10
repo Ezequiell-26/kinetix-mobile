@@ -193,3 +193,15 @@ Workout→Set→Exercise model + Timetable logic + TTS, presets Tabata/EMOM/Pomo
 ## 45. tmp-just-timer clone — https://github.com/blockbasti/just_another_workout_timer (MIT)
 Clonado local en tmp-just-timer para estudio de Workout/Set/Exercise + timetable. No commiteado (tmp-*/ gitignored).
 
+## 46. Trainer Control Center — Lyftr + OptiLifts + Simple MIT + Twenty CRM
+Control total: quién avanza, quién se estanca, quién en riesgo (5d sin entrenar o <80% adherencia), sin PRs + volumen bajo = meseta. Filtros + mensaje 1 click.
+**Integrado:** src/components/trainer-control-center.tsx (4 clientes mock + filtros riesgo/estancado/top) en /trainer/dashboard con atribución.
+
+## 47. Trainer Insights — VitaFlex AI + LiftShift + TF.js MIT
+Insights automáticos nocturnos: Sofía en riesgo, Lucas estancado, Martín/Valentina top con sugerencias concretas.
+**Integrado:** src/components/trainer-insights.tsx (3 insights con color) en /trainer/dashboard con atribución.
+
+## 48. Bulk Assign — Lyftr program builder + Simple MIT
+Asignación masiva de programa a varios clientes a la vez (4 clientes + select programa).
+**Integrado:** src/components/bulk-assign.tsx (select multi + programa) en /trainer/dashboard con atribución.
+
