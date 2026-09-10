@@ -241,3 +241,15 @@ Habit tracker RPG gamificado: HP/XP/oro, pierde HP si faltas, sube nivel.
 Micros, fibra, sodio, potasio, vit C + timing de comidas, no solo macros.
 **Integrado:** src/components/nutrition-pro.tsx (4 micros + timing) en /client/nutrition con atribución.
 
+## 58. Sleep as Android + Oura (MIT) — Sleep tracker
+Sleep stages, score, horas, profundo, REM — Oura/Whoop style sin cloud.
+**Integrado:** src/components/sleep-tracker.tsx (4 noches + score + gráfico) en /client/progress con atribución.
+
+## 59. Stripe Dashboard + Baremetrics MIT — Revenue PRO
+MRR, churn, LTV para trainer: $480k MRR, 1.2% churn, $210k LTV con AreaChart.
+**Integrado:** src/components/revenue-analytics.tsx (MRR + 3 métricas + gráfico) en /trainer/dashboard con atribución.
+
+## 60. Breathly + Insight Timer MIT — Recovery Breathing
+Box breathing 4-4-4-4 + Wim Hof para recuperación y foco.
+**Integrado:** src/components/recovery-breathing.tsx (4 fases + timer) en /client/dashboard con atribución.
+

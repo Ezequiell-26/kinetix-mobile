@@ -10,6 +10,7 @@ import { AiCoachChat } from "@/components/ai-coach-chat";
 import { PredictivePlateau } from "@/components/predictive-plateau";
 import { PushCenter } from "@/components/push-center";
 import { OnboardingVideo } from "@/components/onboarding-video";
+import { RecoveryBreathing } from "@/components/recovery-breathing";
 import { HabiticaGamify } from "@/components/habitica-gamify";
 import { HabitStore } from "@/components/habit-store";
 import { Challenges } from "@/components/challenges";
@@ -386,6 +387,7 @@ export default async function ClientDashboardPage(){
       <PredictivePlateau logs={[]} />
       <OnboardingVideo />
       <PushCenter />
+      <RecoveryBreathing />
       <HabiticaGamify />
       <HabitStore />
       <Challenges />

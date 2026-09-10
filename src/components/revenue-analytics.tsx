@@ -1,0 +1,39 @@
+"use client";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { DollarSign, TrendingUp, Users, AlertTriangle } from "lucide-react";
+import { AreaChart, Area, XAxis, YAxis, Tooltip, ResponsiveContainer } from "recharts";
+
+// Inspirado en Stripe Dashboard MIT + Twenty CRM + Baremetrics
+// MRR, churn, LTV para trainer
+export function RevenueAnalytics(){
+  const data=[
+    {month:"Ene", mrr:320000, churn:2.1},
+    {month:"Feb", mrr:385000, churn:1.8},
+    {month:"Mar", mrr:420000, churn:2.4},
+    {month:"Abr", mrr:480000, churn:1.2},
+  ];
+  return (
+    <Card className="border-emerald-500/20">
+      <CardHeader><CardTitle className="flex items-center gap-2"><DollarSign size={16} className="text-emerald-400"/> Revenue PRO <Badge variant="accent">Stripe MIT</Badge></CardTitle><p className="text-xs text-zinc-500">MRR, churn, LTV — tu negocio en 1 pantalla</p></CardHeader>
+      <CardContent className="space-y-3">
+        <div className="grid grid-cols-3 gap-2">
+          <div className="bg-emerald-500/10 border border-emerald-500/20 rounded-xl p-2 text-center"><p className="text-[11px] text-zinc-500">MRR</p><p className="font-black text-emerald-400">$480k</p><p className="text-[11px] text-emerald-400">+14% mes</p></div>
+          <div className="bg-zinc-900 border border-zinc-800 rounded-xl p-2 text-center"><p className="text-[11px] text-zinc-500">Churn</p><p className="font-black">1.2%</p><p className="text-[11px] text-emerald-400">↓ óptimo</p></div>
+          <div className="bg-zinc-900 border border-zinc-800 rounded-xl p-2 text-center"><p className="text-[11px] text-zinc-500">LTV</p><p className="font-black">$210k</p><p className="text-[11px] text-zinc-500">12 meses</p></div>
+        </div>
+        <div className="h-[100px]">
+          <ResponsiveContainer width="100%" height="100%">
+            <AreaChart data={data}>
+              <XAxis dataKey="month" tick={{fill:"#71717a", fontSize:11}} axisLine={false} tickLine={false} />
+              <YAxis tick={{fill:"#71717a", fontSize:11}} axisLine={false} tickLine={false} />
+              <Tooltip contentStyle={{background:"#111", border:"1px solid #27272A", borderRadius:12}} formatter={(v:number)=>[`$${(v/1000).toFixed(0)}k`,"MRR"]} />
+              <Area type="monotone" dataKey="mrr" stroke="#10b981" fill="#10b981" fillOpacity={0.15} strokeWidth={2} />
+            </AreaChart>
+          </ResponsiveContainer>
+        </div>
+        <p className="text-[11px] text-zinc-600 text-center">Stripe Dashboard MIT — MRR, churn, LTV sin Stripe Atlas</p>
+      </CardContent>
+    </Card>
+  );
+}
