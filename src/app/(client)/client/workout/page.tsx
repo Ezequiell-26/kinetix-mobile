@@ -4,6 +4,7 @@ import { getClientForSession } from "@/lib/getClient";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Dumbbell, Calendar, CheckCircle2, Clock } from "lucide-react";
+import { StrongTemplate } from "@/components/strong-template";
 
 export default async function WorkoutListPage(){
   const sessionData = await getClientForSession().catch(() => null);
@@ -119,6 +120,8 @@ export default async function WorkoutListPage(){
           Programa: <span className="text-white font-medium">{activeProgram.name}</span> • {activeProgram.frequency} días/sem
         </p>
       </div>
+
+      <StrongTemplate />
 
       {activeProgram.weeks.map(w => (
         <div key={w.id} className="space-y-3">
