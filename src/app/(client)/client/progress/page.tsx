@@ -10,6 +10,7 @@ import { PhotoCompare } from "@/components/photo-compare";
 import { PrTracker } from "@/components/pr-tracker";
 import { OptiLiftsProgression } from "@/components/optilifts-progression";
 import { Achievements } from "@/components/achievements";
+import { PredictivePlateau } from "@/components/predictive-plateau";
 import { AkiloTracker } from "@/components/akilo-tracker";
 import { GpxTracker } from "@/components/gpx-tracker";
 import { WorkoutTimeline } from "@/components/workout-timeline";
@@ -448,6 +449,7 @@ export default function ProgressPage(){
             <CardContent className="p-4 space-y-4">
               <OptiLiftsProgression logs={workoutLogs.flatMap(w=> w.sets.map(s=> ({exercise:s.exerciseName, weight:s.weight||0, reps:s.reps||0, rir:s.rir, date:w.date})))} />
       <Achievements data={{workouts: workoutLogs.length, streak: 3, adherence: 85, prs: 2, checkins: 4}} />
+      <PredictivePlateau logs={workoutLogs.flatMap(w=> w.sets.map(s=> ({exercise: s.exerciseName, weight: s.weight||0, reps: s.reps||0, rir: s.rir, date: w.date})))} />
       <AkiloTracker />
       <GpxTracker />
       <WorkoutTimeline items={workoutLogs.map(w=> ({id:w.id, date:w.date, name:w.workout.name, durationMin:w.durationMin, sets:w.sets.length, volume: w.sets.reduce((a,s)=>a+((s.weight||0)*(s.reps||0)),0), completed:true}))} />

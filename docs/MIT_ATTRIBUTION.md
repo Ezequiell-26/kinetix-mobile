@@ -118,3 +118,11 @@ Go + GPX + Leaflet tracker 1.2k★, 1.923 commits, v2.9.0. GPX/TCX para running.
 AI wellness FastAPI + GPT-4o + React: coach + food scanner + meal planner + workout planner.
 **Integrado:** src/components/ai-meal-planner.tsx (objetivo + kcal → desayuno/almuerzo/cena/snack) en /client/nutrition con atribución.
 
+## 27. AI Intelligent Trio — VitaFlex-AI GPT-4o + OptiLifts + TensorFlow.js (MIT)
+IA Coach local rule-based + BYOK OpenAI, predicción de meseta con regresión, programa adaptativo auto-ajuste por RIR.
+**Integrado:** src/components/ai-coach-chat.tsx (chat IA con contexto programa/progreso) + predictive-plateau.tsx (meseta/progreso/fatiga) + adaptive-program.tsx (próxima semana +2.5%/deload) en /client/dashboard y /client/progress con atribución.
+
+## 28. Chat Mobile Premium — Estructura táctil perfecta (No MIT, UX propia)
+Chat móvil 100dvh + safe-area + 44px touch + quick replies + 2-pantallas trainer (lista↔chat) + forwardRef Input.
+**Integrado:** src/app/(client)/client/messages/page.tsx + trainer/messages/page.tsx + ui/input.tsx
+

@@ -6,6 +6,9 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
 import { Achievements } from "@/components/achievements";
+import { AiCoachChat } from "@/components/ai-coach-chat";
+import { PredictivePlateau } from "@/components/predictive-plateau";
+import { AdaptiveProgram } from "@/components/adaptive-program";
 import { PremiumCalendar } from "@/components/premium-calendar";
 import { 
   Dumbbell, 
@@ -373,6 +376,9 @@ export default async function ClientDashboardPage(){
       )}
 
       {/* Calendario de Actividad */}
+      <AiCoachChat />
+      <PredictivePlateau logs={[]} />
+      <AdaptiveProgram lastWeek={[]} />
       <Achievements data={{workouts: allWorkoutLogs.length, streak: 3, adherence: 88, prs: 2, checkins: 1}} />
       <PremiumCalendar />
     </div>
