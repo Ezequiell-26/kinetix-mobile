@@ -1,0 +1,127 @@
+[
+  {
+    "name": "ABC Trainerize",
+    "cat": "All-in-one entrenador+cliente",
+    "stars": 4.8
+  },
+  {
+    "name": "Everfit",
+    "cat": "UX/programación muy buena",
+    "stars": 4.7
+  },
+  {
+    "name": "FitBudd",
+    "cat": "App de marca propia + coaching",
+    "stars": 4.6
+  },
+  {
+    "name": "Trainwell",
+    "cat": "Entrenador humano + seguimiento",
+    "stars": 4.5
+  },
+  {
+    "name": "Future",
+    "cat": "Experiencia premium con coach humano",
+    "stars": 4.9
+  },
+  {
+    "name": "Caliber",
+    "cat": "Fuerza + coaching",
+    "stars": 4.6
+  },
+  {
+    "name": "TrueCoach",
+    "cat": "Programación y coaching 1:1",
+    "stars": 4.7
+  },
+  {
+    "name": "PT Distinction",
+    "cat": "Automatizaciones",
+    "stars": 4.4
+  },
+  {
+    "name": "My PT Hub",
+    "cat": "Muchas funciones para negocio",
+    "stars": 4.3
+  },
+  {
+    "name": "Fitbod",
+    "cat": "IA y entrenamiento adaptativo",
+    "stars": 4.8
+  },
+  {
+    "name": "Awesome AI Tools Fitness",
+    "cat": "Herramientas IA para entrenadores 2026",
+    "stars": 4.5
+  },
+  {
+    "name": "ExerciseDB API",
+    "cat": "API 11000+ ejercicios fitness",
+    "stars": 4.7
+  },
+  {
+    "name": "Exercises Dataset 1324",
+    "cat": "1324 ejercicios JSON + imágenes",
+    "stars": 4.8
+  },
+  {
+    "name": "Workout.cool",
+    "cat": "Coaching + rutinas + progreso + ejercicios",
+    "stars": 4.6
+  },
+  {
+    "name": "wger-project/wger",
+    "cat": "Self-hosted FLOSS fitness + nutrición",
+    "stars": 4.9
+  },
+  {
+    "name": "Free Exercise DB",
+    "cat": "800+ ejercicios dominio público",
+    "stars": 4.5
+  },
+  {
+    "name": "AI Workout Generator",
+    "cat": "IA generación rutinas personalizadas",
+    "stars": 4.7
+  },
+  {
+    "name": "OpenFit",
+    "cat": "Rutinas + IA + tracking progreso",
+    "stars": 4.5
+  },
+  {
+    "name": "LibreFit",
+    "cat": "Biblioteca ejercicios + tracking",
+    "stars": 4.4
+  },
+  {
+    "name": "Akilo",
+    "cat": "Nutrición + alimentos + peso + analytics",
+    "stars": 4.6
+  },
+  {
+    "name": "GitHub Fitness Topic",
+    "cat": "Más de 4000 repos fitness",
+    "stars": 4.9
+  },
+  {
+    "name": "SparkyFitness",
+    "cat": "Fitness + nutrición + agua + IA",
+    "stars": 4.5
+  },
+  {
+    "name": "Calistenia",
+    "cat": "IA + entrenamiento + nutrición + hábitos",
+    "stars": 4.5
+  },
+  {
+    "name": "openGym",
+    "cat": "Rutinas + sesiones + peso + IA",
+    "stars": 4.6
+  },
+  {
+    "name": "Granite",
+    "cat": "PWA + offline + rutinas + PRs + stats",
+    "stars": 4.7
+  }
+]
