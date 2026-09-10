@@ -2,7 +2,7 @@
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { useState } from "react";
-import { Home, Dumbbell, TrendingUp, MessageCircle, User, LogOut, Apple, ClipboardCheck, Settings, MoreHorizontal, X } from "lucide-react";
+import { Home, Dumbbell, TrendingUp, MessageCircle, User, LogOut, Apple, ClipboardCheck, Settings, MoreHorizontal, X, Timer } from "lucide-react";
 import { ThemeToggle } from "@/components/theme-toggle";
 import { NotificationsBell } from "@/components/notifications-bell";
 
@@ -18,6 +18,7 @@ export function ClientBottomNav(){
 
   const moreItems = [
     { href: "/client/nutrition", icon: Apple, label: "Nutrición", badge: "VIP" },
+    { href: "/client/timers", icon: Timer, label: "Cronómetros", badge: "PRO" },
     { href: "/client/checkins", icon: ClipboardCheck, label: "Check-ins" },
     { href: "/client/profile", icon: User, label: "Perfil" },
     { href: "/client/settings", icon: Settings, label: "Ajustes" },

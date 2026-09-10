@@ -24,6 +24,13 @@ export default function NutritionPage(){
         <Badge variant="accent">VIP</Badge>
       </div>
 
+      <a href="/client/timers" className="block">
+        <div className="bg-gradient-to-br from-[#D6FF2A]/10 via-zinc-900 to-zinc-900 border border-[#D6FF2A]/20 rounded-2xl p-4 flex items-center gap-3 hover:border-[#D6FF2A]/30 transition">
+          <div className="w-10 h-10 rounded-xl bg-[#D6FF2A] flex items-center justify-center text-black">⏱️</div>
+          <div className="flex-1"><p className="font-bold text-sm">Cronómetros PRO →</p><p className="text-xs text-zinc-400">Tabata, EMOM, Pomodoro, Descanso — todo en un lugar</p></div>
+          <span className="text-xs bg-[#D6FF2A] text-black px-2 py-1 rounded-full font-bold">PRO</span>
+        </div>
+      </a>
       <div className="grid gap-3">
         <Card className="bg-gradient-to-br from-[#D6FF2A]/10 via-[#111111] to-[#111111] border-[#D6FF2A]/20">
           <CardContent className="pt-4 flex gap-3 items-center">
