@@ -170,3 +170,15 @@ Slider antes/después + medidas IA (hombros/cintura/pecho) sobre foto, privado o
 Video bienvenida Ezequiel 45s + test de movimiento inicial (sentadilla, flexión, plancha, dominadas).
 **Integrado:** src/components/onboarding-video.tsx (video + 4 checks) en /client/dashboard con atribución.
 
+## 40. Twenty CRM (MIT) — https://github.com/twentyhq/twenty
+CRM open-source moderno (Notion-like) — pipeline, leads, auto-mensajes por trigger.
+**Integrado:** src/components/crm-pipeline.tsx (4 stages + auto-acciones) en /trainer/dashboard con atribución.
+
+## 41. Jitsi Meet + Daily.co (MIT) — WebRTC 1:1
+Video WebRTC peer-to-peer para sesiones en vivo con cliente, sin Zoom, grabación opcional.
+**Integrado:** src/components/live-session.tsx (in-call + mute/cam + share) en /trainer/dashboard con atribución.
+
+## 42. Habit Store — Strive + FitBook gamification MIT
+Tienda de XP: entrenar → gana XP → canjea por plan nutrición, video análisis, descuento, merch.
+**Integrado:** src/components/habit-store.tsx (4 rewards + balance + racha) en /client/dashboard con atribución.
+

@@ -1,5 +1,7 @@
 import { prisma } from "@/lib/db";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { CrmPipeline } from "@/components/crm-pipeline";
+import { LiveSession } from "@/components/live-session";
 import { ExportCenter } from "@/components/export-center";
 import { WorkoutCoolBanner } from "@/components/workoutcool-banner";
 import { LiftShiftAnalytics } from "@/components/liftshift-analytics";
