@@ -265,3 +265,15 @@ Python + Vue recipe manager: recetas + plan semanal + lista de compras — self-
 Velocidad de barra m/s → RIR + pérdida de velocidad → auto-regula carga, VBT sin encoder.
 **Integrado:** src/components/velocity-tracker.tsx (0.42 m/s + RIR + pérdida) en /client/workout/[id] con atribución.
 
+## 64. OpenFoodFacts Pro (MIT) — https://world.openfoodfacts.org
+2M+ alimentos open source, barcode + search + Nutri-Score, OFF API.
+**Integrado:** src/components/openfoodfacts-pro.tsx (search + barcode + Nutri-Score) en /client/nutrition con atribución.
+
+## 65. HealthBox — Apple HealthKit + open-wearables MIT
+Agregador salud: FC, HRV, pasos, sueño en 1 lugar, HealthKit style.
+**Integrado:** src/components/healthbox.tsx (FC/HRV/pasos/sueño) en /client/progress con atribución.
+
+## 66. Baremetrics Revenue PRO — Stripe + Twenty MIT
+MRR, ARPU, churn, LTV, expansion para trainer — Baremetrics style sin Stripe Sigma.
+**Integrado:** src/components/trainer-revenue-pro.tsx (MRR $480k + ARPU + churn + LTV) en /trainer/dashboard con atribución.
+

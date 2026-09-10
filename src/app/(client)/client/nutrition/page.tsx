@@ -6,6 +6,7 @@ import { BarcodeScanner } from "@/components/barcode-scanner";
 import { FoodDatabase } from "@/components/food-database";
 import { SparkyHabits } from "@/components/sparky-habits";
 import { CalculatorsHub } from "@/components/calculators-hub";
+import { OpenFoodFactsPro } from "@/components/openfoodfacts-pro";
 import { MealieKitchen } from "@/components/mealie-kitchen";
 import { NutritionPro } from "@/components/nutrition-pro";
 import { TimersHub } from "@/components/timers-hub";
@@ -53,6 +54,7 @@ export default function NutritionPage(){
       <SparkyHabits />
       <CalculatorsHub />
       <AiMealPlanner />
+      <OpenFoodFactsPro />
       <MealieKitchen />
       <NutritionPro />
       <TimersHub />

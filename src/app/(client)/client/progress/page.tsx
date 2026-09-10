@@ -13,6 +13,7 @@ import { Achievements } from "@/components/achievements";
 import { PredictivePlateau } from "@/components/predictive-plateau";
 import { AkiloTracker } from "@/components/akilo-tracker";
 import { PhotoAiCompare } from "@/components/photo-ai-compare";
+import { HealthBox } from "@/components/healthbox";
 import { FitTrackeePro } from "@/components/fittrackee-pro";
 import { SleepTracker } from "@/components/sleep-tracker";
 import { OpenScaleSync } from "@/components/openscale-sync";
@@ -462,6 +463,7 @@ export default function ProgressPage(){
       <PredictivePlateau logs={workoutLogs.flatMap(w=> w.sets.map(s=> ({exercise: s.exerciseName, weight: s.weight||0, reps: s.reps||0, rir: s.rir, date: w.date})))} />
       <AkiloTracker />
       <PhotoAiCompare />
+      <HealthBox />
       <FitTrackeePro />
       <SleepTracker />
       <OpenScaleSync />
