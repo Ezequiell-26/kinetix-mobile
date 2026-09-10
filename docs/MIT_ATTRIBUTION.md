@@ -138,3 +138,15 @@ Voz nativa en entreno: cuenta reps, siguiente ejercicio, motivación, sin librer
 Export ZIP de GPX/CSV/PDF/iCal — Strong/Hevy compatible + Google Calendar + PDF reporte.
 **Integrado:** src/components/export-center.tsx (CSV, iCal, PDF, GPX ZIP) en /client/progress y /trainer/dashboard con atribución.
 
+## 32. MediaPipe Pose + MoveNet (Apache 2.0 + MIT) — Form Check IA
+Google MediaPipe Pose para análisis de forma en video: profundidad, espalda, rodillas, score 0-100.
+**Integrado:** src/components/form-check.tsx (upload video + análisis mock + score + feedback) en /client/workout/[id] con atribución.
+
+## 33. Strive Challenges + Leaderboard (MIT) — Strive + FitBook + Simple
+Challenges mensuales + leaderboard anonimizado: 1000 flexiones, 50km, racha 21 con XP y progreso.
+**Integrado:** src/components/challenges.tsx (3 challenges + leaderboard vos #2) en /client/dashboard y /client/progress con atribución.
+
+## 34. Calendar Sync — Simple MIT + workout-tracker iCal + Google Calendar API
+Sync entrenos a Google/Apple/Outlook Calendar + descarga .ics con 1 click.
+**Integrado:** src/components/calendar-sync.tsx (3 calendarios + .ics) en /client/dashboard con atribución.
+

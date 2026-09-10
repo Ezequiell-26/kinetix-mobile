@@ -12,6 +12,7 @@ import { OptiLiftsProgression } from "@/components/optilifts-progression";
 import { Achievements } from "@/components/achievements";
 import { PredictivePlateau } from "@/components/predictive-plateau";
 import { AkiloTracker } from "@/components/akilo-tracker";
+import { Challenges } from "@/components/challenges";
 import { WearablesHub } from "@/components/wearables-hub";
 import { ExportCenter } from "@/components/export-center";
 import { GpxTracker } from "@/components/gpx-tracker";
@@ -453,6 +454,7 @@ export default function ProgressPage(){
       <Achievements data={{workouts: workoutLogs.length, streak: 3, adherence: 85, prs: 2, checkins: 4}} />
       <PredictivePlateau logs={workoutLogs.flatMap(w=> w.sets.map(s=> ({exercise: s.exerciseName, weight: s.weight||0, reps: s.reps||0, rir: s.rir, date: w.date})))} />
       <AkiloTracker />
+      <Challenges />
       <WearablesHub />
       <ExportCenter type="client" />
       <GpxTracker />
