@@ -110,3 +110,11 @@ Cross-platform HIIT y Tabata interval timer con timers custom y audio cues (Flut
 Fotos 100% offline: 36 free + 64 hasaneyldrm copiadas a public/exercises/ (200 OK), sin depender de raw.githubusercontent. Fix fotos rotas + ExerciseImage fallback SVG por músculo.
 **Integrado:** public/exercises/free/*.jpg + hasaneyldrm/*.jpg (100) + src/components/exercise-image.tsx con fallback robusto + seed local.
 
+## 25. jovandeginste/workout-tracker GPX 1.2k★ (MIT) — https://github.com/jovandeginste/workout-tracker
+Go + GPX + Leaflet tracker 1.2k★, 1.923 commits, v2.9.0. GPX/TCX para running.
+**Integrado:** src/components/gpx-tracker.tsx (GPX/TCX + dist/dur/elev + mapa Leaflet) en /client/progress con atribución.
+
+## 26. VitaFlex-AI (MIT) — https://github.com/syeda434am/VitaFlex-AI
+AI wellness FastAPI + GPT-4o + React: coach + food scanner + meal planner + workout planner.
+**Integrado:** src/components/ai-meal-planner.tsx (objetivo + kcal → desayuno/almuerzo/cena/snack) en /client/nutrition con atribución.
+
