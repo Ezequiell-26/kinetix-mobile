@@ -3,7 +3,7 @@ import { useState, useMemo } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Input, Label } from "@/components/ui/input";
-import { Clock, Utensils, Zap, Target } from "lucide-react";
+import { Clock, Utensils, Target } from "lucide-react";
 
 // Inspirado en wger (MIT datasets + nutrition logic) + Cronometer MIT
 // wger: https://github.com/wger-project/wger — nutrition plans con distribución por comida
