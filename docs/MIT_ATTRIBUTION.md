@@ -253,3 +253,15 @@ MRR, churn, LTV para trainer: $480k MRR, 1.2% churn, $210k LTV con AreaChart.
 Box breathing 4-4-4-4 + Wim Hof para recuperación y foco.
 **Integrado:** src/components/recovery-breathing.tsx (4 fases + timer) en /client/dashboard con atribución.
 
+## 61. FitTrackee (MIT) — https://github.com/SamR1/FitTrackee
+Ruby + GPX activity tracker: mapa, elevación, velocidad, calorías — FitTrackee.
+**Integrado:** src/components/fittrackee-pro.tsx (8.4km + elevación + ritmo) en /client/progress con atribución.
+
+## 62. Mealie (MIT) — https://github.com/mealie-recipes/mealie
+Python + Vue recipe manager: recetas + plan semanal + lista de compras — self-hosted.
+**Integrado:** src/components/mealie-kitchen.tsx (3 recetas + plan) en /client/nutrition con atribución.
+
+## 63. Velocity Based Training (VBT) — OptiLifts + Flexify MIT
+Velocidad de barra m/s → RIR + pérdida de velocidad → auto-regula carga, VBT sin encoder.
+**Integrado:** src/components/velocity-tracker.tsx (0.42 m/s + RIR + pérdida) en /client/workout/[id] con atribución.
+

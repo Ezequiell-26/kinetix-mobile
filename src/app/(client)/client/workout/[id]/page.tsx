@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
+import { VelocityTracker } from "@/components/velocity-tracker";
 import { FormCheck } from "@/components/form-check";
 import { VoiceCoach } from "@/components/voice-coach";
 import { ExerciseImage } from "@/components/exercise-image";
@@ -575,6 +576,7 @@ export default function WorkoutExecutionPage(){
               </Button>
             </div>
 
+            <VelocityTracker />
             <FormCheck />
             <VoiceCoach exerciseName={currentExercise.exercise.name} nextExercise={workout.exercises[currentExIdx+1]?.exercise.name} />
             {/* Navigation & Complete Exercise */}
