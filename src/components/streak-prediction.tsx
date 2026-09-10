@@ -62,8 +62,9 @@ export function StreakPrediction() {
 
   const pct = Math.round(p * 100);
 
+  const borderColor = color === "emerald" ? "border-emerald-500/20" : color === "amber" ? "border-amber-500/20" : "border-red-500/20";
   return (
-    <Card className={`border-${color === "emerald" ? "emerald" : color === "amber" ? "amber" : "red"}-500/20`}>
+    <Card className={borderColor}>
       <CardHeader>
         <CardTitle className="flex items-center gap-2">
           <Flame size={16} className={color === "emerald" ? "text-emerald-400" : color === "amber" ? "text-amber-400" : "text-red-400"} />{" "}
