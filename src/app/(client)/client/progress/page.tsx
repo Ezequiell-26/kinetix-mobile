@@ -26,6 +26,7 @@ import { HevyImportPro } from "@/components/hevy-import-pro";
 import { RunTracker } from "@/components/run-tracker";
 import { GpxTracker } from "@/components/gpx-tracker";
 import { WorkoutTimeline } from "@/components/workout-timeline";
+import { StreakPrediction } from "@/components/streak-prediction";
 import { GraniteOffline } from "@/components/granite-offline";
 import { LiftShiftAnalytics } from "@/components/liftshift-analytics";
 import { MuscleMap } from "@/components/muscle-map";
@@ -534,6 +535,7 @@ export default function ProgressPage(){
                 <PredictivePlateau logs={workoutLogs.flatMap(w=> w.sets.map(s=> ({exercise: s.exerciseName, weight: s.weight||0, reps: s.reps||0, rir: s.rir, date: w.date})))} />
                 <AkiloTracker />
                 <Achievements data={{workouts: workoutLogs.length, streak: 3, adherence: 85, prs: 2, checkins: 4}} />
+                <StreakPrediction />
                 <SocialShare />
                 <Challenges />
               </div>
