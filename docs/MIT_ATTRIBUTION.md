@@ -182,3 +182,14 @@ Video WebRTC peer-to-peer para sesiones en vivo con cliente, sin Zoom, grabació
 Tienda de XP: entrenar → gana XP → canjea por plan nutrición, video análisis, descuento, merch.
 **Integrado:** src/components/habit-store.tsx (4 rewards + balance + racha) en /client/dashboard con atribución.
 
+## 43. Calculators Hub — wger + FitBook + Simple MIT (fórmulas públicas)
+IMC, Grasa Navy, FFMI, Wilks, Discos — Mifflin/Navy/Epley/Wilks (públicas) usadas por wger/FitBook MIT.
+**Integrado:** src/components/calculators-hub.tsx (5 calculadoras con tabs) en /client/nutrition con atribución. No copia AGPL de wger, solo fórmulas públicas.
+
+## 44. Timers Hub — blockbasti/just_another_workout_timer MIT (Flutter)
+Workout→Set→Exercise model + Timetable logic + TTS, presets Tabata/EMOM/Pomodoro/For Time/Rest. MIT.
+**Integrado:** src/components/timers-hub.tsx (5 presets + flat timetable + audio) en /client/nutrition con atribución. Adaptado de Dart a TS.
+
+## 45. tmp-just-timer clone — https://github.com/blockbasti/just_another_workout_timer (MIT)
+Clonado local en tmp-just-timer para estudio de Workout/Set/Exercise + timetable. No commiteado (tmp-*/ gitignored).
+
