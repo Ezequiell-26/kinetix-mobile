@@ -453,3 +453,7 @@ Este proyecto alcanza **81 repositorios MIT integrados** — patrones adaptados,
 - **Cierre:** Con Automatizaciones PT Distinction+My PT Hub (#80: onboarding auto + check-in reminder + retención 5d → auto-mensaje) + IA Adaptativa Fitbod (#81: músculo fresco/recuperación + adapta workout por historial) se cierra el ciclo 81 MIT premium — lo mejor de las 10 plataformas comerciales TOP mejorado con MIT: automatizaciones retención + IA fresco + CRM/pagos.
 - **Nota legal:** Todas las integraciones mantienen licencia MIT original y atribuyen autores. Código adaptado es original inspirado en patrones. Inspiración comercial (PT Distinction/My PT Hub/Fitbod/Trainerize/Everfit/FitBudd/Future) no implica copia de código propietario.
 
+## 82. Electron + PWA Windows/Mac — Electron + PWABuilder MIT
+PWA installable Windows/Mac/Linux (Chrome/Edge) + Electron nativo (Tray, auto-update, offline, .exe/.dmg).
+**Integrado:** electron/main.js + preload.js + package.json (electron-builder) + public/manifest.json (display_override, shortcuts, screenshots) + src/components/pwa-install-desktop.tsx (3 plataformas + install prompt) con atribución. App disponible en Windows, Mac, Linux, Android, iOS — PWA + Electron.
+

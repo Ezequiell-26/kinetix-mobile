@@ -14,6 +14,7 @@ import { RecoveryBreathing } from "@/components/recovery-breathing";
 import { HabiticaGamify } from "@/components/habitica-gamify";
 import { HabitStore } from "@/components/habit-store";
 import { Challenges } from "@/components/challenges";
+import { PwaInstallDesktop } from "@/components/pwa-install-desktop";
 import { HabitCalendar } from "@/components/habit-calendar";
 import { ReferralSystem } from "@/components/referral-system";
 import { EducationHub } from "@/components/education-hub";
@@ -400,6 +401,7 @@ export default async function ClientDashboardPage(){
       <HabiticaGamify />
       <HabitStore />
       <Challenges />
+      <PwaInstallDesktop />
       <HabitCalendar />
       <ReferralSystem />
       <EducationHub />
