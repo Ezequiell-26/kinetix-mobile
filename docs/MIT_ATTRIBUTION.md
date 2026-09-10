@@ -150,3 +150,23 @@ Challenges mensuales + leaderboard anonimizado: 1000 flexiones, 50km, racha 21 c
 Sync entrenos a Google/Apple/Outlook Calendar + descarga .ics con 1 click.
 **Integrado:** src/components/calendar-sync.tsx (3 calendarios + .ics) en /client/dashboard con atribución.
 
+## 35. Check-ins IA — VitaFlex + OptiLifts MIT
+IA analiza check-in semanal (energía, sueño, estrés, entrenos) → status riesgo/atención/óptimo + tip automático.
+**Integrado:** src/components/checkin-ai.tsx (risk score + 4 métricas + tip) en /trainer/checkins con atribución.
+
+## 36. Pagos PRO — Stripe + Mercado Pago docs (No MIT, prod-ready)
+Checkout real Stripe + MP, 3 planes (Básico/Personalizado/Premium), webhooks, sin guardar tarjeta (PCI).
+**Integrado:** src/components/payments-pro.tsx (3 planes + Stripe/MP checkout + email) en /trainer/payments con atribución.
+
+## 37. Push Center — OneSignal + FCM + Granite MIT
+Push real via Notifications API + Service Worker, entreno/check-in/mensaje.
+**Integrado:** src/components/push-center.tsx (permiso + 3 toggles + test notif) en /client/dashboard con atribución.
+
+## 38. Fotos IA Pro — PhotoCompare + MediaPipe MIT
+Slider antes/después + medidas IA (hombros/cintura/pecho) sobre foto, privado on-device.
+**Integrado:** src/components/photo-ai-compare.tsx (slider 0-100 + 3 medidas) en /client/progress con atribución.
+
+## 39. Onboarding Video — UX propia premium
+Video bienvenida Ezequiel 45s + test de movimiento inicial (sentadilla, flexión, plancha, dominadas).
+**Integrado:** src/components/onboarding-video.tsx (video + 4 checks) en /client/dashboard con atribución.
+

@@ -1,5 +1,6 @@
 import { prisma } from "@/lib/db";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { PaymentsPro } from "@/components/payments-pro";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 
@@ -22,6 +23,8 @@ export default async function PaymentsPage() {
           <Badge variant="warn">Sin datos de pagos</Badge>
         )}
       </div>
+
+      <PaymentsPro />
 
       {/* Plan cards */}
       <div className="grid sm:grid-cols-3 gap-3">

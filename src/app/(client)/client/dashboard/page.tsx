@@ -8,6 +8,8 @@ import { Progress } from "@/components/ui/progress";
 import { Achievements } from "@/components/achievements";
 import { AiCoachChat } from "@/components/ai-coach-chat";
 import { PredictivePlateau } from "@/components/predictive-plateau";
+import { PushCenter } from "@/components/push-center";
+import { OnboardingVideo } from "@/components/onboarding-video";
 import { Challenges } from "@/components/challenges";
 import { CalendarSync } from "@/components/calendar-sync";
 import { AdaptiveProgram } from "@/components/adaptive-program";
@@ -380,6 +382,8 @@ export default async function ClientDashboardPage(){
       {/* Calendario de Actividad */}
       <AiCoachChat />
       <PredictivePlateau logs={[]} />
+      <OnboardingVideo />
+      <PushCenter />
       <Challenges />
       <CalendarSync />
       <AdaptiveProgram lastWeek={[]} />

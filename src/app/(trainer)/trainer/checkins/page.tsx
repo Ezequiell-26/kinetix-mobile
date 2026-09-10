@@ -1,6 +1,7 @@
 "use client";
 import { useState, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { CheckinAI } from "@/components/checkin-ai";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/input";
@@ -249,7 +250,8 @@ export default function TrainerCheckinsPage(){
 
               <CardContent className="p-4 space-y-4">
                 {/* Metric Badges */}
-                <div className="grid grid-cols-2 sm:grid-cols-5 gap-2 text-center text-xs">
+                <CheckinAI checkin={{energia:6, sueno:5, estres:7, entrenos:3, rendimiento:6, molestias:"Rodilla molesta leve", alimentacion:6, progreso:5}} />
+      <div className="grid grid-cols-2 sm:grid-cols-5 gap-2 text-center text-xs">
                   <div className="bg-zinc-950 p-2.5 rounded-xl border border-zinc-800/80">
                     <span className="text-[10px] text-zinc-500 uppercase font-bold block">Energía</span>
                     <span className="font-black text-white text-base">{ch.energia ?? "—"}/10</span>
