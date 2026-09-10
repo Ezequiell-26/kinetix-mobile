@@ -3,7 +3,7 @@ import { useMemo, useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Flame, TrendingUp, AlertTriangle, Brain, ChevronRight, Activity } from "lucide-react";
+import { Flame, Brain, Activity } from "lucide-react";
 
 // Inspirado en TensorFlow.js (MIT) — https://github.com/tensorflow/tfjs + Habitica/Streaks MIT + Strive gamification
 // Predicción de racha con regresión logística JS pura (mimics tf.sequential + sigmoid) — sin importar tfjs para BUILD 0
@@ -61,11 +61,6 @@ export function StreakPrediction() {
   }, [streak, entrenos7d, adherencia, diasSin]);
 
   const pct = Math.round(p * 100);
-
-  // Mock 3 clientes para trainer view (igual que risk-ml pero streak-specific)
-  const mockClients = [
-    { name: "Vos", p: p, streak, entrenos7d },
-  ];
 
   return (
     <Card className={`border-${color === "emerald" ? "emerald" : color === "amber" ? "amber" : "red"}-500/20`}>
