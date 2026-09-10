@@ -13,6 +13,8 @@ import { LiveSession } from "@/components/live-session";
 import { ExportCenter } from "@/components/export-center";
 import { WorkoutCoolBanner } from "@/components/workoutcool-banner";
 import { LiftShiftAnalytics } from "@/components/liftshift-analytics";
+import { TrainerizeAllInOne } from "@/components/trainerize-allinone";
+import { EverfitUxBuilder } from "@/components/everfit-ux-builder";
 import { Badge } from "@/components/ui/badge";
 import { ChangelogNotification } from "@/components/changelog-notification";
 import { AdherenceChart, RevenueChart, CheckinDonut } from "@/components/analytics-charts";
@@ -380,6 +382,10 @@ export default async function TrainerDashboard(){
           )}
         </CardContent>
       </Card>
+
+      {/* Trainerize All-in-One + Everfit UX Builder — 77 MIT */}
+      <TrainerizeAllInOne />
+      <EverfitUxBuilder />
     </div>
   );
 }
