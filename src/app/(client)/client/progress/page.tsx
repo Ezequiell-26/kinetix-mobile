@@ -6,6 +6,7 @@ import { Progress } from "@/components/ui/progress";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input, Label } from "@/components/ui/input";
+import { Tabs } from "@/components/ui/tabs";
 import { PhotoCompare } from "@/components/photo-compare";
 import { PrTracker } from "@/components/pr-tracker";
 import { OptiLiftsProgression } from "@/components/optilifts-progression";
@@ -458,27 +459,7 @@ export default function ProgressPage(){
               <Badge variant="muted">Privado</Badge>
             </CardHeader>
             <CardContent className="p-4 space-y-4">
-              <OptiLiftsProgression logs={workoutLogs.flatMap(w=> w.sets.map(s=> ({exercise:s.exerciseName, weight:s.weight||0, reps:s.reps||0, rir:s.rir, date:w.date})))} />
-      <Achievements data={{workouts: workoutLogs.length, streak: 3, adherence: 85, prs: 2, checkins: 4}} />
-      <PredictivePlateau logs={workoutLogs.flatMap(w=> w.sets.map(s=> ({exercise: s.exerciseName, weight: s.weight||0, reps: s.reps||0, rir: s.rir, date: w.date})))} />
-      <AkiloTracker />
-      <PhotoAiCompare />
-      <HealthBox />
-      <FitTrackeePro />
-      <SleepTracker />
-      <OpenScaleSync />
-      <SocialShare />
-      <Challenges />
-      <WearablesHub />
-      <ExportCenter type="client" />
-      <HevyImportPro />
-      <RunTracker />
-      <GpxTracker />
-      <WorkoutTimeline items={workoutLogs.map(w=> ({id:w.id, date:w.date, name:w.workout.name, durationMin:w.durationMin, sets:w.sets.length, volume: w.sets.reduce((a,s)=>a+((s.weight||0)*(s.reps||0)),0), completed:true}))} />
-      <GraniteOffline />
-      <LiftShiftAnalytics data={[]} />
-      <PrTracker sets={workoutLogs.flatMap(w=> w.sets.map(s=> ({exerciseName: s.exerciseName, weight: s.weight, reps: s.reps, date: w.date, rir: s.rir})))} />
-      <MuscleMap volumeByMuscle={volumeByMuscle} />
+              <PhotoAiCompare />
       <PhotoCompare
                 beforeUrl={beforePhoto?.url}
                 afterUrl={currentPhoto?.url || beforePhoto?.url}
@@ -532,6 +513,58 @@ export default function ProgressPage(){
           </Card>
         </div>
       )}
+
+      {/* Super Clean MIT Features — 4 tabs, nada de scroll infinito */}
+      <Tabs
+        tabs={[
+          {id:"resumen", label:"Resumen"},
+          {id:"graficos", label:"Gráficos"},
+          {id:"wearables", label:"Wearables"},
+          {id:"import", label:"Import"},
+        ]}
+        defaultId="resumen"
+      >
+        {(active: string)=> (
+          <>
+            {active==="resumen" && (
+              <div className="space-y-4">
+                <PrTracker sets={workoutLogs.flatMap(w=> w.sets.map(s=> ({exerciseName: s.exerciseName, weight: s.weight, reps: s.reps, date: w.date, rir: s.rir})))} />
+                <MuscleMap volumeByMuscle={volumeByMuscle} />
+                <OptiLiftsProgression logs={workoutLogs.flatMap(w=> w.sets.map(s=> ({exercise: s.exerciseName, weight: s.weight||0, reps: s.reps||0, rir: s.rir, date: w.date})))} />
+                <PredictivePlateau logs={workoutLogs.flatMap(w=> w.sets.map(s=> ({exercise: s.exerciseName, weight: s.weight||0, reps: s.reps||0, rir: s.rir, date: w.date})))} />
+                <AkiloTracker />
+                <Achievements data={{workouts: workoutLogs.length, streak: 3, adherence: 85, prs: 2, checkins: 4}} />
+                <SocialShare />
+                <Challenges />
+              </div>
+            )}
+            {active==="graficos" && (
+              <div className="space-y-4">
+                <LiftShiftAnalytics data={[]} />
+                <SleepTracker />
+                <OpenScaleSync />
+                <FitTrackeePro />
+              </div>
+            )}
+            {active==="wearables" && (
+              <div className="space-y-4">
+                <WearablesHub />
+                <HealthBox />
+                <ExportCenter type="client" />
+              </div>
+            )}
+            {active==="import" && (
+              <div className="space-y-4">
+                <HevyImportPro />
+                <RunTracker />
+                <GpxTracker />
+                <WorkoutTimeline items={workoutLogs.map(w=> ({id:w.id, date:w.date, name:w.workout.name, durationMin:w.durationMin, sets:w.sets.length, volume: w.sets.reduce((a,s)=>a+((s.weight||0)*(s.reps||0)),0), completed:true}))} />
+                <GraniteOffline />
+              </div>
+            )}
+          </>
+        )}
+      </Tabs>
 
       {/* Export actions */}
       <ExportActions />
