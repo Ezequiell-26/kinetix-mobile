@@ -352,7 +352,7 @@ export function StrongTemplate() {
                 </p>
                 {activeEx.note && <p className="text-[11px] text-amber-300">{activeEx.note}</p>}
               </div>
-              <Badge variant="outline" className="border-zinc-700 text-zinc-300">{activeEx.muscleGroup}</Badge>
+              <Badge variant="muted" className="border-zinc-700 text-zinc-300">{activeEx.muscleGroup}</Badge>
             </div>
 
             <div className="grid grid-cols-3 gap-2">
@@ -418,7 +418,7 @@ export function StrongTemplate() {
             <CardTitle className="flex items-center gap-2 text-base">
               <Dumbbell size={18} className="text-[#D6FF2A]" /> Plantillas Strong
               <Badge variant="accent" className="text-[10px]">MIT 75</Badge>
-              <Badge variant="outline" className="text-[10px] border-zinc-700">Template + Timer + PR</Badge>
+              <Badge variant="muted" className="text-[10px] border-zinc-700">Template + Timer + PR</Badge>
             </CardTitle>
             <p className="text-xs text-zinc-500 mt-1">Inspirado en Strong App MIT — templates por carpeta, duplicate, rest timer, PR Epley</p>
           </div>
@@ -438,7 +438,7 @@ export function StrongTemplate() {
               <Folder size={12} className="mr-1" /> {f}
             </Button>
           ))}
-          <Badge variant="outline" className="border-zinc-700 text-zinc-500 ml-auto">
+          <Badge variant="muted" className="border-zinc-700 text-zinc-500 ml-auto">
             {filtered.length} plantillas • {templates.reduce((a, t) => a + t.exercises.length, 0)} ejercicios
           </Badge>
         </div>
@@ -459,7 +459,7 @@ export function StrongTemplate() {
                     <Folder size={12} /> {selected.folder} • {selected.exercises.length} ejercicios • {selected.exercises.reduce((a, e) => a + e.sets, 0)} series • {selected.lastUsed}
                   </p>
                 </div>
-                <Badge variant="outline" className="border-zinc-700 shrink-0">{selected.exercises.reduce((a, e) => a + e.restSec, 0) / 60} min est.</Badge>
+                <Badge variant="muted" className="border-zinc-700 shrink-0">{selected.exercises.reduce((a, e) => a + e.restSec, 0) / 60} min est.</Badge>
               </div>
               <div className="mt-4 space-y-2">
                 {selected.exercises.map((ex, idx) => (
@@ -469,7 +469,7 @@ export function StrongTemplate() {
                       <p className="font-bold text-sm leading-none">{ex.name} {ex.superset && <span className="text-[#D6FF2A] text-[10px]">SUPERSET</span>}</p>
                       <p className="text-xs text-zinc-500">{ex.sets}×{ex.reps} @ {ex.weight || "BW"}kg • ⏱ {ex.restSec}s</p>
                     </div>
-                    <Badge variant="outline" className="border-zinc-700 text-zinc-400 text-[10px]">{ex.muscleGroup}</Badge>
+                    <Badge variant="muted" className="border-zinc-700 text-zinc-400 text-[10px]">{ex.muscleGroup}</Badge>
                   </div>
                 ))}
               </div>
@@ -511,8 +511,8 @@ export function StrongTemplate() {
                   {tpl.exercises.length > 3 && <p className="text-[11px] text-zinc-600">+{tpl.exercises.length - 3} ejercicios más</p>}
                 </div>
                 <div className="mt-3 flex items-center gap-1.5">
-                  <Badge variant="outline" className="border-zinc-800 text-zinc-400 text-[10px]">{tpl.exercises.length} ej</Badge>
-                  <Badge variant="outline" className="border-zinc-800 text-zinc-400 text-[10px]"><Clock size={10} className="mr-1" />{tpl.exercises.reduce((a, e) => a + e.restSec, 0) / 60}m</Badge>
+                  <Badge variant="muted" className="border-zinc-800 text-zinc-400 text-[10px]">{tpl.exercises.length} ej</Badge>
+                  <Badge variant="muted" className="border-zinc-800 text-zinc-400 text-[10px]"><Clock size={10} className="mr-1" />{tpl.exercises.reduce((a, e) => a + e.restSec, 0) / 60}m</Badge>
                   <Button size="sm" variant="ghost" className="ml-auto h-7 text-xs font-bold text-[#D6FF2A] hover:bg-[#D6FF2A]/10" onClick={(e) => { e.stopPropagation(); duplicateTpl(tpl.id); }}>
                     <Copy size={12} className="mr-1" /> Duplicar
                   </Button>
@@ -533,9 +533,9 @@ export function StrongTemplate() {
             <p className="text-xs font-bold">Strong MIT: template + rest timer + PR</p>
             <p className="text-[11px] text-zinc-500 leading-snug">Toca una plantilla → ve detalle → Empezar registra series con peso/reps, inicia descanso circular auto (90-180s), detecta PR con Epley 1RM y celebra. Duplica para progresión semanal +2.5%.</p>
             <div className="flex gap-1.5 mt-2 flex-wrap">
-              <Badge variant="outline" className="border-zinc-800 text-zinc-500 text-[10px]"><Timer size={10} className="mr-1" /> Rest 30-180s</Badge>
-              <Badge variant="outline" className="border-zinc-800 text-zinc-500 text-[10px]"><Trophy size={10} className="mr-1 text-amber-400" /> PR Epley</Badge>
-              <Badge variant="outline" className="border-zinc-800 text-zinc-500 text-[10px]"><Flame size={10} className="mr-1 text-orange-500" /> Volumen total</Badge>
+              <Badge variant="muted" className="border-zinc-800 text-zinc-500 text-[10px]"><Timer size={10} className="mr-1" /> Rest 30-180s</Badge>
+              <Badge variant="muted" className="border-zinc-800 text-zinc-500 text-[10px]"><Trophy size={10} className="mr-1 text-amber-400" /> PR Epley</Badge>
+              <Badge variant="muted" className="border-zinc-800 text-zinc-500 text-[10px]"><Flame size={10} className="mr-1 text-orange-500" /> Volumen total</Badge>
             </div>
           </div>
         </div>
