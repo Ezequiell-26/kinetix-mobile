@@ -6,6 +6,7 @@ import { TrainerRevenuePro } from "@/components/trainer-revenue-pro";
 import { RevenueAnalytics } from "@/components/revenue-analytics";
 import { RiskMl } from "@/components/risk-ml";
 import { ProgramTuner } from "@/components/program-tuner";
+import { AutoMessageRisk } from "@/components/auto-message-risk";
 import { BulkAssign } from "@/components/bulk-assign";
 import { CrmPipeline } from "@/components/crm-pipeline";
 import { LiveSession } from "@/components/live-session";
