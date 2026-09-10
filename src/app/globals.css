@@ -85,3 +85,61 @@ html.light .text-black { color: white !important; }
 html.light .hover\:bg-zinc-900:hover { background-color: #F5F5F5 !important; }
 html.light .hover\:text-white:hover { color: #0A0A0A !important; }
 
+/* VIP Polish — EZEQUIEL COACHING alto nivel */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: #27272a #080808;
+}
+*::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+*::-webkit-scrollbar-track {
+  background: #080808;
+}
+*::-webkit-scrollbar-thumb {
+  background: #27272a;
+  border-radius: 999px;
+}
+*::-webkit-scrollbar-thumb:hover {
+  background: #3f3f46;
+}
+::selection {
+  background: #D6FF2A;
+  color: #000;
+}
+:focus-visible {
+  outline: 2px solid #D6FF2A;
+  outline-offset: 2px;
+}
+/* Glassmorphism utility */
+.glass {
+  background: rgba(17, 17, 17, 0.8);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(39, 39, 42, 0.5);
+}
+/* Shimmer animation */
+@keyframes shimmer {
+  0% { transform: translateX(-100%); }
+  100% { transform: translateX(100%); }
+}
+.shimmer {
+  position: relative;
+  overflow: hidden;
+}
+.shimmer::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.08), transparent);
+  animation: shimmer 2s infinite;
+}
+/* Premium card hover */
+.card-premium {
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+.card-premium:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 32px rgba(0,0,0,0.4), 0 0 0 1px rgba(39,39,42,0.5);
+}
