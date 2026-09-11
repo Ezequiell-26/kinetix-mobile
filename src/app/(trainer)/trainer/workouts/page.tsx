@@ -8,7 +8,7 @@ import { Badge } from "@/components/ui/badge";
 import { Stronk531 } from "@/components/stronk-531";
 import { AiRoutineGenerator } from "@/components/ai-routine-generator";
 import { FitNotesPro } from "@/components/fitnotes-pro";
-import { Dumbbell, Plus, Trash2, ArrowUp, ArrowDown, Check, Copy } from "lucide-react";
+import { X, Dumbbell, Plus, Trash2, ArrowUp, ArrowDown, Check, Copy } from "lucide-react";
 
 type ExerciseOption = {
   id: string;
@@ -312,25 +312,53 @@ export default function WorkoutsPage(){
         }))
       };
 
-      const res = await fetch("/api/programs", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(payload)
-      });
+      // Si estamos editando un programa existente, actualizamos (PUT).
+      // Si es nuevo, creamos (POST). Antes siempre hacía POST y duplicaba.
+      const isEditing = selectedProgramId !== "new";
+      const res = await fetch(
+        isEditing ? `/api/programs/${selectedProgramId}` : "/api/programs",
+        {
+          method: isEditing ? "PUT" : "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(payload)
+        }
+      );
 
       if (!res.ok) {
         const data = await res.json().catch(() => ({}));
         throw new Error(data.error || "Error al guardar el programa");
       }
 
-      const created = await res.json();
-      setStatusMsg({ text: `Programa "${created.name}" guardado exitosamente en la base de datos`, type: "success" });
+      const saved = await res.json();
+      setSelectedProgramId(saved.id);
+      setStatusMsg({
+        text: isEditing
+          ? `Programa "${saved.name}" actualizado correctamente`
+          : `Programa "${saved.name}" creado exitosamente en la base de datos`,
+        type: "success"
+      });
       loadData();
     } catch (err: unknown) {
       const msg = err instanceof Error ? err.message : "Error inesperado";
       setStatusMsg({ text: msg, type: "error" });
     } finally {
       setSaving(false);
+    }
+  }
+
+  async function handleDeleteProgram(id: string, name: string){
+    if(!window.confirm(`¿Eliminar el programa "${name}"?\n\nSe borrarán sus semanas, días y ejercicios. El historial de entrenamientos de los clientes no se pierde.`)) return;
+    try {
+      const res = await fetch(`/api/programs/${id}`, { method: "DELETE" });
+      if(!res.ok){
+        const data = await res.json().catch(() => ({}));
+        throw new Error(data.error || "Error al eliminar el programa");
+      }
+      startNewProgram();
+      setExistingPrograms(prev => prev.filter(p => p.id !== id));
+      setStatusMsg({ text: `Programa "${name}" eliminado`, type: "success" });
+    } catch (err: unknown) {
+      setStatusMsg({ text: err instanceof Error ? err.message : "Error inesperado", type: "error" });
     }
   }
 
@@ -347,7 +375,7 @@ export default function WorkoutsPage(){
             <Plus size={16} className="mr-1" /> Nuevo Programa
           </Button>
           <Button variant="accent" size="sm" onClick={handleSaveProgram} disabled={saving} className="font-bold min-h-[44px]">
-            {saving ? "Guardando..." : "GUARDAR PROGRAMA ✓"}
+            {saving ? "Guardando..." : "GUARDAR PROGRAMA"}
           </Button>
         </div>
       </div>
@@ -355,7 +383,7 @@ export default function WorkoutsPage(){
       {statusMsg && (
         <div className={`p-4 rounded-xl text-sm font-medium border flex items-center justify-between ${statusMsg.type === "success" ? "bg-emerald-500/10 border-emerald-500/30 text-emerald-400" : "bg-red-500/10 border-red-500/30 text-red-400"}`}>
           <span>{statusMsg.text}</span>
-          <button onClick={() => setStatusMsg(null)} className="text-xs opacity-70 hover:opacity-100">✕</button>
+          <button onClick={() => setStatusMsg(null)} className="text-xs opacity-70 hover:opacity-100"><X size={14} /></button>
         </div>
       )}
 
@@ -440,7 +468,6 @@ export default function WorkoutsPage(){
             days: w.days.map((d: {name:string; exercises:Array<{name:string; sets:number; reps:string; rir:number; restSec:number}>}, di:number)=>({
               id: Math.random().toString(36).slice(2),
               name: d.name,
-              // @ts-ignore
               dayNumber: di+1,
               estimatedMin: 60,
               exercises: d.exercises.map((e: {name:string; sets:number; reps:string; rir:number; restSec:number})=>{
@@ -461,13 +488,21 @@ export default function WorkoutsPage(){
           <CardContent className="p-4 flex items-center gap-3 overflow-x-auto">
             <span className="text-xs font-bold uppercase tracking-wider text-zinc-500 shrink-0">Programas existentes:</span>
             {existingPrograms.map(p => (
-              <button
-                key={p.id}
-                onClick={() => loadProgramIntoEditor(p)}
-                className={`text-xs px-3.5 py-2 rounded-xl border shrink-0 transition font-medium ${selectedProgramId === p.id ? "bg-[#D6FF2A] text-black border-[#D6FF2A] font-bold" : "bg-zinc-900 text-zinc-300 border-zinc-800 hover:border-zinc-700"}`}
-              >
-                {p.name} ({p.weeks?.length || p.durationWeeks} sem)
-              </button>
+              <div key={p.id} className="flex items-center gap-1 shrink-0">
+                <button
+                  onClick={() => loadProgramIntoEditor(p)}
+                  className={`text-xs px-3.5 py-2 rounded-xl border transition font-medium ${selectedProgramId === p.id ? "bg-primary text-black border-primary font-bold" : "bg-zinc-900 text-zinc-300 border-zinc-800 hover:border-zinc-700"}`}
+                >
+                  {p.name} ({p.weeks?.length || p.durationWeeks} sem)
+                </button>
+                <button
+                  onClick={() => handleDeleteProgram(p.id, p.name)}
+                  title={`Eliminar "${p.name}"`}
+                  className="text-zinc-500 hover:text-red-400 p-1.5 transition"
+                >
+                  <Trash2 size={14} />
+                </button>
+              </div>
             ))}
           </CardContent>
         </Card>
@@ -488,7 +523,7 @@ export default function WorkoutsPage(){
             <select
               value={freq}
               onChange={e => setFreq(Number(e.target.value))}
-              className="w-full h-11 px-4 bg-zinc-900 border border-zinc-800 rounded-xl text-sm text-white focus:outline-none focus:border-[#D6FF2A]"
+              className="w-full h-11 px-4 bg-zinc-900 border border-zinc-800 rounded-xl text-sm text-white focus:outline-none focus:border-primary"
             >
               <option value={2}>2 días por semana</option>
               <option value={3}>3 días por semana</option>
@@ -522,7 +557,7 @@ export default function WorkoutsPage(){
                     c[wi].name = e.target.value;
                     setWeeks(c);
                   }}
-                  className="bg-transparent text-white font-bold text-base border-b border-transparent hover:border-zinc-700 focus:border-[#D6FF2A] outline-none px-1"
+                  className="bg-transparent text-white font-bold text-base border-b border-transparent hover:border-zinc-700 focus:border-primary outline-none px-1"
                 />
               </div>
               <div className="flex gap-2">
@@ -572,7 +607,7 @@ export default function WorkoutsPage(){
                           c[wi].days[di].name = e.target.value;
                           setWeeks(c);
                         }}
-                        className="bg-transparent text-white font-semibold text-sm border-b border-transparent hover:border-zinc-700 focus:border-[#D6FF2A] outline-none flex-1 px-1"
+                        className="bg-transparent text-white font-semibold text-sm border-b border-transparent hover:border-zinc-700 focus:border-primary outline-none flex-1 px-1"
                         placeholder="Nombre de la sesión (ej: Empuje, Piernas...)"
                       />
                     </div>
@@ -630,7 +665,7 @@ export default function WorkoutsPage(){
                                   <select
                                     value={ex.exerciseId}
                                     onChange={e => updateExercise(wi, di, ei, "exerciseId", e.target.value)}
-                                    className="w-full bg-zinc-900 border border-zinc-800 rounded-lg px-2.5 py-1.5 text-sm font-semibold text-white focus:outline-none focus:border-[#D6FF2A]"
+                                    className="w-full bg-zinc-900 border border-zinc-800 rounded-lg px-2.5 py-1.5 text-sm font-semibold text-white focus:outline-none focus:border-primary"
                                   >
                                     <option value="default">{ex.name}</option>
                                     {libraryExercises.map(opt => (
@@ -748,7 +783,7 @@ export default function WorkoutsPage(){
                               value={ex.notes || ""}
                               onChange={e => updateExercise(wi, di, ei, "notes", e.target.value)}
                               placeholder="Notas técnicas: codos pegados, retracción escapular, pausa abajo..."
-                              className="w-full bg-zinc-900/60 border border-zinc-800/80 rounded-lg px-3 py-1.5 text-xs text-zinc-300 placeholder:text-zinc-600 focus:outline-none focus:border-[#D6FF2A]"
+                              className="w-full bg-zinc-900/60 border border-zinc-800/80 rounded-lg px-3 py-1.5 text-xs text-zinc-300 placeholder:text-zinc-600 focus:outline-none focus:border-primary"
                             />
                           </div>
                         </div>
@@ -768,7 +803,7 @@ export default function WorkoutsPage(){
           <Plus size={16} className="mr-1.5" /> Agregar Otra Semana
         </Button>
         <Button variant="accent" onClick={handleSaveProgram} disabled={saving} className="flex-1 h-12 font-bold text-base">
-          {saving ? "Guardando..." : "GUARDAR PROGRAMA COMPLETO ✓"}
+          {saving ? "Guardando..." : "GUARDAR PROGRAMA COMPLETO"}
         </Button>
       </div>
     </div>

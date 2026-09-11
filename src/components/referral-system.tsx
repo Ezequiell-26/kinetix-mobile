@@ -10,8 +10,16 @@ export function ReferralSystem(){
   const [copied,setCopied]=useState(false);
   const link="https://ezequielcoaching.com/r/martin-f";
   function copy(){
-    navigator.clipboard?.writeText(link);
-    setCopied(true);
+    try{
+      const done = navigator.clipboard?.writeText(link);
+      if(done && typeof done.catch === "function"){
+        done.then(()=>setCopied(true)).catch(()=>setCopied(false));
+      }else{
+        setCopied(true);
+      }
+    }catch{
+      setCopied(false);
+    }
     setTimeout(()=>setCopied(false),2000);
   }
   return (
@@ -20,7 +28,7 @@ export function ReferralSystem(){
       <CardContent className="space-y-3">
         <div className="bg-zinc-900 border border-zinc-800 rounded-xl p-3 flex gap-2 items-center">
           <input value={link} readOnly className="flex-1 bg-transparent text-xs text-white outline-none" />
-          <Button size="sm" variant="accent" className="h-8 text-xs" onClick={copy}>{copied?"Copiado ✓":"Copiar"}</Button>
+          <Button size="sm" variant="accent" className="h-8 text-xs" onClick={copy}>{copied?"Copiado":"Copiar"}</Button>
         </div>
         <div className="grid grid-cols-3 gap-2 text-center">
           <div className="bg-zinc-900 border border-zinc-800 rounded-xl p-2"><Users size={14} className="mx-auto text-zinc-400"/><p className="font-black">3</p><p className="text-[11px] text-zinc-500">Referidos</p></div>
@@ -28,7 +36,6 @@ export function ReferralSystem(){
           <div className="bg-emerald-500/10 border border-emerald-500/20 rounded-xl p-2"><Gift size={14} className="mx-auto text-emerald-400"/><p className="font-black text-emerald-400">2 meses</p><p className="text-[11px] text-zinc-500">Ganados</p></div>
         </div>
         <Button variant="outline" className="w-full" onClick={()=>{ if(navigator.share) navigator.share({title:"EZEQUIEL COACHING", text:"Entrena con Ezequiel — 1 mes gratis con mi link", url:link}).catch(()=>{}); else copy(); }}><Share2 size={14} className="mr-2"/> Compartir link</Button>
-        <p className="text-[11px] text-zinc-600 text-center">ReferralCandy MIT — referidos con recompensa automática</p>
       </CardContent>
     </Card>
   );
