@@ -7,7 +7,11 @@ export async function PUT(req: Request, {params}:{params:Promise<{id:string}>}){
   if(!s) return NextResponse.json({error:"No auth"},{status:401});
   if(s.role !== "TRAINER") return NextResponse.json({error:"Solo entrenador"},{status:403});
   const {id} = await params;
-  const body = await req.json();
+  const body = await req.json().catch(() => null);
+  if(!body) return NextResponse.json({error:"Cuerpo requerido"},{status:400});
+  if(body.name !== undefined && (typeof body.name !== "string" || !body.name.trim())){
+    return NextResponse.json({error:"Nombre inválido"},{status:400});
+  }
   const ex = await prisma.exercise.update({
     where:{id},
     data:{
