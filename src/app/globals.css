@@ -5,6 +5,18 @@
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Space+Grotesk:wght@500;600;700&display=swap');
 
 :root {
+  /* ===== Tokens FitSync (canales RGB para alpha de Tailwind) ===== */
+  --primary: 52 211 153;        /* emerald-400 */
+  --primary-hover: 110 231 183; /* emerald-300 */
+  --surface: 24 24 27;          /* zinc-900 */
+  --surface-elevated: 9 9 11;   /* zinc-950 */
+  --subtle: 39 39 42;           /* zinc-800 */
+  --success: 52 211 153;
+  --warning: 251 191 36;        /* amber-400 */
+  --danger: 248 113 113;        /* red-400 */
+  --info: 56 189 248;           /* sky-400 */
+  --ai: 167 139 250;            /* violet-400 */
+  --premium: 167 139 250;
   --background: 0 0% 3.5%;
   --foreground: 0 0% 98%;
   --card: 0 0% 7%;
@@ -16,6 +28,15 @@
 }
 * { border-color: hsl(var(--border)); }
 html { scroll-behavior: smooth; -webkit-text-size-adjust: 100%; transition: background-color 0.3s ease; }
+/* ===== TEMA OSCURO FITSYNC: azul-negro premium ===== */
+html:not(.light) body { background: #0A0F14; }
+html:not(.light) .bg-\[\#080808\] { background-color: #0A0F14; }
+html:not(.light) .bg-\[\#080808\]\/80 { background-color: rgba(10,15,20,0.85); }
+html:not(.light) .bg-\[\#0F0F0F\] { background-color: #0D1319; }
+html:not(.light) .bg-\[\#111111\] { background-color: #0F151B; }
+html:not(.light) * { scrollbar-color: #2b3a42 #0A0F14; }
+html:not(.light) ::-webkit-scrollbar-track { background: #0A0F14; }
+html:not(.light) ::-webkit-scrollbar-thumb { background: #2b3a42; }
 body {
   background: #080808;
   color: #FAFAFA;
@@ -31,25 +52,38 @@ h1,h2,h3 { font-family: 'Space Grotesk', sans-serif; letter-spacing: -0.02em; }
 ::-webkit-scrollbar-thumb { background: #27272A; border-radius: 999px; transition: background 0.2s; }
 ::-webkit-scrollbar-track { background: transparent; }
 /* Premium selection */
-::selection { background: #D6FF2A; color: #000; }
+::selection { background: var(--primary); color: #000; }
 html.light ::selection { background: #0A0A0A; color: #fff; }
 /* Premium focus */
-*:focus-visible { outline: 2px solid #D6FF2A; outline-offset: 2px; }
+*:focus-visible { outline: 2px solid var(--primary); outline-offset: 2px; }
 html.light *:focus-visible { outline-color: #0A0A0A; }
 /* PWA standalone */
 @media (display-mode: standalone) {
-  body { background: #080808; }
+  body { background: #0A0F14; }
 }
 @media (display-mode: standalone) {
-  html.light body { background: #FFFFFF; }
+  html.light body { background: #FAFAFA; }
 }
 /* iOS safe bottom for fixed navs */
 @supports (padding: env(safe-area-inset-bottom)) {
   .safe-bottom { padding-bottom: env(safe-area-inset-bottom); }
 }
 
-/* ===== TEMA CLARO PREMIUM BLANCO Y NEGRO ===== */
+/* ===== TEMA CLARO PREMIUM — paleta completa y consistente =====
+   Dirección: página blanca, superficies gris muy claro, acento lima intacto.
+   El acento como TEXTO se oscurece a lime-700 para contraste AA sobre blanco. */
 html.light {
+  --primary: 5 150 105;         /* emerald-600 (AA sobre blanco) */
+  --primary-hover: 4 120 87;    /* emerald-700 */
+  --surface: 242 242 242;
+  --surface-elevated: 247 247 248;
+  --subtle: 228 228 231;
+  --success: 5 150 105;
+  --warning: 217 119 6;
+  --danger: 220 38 38;
+  --info: 2 132 199;
+  --ai: 124 58 237;
+  --premium: 124 58 237;
   --background: 0 0% 100%;
   --foreground: 0 0% 3.5%;
   --card: 0 0% 98%;
@@ -57,33 +91,86 @@ html.light {
   --border: 0 0% 90%;
 }
 html.light body {
-  background: #FFFFFF;
-  color: #0A0A0A;
+  background: #FAFAFA;
+  color: #18181B;
 }
 html.light h1, html.light h2, html.light h3 { color: #0A0A0A; }
-html.light ::-webkit-scrollbar-thumb { background: #E5E5E5; }
-/* Fondos */
-html.light .bg-\[\#080808\] { background-color: #FFFFFF !important; }
-html.light .bg-\[\#080808\]\/80 { background-color: rgba(255,255,255,0.8) !important; }
+html.light ::-webkit-scrollbar-thumb { background: #D4D4D8; }
+html.light ::-webkit-scrollbar-track { background: transparent; }
+html.light * { scrollbar-color: #D4D4D8 #FAFAFA; }
+
+/* --- Fondos: páginas, navs, drawers --- */
+html.light .bg-\[\#080808\] { background-color: #FAFAFA !important; }
+html.light .bg-\[\#080808\]\/80 { background-color: rgba(250,250,250,0.85) !important; }
 html.light .bg-\[\#0F0F0F\] { background-color: #FFFFFF !important; }
-html.light .bg-\[\#111111\] { background-color: #FFFFFF !important; border-color: #E8E8E8 !important; }
+html.light .bg-\[\#111111\] { background-color: #FFFFFF !important; }
+html.light .bg-zinc-950 { background-color: #F4F4F5 !important; }
+html.light .bg-zinc-950\/50 { background-color: rgba(244,244,245,0.6) !important; }
 html.light .bg-zinc-900 { background-color: #F2F2F2 !important; }
-html.light .bg-zinc-800 { background-color: #E8E8E8 !important; }
-html.light .bg-black\/60 { background-color: rgba(0,0,0,0.08) !important; }
-/* Bordes */
-html.light .border-zinc-800 { border-color: #E8E8E8 !important; }
-html.light .border-zinc-900 { border-color: #EDEDED !important; }
-/* Textos */
+html.light .bg-zinc-900\/30 { background-color: rgba(242,242,242,0.4) !important; }
+html.light .bg-zinc-900\/50 { background-color: rgba(242,242,242,0.6) !important; }
+html.light .bg-zinc-900\/60 { background-color: rgba(242,242,242,0.7) !important; }
+html.light .bg-zinc-900\/80 { background-color: rgba(242,242,242,0.85) !important; }
+html.light .bg-zinc-900\/90 { background-color: #F2F2F2 !important; }
+html.light .bg-zinc-900\/95 { background-color: #F4F4F5 !important; }
+html.light .bg-zinc-950\/80 { background-color: rgba(244,244,245,0.9) !important; }
+html.light .bg-zinc-950\/60 { background-color: rgba(244,244,245,0.7) !important; }
+html.light .bg-zinc-800 { background-color: #E4E4E7 !important; }
+html.light .bg-black\/60 { background-color: rgba(0,0,0,0.25) !important; }
+/* Overlay de drawer: veladura clara */
+html.light .bg-black\/60.backdrop-blur-sm { background-color: rgba(250,250,250,0.6) !important; }
+html.light .glass { background: rgba(255,255,255,0.8); border: 1px solid rgba(228,228,231,0.9); }
+
+/* --- Bordes --- */
+html.light .border-zinc-900 { border-color: #EFEFEF !important; }
+html.light .border-zinc-800 { border-color: #E4E4E7 !important; }
+html.light .border-zinc-700 { border-color: #D4D4D8 !important; }
+html.light .border-zinc-600 { border-color: #C4C4CD !important; }
+html.light .border-white { border-color: #0A0A0A !important; }
+html.light .hover\:border-zinc-700:hover { border-color: #C4C4CD !important; }
+html.light .hover\:border-zinc-600:hover { border-color: #A1A1AA !important; }
+html.light .hover\:border-zinc-500:hover { border-color: #71717A !important; }
+
+/* --- Textos: contraste AA real --- */
 html.light .text-white { color: #0A0A0A !important; }
-html.light .text-zinc-100 { color: #0A0A0A !important; }
-html.light .text-zinc-300 { color: #52525B !important; }
-html.light .text-zinc-400 { color: #71717A !important; }
-html.light .text-zinc-500 { color: #A1A1AA !important; }
-/* Botones y acentos se mantienen pero con contraste premium */
-html.light .bg-white { background-color: #0A0A0A !important; color: white !important; }
-html.light .text-black { color: white !important; }
-html.light .hover\:bg-zinc-900:hover { background-color: #F5F5F5 !important; }
+html.light .text-zinc-100 { color: #18181B !important; }
+html.light .text-zinc-200 { color: #27272A !important; }
+html.light .text-zinc-300 { color: #3F3F46 !important; }
+html.light .text-zinc-400 { color: #52525B !important; }
+html.light .text-zinc-500 { color: #71717A !important; }
+html.light .text-zinc-600 { color: #8E8E99 !important; }
+/* Acento lima como texto: ilegible sobre blanco -> lime-700 (mismo tono de marca, AA) */
 html.light .hover\:text-white:hover { color: #0A0A0A !important; }
+
+/* --- Selección secundaria: chip blanco con borde negro (sin invertir) --- */
+html.light .bg-white { background-color: #FFFFFF !important; }
+/* OJO: text-black NO se toca — sobre botones lima (bg-primary text-black)
+   debe seguir siendo negro. La versión anterior lo invertía a blanco y
+   hacía los botones lima ilegibles en modo claro. */
+
+/* --- Estados hover --- */
+html.light .hover\:bg-zinc-900:hover { background-color: #E9E9EC !important; }
+html.light .hover\:bg-zinc-800:hover { background-color: #E0E0E3 !important; }
+html.light .hover\:bg-zinc-950:hover { background-color: #E4E4E7 !important; }
+
+/* --- Gradientes decorativos (from/via/to zinc y hex oscuros) --- */
+html.light .from-zinc-900 { --tw-gradient-from: #F2F2F2 !important; }
+html.light .from-zinc-950 { --tw-gradient-from: #F7F7F8 !important; }
+html.light .via-zinc-900 { --tw-gradient-stops: var(--tw-gradient-from), #F0F0F1 var(--tw-gradient-via-position), var(--tw-gradient-to) !important; }
+html.light .via-zinc-950 { --tw-gradient-stops: var(--tw-gradient-from), #F4F4F5 var(--tw-gradient-via-position), var(--tw-gradient-to) !important; }
+html.light .to-zinc-900 { --tw-gradient-to: #EFEFEF !important; }
+html.light .to-zinc-950 { --tw-gradient-to: #F4F4F5 !important; }
+html.light .from-\[\#111111\] { --tw-gradient-from: #F5F5F6 !important; }
+html.light .to-\[\#111111\] { --tw-gradient-to: #F5F5F6 !important; }
+html.light .from-\[\#0F0F0F\] { --tw-gradient-from: #F6F6F7 !important; }
+html.light .to-\[\#080808\] { --tw-gradient-to: #FAFAFA !important; }
+html.light .via-\[\#111111\] { --tw-gradient-stops: var(--tw-gradient-from), #F2F2F3 var(--tw-gradient-via-position), var(--tw-gradient-to) !important; }
+
+/* --- Sombras: en claro deben ser sutiles --- */
+html.light .shadow-2xl { box-shadow: 0 8px 30px rgba(0,0,0,0.08) !important; }
+html.light .shadow-lg { box-shadow: 0 4px 16px rgba(0,0,0,0.06) !important; }
+html.light .card-premium:hover { box-shadow: 0 8px 24px rgba(0,0,0,0.08), 0 0 0 1px rgba(228,228,231,0.9); }
+html.light .shimmer::after { background: linear-gradient(90deg, transparent, rgba(0,0,0,0.04), transparent); }
 
 /* VIP Polish — EZEQUIEL COACHING alto nivel */
 * {
@@ -105,11 +192,11 @@ html.light .hover\:text-white:hover { color: #0A0A0A !important; }
   background: #3f3f46;
 }
 ::selection {
-  background: #D6FF2A;
+  background: var(--primary);
   color: #000;
 }
 :focus-visible {
-  outline: 2px solid #D6FF2A;
+  outline: 2px solid var(--primary);
   outline-offset: 2px;
 }
 /* Glassmorphism utility */
@@ -142,4 +229,49 @@ html.light .hover\:text-white:hover { color: #0A0A0A !important; }
 .card-premium:hover {
   transform: translateY(-2px);
   box-shadow: 0 8px 32px rgba(0,0,0,0.4), 0 0 0 1px rgba(39,39,42,0.5);
+}
+
+/* ===== Sistema visual EZEQUIEL COACHING — cross-platform (Windows/Mac/Android/iOS) ===== */
+
+/* Etiqueta de sección: eyebrow 10px uppercase — escaneo en F en 1s */
+.section-eyebrow {
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: #71717a;
+}
+
+/* CTA pegajoso en zona pulgar (móvil): blur + safe-area iOS/Android */
+.cta-sticky {
+  position: sticky;
+  bottom: calc(84px + env(safe-area-inset-bottom));
+  z-index: 30;
+  background: linear-gradient(to top, #080808 55%, transparent);
+  padding: 12px 0 calc(8px + env(safe-area-inset-bottom));
+}
+@media (min-width: 1024px) {
+  .cta-sticky { position: static; background: none; padding: 0; }
+}
+
+/* Sin scrollbar visible para rails horizontales (Windows/Mac táctil) */
+.no-scrollbar { scrollbar-width: none; -ms-overflow-style: none; }
+.no-scrollbar::-webkit-scrollbar { display: none; }
+
+/* Evita salto de layout por scrollbar en Windows */
+html { scrollbar-gutter: stable; }
+
+/* Balanceo de titulares premium */
+h1, h2 { text-wrap: balance; }
+
+/* Aceleración GPU para blur fijo en Windows/Mac de gama media */
+.glass, .cta-sticky { transform: translateZ(0); }
+
+/* Movimiento reducido: respeta al usuario (iOS/Android/Windows) */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+  }
+  .shimmer::after { display: none; }
 }
