@@ -45,7 +45,8 @@ export async function GET(req: Request){
 export async function POST(req: Request){
   const s = await getSession();
   if(!s) return NextResponse.json({error:"No auth"},{status:401});
-  const body = await req.json();
+  const body = await req.json().catch(() => null);
+  if(!body) return NextResponse.json({error:"Cuerpo requerido"},{status:400});
 
   // Find client for current user if CLIENT to prevent spoofing
   let clientId: string | null = null;

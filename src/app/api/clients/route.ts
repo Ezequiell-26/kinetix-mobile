@@ -11,9 +11,15 @@ export async function GET(){
 export async function POST(req:Request){
   const s = await getSession();
   if(!s || s.role!=="TRAINER") return NextResponse.json({error:"No auth"},{status:401});
-  const body = await req.json();
+  const body = await req.json().catch(() => null);
+  if(!body || typeof body.name !== "string" || !body.name.trim()){
+    return NextResponse.json({error:"Nombre requerido"},{status:400});
+  }
+  if(typeof body.email !== "string" || !body.email.includes("@")){
+    return NextResponse.json({error:"Email válido requerido"},{status:400});
+  }
   const c = await prisma.client.create({data:{
-    name: body.name, email: body.email, goal: body.goal || "HIPERTROFIA",
+    name: body.name.trim(), email: body.email.trim(), goal: body.goal || "HIPERTROFIA",
     status: body.status || "ACTIVO", plan: body.plan || "PERSONALIZADO",
     age: body.age ? Number(body.age) : null, weight: body.weight ? Number(body.weight): null,
     notes: body.notes || null
