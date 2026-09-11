@@ -32,24 +32,24 @@ export function ClientBottomNav(){
   return (
     <>
       <nav aria-label="Navegación principal" className="lg:hidden fixed bottom-3 left-3 right-3 z-40 max-w-[560px] mx-auto">
-        <div className="rounded-3xl bg-[#0D1319]/90 backdrop-blur-xl border border-subtle shadow-[0_12px_40px_rgba(0,0,0,0.5)] flex justify-around items-end px-2 pt-4 pb-[max(0.5rem,env(safe-area-inset-bottom))]">
+        <div className="rounded-3xl bg-[#0D1319]/90 backdrop-blur-xl border border-subtle shadow-[0_12px_40px_rgba(0,0,0,0.5)] flex justify-around items-center px-2 py-2 pb-[max(0.5rem,env(safe-area-inset-bottom))]">
         {items.map(i => {
           const active = path === i.href || path.startsWith(i.href + "/");
-          const isHero = i.href === "/client/workout";
           return (
             <Link
               key={i.href}
               href={i.href}
               aria-current={active ? "page" : undefined}
               aria-label={i.label}
-              className={
-                isHero
-                  ? `flex flex-col items-center gap-1 px-4 py-2.5 rounded-2xl min-h-[60px] min-w-[68px] justify-center transition-all -translate-y-2 font-bold shadow-[0_8px_28px_rgba(52,211,153,0.45)] active:scale-95 ${active ? "text-black bg-primary" : "text-black bg-primary/90"}`
-                  : `flex flex-col items-center gap-1 px-2 sm:px-3 py-2 rounded-2xl min-h-[52px] min-w-[52px] justify-center transition-all active:scale-95 ${active ? "text-primary bg-primary/10 border border-primary/25 font-bold" : "text-zinc-500 hover:text-zinc-200"}`
-              }
+              className="relative flex flex-col items-center gap-1 px-2 sm:px-3 py-2 rounded-xl min-h-[52px] min-w-[56px] justify-center transition-all active:scale-95"
             >
-              <i.icon size={isHero ? 22 : 20} strokeWidth={active || isHero ? 2.5 : 1.8} />
-              <span className="text-[10px] font-bold tracking-wide">{i.label}</span>
+              <i.icon
+                size={22}
+                strokeWidth={active ? 2.5 : 2}
+                className={active ? "text-primary drop-shadow-[0_0_10px_rgba(52,211,153,0.9)]" : "text-zinc-500"}
+              />
+              <span className={`text-[10px] tracking-wide ${active ? "font-black text-primary drop-shadow-[0_0_8px_rgba(52,211,153,0.7)]" : "font-semibold text-zinc-500"}`}>{i.label}</span>
+              {active && <span className="absolute -bottom-0.5 w-1 h-1 rounded-full bg-primary shadow-[0_0_6px_rgba(52,211,153,1)]" aria-hidden="true" />}
             </Link>
           );
         })}
@@ -57,10 +57,15 @@ export function ClientBottomNav(){
           onClick={()=>setShowMore(!showMore)}
           aria-expanded={showMore}
           aria-label="Más opciones"
-          className={`flex flex-col items-center gap-1 px-2 sm:px-3 py-2 rounded-2xl min-h-[52px] min-w-[52px] justify-center transition-all active:scale-95 ${isMoreActive || showMore ? "text-primary bg-primary/10 border border-primary/25 font-bold" : "text-zinc-500 hover:text-zinc-200"}`}
+          className="relative flex flex-col items-center gap-1 px-2 sm:px-3 py-2 rounded-xl min-h-[52px] min-w-[56px] justify-center transition-all active:scale-95"
         >
-          <MoreHorizontal size={20} strokeWidth={isMoreActive || showMore ? 2.5 : 1.8} />
-          <span className="text-[10px] font-bold tracking-wide">Más</span>
+          <MoreHorizontal
+            size={22}
+            strokeWidth={isMoreActive || showMore ? 2.5 : 2}
+            className={isMoreActive || showMore ? "text-primary drop-shadow-[0_0_10px_rgba(52,211,153,0.9)]" : "text-zinc-500"}
+          />
+          <span className={`text-[10px] tracking-wide ${isMoreActive || showMore ? "font-black text-primary drop-shadow-[0_0_8px_rgba(52,211,153,0.7)]" : "font-semibold text-zinc-500"}`}>Más</span>
+          {(isMoreActive || showMore) && <span className="absolute -bottom-0.5 w-1 h-1 rounded-full bg-primary shadow-[0_0_6px_rgba(52,211,153,1)]" aria-hidden="true" />}
         </button>
         </div>
       </nav>
