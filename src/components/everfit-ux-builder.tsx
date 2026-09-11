@@ -271,12 +271,12 @@ export function EverfitUxBuilder() {
             <div className="p-3 border-b border-zinc-800 space-y-2">
               <p className="text-xs font-black tracking-widest uppercase text-zinc-400 flex items-center gap-1.5"><Search size={12} /> Biblioteca</p>
               <div className="relative">
-                <Search size={14} className="absolute left-2.5 top-1/2 -translate-y-1/2 text-zinc-600" />
+                <Search size={14} className="absolute left-2.5 top-1/2 -translate-y-1/2 text-zinc-500" />
                 <input
                   value={search}
                   onChange={(e) => setSearch(e.target.value)}
                   placeholder="Buscar ejercicio..."
-                  className="w-full h-9 pl-8 pr-3 bg-zinc-900 border border-zinc-800 rounded-xl text-xs text-white placeholder:text-zinc-600 focus:outline-none focus:border-primary"
+                  className="w-full h-9 pl-8 pr-3 bg-zinc-900 border border-zinc-800 rounded-xl text-xs text-white placeholder:text-zinc-500 focus:outline-none focus:border-primary"
                 />
               </div>
               <div className="flex gap-1 overflow-x-auto pb-1 scrollbar-none">
@@ -290,7 +290,7 @@ export function EverfitUxBuilder() {
                   </button>
                 ))}
               </div>
-              <p className="text-[11px] text-zinc-600">Arrastrá al día o tocá + — {filteredLibrary.length} ejercicios</p>
+              <p className="text-[11px] text-zinc-500">Arrastrá al día o tocá + — {filteredLibrary.length} ejercicios</p>
             </div>
             <div className="flex-1 overflow-y-auto p-2 space-y-1.5">
               {filteredLibrary.map((lib) => (
@@ -301,7 +301,7 @@ export function EverfitUxBuilder() {
                   onDragEnd={() => setDragLibrary(null)}
                   className="group bg-zinc-900 border border-zinc-800 rounded-xl p-2.5 flex items-center gap-2 hover:border-zinc-700 cursor-grab active:cursor-grabbing"
                 >
-                  <GripVertical size={14} className="text-zinc-600 group-hover:text-zinc-400 shrink-0" />
+                  <GripVertical size={14} className="text-zinc-500 group-hover:text-zinc-400 shrink-0" />
                   <div className="flex-1 min-w-0">
                     <p className="text-xs font-bold leading-none truncate">{lib.name}</p>
                     <p className="text-[11px] text-zinc-500">{lib.muscle} • {lib.equipment}</p>
@@ -316,7 +316,7 @@ export function EverfitUxBuilder() {
               ))}
             </div>
             <div className="p-2 border-t border-zinc-800 bg-zinc-900/50">
-              <p className="text-[11px] text-zinc-600 text-center flex items-center justify-center gap-1"><Link2 size={11} /> Tip: arrastrá o usá + para agregar al Día 1</p>
+              <p className="text-[11px] text-zinc-500 text-center flex items-center justify-center gap-1"><Link2 size={11} /> Tip: arrastrá o usá + para agregar al Día 1</p>
             </div>
           </div>
 
@@ -363,7 +363,7 @@ export function EverfitUxBuilder() {
                           }}
                           className="flex-1 bg-transparent text-sm font-bold text-white border-b border-transparent hover:border-zinc-700 focus:border-primary outline-none px-1 min-w-0"
                         />
-                        <span className="text-[11px] text-zinc-600 shrink-0">{d.exercises.length} ej • {d.exercises.reduce((a, e) => a + e.sets, 0)} series</span>
+                        <span className="text-[11px] text-zinc-500 shrink-0">{d.exercises.length} ej • {d.exercises.reduce((a, e) => a + e.sets, 0)} series</span>
                         <Button size="sm" variant="outline" className="h-7 text-xs border-zinc-800 shrink-0" onClick={() => addExerciseToDay(wi, di)}><Plus size={12} className="mr-1" /> Ejercicio</Button>
                         <button
                           onClick={() => {
@@ -371,7 +371,7 @@ export function EverfitUxBuilder() {
                             c[wi].days.splice(di, 1);
                             setWeeks(c);
                           }}
-                          className="text-zinc-600 hover:text-red-400 p-1 shrink-0"
+                          className="text-zinc-500 hover:text-red-400 p-1 shrink-0"
                         >
                           <Trash2 size={14} />
                         </button>
@@ -392,7 +392,7 @@ export function EverfitUxBuilder() {
                               className={`p-3 bg-zinc-950 hover:bg-zinc-900/40 transition group ${dragEx?.id === ex.id ? "opacity-40" : ""}`}
                             >
                               <div className="flex items-start gap-2">
-                                <span className="mt-1 cursor-grab active:cursor-grabbing text-zinc-600 group-hover:text-zinc-400"><GripVertical size={14} /></span>
+                                <span className="mt-1 cursor-grab active:cursor-grabbing text-zinc-500 group-hover:text-zinc-400"><GripVertical size={14} /></span>
                                 <div className="flex-1 min-w-0 space-y-2">
                                   <div className="flex items-center gap-2">
                                     <span className="w-6 h-6 rounded-lg bg-white text-black flex items-center justify-center font-black text-xs shrink-0">{ei + 1}</span>
@@ -433,7 +433,7 @@ export function EverfitUxBuilder() {
                                       value={ex.note}
                                       onChange={(e) => updateEx(wi, di, ei, "note", e.target.value)}
                                       placeholder="Nota: codos pegados, pausa abajo..."
-                                      className="flex-1 h-8 px-2.5 bg-zinc-900/60 border border-zinc-800 rounded-lg text-xs text-zinc-300 placeholder:text-zinc-600 focus:outline-none focus:border-primary"
+                                      className="flex-1 h-8 px-2.5 bg-zinc-900/60 border border-zinc-800 rounded-lg text-xs text-zinc-300 placeholder:text-zinc-500 focus:outline-none focus:border-primary"
                                     />
                                     <label className="flex items-center gap-1 text-[11px] text-zinc-500 cursor-pointer shrink-0">
                                       <input type="checkbox" checked={ex.superset} onChange={(e) => updateEx(wi, di, ei, "superset", e.target.checked)} className="accent-primary" /> SS
@@ -442,14 +442,14 @@ export function EverfitUxBuilder() {
                                 </div>
 
                                 <div className="flex flex-col gap-1 shrink-0">
-                                  <button onClick={() => moveEx(wi, di, ei, "up")} disabled={ei === 0} aria-label="Subir ejercicio" className="p-2 -m-1 text-zinc-600 hover:text-white disabled:opacity-30 min-h-[32px] min-w-[32px] flex items-center justify-center"><ArrowUp size={12} /></button>
-                                  <button onClick={() => moveEx(wi, di, ei, "down")} disabled={ei === d.exercises.length - 1} aria-label="Bajar ejercicio" className="p-2 -m-1 text-zinc-600 hover:text-white disabled:opacity-30 min-h-[32px] min-w-[32px] flex items-center justify-center"><ArrowDown size={12} /></button>
-                                  <button onClick={() => duplicateEx(wi, di, ei)} aria-label="Duplicar ejercicio" className="p-2 -m-1 text-zinc-600 hover:text-primary min-h-[32px] min-w-[32px] flex items-center justify-center"><Copy size={12} /></button>
-                                  <button onClick={() => removeEx(wi, di, ei)} aria-label="Eliminar ejercicio" className="p-2 -m-1 text-zinc-600 hover:text-red-400 min-h-[32px] min-w-[32px] flex items-center justify-center"><Trash2 size={12} /></button>
+                                  <button onClick={() => moveEx(wi, di, ei, "up")} disabled={ei === 0} aria-label="Subir ejercicio" className="p-2 -m-1 text-zinc-500 hover:text-white disabled:opacity-30 min-h-[32px] min-w-[32px] flex items-center justify-center"><ArrowUp size={12} /></button>
+                                  <button onClick={() => moveEx(wi, di, ei, "down")} disabled={ei === d.exercises.length - 1} aria-label="Bajar ejercicio" className="p-2 -m-1 text-zinc-500 hover:text-white disabled:opacity-30 min-h-[32px] min-w-[32px] flex items-center justify-center"><ArrowDown size={12} /></button>
+                                  <button onClick={() => duplicateEx(wi, di, ei)} aria-label="Duplicar ejercicio" className="p-2 -m-1 text-zinc-500 hover:text-primary min-h-[32px] min-w-[32px] flex items-center justify-center"><Copy size={12} /></button>
+                                  <button onClick={() => removeEx(wi, di, ei)} aria-label="Eliminar ejercicio" className="p-2 -m-1 text-zinc-500 hover:text-red-400 min-h-[32px] min-w-[32px] flex items-center justify-center"><Trash2 size={12} /></button>
                                 </div>
                               </div>
                               {autoProgression && (
-                                <p className="text-[11px] text-zinc-600 mt-2 flex items-center gap-1">
+                                <p className="text-[11px] text-zinc-500 mt-2 flex items-center gap-1">
                                   <Zap size={10} className="text-primary" />
                                   {progressionRule === "double" ? `Doble: si ${ex.reps} tope 2× → +2.5kg` : progressionRule === "linear" ? `Lineal: +2.5% next week` : `RIR ${ex.rir}: si RIR≤1 2× → +2.5kg`}
                                 </p>

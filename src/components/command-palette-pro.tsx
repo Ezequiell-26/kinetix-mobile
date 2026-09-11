@@ -205,7 +205,7 @@ export function CommandPalettePro({ role = "trainer" }: { role?: "trainer" | "cl
                       ? "Buscar entrenos, progreso, nutrición…"
                       : "Buscar clientes, rutinas, check-ins…"
                   }
-                  className="flex-1 bg-transparent outline-none text-[16px] sm:text-sm placeholder:text-zinc-600 text-white"
+                  className="flex-1 bg-transparent outline-none text-[16px] sm:text-sm placeholder:text-zinc-500 text-white"
                 />
                 <button
                   onClick={() => setOpen(false)}
@@ -232,7 +232,7 @@ export function CommandPalettePro({ role = "trainer" }: { role?: "trainer" | "cl
                             className="w-full text-left px-3 py-2 rounded-xl hover:bg-zinc-900 border border-transparent hover:border-zinc-800 flex justify-between items-center text-sm"
                           >
                             <span className="text-zinc-200">{f.label}</span>
-                            <ArrowRight size={14} className="text-zinc-600" />
+                            <ArrowRight size={14} className="text-zinc-500" />
                           </button>
                         ))}
                       </div>
@@ -251,7 +251,7 @@ export function CommandPalettePro({ role = "trainer" }: { role?: "trainer" | "cl
                             className="w-full text-left px-3 py-2 rounded-xl hover:bg-zinc-900 border border-transparent hover:border-zinc-800 flex justify-between items-center text-sm"
                           >
                             <span className="text-zinc-300">{r.label}</span>
-                            <ArrowRight size={14} className="text-zinc-600" />
+                            <ArrowRight size={14} className="text-zinc-500" />
                           </button>
                         ))}
                       </div>
@@ -314,7 +314,7 @@ export function CommandPalettePro({ role = "trainer" }: { role?: "trainer" | "cl
                                 onClick={(e) => { e.stopPropagation(); toggleFav({ href: c.href, label: c.label }); }}
                                 aria-label={isFav(c.href) ? "Quitar de favoritos" : "Agregar a favoritos"}
                                 title={isFav(c.href) ? "Quitar de favoritos" : "Favorito"}
-                                className={cn("ml-1 p-1.5 rounded-lg shrink-0 transition", isFav(c.href) ? "text-primary" : "text-zinc-600 hover:text-zinc-300")}
+                                className={cn("ml-1 p-1.5 rounded-lg shrink-0 transition", isFav(c.href) ? "text-primary" : "text-zinc-500 hover:text-zinc-300")}
                               >
                                 <Star size={14} className={isFav(c.href) ? "fill-primary" : ""} />
                               </button>
@@ -327,7 +327,7 @@ export function CommandPalettePro({ role = "trainer" }: { role?: "trainer" | "cl
                 )}
               </div>
 
-              <div className="p-2.5 border-t border-zinc-800 text-[11px] text-zinc-600 flex items-center justify-between shrink-0">
+              <div className="p-2.5 border-t border-zinc-800 text-[11px] text-zinc-500 flex items-center justify-between shrink-0">
                 <span className="hidden sm:inline">↑↓ navegar • ↵ seleccionar • ESC cerrar</span>
                 <span className="sm:hidden">↵ seleccionar • / para abrir</span>
                 <span className="text-zinc-500">{filtered.length} comandos</span>

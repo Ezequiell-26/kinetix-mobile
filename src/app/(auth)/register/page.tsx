@@ -33,7 +33,7 @@ export default function RegisterPage(){
                 <option value="CLIENT">Cliente</option><option value="TRAINER">Entrenador</option>
               </select>
             </div>
-            {err && <p className="text-sm text-red-400 bg-red-500/10 border border-red-500/20 rounded-xl p-3">{err}</p>}
+            {err && <p role="alert" className="text-sm text-red-400 bg-red-500/10 border border-red-500/20 rounded-xl p-3">{err}</p>}
             <Button type="submit" variant="accent" className="w-full" disabled={loading}>{loading?"Creando...":"CREAR CUENTA"}</Button>
             <p className="text-center text-xs text-zinc-500">¿Ya tienes cuenta? <Link href="/login" className="text-white hover:underline">Ingresar</Link></p>
           </form>
