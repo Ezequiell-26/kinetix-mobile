@@ -27,10 +27,15 @@ export function GraniteOffline(){
       }catch{}
     };
     check();
-    window.addEventListener("online", check);
+    const onOnline = () => {
+      check();
+      // Auto-sync real: al volver internet se sube la cola sin tocar nada.
+      void syncNow();
+    };
+    window.addEventListener("online", onOnline);
     window.addEventListener("offline", check);
     const t=setInterval(check, 3000);
-    return ()=>{ window.removeEventListener("online", check); window.removeEventListener("offline", check); clearInterval(t); };
+    return ()=>{ window.removeEventListener("online", onOnline); window.removeEventListener("offline", check); clearInterval(t); };
   },[]);
 
   async function syncNow(){
@@ -51,7 +56,7 @@ export function GraniteOffline(){
 
   return (
     <Card className={`border ${offline?"border-amber-500/30 bg-amber-500/5":"border-zinc-800"}`}>
-      <CardHeader><CardTitle className="flex items-center gap-2">{offline?<WifiOff size={16} className="text-amber-400"/>:<Wifi size={16} className="text-emerald-400"/>} Modo Offline <Badge variant={offline?"warn":"muted"}>{offline?"Offline":"Online"}</Badge> <Badge variant="muted">Granite MIT</Badge></CardTitle><p className="text-xs text-zinc-500">PWA 100% offline — tus series se guardan y sincronizan al volver</p></CardHeader>
+      <CardHeader><CardTitle className="flex items-center gap-2">{offline?<WifiOff size={16} className="text-amber-400"/>:<Wifi size={16} className="text-emerald-400"/>} Modo Offline <Badge variant={offline?"warn":"muted"}>{offline?"Offline":"Online"}</Badge></CardTitle><p className="text-xs text-zinc-500">PWA 100% offline — tus series se guardan y sincronizan al volver</p></CardHeader>
       <CardContent className="space-y-3">
         <div className="grid grid-cols-3 gap-2 text-center">
           <div className="bg-zinc-900 border border-zinc-800 rounded-xl p-3"><HardDrive size={16} className="mx-auto text-zinc-400"/><p className="text-lg font-black mt-1">{cached} KB</p><p className="text-[11px] text-zinc-500">Cache</p></div>
@@ -59,9 +64,8 @@ export function GraniteOffline(){
           <div className="bg-zinc-900 border border-zinc-800 rounded-xl p-3"><Check size={16} className="mx-auto text-emerald-400"/><p className="text-xs font-bold mt-1">{lastSync||"—"}</p><p className="text-[11px] text-zinc-500">Último sync</p></div>
         </div>
         <Button variant={offline?"outline":"accent"} className="w-full" onClick={syncNow} disabled={offline || pending===0}>
-          {offline ? "Sin conexión — guardando offline" : pending ? `Sincronizar ${pending} pendientes` : "Todo sincronizado ✓"}
+          {offline ? "Sin conexión — guardando offline" : pending ? `Sincronizar ${pending} pendientes` : "Todo sincronizado"}
         </Button>
-        <p className="text-[11px] text-zinc-600 text-center">Granite MIT — PWA + offline + rutinas + PRs. Inspirado en <a href="https://github.com/search?q=granite+pwa" target="_blank" className="underline">Granite</a></p>
       </CardContent>
     </Card>
   );
