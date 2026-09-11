@@ -1,4 +1,4 @@
-const CACHE = "ezequiel-v2-granite";
+const CACHE = "ezequiel-v3-voz";
 const CORE = [
   "/",
   "/login",
@@ -8,6 +8,7 @@ const CORE = [
   "/client/workout",
   "/client/progress",
   "/client/nutrition",
+  "/audio/narrador-cuenta-regresiva.mp3",
 ];
 self.addEventListener("install", (e) => {
   e.waitUntil(caches.open(CACHE).then((c) => c.addAll(CORE)).then(() => self.skipWaiting()));
