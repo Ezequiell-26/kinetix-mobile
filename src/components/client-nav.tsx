@@ -2,9 +2,10 @@
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { useState } from "react";
-import { Home, Dumbbell, TrendingUp, MessageCircle, User, LogOut, Apple, ClipboardCheck, Settings, MoreHorizontal, X, Timer } from "lucide-react";
+import { Home, Dumbbell, TrendingUp, MessageCircle, User, LogOut, Apple, ClipboardCheck, Settings, MoreHorizontal, X, Timer, LayoutGrid, Clock } from "lucide-react";
 import { ThemeToggle } from "@/components/theme-toggle";
 import { NotificationsBell } from "@/components/notifications-bell";
+import { CommandPalettePro } from "@/components/command-palette-pro";
 
 export function ClientBottomNav(){
   const path = usePathname();
@@ -12,14 +13,16 @@ export function ClientBottomNav(){
   const items = [
     { href: "/client/dashboard", icon: Home, label: "Inicio" },
     { href: "/client/workout", icon: Dumbbell, label: "Entrenar" },
+    { href: "/client/nutrition", icon: Apple, label: "Nutrición" },
     { href: "/client/progress", icon: TrendingUp, label: "Progreso" },
-    { href: "/client/messages", icon: MessageCircle, label: "Mensajes" },
   ];
 
   const moreItems = [
-    { href: "/client/nutrition", icon: Apple, label: "Nutrición", badge: "VIP" },
+    { href: "/client/messages", icon: MessageCircle, label: "Mensajes" },
+    { href: "/client/tools", icon: LayoutGrid, label: "Herramientas", badge: "NUEVO" },
     { href: "/client/timers", icon: Timer, label: "Cronómetros", badge: "PRO" },
     { href: "/client/checkins", icon: ClipboardCheck, label: "Check-ins" },
+    { href: "/client/history", icon: Clock, label: "Historial" },
     { href: "/client/profile", icon: User, label: "Perfil" },
     { href: "/client/settings", icon: Settings, label: "Ajustes" },
   ];
@@ -28,34 +31,45 @@ export function ClientBottomNav(){
 
   return (
     <>
-      <nav className="fixed bottom-0 left-0 right-0 z-40 bg-[#0F0F0F] border-t border-zinc-900 flex justify-around py-2 pb-[calc(0.5rem+env(safe-area-inset-bottom))]">
+      <nav aria-label="Navegación principal" className="lg:hidden fixed bottom-3 left-3 right-3 z-40 max-w-[560px] mx-auto">
+        <div className="rounded-3xl bg-[#0D1319]/90 backdrop-blur-xl border border-subtle shadow-[0_12px_40px_rgba(0,0,0,0.5)] flex justify-around items-end px-2 pt-4 pb-[max(0.5rem,env(safe-area-inset-bottom))]">
         {items.map(i => {
           const active = path === i.href || path.startsWith(i.href + "/");
+          const isHero = i.href === "/client/workout";
           return (
             <Link
               key={i.href}
               href={i.href}
-              className={`flex flex-col items-center gap-1 px-3 py-1.5 rounded-2xl min-h-[44px] justify-center transition ${active ? "text-black bg-[#D6FF2A] font-bold" : "text-zinc-400 hover:text-white"}`}
+              aria-current={active ? "page" : undefined}
+              aria-label={i.label}
+              className={
+                isHero
+                  ? `flex flex-col items-center gap-1 px-4 py-2.5 rounded-2xl min-h-[60px] min-w-[68px] justify-center transition-all -translate-y-2 font-bold shadow-[0_8px_28px_rgba(52,211,153,0.45)] active:scale-95 ${active ? "text-black bg-primary" : "text-black bg-primary/90"}`
+                  : `flex flex-col items-center gap-1 px-2 sm:px-3 py-2 rounded-2xl min-h-[52px] min-w-[52px] justify-center transition-all active:scale-95 ${active ? "text-primary bg-primary/10 border border-primary/25 font-bold" : "text-zinc-500 hover:text-zinc-200"}`
+              }
             >
-              <i.icon size={20} strokeWidth={active ? 2.5 : 1.8} />
+              <i.icon size={isHero ? 22 : 20} strokeWidth={active || isHero ? 2.5 : 1.8} />
               <span className="text-[10px] font-bold tracking-wide">{i.label}</span>
             </Link>
           );
         })}
         <button
           onClick={()=>setShowMore(!showMore)}
-          className={`flex flex-col items-center gap-1 px-3 py-1.5 rounded-2xl min-h-[44px] justify-center transition ${isMoreActive || showMore ? "text-black bg-[#D6FF2A] font-bold" : "text-zinc-400 hover:text-white"}`}
+          aria-expanded={showMore}
+          aria-label="Más opciones"
+          className={`flex flex-col items-center gap-1 px-2 sm:px-3 py-2 rounded-2xl min-h-[52px] min-w-[52px] justify-center transition-all active:scale-95 ${isMoreActive || showMore ? "text-primary bg-primary/10 border border-primary/25 font-bold" : "text-zinc-500 hover:text-zinc-200"}`}
         >
           <MoreHorizontal size={20} strokeWidth={isMoreActive || showMore ? 2.5 : 1.8} />
           <span className="text-[10px] font-bold tracking-wide">Más</span>
         </button>
+        </div>
       </nav>
 
       {/* Más drawer - mobile */}
       {showMore && (
         <div className="fixed inset-0 z-50 flex items-end justify-center">
           <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={()=>setShowMore(false)} />
-          <div className="relative w-full max-w-[640px] bg-[#0F0F0F] border-t border-zinc-800 rounded-t-2xl p-4 pb-[calc(1rem+env(safe-area-inset-bottom))] space-y-3 animate-in slide-in-from-bottom">
+          <div className="relative w-full max-w-[640px] bg-[#0D1319] border-t border-subtle rounded-t-3xl p-4 pb-[calc(1rem+env(safe-area-inset-bottom))] space-y-3 animate-in slide-in-from-bottom">
             <div className="flex justify-between items-center">
               <p className="font-bold text-white">Más opciones</p>
               <button onClick={()=>setShowMore(false)} className="w-8 h-8 rounded-full bg-zinc-900 border border-zinc-800 flex items-center justify-center text-zinc-400"><X size={16}/></button>
@@ -64,8 +78,8 @@ export function ClientBottomNav(){
               {moreItems.map(i=>{
                 const active = path===i.href;
                 return (
-                  <Link key={i.href} href={i.href} onClick={()=>setShowMore(false)} className={`p-3 rounded-xl border flex items-center gap-3 ${active?"bg-[#D6FF2A] text-black border-[#D6FF2A] font-bold":"bg-zinc-900 border-zinc-800 text-white hover:border-zinc-700"}`}>
-                    <div className={`w-9 h-9 rounded-xl flex items-center justify-center ${active?"bg-black text-[#D6FF2A]":"bg-zinc-800 text-zinc-400"}`}><i.icon size={18}/></div>
+                  <Link key={i.href} href={i.href} onClick={()=>setShowMore(false)} className={`p-3 rounded-xl border flex items-center gap-3 ${active?"bg-primary text-black border-primary font-bold":"bg-zinc-900 border-zinc-800 text-white hover:border-zinc-700"}`}>
+                    <div className={`w-9 h-9 rounded-xl flex items-center justify-center ${active?"bg-black text-primary":"bg-zinc-800 text-zinc-400"}`}><i.icon size={18}/></div>
                     <div className="flex-1 min-w-0">
                       <p className="text-sm font-bold leading-none">{i.label} {i.badge && <span className="text-[10px] bg-violet-500 text-white px-1.5 py-0.5 rounded-full ml-1">{i.badge}</span>}</p>
                       <p className="text-xs opacity-60 truncate">{i.href}</p>
@@ -74,7 +88,7 @@ export function ClientBottomNav(){
                 );
               })}
             </div>
-            <p className="text-[11px] text-zinc-600 text-center">Nutrición VIP + Check-ins + Perfil + Ajustes</p>
+            <p className="text-[11px] text-zinc-600 text-center">Mensajes, herramientas, check-ins, perfil y ajustes</p>
           </div>
         </div>
       )}
@@ -83,6 +97,7 @@ export function ClientBottomNav(){
 }
 
 export function ClientTopBar({ name }: { name?: string }){
+  const path = usePathname();
   const r = useRouter();
   async function logout(){
     await fetch("/api/auth/logout", { method: "POST" });
@@ -91,27 +106,51 @@ export function ClientTopBar({ name }: { name?: string }){
   }
 
   return (
-    <header className="sticky top-0 z-30 bg-[#080808]/80 backdrop-blur border-b border-zinc-900">
-      <div className="flex items-center justify-between px-4 h-[56px] max-w-[640px] mx-auto w-full">
-        <Link href="/client/dashboard" className="flex items-center gap-2">
-          <div className="w-8 h-8 rounded-lg bg-[#D6FF2A] flex items-center justify-center font-black text-black text-sm">
+    <header className="sticky top-0 z-30 bg-[#0A0F14]/85 backdrop-blur-xl border-b border-subtle">
+      <div className="flex items-center justify-between px-4 lg:px-8 h-[60px] max-w-[1100px] mx-auto w-full">
+        <Link href="/client/dashboard" className="flex items-center gap-2.5 group">
+          <div className="w-9 h-9 rounded-xl bg-primary flex items-center justify-center font-black text-black text-base shadow-[0_4px_16px_rgba(52,211,153,0.3)] group-hover:shadow-[0_4px_20px_rgba(52,211,153,0.45)] transition-shadow">
             E
           </div>
-          <span className="font-display font-bold text-white text-sm tracking-tight">
-            EZEQUIEL COACHING
-          </span>
+          <div className="leading-none">
+            <span className="font-display font-bold text-white text-sm tracking-tight block">EZEQUIEL COACHING</span>
+            <span className="text-[9px] text-zinc-500 font-bold tracking-[0.18em] uppercase hidden sm:block mt-0.5">Tu mejor versión, cada día</span>
+          </div>
         </Link>
-        <div className="flex items-center gap-2">
-          <span className="text-xs text-zinc-400 hidden sm:inline max-w-[120px] truncate">{name}</span>
+        <nav aria-label="Secciones" className="hidden lg:flex items-center gap-1 ml-6 mr-auto">
+          {[
+            { href: "/client/dashboard", label: "Inicio" },
+            { href: "/client/workout", label: "Entrenar" },
+            { href: "/client/nutrition", label: "Nutrición" },
+            { href: "/client/progress", label: "Progreso" },
+            { href: "/client/tools", label: "Herramientas" },
+          ].map(l => {
+            const active = l.href === "/client/dashboard" ? path === l.href : path.startsWith(l.href);
+            return (
+              <Link key={l.href} href={l.href} aria-current={active ? "page" : undefined}
+                className={`px-3.5 py-2 rounded-xl text-[13px] font-bold transition ${active ? "bg-primary/10 text-primary border border-primary/25" : "text-zinc-400 hover:text-white hover:bg-zinc-800/50 border border-transparent"}`}>
+                {l.label}
+              </Link>
+            );
+          })}
+        </nav>
+        <div className="flex items-center gap-1.5 sm:gap-2">
+          <CommandPalettePro role="client" />
+          <div className="hidden sm:flex items-center gap-2 pl-2 ml-1 border-l border-subtle">
+            <div className="w-8 h-8 rounded-full bg-zinc-800 border border-subtle flex items-center justify-center text-[11px] font-black text-primary">
+              {(name || "A").charAt(0).toUpperCase()}
+            </div>
+            <span className="text-xs font-semibold text-zinc-300 max-w-[110px] truncate">{name}</span>
+          </div>
           <NotificationsBell />
           <ThemeToggle />
           <button
             onClick={logout}
-            className="p-2 text-zinc-400 hover:text-white transition"
+            className="p-2 rounded-lg text-zinc-500 hover:text-white hover:bg-zinc-800/60 transition"
             title="Cerrar sesión"
             aria-label="Cerrar sesión"
           >
-            <LogOut size={18} />
+            <LogOut size={17} />
           </button>
         </div>
       </div>
