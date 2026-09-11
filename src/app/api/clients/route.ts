@@ -8,6 +8,11 @@ export async function GET(){
   const clients = await prisma.client.findMany({orderBy:{createdAt:"desc"}, include:{assignedProgram:true}});
   return NextResponse.json(clients);
 }
+function fin(v: unknown): number | null {
+  const n = typeof v === "number" ? v : parseFloat(String(v ?? ""));
+  return Number.isFinite(n) ? n : null;
+}
+
 export async function POST(req:Request){
   const s = await getSession();
   if(!s || s.role!=="TRAINER") return NextResponse.json({error:"No auth"},{status:401});
@@ -18,12 +23,16 @@ export async function POST(req:Request){
   if(typeof body.email !== "string" || !body.email.includes("@")){
     return NextResponse.json({error:"Email válido requerido"},{status:400});
   }
-  const c = await prisma.client.create({data:{
-    name: body.name.trim(), email: body.email.trim(), goal: body.goal || "HIPERTROFIA",
-    status: body.status || "ACTIVO", plan: body.plan || "PERSONALIZADO",
-    age: body.age ? Number(body.age) : null, weight: body.weight ? Number(body.weight): null,
-    notes: body.notes || null
-  }});
-  await prisma.subscription.create({data:{clientId:c.id, plan:c.plan, status:"ACTIVA", nextPayment: new Date(Date.now()+30*24*60*60*1000), price: c.plan==="PREMIUM"?25000: c.plan==="PERSONALIZADO"?18000:12000 }});
+  // Transacción atómica: sin cliente huérfano ni suscripción huérfana.
+  const c = await prisma.$transaction(async (tx) => {
+    const created = await tx.client.create({data:{
+      name: body.name.trim(), email: body.email.trim(), goal: body.goal || "HIPERTROFIA",
+      status: body.status || "ACTIVO", plan: body.plan || "PERSONALIZADO",
+      age: fin(body.age), weight: fin(body.weight),
+      notes: body.notes || null
+    }});
+    await tx.subscription.create({data:{clientId:created.id, plan:created.plan, status:"ACTIVA", nextPayment: new Date(Date.now()+30*24*60*60*1000), price: created.plan==="PREMIUM"?25000: created.plan==="PERSONALIZADO"?18000:12000 }});
+    return created;
+  });
   return NextResponse.json(c);
 }
