@@ -1,5 +1,5 @@
 "use client";
-import { useEffect, useRef } from "react";
+import { useState, useEffect, useRef } from "react";
 import { playTrack, oncePerDay } from "@/lib/voice";
 
 /** Narrador de racha: suena una vez por día si la racha viene en marcha. */
@@ -11,6 +11,17 @@ export function StreakVoice({ streak }: { streak: number }) {
     if (oncePerDay("racha")) playTrack("racha");
   }, [streak]);
   return null;
+}
+
+/** Saludo según la hora: la app saluda distinto mañana, tarde y noche. */
+export function TimeGreeting({ name }: { name: string }) {
+  const [text, setText] = useState(`Hola, ${name}.`);
+  useEffect(() => {
+    const h = new Date().getHours();
+    const g = h < 12 ? "Buen día" : h < 20 ? "Buenas tardes" : "Buenas noches";
+    setText(`${g}, ${name}.`);
+  }, [name]);
+  return <>{text}</>;
 }
 
 /** Narrador de check-in: saluda una vez por día si hay check-in pendiente. */
