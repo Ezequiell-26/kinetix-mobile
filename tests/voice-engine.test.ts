@@ -14,6 +14,9 @@ import {
 } from "../src/lib/voice-engine/planner";
 import { VoiceQueue } from "../src/lib/voice-engine/queue";
 import { MotivationEngine, repCountPlan } from "../src/lib/voice-engine/motivation";
+import { DEFAULT_VOICE } from "../src/lib/voice-engine/voices";
+import * as fs from "fs";
+import * as path from "path";
 import type { VoiceManifest, PlannedPhrase } from "../src/lib/voice-engine/types";
 
 let passed = 0;
@@ -131,6 +134,18 @@ function main() {
   check("SMART: restan 2 → últimas dos", repCountPlan(8, 10, "smart")?.kind === "ultimas-dos");
   check("SMART: resta 1 → una más", repCountPlan(9, 10, "smart")?.kind === "una-mas");
   check("FULL también cierra con una más", repCountPlan(10, 10, "full")?.kind === "una-mas");
+
+  // ── Manifiesto real: todo lo declarado existe en disco ──
+  const pubDir = path.join(__dirname, "..", "public");
+  const declared: string[] = [];
+  for (const group of Object.values(DEFAULT_VOICE) as unknown as Record<string, string>[]) {
+    if (group && typeof group === "object" && !Array.isArray(group)) {
+      declared.push(...Object.values(group));
+    }
+  }
+  const missingFiles = declared.filter((src) => !fs.existsSync(path.join(pubDir, src)));
+  check("manifiesto: 0 audios rotos", missingFiles.length === 0, missingFiles);
+  check("manifiesto: 13 frases legacy + nuevas", declared.length >= 50, declared.length);
 
   console.log(`\nResultado: ${passed} pass, ${failed} fail`);
   if (failed > 0) process.exitCode = 1;
