@@ -1,8 +1,9 @@
 import * as jose from "jose";
 import bcrypt from "bcryptjs";
 import { cookies } from "next/headers";
+import { getJwtSecret } from "./secret";
 
-const SECRET = new TextEncoder().encode(process.env.JWT_SECRET || "ezequiel-coaching-super-secret-jwt-32chars!");
+const SECRET = getJwtSecret();
 const COOKIE_NAME = "ec_token";
 const MAX_AGE = 60*60*24*7;
 
