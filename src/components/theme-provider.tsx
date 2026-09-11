@@ -1,5 +1,6 @@
 "use client";
 import { createContext, useContext, useEffect, useState } from "react";
+import { MotionConfig } from "framer-motion";
 
 type Theme = "dark" | "light";
 const Ctx = createContext<{ theme: Theme; toggle: () => void; setTheme: (t: Theme) => void }>({
@@ -39,5 +40,10 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
   // Avoid flash: render light/dark after mount
   if (!mounted) return <>{children}</>;
 
-  return <Ctx.Provider value={{ theme, toggle, setTheme }}>{children}</Ctx.Provider>;
+  // Todo framer-motion respeta la preferencia del SO (reduced motion).
+  return (
+    <MotionConfig reducedMotion="user">
+      <Ctx.Provider value={{ theme, toggle, setTheme }}>{children}</Ctx.Provider>
+    </MotionConfig>
+  );
 }
