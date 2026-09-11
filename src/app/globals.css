@@ -386,3 +386,17 @@ html.light .nav-dot { box-shadow: 0 0 4px rgba(5,150,105,0.6); }
 .pill-active { background-color: #FFFFFF; color: #000000; }
 html.light .pill-active { background-color: #0A0A0A !important; color: #FFFFFF !important; }
 html.light .group:hover .group-hover\:bg-primary { color: #FFFFFF !important; }
+/* Chat premium: textura sutil + entrada de mensajes */
+.chat-canvas {
+  background-color: #080808;
+  background-image: radial-gradient(rgba(255,255,255,0.045) 1px, transparent 1px);
+  background-size: 22px 22px;
+}
+@keyframes msg-in {
+  from { opacity: 0; transform: translateY(6px) scale(0.98); }
+  to { opacity: 1; transform: none; }
+}
+.msg-in { animation: msg-in 0.22s ease-out; }
+@media (prefers-reduced-motion: reduce) {
+  .msg-in { animation: none; }
+}
