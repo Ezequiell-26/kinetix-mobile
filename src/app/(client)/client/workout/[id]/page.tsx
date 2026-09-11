@@ -9,10 +9,10 @@ import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
 import { VelocityTracker } from "@/components/velocity-tracker";
 import { FormCheck } from "@/components/form-check";
-import { VoiceCoach } from "@/components/voice-coach";
+import { VoiceCoach, type VoiceCue, type VoiceCueInput } from "@/components/voice-coach";
 import { ExerciseImage } from "@/components/exercise-image";
 import { GymMode } from "@/components/gym-mode";
-import { 
+import { Lightbulb, 
   ArrowLeft, 
   CheckCircle, 
   Clock, 
@@ -96,6 +96,29 @@ export default function WorkoutExecutionPage(){
   const [finalComment, setFinalComment] = useState<string>("");
   const [savingLog, setSavingLog] = useState<boolean>(false);
 
+  // Avisos de voz: la página emite, el VoiceCoach reproduce (narrador o TTS).
+  const [voiceCue, setVoiceCue] = useState<VoiceCue | null>(null);
+  const cueIdRef = useRef(0);
+  const firstExRef = useRef(true);
+  function emitCue(cue: VoiceCueInput) {
+    cueIdRef.current += 1;
+    setVoiceCue({ ...cue, id: cueIdRef.current } as VoiceCue);
+  }
+
+  // Narrador 3-2-1-¡vamos! sobre el final del descanso (el audio dura ~6s).
+  // Disparo único por descanso: al cruzar los 6s o al arrancar un descanso corto.
+  const restCueRef = useRef({ resting: false, value: 0 });
+  useEffect(() => {
+    const prev = restCueRef.current;
+    if (isResting && !isTimerPaused && restRemaining > 0) {
+      if ((!prev.resting && restRemaining <= 6) || (prev.value > 6 && restRemaining <= 6)) {
+        emitCue({ kind: "countdown" });
+      }
+    }
+    restCueRef.current = { resting: isResting, value: restRemaining };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isResting, restRemaining, isTimerPaused]);
+
   // Audio beep
   function playBeep(){
     try {
@@ -172,6 +195,26 @@ export default function WorkoutExecutionPage(){
       setRir(currentExercise.rir !== null && currentExercise.rir !== undefined ? String(currentExercise.rir) : "2");
     }
   }, [currentExIdx, currentExercise]);
+
+  // Aviso de voz al cambiar de ejercicio (salta el montaje inicial).
+  useEffect(() => {
+    if (firstExRef.current) {
+      firstExRef.current = false;
+      return;
+    }
+    if (currentExercise) {
+      emitCue({ kind: "say", text: `Siguiente ejercicio: ${currentExercise.exercise.name}.` });
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [currentExIdx]);
+
+  // Aviso de voz al completar el entreno.
+  useEffect(() => {
+    if (finished) {
+      emitCue({ kind: "say", text: "Entrenamiento completado. Excelente trabajo." });
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [finished]);
 
   // Complete a set
   function handleSaveSet(){
@@ -266,7 +309,7 @@ export default function WorkoutExecutionPage(){
   if (loading) {
     return (
       <div className="flex flex-col items-center justify-center min-h-[60vh] space-y-4">
-        <div className="w-10 h-10 border-2 border-[#D6FF2A] border-t-transparent rounded-full animate-spin" />
+        <div className="w-10 h-10 border-2 border-primary border-t-transparent rounded-full animate-spin" />
         <p className="text-sm text-zinc-400">Cargando tu entrenamiento...</p>
       </div>
     );
@@ -300,7 +343,7 @@ export default function WorkoutExecutionPage(){
     return (
       <div className="space-y-5 py-4 max-w-md mx-auto">
         <div className="text-center space-y-2">
-          <div className="w-16 h-16 rounded-full bg-[#D6FF2A] flex items-center justify-center text-black mx-auto">
+          <div className="w-16 h-16 rounded-full bg-primary flex items-center justify-center text-black mx-auto">
             <Check size={36} strokeWidth={3} />
           </div>
           <h1 className="text-2xl font-display font-bold">¡Entrenamiento Completado!</h1>
@@ -323,7 +366,7 @@ export default function WorkoutExecutionPage(){
             </div>
             <div className="bg-zinc-950 p-3 rounded-xl border border-zinc-800/80">
               <span className="text-[11px] uppercase tracking-wider text-zinc-500 font-bold block">Volumen</span>
-              <p className="text-xl font-black text-[#D6FF2A] mt-0.5">{totalVolume.toLocaleString("es-AR")} kg</p>
+              <p className="text-xl font-black text-primary mt-0.5">{totalVolume.toLocaleString("es-AR")} kg</p>
             </div>
           </CardContent>
         </Card>
@@ -345,7 +388,7 @@ export default function WorkoutExecutionPage(){
           disabled={savingLog}
           className="w-full h-14 font-black text-base tracking-wide"
         >
-          {savingLog ? "Guardando..." : "GUARDAR Y VOLVER AL INICIO ✓"}
+          {savingLog ? "Guardando..." : "GUARDAR Y VOLVER AL INICIO"}
         </Button>
       </div>
     );
@@ -372,20 +415,20 @@ export default function WorkoutExecutionPage(){
           <p className="font-bold text-white truncate max-w-[200px]">{workout.name}</p>
           <div className="flex items-center gap-2"><Badge variant="accent" className="font-bold">
             {currentExIdx + 1} / {workout.exercises.length}
-          </Badge><button onClick={()=>setGymMode(true)} className="text-[11px] font-black bg-[#D6FF2A] text-black px-2.5 py-1 rounded-full">GYM MODE</button></div>
+          </Badge><button onClick={()=>setGymMode(true)} className="text-[11px] font-black bg-primary text-black px-2.5 py-1 rounded-full">GYM MODE</button></div>
         </div>
         <Progress value={progressPercent} className="h-2 bg-zinc-800" />
         <div className="flex justify-between text-[11px] text-zinc-400">
           <span>Serie {totalCompletedSets + 1} de {totalTargetSets}</span>
-          <span className="font-bold text-[#D6FF2A]">{progressPercent}% realizado</span>
+          <span className="font-bold text-primary">{progressPercent}% realizado</span>
         </div>
       </div>
 
       {/* Rest Timer Modal / Overlay Banner */}
       {isResting && (
-        <Card className="border-[#D6FF2A]/40 bg-[#D6FF2A]/[0.08] text-center shadow-2xl animate-in fade-in">
+        <Card className="border-primary/40 bg-primary/[0.08] text-center shadow-2xl animate-in fade-in">
           <CardContent className="py-5 px-4 space-y-3">
-            <span className="text-[11px] font-black uppercase tracking-widest text-[#D6FF2A] flex items-center justify-center gap-1">
+            <span className="text-[11px] font-black uppercase tracking-widest text-primary flex items-center justify-center gap-1">
               <Clock size={14} /> Tiempo de Descanso
             </span>
             <p className="text-5xl sm:text-6xl font-black font-mono text-white tracking-tight">
@@ -481,7 +524,7 @@ export default function WorkoutExecutionPage(){
               <div className="p-3 rounded-xl bg-zinc-950 border border-zinc-800/80 text-xs space-y-1">
                 {currentExercise.load && (
                   <p className="text-zinc-300">
-                    <span className="font-bold text-[#D6FF2A]">Carga sugerida:</span> {currentExercise.load}
+                    <span className="font-bold text-primary">Carga sugerida:</span> {currentExercise.load}
                   </p>
                 )}
                 {currentExercise.tempo && (
@@ -490,7 +533,7 @@ export default function WorkoutExecutionPage(){
                   </p>
                 )}
                 {currentExercise.notes && (
-                  <p className="text-zinc-400 italic">💡 {currentExercise.notes}</p>
+                  <p className="text-zinc-400 italic"><Lightbulb size={12} className="inline mr-1 -mt-0.5 text-violet-300" />{currentExercise.notes}</p>
                 )}
               </div>
             )}
@@ -514,7 +557,7 @@ export default function WorkoutExecutionPage(){
                           isDone
                             ? "bg-emerald-400 shadow-[0_0_8px_rgba(52,211,153,0.5)]"
                             : isCurrent
-                            ? "bg-[#D6FF2A] ring-2 ring-[#D6FF2A]/40"
+                            ? "bg-primary ring-2 ring-primary/40"
                             : "bg-zinc-800"
                         }`}
                       />
@@ -535,7 +578,7 @@ export default function WorkoutExecutionPage(){
                     value={weight}
                     onChange={e => setWeight(e.target.value)}
                     placeholder="0"
-                    className="w-full h-14 bg-zinc-900 border-2 border-zinc-800 focus:border-[#D6FF2A] rounded-xl text-center font-black text-2xl text-white outline-none"
+                    className="w-full h-14 bg-zinc-900 border-2 border-zinc-800 focus:border-primary rounded-xl text-center font-black text-2xl text-white outline-none"
                   />
                 </div>
                 <div className="space-y-1">
@@ -547,7 +590,7 @@ export default function WorkoutExecutionPage(){
                     value={reps}
                     onChange={e => setReps(e.target.value)}
                     placeholder="8"
-                    className="w-full h-14 bg-zinc-900 border-2 border-zinc-800 focus:border-[#D6FF2A] rounded-xl text-center font-black text-2xl text-white outline-none"
+                    className="w-full h-14 bg-zinc-900 border-2 border-zinc-800 focus:border-primary rounded-xl text-center font-black text-2xl text-white outline-none"
                   />
                 </div>
                 <div className="space-y-1">
@@ -561,7 +604,7 @@ export default function WorkoutExecutionPage(){
                     value={rir}
                     onChange={e => setRir(e.target.value)}
                     placeholder="2"
-                    className="w-full h-14 bg-zinc-900 border-2 border-zinc-800 focus:border-[#D6FF2A] rounded-xl text-center font-black text-2xl text-white outline-none"
+                    className="w-full h-14 bg-zinc-900 border-2 border-zinc-800 focus:border-primary rounded-xl text-center font-black text-2xl text-white outline-none"
                   />
                 </div>
               </div>
@@ -572,13 +615,13 @@ export default function WorkoutExecutionPage(){
                 onClick={handleSaveSet}
                 className="w-full h-14 text-base font-black tracking-wide"
               >
-                COMPLETAR SERIE ✓
+                COMPLETAR SERIE
               </Button>
             </div>
 
             <VelocityTracker />
             <FormCheck />
-            <VoiceCoach exerciseName={currentExercise.exercise.name} nextExercise={workout.exercises[currentExIdx+1]?.exercise.name} />
+            <VoiceCoach exerciseName={currentExercise.exercise.name} nextExercise={workout.exercises[currentExIdx+1]?.exercise.name} cue={voiceCue} />
             {/* Navigation & Complete Exercise */}
             <div className="flex gap-2">
               <Button
