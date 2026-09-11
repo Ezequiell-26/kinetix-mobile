@@ -4,9 +4,11 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input, Label } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { copyText, downloadFile } from "@/lib/clipboard";
 
 export function CalorieCalculator(){
   const [copied,setCopied]=useState(false);
+  const [copyFail,setCopyFail]=useState(false);
   const [sex,setSex]=useState<"M"|"F">("M");
   const [age,setAge]=useState(28);
   const [weight,setWeight]=useState(86.8);
@@ -67,25 +69,34 @@ export function CalorieCalculator(){
       </div>
 
       <Card className="border-zinc-800">
-        <CardContent className="pt-4 flex gap-2">
+        <CardContent className="pt-4 flex flex-wrap gap-2">
           <Button
             variant="accent"
             className="flex-1 min-h-[44px]"
-            onClick={()=>{
-              try{
-                const done = navigator.clipboard?.writeText(`Objetivo ${result.target} kcal — P:${result.protein} C:${result.carbs} G:${result.fat}`);
-                if(done && typeof done.then === "function"){
-                  done.then(()=>{ setCopied(true); setTimeout(()=>setCopied(false),2000); }).catch(()=>{});
-                }else{
-                  setCopied(true);
-                  setTimeout(()=>setCopied(false),2000);
-                }
-              }catch{}
+            onClick={async ()=>{
+              const ok = await copyText(`Objetivo ${result.target} kcal — P:${result.protein} C:${result.carbs} G:${result.fat}`);
+              setCopied(ok);
+              setCopyFail(!ok);
+              if(ok) setTimeout(()=>setCopied(false),2000);
             }}
           >
             {copied ? "Copiado ✓" : "Copiar macros"}
           </Button>
-          <Button variant="outline" className="flex-1" onClick={()=>window.print()}>Exportar PDF</Button>
+          <Button
+            variant="outline"
+            className="flex-1 min-h-[44px]"
+            onClick={()=>{
+              const html = `<!DOCTYPE html><html lang="es"><head><meta charset="utf-8"><title>Mis macros — EZEQUIEL COACHING</title><style>body{font-family:Arial,sans-serif;max-width:560px;margin:32px auto;padding:0 16px;color:#111}h1{font-size:22px}table{width:100%;border-collapse:collapse;margin:16px 0}td{padding:8px;border-bottom:1px solid #ddd;font-size:15px}td:last-child{text-align:right;font-weight:bold}@media print{button{display:none}}</style></head><body><h1>Mis macros — EZEQUIEL COACHING</h1><table><tr><td>Objetivo</td><td>${result.target} kcal/día</td></tr><tr><td>TMB / TDEE</td><td>${result.bmr} / ${result.tdee} kcal</td></tr><tr><td>Proteína</td><td>${result.protein}g (${result.protein*4} kcal)</td></tr><tr><td>Carbos</td><td>${result.carbs}g (${result.carbs*4} kcal)</td></tr><tr><td>Grasas</td><td>${result.fat}g (${result.fat*9} kcal)</td></tr><tr><td>Agua</td><td>${result.water} ml/día</td></tr><tr><td>IMC</td><td>${result.bmi}</td></tr></table><p>Consulta con Ezequiel para el ajuste fino.</p><button onclick="window.print()">Imprimir / Guardar PDF</button></body></html>`;
+              downloadFile("mis-macros.html", html, "text/html");
+            }}
+          >
+            Exportar PDF
+          </Button>
+          {copyFail && (
+            <p className="w-full text-xs text-zinc-300 rounded-xl border border-zinc-700 bg-zinc-900 px-3 py-2.5 select-all">
+              Tu navegador bloqueó el copiado. Mantené presionado para copiar: Objetivo {result.target} kcal — P:{result.protein} C:{result.carbs} G:{result.fat}
+            </p>
+          )}
         </CardContent>
       </Card>
       <p className="text-xs text-zinc-500 text-center">Fórmula Mifflin-St Jeor • VIP — consulta con Ezequiel para ajuste fino. No reemplaza asesoría médica.</p>

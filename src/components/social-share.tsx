@@ -4,6 +4,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Share2, Instagram, Download, Award } from "lucide-react";
+import { copyText } from "@/lib/clipboard";
 
 // Inspirado en FitBook share + Strive social MIT
 export function SocialShare(){
@@ -15,9 +16,9 @@ export function SocialShare(){
         await navigator.share({title:"Mi progreso", text});
         return;
       }
-      await navigator.clipboard?.writeText(text);
-      setCopied(true);
-      setTimeout(()=>setCopied(false),2000);
+      const ok = await copyText(text);
+      setCopied(ok);
+      if(ok) setTimeout(()=>setCopied(false),2000);
     }catch{
       // Cancelado por el usuario o portapapeles bloqueado: no hacer nada.
     }
