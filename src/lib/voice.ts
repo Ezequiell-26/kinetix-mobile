@@ -6,6 +6,8 @@
  * - Todo falla en silencio: sin voz nunca se rompe el entreno.
  */
 
+import { voiceEngine } from "./voice-engine/engine";
+
 export const NARRATOR_COUNTDOWN_SRC = "/audio/narrador-cuenta-regresiva.mp3";
 
 export const TRACKS = {
@@ -44,7 +46,13 @@ function ensureAudio(): HTMLAudioElement | null {
 
 export function isVoiceEnabled(): boolean {
   try {
-    return localStorage.getItem(VOICE_KEY) !== "off";
+    if (localStorage.getItem(VOICE_KEY) === "off") return false;
+  } catch {
+    return true;
+  }
+  // Unifica el mute con el Voice Engine: silenciar en un lugar silencia todo.
+  try {
+    return voiceEngine.isEnabled();
   } catch {
     return true;
   }

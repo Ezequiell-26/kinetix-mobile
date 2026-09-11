@@ -14,7 +14,7 @@ export function PtDistinctionAuto(){
 
   return (
     <Card className="border-violet-500/20">
-      <CardHeader><CardTitle className="flex items-center gap-2"><Bot size={16} className="text-violet-400"/> Automatizaciones <Badge variant="muted">PT Distinction MIT</Badge></CardTitle>
+      <CardHeader><CardTitle className="flex items-center gap-2"><Bot size={16} className="text-violet-400"/> Automatizaciones</CardTitle>
         <div className="flex gap-1.5 overflow-x-auto pb-1">
           {[
             {id:"onboarding", label:"Onboarding"},
@@ -28,7 +28,7 @@ export function PtDistinctionAuto(){
       <CardContent className="space-y-3">
         {activeTab==="onboarding" && (
           <div className="space-y-2">
-            <div className="flex justify-between items-center"><p className="font-bold text-sm">Onboarding D0/D1/D3/D7</p><button onClick={()=>setEnabled(e=>({...e, onboarding:!e.onboarding}))}>{enabled.onboarding?<ToggleRight size={20} className="text-violet-400"/>:<ToggleLeft size={20} className="text-zinc-600"/>}</button></div>
+            <div className="flex justify-between items-center"><p className="font-bold text-sm">Onboarding D0/D1/D3/D7</p><button onClick={()=>setEnabled(e=>({...e, onboarding:!e.onboarding}))} aria-label="Automatizar onboarding" aria-pressed={enabled.onboarding} className="min-h-[32px] flex items-center">{enabled.onboarding?<ToggleRight size={20} className="text-violet-400"/>:<ToggleLeft size={20} className="text-zinc-600"/>}</button></div>
             {[
               {day:"D0", msg:"¡Bienvenido {name}! Tu plan {plan} está listo →", sent:"2h ago"},
               {day:"D1", msg:"¿Cómo fue tu primer entreno, {name}?", sent:"pendiente"},
@@ -44,7 +44,7 @@ export function PtDistinctionAuto(){
         )}
         {activeTab==="checkin" && (
           <div className="space-y-2">
-            <div className="flex justify-between items-center"><p className="font-bold text-sm">Check-in ≥3d pendiente</p><button onClick={()=>setEnabled(e=>({...e, checkin:!e.checkin}))}>{enabled.checkin?<ToggleRight size={20} className="text-violet-400"/>:<ToggleLeft size={20} className="text-zinc-600"/>}</button></div>
+            <div className="flex justify-between items-center"><p className="font-bold text-sm">Check-in ≥3d pendiente</p><button onClick={()=>setEnabled(e=>({...e, checkin:!e.checkin}))} aria-label="Automatizar check-ins pendientes" aria-pressed={enabled.checkin} className="min-h-[32px] flex items-center">{enabled.checkin?<ToggleRight size={20} className="text-violet-400"/>:<ToggleLeft size={20} className="text-zinc-600"/>}</button></div>
             <div className="bg-amber-500/10 border border-amber-500/20 rounded-xl p-3">
               <p className="text-xs">Si no hay check-in en 3 días → auto recordatorio:</p>
               <p className="text-xs bg-zinc-900 rounded-lg p-2 mt-1 border border-zinc-800">“Hola {`{name}`}, te falta tu check-in. ¿Cómo va tu energía 1-10?”</p>
@@ -55,7 +55,7 @@ export function PtDistinctionAuto(){
         )}
         {activeTab==="retencion" && (
           <div className="space-y-2">
-            <div className="flex justify-between items-center"><p className="font-bold text-sm">Retención 5d sin entrenar</p><button onClick={()=>setEnabled(e=>({...e, retencion:!e.retencion}))}>{enabled.retencion?<ToggleRight size={20} className="text-violet-400"/>:<ToggleLeft size={20} className="text-zinc-600"/>}</button></div>
+            <div className="flex justify-between items-center"><p className="font-bold text-sm">Retención 5d sin entrenar</p><button onClick={()=>setEnabled(e=>({...e, retencion:!e.retencion}))} aria-label="Automatizar retención" aria-pressed={enabled.retencion} className="min-h-[32px] flex items-center">{enabled.retencion?<ToggleRight size={20} className="text-violet-400"/>:<ToggleLeft size={20} className="text-zinc-600"/>}</button></div>
             <div className="bg-red-500/10 border border-red-500/20 rounded-xl p-3">
               <p className="text-xs">5 días sin entrenar → auto-mensaje + tarea CRM 48h:</p>
               <p className="text-xs bg-zinc-900 rounded-lg p-2 mt-1 border border-zinc-800">“Hola {`{name}`}, noté {`{adherence}`}% adherencia. ¿Ajustamos tu plan?”</p>
@@ -66,7 +66,6 @@ export function PtDistinctionAuto(){
             </div>
           </div>
         )}
-        <p className="text-[11px] text-zinc-600 text-center">PT Distinction + My PT Hub MIT — automatizaciones sin Zapier</p>
       </CardContent>
     </Card>
   );
