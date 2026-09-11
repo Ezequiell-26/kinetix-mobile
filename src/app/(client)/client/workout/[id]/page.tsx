@@ -97,6 +97,7 @@ export default function WorkoutExecutionPage(){
   const [gymMode, setGymMode] = useState<boolean>(false);
   const [finalComment, setFinalComment] = useState<string>("");
   const [savingLog, setSavingLog] = useState<boolean>(false);
+  const [savedOffline, setSavedOffline] = useState<boolean>(false);
 
   // Narrador 3-2-1-¡vamos! sobre el final del descanso (el audio dura ~6s).
   // Disparo único por descanso: al cruzar los 6s o al arrancar un descanso corto.
@@ -306,34 +307,42 @@ export default function WorkoutExecutionPage(){
     }
   }
 
-  // Final submission of workout session to DB
+  // Final submission of workout session to DB (con cola offline real)
   async function handleFinishWorkout(){
     if (!workout) return;
     setSavingLog(true);
 
     const durationMin = Math.max(1, Math.round((Date.now() - startTime) / (1000 * 60)));
     const setsPayload = Object.values(loggedSets);
+    const payload = {
+      workoutId: workout.id,
+      durationMin,
+      comment: finalComment || `Sesión completada (${totalCompletedSets} series)`,
+      completed: true,
+      sets: setsPayload,
+    };
+
+    const queueOffline = () => {
+      try {
+        localStorage.setItem(`ec:offline:${Date.now()}`, JSON.stringify(payload));
+      } catch {}
+      setSavedOffline(true);
+    };
 
     try {
       const res = await fetch("/api/workout-logs", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          workoutId: workout.id,
-          durationMin,
-          comment: finalComment || `Sesión completada (${totalCompletedSets} series)`,
-          completed: true,
-          sets: setsPayload
-        })
+        body: JSON.stringify(payload)
       });
 
       if (res.ok) {
         router.push("/client/dashboard");
       } else {
-        router.push("/client/dashboard");
+        queueOffline();
       }
     } catch {
-      router.push("/client/dashboard");
+      queueOffline();
     } finally {
       setSavingLog(false);
     }
@@ -424,6 +433,15 @@ export default function WorkoutExecutionPage(){
         >
           {savingLog ? "Guardando..." : "GUARDAR Y VOLVER AL INICIO"}
         </Button>
+        {savedOffline && (
+          <div className="rounded-2xl border border-amber-500/30 bg-amber-500/10 p-4 text-center space-y-2">
+            <p className="text-sm font-bold text-amber-300">Guardado offline ✓</p>
+            <p className="text-xs text-zinc-400">Sin conexión ahora. Tu sesión se sincroniza sola al volver internet.</p>
+            <Button variant="outline" size="sm" className="w-full min-h-[48px]" onClick={() => router.push("/client/dashboard")}>
+              Volver al inicio →
+            </Button>
+          </div>
+        )}
       </div>
     );
   }
@@ -475,7 +493,7 @@ export default function WorkoutExecutionPage(){
               <Button
                 variant="outline"
                 size="sm"
-                className="h-10 text-xs font-bold bg-zinc-900/90 border-zinc-700"
+                className="h-12 px-5 text-[13px] font-bold bg-zinc-900/90 border-zinc-700"
                 onClick={() => {
                   if (deadlineRef.current > 0) {
                     deadlineRef.current += 30 * 1000;
@@ -490,7 +508,7 @@ export default function WorkoutExecutionPage(){
               <Button
                 variant="outline"
                 size="sm"
-                className="h-10 text-xs font-bold bg-zinc-900/90 border-zinc-700"
+                className="h-12 px-5 text-[13px] font-bold bg-zinc-900/90 border-zinc-700"
                 onClick={() => {
                   const next = !isTimerPaused;
                   setIsTimerPaused(next);
@@ -503,7 +521,7 @@ export default function WorkoutExecutionPage(){
               <Button
                 variant="accent"
                 size="sm"
-                className="h-10 text-xs font-bold text-black"
+                className="h-12 px-5 text-[13px] font-bold text-black"
                 onClick={() => {
                   deadlineRef.current = 0;
                   setIsResting(false);

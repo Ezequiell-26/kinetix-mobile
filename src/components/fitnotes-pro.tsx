@@ -226,28 +226,26 @@ export function FitNotesPro({ onApplyTemplate }: { onApplyTemplate?: (t: FitTemp
   })();
 
   return (
-    <Card className="border-[#D6FF2A]/20 overflow-hidden">
+    <Card className="border-primary/20 overflow-hidden">
       <CardHeader className="pb-3">
         <CardTitle className="flex items-center gap-2 text-base">
-          <ClipboardList size={16} className="text-[#D6FF2A]" /> FitNotes Pro
-          <Badge variant="muted" className="text-[10px]">FitNotes MIT</Badge>
+          <ClipboardList size={16} className="text-primary" /> FitNotes Pro
           <Badge variant="accent" className="text-[10px]">Template + RPE + Notas</Badge>
         </CardTitle>
-        <p className="text-xs text-zinc-500">Workout notes + ejercicio notes + set notes + RPE 6-10 + warmup + templates — inspirado en FitNotes (CSV/JSON import,Routines/Templates, copy previous sets)</p>
       </CardHeader>
       <CardContent className="space-y-4">
         {/* Filtros categoría */}
         <div className="flex gap-1.5 flex-wrap items-center">
           <span className="text-[11px] font-bold text-zinc-500 uppercase tracking-wider flex items-center gap-1"><Layers size={12} /> Filtrar:</span>
           {["Todas", ...CATEGORIES].map(c => (
-            <button key={c} onClick={() => setFilterCat(c)} className={`px-2.5 py-1 rounded-full text-xs font-bold border ${filterCat === c ? "bg-[#D6FF2A] text-black border-[#D6FF2A]" : "bg-zinc-900 text-zinc-400 border-zinc-800 hover:border-zinc-700"}`}>{c}</button>
+            <button key={c} onClick={() => setFilterCat(c)} className={`px-2.5 py-1 rounded-full text-xs font-bold border ${filterCat === c ? "bg-primary text-black border-primary" : "bg-zinc-900 text-zinc-400 border-zinc-800 hover:border-zinc-700"}`}>{c}</button>
           ))}
         </div>
 
         {/* Grid templates */}
         <div className="grid sm:grid-cols-2 gap-2 max-h-[280px] overflow-auto pr-1">
           {filtered.map(t => (
-            <div key={t.id} onClick={() => handleSelect(t.id)} className={`text-left rounded-xl border p-3 cursor-pointer transition ${selectedId === t.id ? "bg-[#D6FF2A]/10 border-[#D6FF2A]/40" : "bg-zinc-900 border-zinc-800 hover:border-zinc-700"}`}>
+            <div key={t.id} onClick={() => handleSelect(t.id)} className={`text-left rounded-xl border p-3 cursor-pointer transition ${selectedId === t.id ? "bg-primary/10 border-primary/40" : "bg-zinc-900 border-zinc-800 hover:border-zinc-700"}`}>
               <div className="flex items-start justify-between gap-2">
                 <div className="min-w-0 flex-1">
                   <p className="font-bold text-sm leading-tight line-clamp-1">{t.name}</p>
@@ -258,7 +256,7 @@ export function FitNotesPro({ onApplyTemplate }: { onApplyTemplate?: (t: FitTemp
                   </div>
                   <p className="text-[11px] text-zinc-500 line-clamp-1 mt-1 flex items-center gap-1"><FileText size={10} /> {t.workoutNotes || "Sin notas"}</p>
                 </div>
-                {selectedId === t.id && <Star size={14} className="text-[#D6FF2A] shrink-0 mt-0.5" />}
+                {selectedId === t.id && <Star size={14} className="text-primary shrink-0 mt-0.5" />}
               </div>
               <div className="flex gap-1 mt-2.5">
                 <Button size="sm" variant={selectedId === t.id ? "accent" : "outline"} className="h-7 text-xs flex-1" onClick={(e) => { e.stopPropagation(); handleApply(t); }}>
@@ -283,7 +281,7 @@ export function FitNotesPro({ onApplyTemplate }: { onApplyTemplate?: (t: FitTemp
           </div>
           <div className="w-full sm:w-32">
             <Label className="text-xs">Categoría</Label>
-            <select value={newCat} onChange={e => setNewCat(e.target.value)} className="w-full h-9 mt-1 bg-zinc-950 border border-zinc-800 rounded-lg px-2 text-sm text-white focus:outline-none focus:border-[#D6FF2A]">
+            <select value={newCat} onChange={e => setNewCat(e.target.value)} className="w-full h-9 mt-1 bg-zinc-950 border border-zinc-800 rounded-lg px-2 text-sm text-white focus:outline-none focus:border-primary">
               {CATEGORIES.map(c => <option key={c} value={c}>{c}</option>)}
             </select>
           </div>
@@ -304,12 +302,12 @@ export function FitNotesPro({ onApplyTemplate }: { onApplyTemplate?: (t: FitTemp
 
           {/* Workout notes */}
           <div className="p-3 space-y-1 border-b border-zinc-800/60">
-            <Label className="text-xs flex items-center gap-1"><FileText size={12} className="text-[#D6FF2A]" /> Notas del workout (FitNotes: workout notes)</Label>
+            <Label className="text-xs flex items-center gap-1"><FileText size={12} className="text-primary" /> Notas del workout (FitNotes: workout notes)</Label>
             <textarea
               value={workoutNotes}
               onChange={e => updateWorkoutNotes(e.target.value)}
               placeholder="Notas globales: objetivo RPE, pausas, sensaciones, links, filmar técnica..."
-              className="w-full min-h-[56px] bg-zinc-900 border border-zinc-800 rounded-xl p-2.5 text-sm text-white placeholder:text-zinc-600 focus:outline-none focus:border-[#D6FF2A] resize-y"
+              className="w-full min-h-[56px] bg-zinc-900 border border-zinc-800 rounded-xl p-2.5 text-sm text-white placeholder:text-zinc-600 focus:outline-none focus:border-primary resize-y"
               rows={2}
             />
             <p className="text-[11px] text-zinc-600">Tip FitNotes: las notas del workout quedan arriba del día, visibles sin abrir ejercicio.</p>
@@ -363,7 +361,7 @@ export function FitNotesPro({ onApplyTemplate }: { onApplyTemplate?: (t: FitTemp
                           <button
                             key={v}
                             onClick={() => updateSetRpe(ex.id, s.id, s.rpe === v ? null : v)}
-                            className={`w-7 h-7 rounded-full text-xs font-black border transition ${s.rpe === v ? (v >= 9 ? "bg-red-500 text-white border-red-500" : v === 8 ? "bg-amber-500 text-black border-amber-500" : "bg-[#D6FF2A] text-black border-[#D6FF2A]") : "bg-zinc-800 text-zinc-500 border-zinc-700 hover:border-zinc-600"}`}
+                            className={`w-7 h-7 rounded-full text-xs font-black border transition ${s.rpe === v ? (v >= 9 ? "bg-red-500 text-white border-red-500" : v === 8 ? "bg-amber-500 text-black border-amber-500" : "bg-primary text-black border-primary") : "bg-zinc-800 text-zinc-500 border-zinc-700 hover:border-zinc-600"}`}
                             title={`RPE ${v}`}
                           >{v}</button>
                         ))}
@@ -384,9 +382,8 @@ export function FitNotesPro({ onApplyTemplate }: { onApplyTemplate?: (t: FitTemp
           </div>
         </div>
 
-        {toast && <div className="fixed bottom-4 left-1/2 -translate-x-1/2 bg-zinc-900 border border-zinc-700 text-white text-sm px-4 py-2 rounded-full shadow-lg z-50">{toast}</div>}
+        {toast && <div className="fixed bottom-[calc(92px+env(safe-area-inset-bottom))] lg:bottom-6 left-1/2 -translate-x-1/2 bg-zinc-900 border border-zinc-700 text-white text-sm px-4 py-2.5 rounded-full shadow-lg z-50 whitespace-nowrap">{toast}</div>}
 
-        <p className="text-[11px] text-zinc-600 text-center">FitNotes MIT — tihawk/fitnotes2fit + FitNotes-iOS + fitnotes-research • workout notes + RPE/RIR + templates/routines • Warmup + copy sets</p>
       </CardContent>
     </Card>
   );

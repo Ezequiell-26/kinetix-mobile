@@ -11,7 +11,7 @@ export function OfflineIndicator(){
   },[]);
   if(!offline) return null;
   return (
-    <div className="fixed top-[56px] left-0 right-0 z-40 bg-amber-500 text-black text-center py-2 text-xs font-bold">
+    <div className="fixed top-[60px] left-0 right-0 z-40 bg-amber-500 text-black text-center py-2 px-3 text-xs font-bold">
       Sin conexión — modo offline activo. Tus series se guardarán y sincronizarán luego.
     </div>
   );

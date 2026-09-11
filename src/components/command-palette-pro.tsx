@@ -9,34 +9,12 @@
 import { useEffect, useMemo, useState, useRef } from "react";
 import { useRouter } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
-import { Search, Command, Clock, ArrowRight, X } from "lucide-react";
+import { Search, Command, Clock, ArrowRight, X, Star, Dumbbell, User } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { navForRole, type NavEntry } from "@/lib/nav-registry";
+import { useSessionUserKey, useUserPrefs } from "@/lib/user-prefs";
 
-type Cmd = { label: string; href: string; kbd?: string; group: string; desc?: string };
-
-const TRAINER_CMDS: Cmd[] = [
-  { label: "Ir a Dashboard", href: "/trainer/dashboard", kbd: "D", group: "Navegación", desc: "Panel del entrenador" },
-  { label: "Clientes", href: "/trainer/clients", kbd: "C", group: "Navegación", desc: "Listado + control" },
-  { label: "Crear cliente", href: "/trainer/clients/new", kbd: "N", group: "Acciones", desc: "Alta rápida" },
-  { label: "Entrenamientos", href: "/trainer/workouts", kbd: "E", group: "Navegación", desc: "Biblioteca + rutinas" },
-  { label: "Crear rutina", href: "/trainer/workouts", kbd: "R", group: "Acciones", desc: "Nueva rutina" },
-  { label: "Check-ins", href: "/trainer/checkins", kbd: "K", group: "Navegación", desc: "Revisar check-ins" },
-  { label: "Mensajes", href: "/trainer/messages", kbd: "M", group: "Navegación", desc: "Chat con clientes" },
-  { label: "Pagos", href: "/trainer/payments", kbd: "P", group: "Navegación", desc: "Suscripciones" },
-  { label: "Progreso cliente", href: "/client/progress", kbd: "G", group: "Navegación", desc: "Vista cliente" },
-  { label: "Ejercicios", href: "/trainer/exercises", kbd: "J", group: "Navegación", desc: "100 ejercicios" },
-];
-
-const CLIENT_CMDS: Cmd[] = [
-  { label: "Mi Dashboard", href: "/client/dashboard", kbd: "D", group: "Navegación", desc: "Entrenamiento de hoy" },
-  { label: "Mi Progreso", href: "/client/progress", kbd: "G", group: "Navegación", desc: "Peso • cargas • fotos" },
-  { label: "Nutrición", href: "/client/nutrition", kbd: "N", group: "Navegación", desc: "Calculadoras + hábitos" },
-  { label: "Mensajes", href: "/client/messages", kbd: "M", group: "Navegación", desc: "Chat con Ezequiel" },
-  { label: "Check-ins", href: "/client/checkins", kbd: "K", group: "Navegación", desc: "Enviar check-in" },
-  { label: "Comenzar entrenamiento", href: "/client/dashboard", kbd: "E", group: "Acciones", desc: "Ir a entrenar" },
-  { label: "Registrar medidas", href: "/client/progress", kbd: "R", group: "Acciones", desc: "Peso + cintura" },
-  { label: "Fotos de progreso", href: "/client/progress", kbd: "F", group: "Acciones", desc: "Antes / Actual" },
-];
+type Cmd = NavEntry & { kbd?: string };
 
 function highlight(text: string, q: string) {
   if (!q) return text;
@@ -45,7 +23,7 @@ function highlight(text: string, q: string) {
   return (
     <>
       {text.slice(0, idx)}
-      <mark className="bg-[#D6FF2A]/30 text-white rounded px-0.5">{text.slice(idx, idx + q.length)}</mark>
+      <mark className="bg-primary/30 text-white rounded px-0.5">{text.slice(idx, idx + q.length)}</mark>
       {text.slice(idx + q.length)}
     </>
   );
@@ -55,26 +33,42 @@ export function CommandPalettePro({ role = "trainer" }: { role?: "trainer" | "cl
   const [open, setOpen] = useState(false);
   const [q, setQ] = useState("");
   const [idx, setIdx] = useState(0);
-  const [recent, setRecent] = useState<string[]>([]);
+  const [dynamic, setDynamic] = useState<Cmd[]>([]);
   const router = useRouter();
   const inputRef = useRef<HTMLInputElement>(null);
-  const commands = role === "client" ? CLIENT_CMDS : TRAINER_CMDS;
+  const commands = navForRole(role);
 
-  // load recent from localStorage (cmdk MIT: recents pattern)
+  // Favoritos + recientes por usuario (local-first, migrable a servidor)
+  const userKey = useSessionUserKey();
+  const { favs, recent, isFav, toggleFav, pushRecent } = useUserPrefs(userKey);
+
+  // Búsqueda dinámica con permisos por rol: ejercicios y atletas solo trainer
   useEffect(() => {
-    try {
-      const r = JSON.parse(localStorage.getItem(`cmdk-recent-${role}`) || "[]");
-      if (Array.isArray(r)) setRecent(r.slice(0, 3));
-    } catch {}
-  }, [role]);
-
-  function pushRecent(href: string) {
-    try {
-      const next = [href, ...recent.filter((x) => x !== href)].slice(0, 3);
-      setRecent(next);
-      localStorage.setItem(`cmdk-recent-${role}`, JSON.stringify(next));
-    } catch {}
-  }
+    if (role !== "trainer" || !open || q.trim().length < 2) { setDynamic([]); return; }
+    const term = q.trim().toLowerCase();
+    const t = setTimeout(async () => {
+      try {
+        const [exRes, clRes] = await Promise.all([
+          fetch(`/api/exercises?q=${encodeURIComponent(term)}`).then(r => (r.ok ? r.json() : [])),
+          fetch("/api/clients").then(r => (r.ok ? r.json() : [])),
+        ]);
+        const out: Cmd[] = [];
+        if (Array.isArray(exRes)) {
+          for (const e of exRes.slice(0, 4)) {
+            out.push({ label: e.name, href: `/trainer/exercises?q=${encodeURIComponent(e.name)}`, group: "Ejercicios", desc: `${e.muscleGroup} · ${e.equipment || "—"}` });
+          }
+        }
+        if (Array.isArray(clRes)) {
+          for (const c of clRes) {
+            if (!String(c.name).toLowerCase().includes(term)) continue;
+            out.push({ label: c.name, href: `/trainer/clients/${c.id}`, group: "Atletas", desc: c.plan || undefined });
+          }
+        }
+        setDynamic(out);
+      } catch { setDynamic([]); }
+    }, 250);
+    return () => clearTimeout(t);
+  }, [q, open, role]);
 
   useEffect(() => {
     const h = (e: KeyboardEvent) => {
@@ -100,10 +94,11 @@ export function CommandPalettePro({ role = "trainer" }: { role?: "trainer" | "cl
   }, [open]);
 
   const filtered = useMemo(() => {
-    if (!q) return commands;
+    const base = q ? [...commands, ...dynamic] : commands;
+    if (!q) return base;
     const low = q.toLowerCase();
     // cmdk MIT: simple fuzzy (includes + prefix bonus)
-    return commands
+    return base
       .map((c) => {
         const hay = `${c.label} ${c.desc || ""} ${c.group}`.toLowerCase();
         const score = hay.includes(low) ? (c.label.toLowerCase().startsWith(low) ? 2 : 1) : 0;
@@ -112,7 +107,7 @@ export function CommandPalettePro({ role = "trainer" }: { role?: "trainer" | "cl
       .filter((x) => x.score > 0)
       .sort((a, b) => b.score - a.score)
       .map((x) => x.c);
-  }, [q, commands]);
+  }, [q, commands, dynamic]);
 
   const groups = useMemo(() => {
     const m = new Map<string, Cmd[]>();
@@ -126,7 +121,7 @@ export function CommandPalettePro({ role = "trainer" }: { role?: "trainer" | "cl
   const flat = filtered;
 
   function go(c: Cmd) {
-    pushRecent(c.href);
+    pushRecent({ href: c.href, label: c.label });
     setOpen(false);
     router.push(c.href);
   }
@@ -154,7 +149,7 @@ export function CommandPalettePro({ role = "trainer" }: { role?: "trainer" | "cl
         aria-label="Abrir paleta de comandos"
         className={cn(
           "hidden lg:flex items-center gap-2 text-xs text-zinc-400 bg-zinc-900 border border-zinc-800 rounded-xl px-3 py-2",
-          "hover:border-zinc-700 hover:text-zinc-200 transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#D6FF2A]/40"
+          "hover:border-zinc-700 hover:text-zinc-200 transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/40"
         )}
       >
         <Search size={14} />
@@ -210,7 +205,7 @@ export function CommandPalettePro({ role = "trainer" }: { role?: "trainer" | "cl
                       ? "Buscar entrenos, progreso, nutrición…"
                       : "Buscar clientes, rutinas, check-ins…"
                   }
-                  className="flex-1 bg-transparent outline-none text-sm placeholder:text-zinc-600 text-white"
+                  className="flex-1 bg-transparent outline-none text-[16px] sm:text-sm placeholder:text-zinc-600 text-white"
                 />
                 <button
                   onClick={() => setOpen(false)}
@@ -221,27 +216,47 @@ export function CommandPalettePro({ role = "trainer" }: { role?: "trainer" | "cl
                 </button>
               </div>
 
-              {/* Recent (cmdk pattern) */}
-              {!q && recent.length > 0 && (
+              {/* Favoritos + Recientes por usuario (cmdk pattern) */}
+              {!q && (favs.length > 0 || recent.length > 0) && (
                 <div className="px-2 pt-3 pb-1">
-                  <p className="text-[10px] font-bold tracking-widest text-zinc-500 uppercase px-2 mb-1 flex items-center gap-1">
-                    <Clock size={10} /> Recientes
-                  </p>
-                  <div className="space-y-1">
-                    {recent
-                      .map((href) => commands.find((c) => c.href === href))
-                      .filter(Boolean)
-                      .map((c) => (
-                        <button
-                          key={`recent-${c!.href}`}
-                          onClick={() => go(c!)}
-                          className="w-full text-left px-3 py-2 rounded-xl hover:bg-zinc-900 border border-transparent hover:border-zinc-800 flex justify-between items-center text-sm"
-                        >
-                          <span className="text-zinc-200">{c!.label}</span>
-                          <ArrowRight size={14} className="text-zinc-600" />
-                        </button>
-                      ))}
-                  </div>
+                  {favs.length > 0 && (
+                    <>
+                      <p className="text-[10px] font-bold tracking-widest text-zinc-500 uppercase px-2 mb-1 flex items-center gap-1">
+                        <Star size={10} className="fill-primary text-primary" /> Favoritos
+                      </p>
+                      <div className="space-y-1">
+                        {favs.map((f) => (
+                          <button
+                            key={`fav-${f.href}`}
+                            onClick={() => go(f as Cmd)}
+                            className="w-full text-left px-3 py-2 rounded-xl hover:bg-zinc-900 border border-transparent hover:border-zinc-800 flex justify-between items-center text-sm"
+                          >
+                            <span className="text-zinc-200">{f.label}</span>
+                            <ArrowRight size={14} className="text-zinc-600" />
+                          </button>
+                        ))}
+                      </div>
+                    </>
+                  )}
+                  {recent.length > 0 && (
+                    <>
+                      <p className="text-[10px] font-bold tracking-widest text-zinc-500 uppercase px-2 mb-1 mt-2 flex items-center gap-1">
+                        <Clock size={10} /> Recientes
+                      </p>
+                      <div className="space-y-1">
+                        {recent.slice(0, 4).map((r) => (
+                          <button
+                            key={`recent-${r.href}`}
+                            onClick={() => go(r as Cmd)}
+                            className="w-full text-left px-3 py-2 rounded-xl hover:bg-zinc-900 border border-transparent hover:border-zinc-800 flex justify-between items-center text-sm"
+                          >
+                            <span className="text-zinc-300">{r.label}</span>
+                            <ArrowRight size={14} className="text-zinc-600" />
+                          </button>
+                        ))}
+                      </div>
+                    </>
+                  )}
                   <div className="h-px bg-zinc-800 my-2 mx-2" />
                 </div>
               )}
@@ -295,6 +310,14 @@ export function CommandPalettePro({ role = "trainer" }: { role?: "trainer" | "cl
                                   {c.kbd}
                                 </span>
                               )}
+                              <button
+                                onClick={(e) => { e.stopPropagation(); toggleFav({ href: c.href, label: c.label }); }}
+                                aria-label={isFav(c.href) ? "Quitar de favoritos" : "Agregar a favoritos"}
+                                title={isFav(c.href) ? "Quitar de favoritos" : "Favorito"}
+                                className={cn("ml-1 p-1.5 rounded-lg shrink-0 transition", isFav(c.href) ? "text-primary" : "text-zinc-600 hover:text-zinc-300")}
+                              >
+                                <Star size={14} className={isFav(c.href) ? "fill-primary" : ""} />
+                              </button>
                             </button>
                           );
                         })}
