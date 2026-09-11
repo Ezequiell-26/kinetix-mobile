@@ -637,10 +637,12 @@ export default function WorkoutExecutionPage(){
               {/* Large touch inputs for Gym use */}
               <div className="grid grid-cols-3 gap-3">
                 <div className="space-y-1">
-                  <label className="text-[11px] font-bold text-zinc-400 uppercase tracking-wider block text-center">
+                  <label htmlFor="set-weight" className="text-[11px] font-bold text-zinc-400 uppercase tracking-wider block text-center">
                     Peso (kg)
                   </label>
                   <input
+                    id="set-weight"
+                    inputMode="decimal"
                     type="number"
                     step="0.5"
                     value={weight}
@@ -650,10 +652,12 @@ export default function WorkoutExecutionPage(){
                   />
                 </div>
                 <div className="space-y-1">
-                  <label className="text-[11px] font-bold text-zinc-400 uppercase tracking-wider block text-center">
+                  <label htmlFor="set-reps" className="text-[11px] font-bold text-zinc-400 uppercase tracking-wider block text-center">
                     Reps
                   </label>
                   <input
+                    id="set-reps"
+                    inputMode="numeric"
                     type="number"
                     value={reps}
                     onChange={e => setReps(e.target.value)}
@@ -662,10 +666,12 @@ export default function WorkoutExecutionPage(){
                   />
                 </div>
                 <div className="space-y-1">
-                  <label className="text-[11px] font-bold text-zinc-400 uppercase tracking-wider block text-center">
+                  <label htmlFor="set-rir" className="text-[11px] font-bold text-zinc-400 uppercase tracking-wider block text-center">
                     RIR
                   </label>
                   <input
+                    id="set-rir"
+                    inputMode="numeric"
                     type="number"
                     min={0}
                     max={10}

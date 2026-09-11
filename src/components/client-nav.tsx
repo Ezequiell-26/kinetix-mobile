@@ -94,7 +94,7 @@ export function ClientBottomNav(){
                 );
               })}
             </div>
-            <p className="text-[11px] text-zinc-600 text-center">Todo tu entreno y tu cuenta, en un lugar</p>
+            <p className="text-[11px] text-zinc-500 text-center">Todo tu entreno y tu cuenta, en un lugar</p>
           </div>
         </div>
       )}

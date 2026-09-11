@@ -15,7 +15,7 @@ export function AutoMessageRisk(){
   ];
   return (
     <Card className="border-amber-500/20">
-      <CardHeader><CardTitle className="flex items-center gap-2"><AlertTriangle size={16} className="text-amber-400"/> Auto-Mensajes Riesgo <Badge variant="warn">Trigger MIT</Badge></CardTitle><p className="text-xs text-zinc-500">Detecta riesgo y sugiere mensaje 1 click — no esperes a que se vayan</p></CardHeader>
+      <CardHeader><CardTitle className="flex items-center gap-2"><AlertTriangle size={16} className="text-amber-400"/> Auto-Mensajes Riesgo</CardTitle><p className="text-xs text-zinc-500">Detecta riesgo y sugiere mensaje 1 click — no esperes a que se vayan</p></CardHeader>
       <CardContent className="space-y-2">
         {triggers.map(t=>(
           <div key={t.id} className={`p-3 rounded-xl border flex gap-3 items-center ${t.color==="red"?"bg-red-500/10 border-red-500/20": t.color==="amber"?"bg-amber-500/10 border-amber-500/20":"bg-violet-500/10 border-violet-500/20"}`}>
@@ -24,10 +24,10 @@ export function AutoMessageRisk(){
               <p className="font-bold text-xs">{t.label}</p>
               <p className="text-xs text-zinc-500 truncate">{t.msg.slice(0,60)}...</p>
             </div>
-            <Button size="sm" variant={sent===t.id?"accent":"outline"} className="shrink-0 h-7 text-xs" onClick={()=>setSent(t.id)}>{sent===t.id?"Enviado ✓":<><Send size={12} className="mr-1"/> Enviar</>}</Button>
+            <Button size="sm" variant={sent===t.id?"accent":"outline"} className="shrink-0 h-7 text-xs" onClick={()=>setSent(t.id)}>{sent===t.id?"Enviado":<><Send size={12} className="mr-1"/> Enviar</>}</Button>
           </div>
         ))}
-        <p className="text-[11px] text-zinc-600 text-center">Trigger: 5d sin entrenar, check-in pendiente 3d, sin PRs 3 sem — auto-sugiere</p>
+        <p className="text-[11px] text-zinc-500 text-center">Trigger: 5d sin entrenar, check-in pendiente 3d, sin PRs 3 sem — auto-sugiere</p>
       </CardContent>
     </Card>
   );
