@@ -10,6 +10,10 @@
     "db:generate": "prisma generate",
     "db:migrate": "prisma migrate dev",
     "db:seed": "tsx prisma/seed.ts",
+    "test:stats": "tsx tests/stats.test.ts",
+    "test:voice": "tsx tests/voice-engine.test.ts",
+    "test:core": "node -e \"require('fs').copyFileSync('prisma/dev.db','prisma/test-core.db')\" && tsx tests/program-edit.test.ts",
+    "test": "npm run test:stats && npm run test:core",
     "postinstall": "prisma generate"
   },
   "dependencies": {

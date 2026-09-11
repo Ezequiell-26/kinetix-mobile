@@ -9,7 +9,9 @@ import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
 import { VelocityTracker } from "@/components/velocity-tracker";
 import { FormCheck } from "@/components/form-check";
-import { VoiceCoach, type VoiceCue, type VoiceCueInput } from "@/components/voice-coach";
+import { VoiceCoach } from "@/components/voice-coach";
+import { RepCounter } from "@/components/rep-counter";
+import { voiceEngine } from "@/lib/voice-engine/engine";
 import { ExerciseImage } from "@/components/exercise-image";
 import { GymMode } from "@/components/gym-mode";
 import { Lightbulb, 
@@ -96,15 +98,6 @@ export default function WorkoutExecutionPage(){
   const [finalComment, setFinalComment] = useState<string>("");
   const [savingLog, setSavingLog] = useState<boolean>(false);
 
-  // Avisos de voz: la página emite, el VoiceCoach reproduce (narrador o TTS).
-  const [voiceCue, setVoiceCue] = useState<VoiceCue | null>(null);
-  const cueIdRef = useRef(0);
-  const firstExRef = useRef(true);
-  function emitCue(cue: VoiceCueInput) {
-    cueIdRef.current += 1;
-    setVoiceCue({ ...cue, id: cueIdRef.current } as VoiceCue);
-  }
-
   // Narrador 3-2-1-¡vamos! sobre el final del descanso (el audio dura ~6s).
   // Disparo único por descanso: al cruzar los 6s o al arrancar un descanso corto.
   const restCueRef = useRef({ resting: false, value: 0 });
@@ -112,7 +105,13 @@ export default function WorkoutExecutionPage(){
     const prev = restCueRef.current;
     if (isResting && !isTimerPaused && restRemaining > 0) {
       if ((!prev.resting && restRemaining <= 6) || (prev.value > 6 && restRemaining <= 6)) {
-        emitCue({ kind: "countdown" });
+        voiceEngine.emit("REST_COMPLETED");
+      }
+      // Avisos "quedan X segundos" según verbosidad (una vez por marca).
+      const v = voiceEngine.settings.restVerbosity;
+      const marks = v === "full" ? [60, 30, 10] : v === "standard" ? [30, 10] : [];
+      if (marks.includes(restRemaining)) {
+        voiceEngine.emit("REST_WARNING", { remaining: restRemaining });
       }
     }
     restCueRef.current = { resting: isResting, value: restRemaining };
@@ -197,13 +196,14 @@ export default function WorkoutExecutionPage(){
   }, [currentExIdx, currentExercise]);
 
   // Aviso de voz al cambiar de ejercicio (salta el montaje inicial).
+  const firstExRef = useRef(true);
   useEffect(() => {
     if (firstExRef.current) {
       firstExRef.current = false;
       return;
     }
     if (currentExercise) {
-      emitCue({ kind: "track", track: "siguiente" });
+      voiceEngine.emit("EXERCISE_STARTED", { name: currentExercise.exercise.name });
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [currentExIdx]);
@@ -211,27 +211,10 @@ export default function WorkoutExecutionPage(){
   // Aviso de voz al completar el entreno.
   useEffect(() => {
     if (finished) {
-      emitCue({ kind: "track", track: "cierre" });
+      voiceEngine.emit("WORKOUT_COMPLETED");
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [finished]);
-
-  // "Serie lista, descansá" al arrancar cada descanso (salvo el primero: ahí va el arranque).
-  const startedRestRef = useRef(false);
-  const firstSetVoiceRef = useRef(false);
-  useEffect(() => {
-    if (isResting && !startedRestRef.current) {
-      startedRestRef.current = true;
-      if (firstSetVoiceRef.current) {
-        firstSetVoiceRef.current = false;
-      } else {
-        emitCue({ kind: "track", track: "descanso" });
-      }
-    } else if (!isResting) {
-      startedRestRef.current = false;
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [isResting]);
 
   // Complete a set
   function handleSaveSet(){
@@ -255,28 +238,32 @@ export default function WorkoutExecutionPage(){
     // Haptic feedback
     try { navigator.vibrate?.(40); } catch {}
 
-    // Voz: arranque en la primera serie, mitad al 50%, último esfuerzo antes del cierre.
+    // Voice Engine: arranque en la primera serie, hitos, serie completada + motivación.
+    voiceEngine.unlock();
     const newCount = totalCompletedSets + 1;
     if (totalCompletedSets === 0) {
-      firstSetVoiceRef.current = true;
-      emitCue({ kind: "track", track: "arranque" });
+      voiceEngine.emit("WORKOUT_STARTED");
     } else if (totalTargetSets >= 4 && newCount === Math.floor(totalTargetSets / 2)) {
-      emitCue({ kind: "track", track: "mitad" });
+      voiceEngine.emit("REP_MILESTONE", { key: "mitad", text: "Vas por la mitad." });
     } else if (newCount === totalTargetSets - 1) {
-      emitCue({ kind: "track", track: "ultimo" });
+      voiceEngine.emit("REP_MILESTONE", { key: "ultimo", text: "Último esfuerzo." });
     }
+    voiceEngine.emit("SET_COMPLETED");
+    voiceEngine.motivate(`${workoutId}-ex${currentExIdx}-set${currentSetIdx}`);
 
     // Check next set or next exercise
     if (currentSetIdx < currentExercise.sets - 1) {
       setCurrentSetIdx(prev => prev + 1);
       const rest = currentExercise.restSec || 90;
       setRestRemaining(rest);
+      voiceEngine.emit("REST_STARTED", { rest });
       setIsResting(true);
       setIsTimerPaused(false);
     } else if (currentExIdx < (workout?.exercises?.length || 0) - 1) {
       setCurrentExIdx(prev => prev + 1);
       setCurrentSetIdx(0);
       setRestRemaining(90);
+      voiceEngine.emit("REST_STARTED", { rest: 90 });
       setIsResting(true);
       setIsTimerPaused(false);
     } else {
@@ -290,12 +277,15 @@ export default function WorkoutExecutionPage(){
   function handleCompleteExercise(){
     if (!workout) return;
     if (currentExIdx < workout.exercises.length - 1) {
+      voiceEngine.emit("EXERCISE_COMPLETED");
       setCurrentExIdx(prev => prev + 1);
       setCurrentSetIdx(0);
       setRestRemaining(60);
+      voiceEngine.emit("REST_STARTED", { rest: 60 });
       setIsResting(true);
       setIsTimerPaused(false);
     } else {
+      voiceEngine.emit("EXERCISE_COMPLETED");
       setFinished(true);
     }
   }
@@ -478,7 +468,11 @@ export default function WorkoutExecutionPage(){
                 variant="outline"
                 size="sm"
                 className="h-10 text-xs font-bold bg-zinc-900/90 border-zinc-700"
-                onClick={() => setIsTimerPaused(!isTimerPaused)}
+                onClick={() => {
+                  const next = !isTimerPaused;
+                  setIsTimerPaused(next);
+                  voiceEngine.emit(next ? "WORKOUT_PAUSED" : "WORKOUT_RESUMED");
+                }}
               >
                 {isTimerPaused ? <Play size={14} className="mr-1" /> : <Pause size={14} className="mr-1" />}
                 {isTimerPaused ? "Reanudar" : "Pausar"}
@@ -645,11 +639,25 @@ export default function WorkoutExecutionPage(){
               >
                 COMPLETAR SERIE
               </Button>
+
+              <RepCounter
+                key={`${currentExIdx}-${currentSetIdx}`}
+                targetReps={parseInt(currentExercise.reps?.split("-")?.[0] || "8", 10) || 8}
+                setKey={`Serie ${currentSetIdx + 1}`}
+                onFirstTap={() =>
+                  voiceEngine.emit("SET_STARTED", {
+                    set: currentSetIdx + 1,
+                    totalSets: currentExercise.sets,
+                    reps: parseInt(currentExercise.reps?.split("-")?.[0] || "8", 10) || 8,
+                    weight: parseFloat(weight) || 0,
+                  })
+                }
+              />
             </div>
 
             <VelocityTracker />
             <FormCheck />
-            <VoiceCoach exerciseName={currentExercise.exercise.name} nextExercise={workout.exercises[currentExIdx+1]?.exercise.name} cue={voiceCue} />
+            <VoiceCoach exerciseName={currentExercise.exercise.name} nextExercise={workout.exercises[currentExIdx+1]?.exercise.name} />
             {/* Navigation & Complete Exercise */}
             <div className="flex gap-2">
               <Button

@@ -1,86 +1,43 @@
 "use client";
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Mic, Volume2, Pause, SkipForward, Play } from "lucide-react";
-import {
-  playNarratorCountdown,
-  playTrack,
-  speakCue,
-  stopVoice,
-  isVoiceEnabled,
-  setVoiceEnabled,
-  type TrackName,
-} from "@/lib/voice";
+import { Mic, Volume2, Pause, SkipForward, Play, Settings2 } from "lucide-react";
+import { speakCue } from "@/lib/voice";
+import { voiceEngine } from "@/lib/voice-engine/engine";
+import type { VoiceSettings, CountMode, Intensity, RestVerbosity } from "@/lib/voice-engine/types";
 
-// Aviso que manda la página: cuenta con narrador real o frase hablada.
-export type VoiceCue =
-  | { id: number; kind: "countdown" }
-  | { id: number; kind: "track"; track: TrackName }
-  | { id: number; kind: "say"; text: string };
-export type VoiceCueInput =
-  | { kind: "countdown" }
-  | { kind: "track"; track: TrackName }
-  | { kind: "say"; text: string };
-
-// Voz en entreno: narrador real (3-2-1-¡vamos!) + avisos automáticos.
-// Inspirado en Web Speech API + OpenHIIT audio cues (atribución en MIT_ATTRIBUTION).
+// Voz en entreno: narrador real + Voice Engine (eventos, cola, motivación).
+// Ajustes persistidos: volumen, intensidad, conteo, motivación, avisos.
 export function VoiceCoach({
   exerciseName,
   nextExercise,
-  cue,
 }: {
   exerciseName: string;
   nextExercise?: string;
-  cue?: VoiceCue | null;
 }) {
   const [speaking, setSpeaking] = useState(false);
-  const [enabled, setEnabled] = useState(true);
-  const lastCueRef = useRef(0);
+  const [showSettings, setShowSettings] = useState(false);
+  const [s, setS] = useState<VoiceSettings>(() => ({ ...voiceEngine.settings }));
 
   useEffect(() => {
-    setEnabled(isVoiceEnabled());
+    setS({ ...voiceEngine.settings });
   }, []);
 
-  // Avisos automáticos que manda la página (fin de descanso, cambio, cierre).
-  useEffect(() => {
-    if (!cue || cue.id === lastCueRef.current) return;
-    lastCueRef.current = cue.id;
-    if (!isVoiceEnabled()) return;
-    if (cue.kind === "countdown") {
-      playNarratorCountdown();
-      setSpeaking(true);
-      window.setTimeout(() => setSpeaking(false), 6500);
-    } else if (cue.kind === "track") {
-      playTrack(cue.track);
-      setSpeaking(true);
-      window.setTimeout(() => setSpeaking(false), 6500);
-    } else {
-      speakCue(cue.text);
-      setSpeaking(true);
-      window.setTimeout(() => setSpeaking(false), 4000);
-    }
-  }, [cue]);
-
-  function toggle() {
-    const next = !enabled;
-    setEnabled(next);
-    setVoiceEnabled(next);
-    if (!next) {
-      stopVoice();
-      setSpeaking(false);
-    }
+  function save(patch: Partial<VoiceSettings>) {
+    setS(voiceEngine.saveSettings(patch));
   }
 
   function preview() {
     if (speaking) {
-      stopVoice();
+      voiceEngine.stop();
       setSpeaking(false);
       return;
     }
-    if (!enabled) return;
-    playNarratorCountdown();
+    if (!s.enabled) return;
+    voiceEngine.unlock();
+    voiceEngine.emit("REST_COMPLETED");
     setSpeaking(true);
     window.setTimeout(() => setSpeaking(false), 6500);
   }
@@ -90,7 +47,7 @@ export function VoiceCoach({
       <CardHeader>
         <CardTitle className="flex items-center gap-2">
           <Mic size={16} className="text-violet-400" /> Voz Coach{" "}
-          <Badge variant={enabled ? "accent" : "muted"}>{enabled ? "Activa" : "Silenciada"}</Badge>
+          <Badge variant={s.enabled ? "accent" : "muted"}>{s.enabled ? "Activa" : "Silenciada"}</Badge>
         </CardTitle>
         <p className="text-xs text-zinc-500">
           Narrador real en la cuenta regresiva + avisos automáticos del entreno
@@ -114,8 +71,22 @@ export function VoiceCoach({
               </>
             )}
           </Button>
-          <Button size="sm" variant="ghost" className="min-h-[48px]" onClick={toggle}>
-            {enabled ? "Silenciar" : "Activar"}
+          <Button
+            size="sm"
+            variant="ghost"
+            className="min-h-[48px]"
+            onClick={() => save({ enabled: !s.enabled })}
+          >
+            {s.enabled ? "Silenciar" : "Activar"}
+          </Button>
+          <Button
+            size="sm"
+            variant="ghost"
+            className="min-h-[48px] px-3"
+            aria-label="Ajustes de voz"
+            onClick={() => setShowSettings((v) => !v)}
+          >
+            <Settings2 size={16} />
           </Button>
         </div>
         <div className="grid grid-cols-3 gap-2">
@@ -134,11 +105,89 @@ export function VoiceCoach({
             size="sm"
             variant="outline"
             className="h-11 text-xs"
-            onClick={() => speakCue(`Vamos, ${exerciseName}. Controla la técnica. Respira.`)}
+            onClick={() => voiceEngine.motivate("manual")}
           >
             Motivar
           </Button>
         </div>
+
+        {showSettings && (
+          <div className="rounded-2xl border border-zinc-800 bg-zinc-950 p-4 space-y-4">
+            <div>
+              <div className="flex justify-between text-[11px] font-bold text-zinc-400 uppercase tracking-wider mb-1.5">
+                <span>Volumen</span>
+                <span className="tabular-nums">{Math.round(s.volume * 100)}%</span>
+              </div>
+              <input
+                type="range"
+                min={0}
+                max={100}
+                value={Math.round(s.volume * 100)}
+                onChange={(e) => save({ volume: Number(e.target.value) / 100 })}
+                className="w-full accent-primary"
+                aria-label="Volumen de voz"
+              />
+            </div>
+            <div className="grid grid-cols-2 gap-3">
+              <label className="space-y-1.5 block">
+                <span className="text-[11px] font-bold text-zinc-400 uppercase tracking-wider">Intensidad</span>
+                <select
+                  value={s.intensity}
+                  onChange={(e) => save({ intensity: e.target.value as Intensity })}
+                  className="w-full h-11 px-3 bg-zinc-900 border border-zinc-800 rounded-xl text-sm text-white"
+                >
+                  <option value="low">Suave</option>
+                  <option value="medium">Media</option>
+                  <option value="high">Fuerte</option>
+                </select>
+              </label>
+              <label className="space-y-1.5 block">
+                <span className="text-[11px] font-bold text-zinc-400 uppercase tracking-wider">Conteo reps</span>
+                <select
+                  value={s.countMode}
+                  onChange={(e) => save({ countMode: e.target.value as CountMode })}
+                  className="w-full h-11 px-3 bg-zinc-900 border border-zinc-800 rounded-xl text-sm text-white"
+                >
+                  <option value="smart">Inteligente</option>
+                  <option value="full">Completo</option>
+                  <option value="off">Sin conteo</option>
+                </select>
+              </label>
+            </div>
+            <div className="grid grid-cols-2 gap-3">
+              <label className="space-y-1.5 block">
+                <span className="text-[11px] font-bold text-zinc-400 uppercase tracking-wider">Avisos descanso</span>
+                <select
+                  value={s.restVerbosity}
+                  onChange={(e) => save({ restVerbosity: e.target.value as RestVerbosity })}
+                  className="w-full h-11 px-3 bg-zinc-900 border border-zinc-800 rounded-xl text-sm text-white"
+                >
+                  <option value="full">Detallado</option>
+                  <option value="standard">Normal</option>
+                  <option value="minimal">Mínimo</option>
+                </select>
+              </label>
+              <div className="flex items-end gap-2 pb-0.5">
+                <Button
+                  size="sm"
+                  variant={s.motivation ? "accent" : "outline"}
+                  className="flex-1 h-11 text-xs"
+                  onClick={() => save({ motivation: !s.motivation })}
+                >
+                  Motivación {s.motivation ? "ON" : "OFF"}
+                </Button>
+              </div>
+            </div>
+            <Button
+              size="sm"
+              variant={s.restAlerts ? "accent" : "outline"}
+              className="w-full h-11 text-xs"
+              onClick={() => save({ restAlerts: !s.restAlerts })}
+            >
+              Avisos de descanso {s.restAlerts ? "activados" : "silenciados"}
+            </Button>
+          </div>
+        )}
       </CardContent>
     </Card>
   );
