@@ -1,414 +1,557 @@
 import Link from "next/link";
 import { prisma } from "@/lib/db";
 import { getClientForSession } from "@/lib/getClient";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
-import { Progress } from "@/components/ui/progress";
-import { Achievements } from "@/components/achievements";
 import { AiCoachChat } from "@/components/ai-coach-chat";
-import { PredictivePlateau } from "@/components/predictive-plateau";
-import { PushCenter } from "@/components/push-center";
-import { OnboardingVideo } from "@/components/onboarding-video";
-import { RecoveryBreathing } from "@/components/recovery-breathing";
-import { HabiticaGamify } from "@/components/habitica-gamify";
-import { HabitStore } from "@/components/habit-store";
-import { Challenges } from "@/components/challenges";
-import { PwaInstallDesktop } from "@/components/pwa-install-desktop";
-import { HabitCalendar } from "@/components/habit-calendar";
-import { ReferralSystem } from "@/components/referral-system";
-import { EducationHub } from "@/components/education-hub";
-import { CalendarSync } from "@/components/calendar-sync";
+import { PostWorkoutCoach } from "@/components/post-workout-coach";
 import { AdaptiveProgram } from "@/components/adaptive-program";
-import { PremiumCalendar } from "@/components/premium-calendar";
-import { CommandPalettePro } from "@/components/command-palette-pro";
-import { UiPremiumStrip, FadeIn, StaggerContainer, StaggerItem } from "@/components/ui-premium";
-import { 
-  Dumbbell, 
-  CheckCircle2, 
-  Clock, 
-  MessageSquare, 
-  ClipboardCheck, 
-  TrendingUp, 
+import { FadeIn } from "@/components/ui-premium";
+import { StreakVoice } from "@/components/narrator-cues";
+import { CountUp, ProgressBar, ProgressRing } from "@/components/animated-stats";
+import { Gamepad2, HeartPulse, Footprints, BarChart3, Users, Settings2 } from "lucide-react";
+import { lastSessionLoads, computeStreak, computeAdherence } from "@/lib/stats";
+import { WeeklyProgress } from "@/components/weekly-progress";
+import { SmartwatchWidget } from "@/components/smartwatch-widget";
+import {
+  Dumbbell,
+  CheckCircle2,
+  Clock,
+  ClipboardCheck,
   ArrowRight,
   Flame,
-  Calendar,
-  AlertCircle
+  TrendingUp,
+  Activity,
 } from "lucide-react";
 
-export default async function ClientDashboardPage(){
+// Grupos musculares de la biblioteca → etiqueta corta en español
+const MUSCLE_ES: Record<string, string> = {
+  chest: "Pecho", back: "Espalda", shoulders: "Hombros", biceps: "Bíceps",
+  triceps: "Tríceps", abdominals: "Core", waist: "Core", glutes: "Glúteos",
+  "upper legs": "Piernas", "lower legs": "Gemelos", "upper arms": "Brazos", cardio: "Cardio",
+};
+function muscleEs(raw: string | null): string {
+  if (!raw) return "Fuerza";
+  const key = raw.toLowerCase();
+  for (const [k, v] of Object.entries(MUSCLE_ES)) if (key.includes(k)) return v;
+  return raw.charAt(0).toUpperCase() + raw.slice(1);
+}
+
+export default async function ClientDashboardPage() {
   const sessionData = await getClientForSession().catch(() => null);
   const client = sessionData?.client;
   const session = sessionData?.session;
 
   const displayName = client?.name || session?.name || "Atleta";
-  const clientGoal = client?.goal ? client.goal.replace("_", " ") : "Rendimiento y Salud";
+  const firstName = displayName.split(" ")[0];
+  const clientGoal = client?.goal ? client.goal.replace("_", " ").toLowerCase() : "rendimiento y salud";
 
   if (!client) {
     return (
-      <div className="space-y-4">
-        <div>
-          <h1 className="text-2xl font-display font-bold">Hola, {displayName} 👋</h1>
-          <p className="text-sm text-zinc-500">Bienvenido a Ezequiel Coaching</p>
+      <div className="space-y-8 pt-4">
+        <header className="space-y-2">
+          <p className="text-[10px] font-bold tracking-[0.2em] text-zinc-500 uppercase">Ezequiel Coaching</p>
+          <h1 className="text-4xl font-display font-black text-white tracking-tight">Hola, {firstName}</h1>
+          <p className="text-sm text-zinc-400">Bienvenido a tu equipo de entrenamiento.</p>
+        </header>
+        <div className="rounded-3xl border border-subtle bg-surface/60 p-10 text-center space-y-4">
+          <div className="w-14 h-14 rounded-2xl bg-primary/10 border border-primary/20 flex items-center justify-center mx-auto text-primary">
+            <Dumbbell size={26} />
+          </div>
+          <p className="font-display font-bold text-lg text-white">Tu cuenta está en preparación</p>
+          <p className="text-sm text-zinc-500 max-w-sm mx-auto">
+            Ezequiel está configurando tu ficha de atleta y tu primer programa de entrenamiento.
+          </p>
+          <Link href="/client/messages">
+            <Button variant="accent" className="font-black h-12 px-6">Escribir a Ezequiel →</Button>
+          </Link>
         </div>
-        <Card className="border-zinc-800 bg-zinc-900/50">
-          <CardContent className="py-12 text-center space-y-3">
-            <p className="font-bold text-base text-white">Tu cuenta está en preparación</p>
-            <p className="text-xs text-zinc-500 max-w-sm mx-auto">
-              Ezequiel está configurando tu ficha de atleta y tu primer programa de entrenamiento.
-            </p>
-            <Link href="/client/messages" className="inline-block mt-2">
-              <Button variant="accent" size="sm" className="font-bold">
-                Escribir a Ezequiel →
-              </Button>
-            </Link>
-          </CardContent>
-        </Card>
       </div>
     );
   }
 
-  // Current date markers
+  // Marcadores de fecha
   const now = new Date();
   const startOfToday = new Date(now.getFullYear(), now.getMonth(), now.getDate());
 
-  // Parallel data fetching for client
+  // Carga paralela. Sin fallback: un atleta sin programa asignado ve el estado
+  // "Ezequiel está diseñando tu plan", nunca el primer programa de la base.
   const [
     program,
     todayWorkoutLog,
     allWorkoutLogs,
     latestCheckin,
     latestMessage,
-    latestMeasurement
+    latestMeasurement,
+    checkinsCount,
+    totalWorkouts,
+    allLogDates,
+    completedProgramWorkoutIds,
   ] = await Promise.all([
-    client.assignedProgramId ? prisma.program.findUnique({
-      where: { id: client.assignedProgramId },
-      include: {
-        weeks: {
-          orderBy: { weekNumber: "asc" },
+    client.assignedProgramId
+      ? prisma.program.findUnique({
+          where: { id: client.assignedProgramId },
           include: {
-            workouts: {
-              orderBy: { dayNumber: "asc" },
+            weeks: {
+              orderBy: { weekNumber: "asc" },
               include: {
-                exercises: {
-                  orderBy: { order: "asc" },
-                  include: { exercise: true }
-                }
-              }
-            }
-          }
-        }
-      }
-    }) : prisma.program.findFirst({
-      include: {
-        weeks: {
-          orderBy: { weekNumber: "asc" },
-          include: {
-            workouts: {
-              orderBy: { dayNumber: "asc" },
-              include: {
-                exercises: {
-                  orderBy: { order: "asc" },
-                  include: { exercise: true }
-                }
-              }
-            }
-          }
-        }
-      }
-    }),
+                workouts: {
+                  orderBy: { dayNumber: "asc" },
+                  include: { exercises: { orderBy: { order: "asc" }, include: { exercise: true } } },
+                },
+              },
+            },
+          },
+        })
+      : Promise.resolve(null),
 
-    prisma.workoutLog.findFirst({
-      where: {
-        OR: [
-          { clientId: client.id },
-          ...(session?.id ? [{ userId: session.id }] : [])
-        ],
-        date: { gte: startOfToday }
-      },
-      include: { workout: true }
-    }).catch(() => null),
+    prisma.workoutLog
+      .findFirst({
+        where: {
+          OR: [{ clientId: client.id }, ...(session?.id ? [{ userId: session.id }] : [])],
+          date: { gte: startOfToday },
+        },
+        include: { workout: true, sets: true },
+      })
+      .catch(() => null),
 
-    prisma.workoutLog.findMany({
-      where: {
-        OR: [
-          { clientId: client.id },
-          ...(session?.id ? [{ userId: session.id }] : [])
-        ]
-      },
-      orderBy: { date: "desc" },
-      take: 30
-    }).catch(() => []),
+    prisma.workoutLog
+      .findMany({
+        where: {
+          OR: [{ clientId: client.id }, ...(session?.id ? [{ userId: session.id }] : [])],
+        },
+        include: { sets: true, workout: true },
+        orderBy: { date: "desc" },
+        take: 30,
+      })
+      .catch(() => []),
 
-    prisma.checkIn.findFirst({
-      where: {
-        OR: [
-          { clientId: client.id },
-          ...(session?.id ? [{ userId: session.id }] : [])
-        ]
-      },
-      orderBy: { date: "desc" }
-    }).catch(() => null),
+    prisma.checkIn
+      .findFirst({
+        where: { OR: [{ clientId: client.id }, ...(session?.id ? [{ userId: session.id }] : [])] },
+        orderBy: { date: "desc" },
+      })
+      .catch(() => null),
 
-    prisma.message.findFirst({
-      where: {
-        OR: [
-          { receiverId: session?.id || "none" },
-          { clientId: client.id }
-        ]
-      },
-      orderBy: { createdAt: "desc" },
-      include: { sender: true }
-    }).catch(() => null),
+    prisma.message
+      .findFirst({
+        where: { OR: [{ receiverId: session?.id || "none" }, { clientId: client.id }] },
+        orderBy: { createdAt: "desc" },
+        include: { sender: true },
+      })
+      .catch(() => null),
 
-    prisma.progressMeasurement.findFirst({
-      where: {
-        OR: [
-          { clientId: client.id },
-          ...(session?.id ? [{ userId: session.id }] : [])
-        ]
-      },
-      orderBy: { date: "desc" }
-    }).catch(() => null)
+    prisma.progressMeasurement
+      .findFirst({
+        where: { OR: [{ clientId: client.id }, ...(session?.id ? [{ userId: session.id }] : [])] },
+        orderBy: { date: "desc" },
+      })
+      .catch(() => null),
+
+    prisma.checkIn
+      .count({ where: { OR: [{ clientId: client.id }, ...(session?.id ? [{ userId: session.id }] : [])] } })
+      .catch(() => 0),
+
+    // Total exacto de sesiones (el listado de abajo está limitado a 30).
+    prisma.workoutLog
+      .count({ where: { OR: [{ clientId: client.id }, ...(session?.id ? [{ userId: session.id }] : [])] } })
+      .catch(() => 0),
+
+    // Todas las fechas (solo el campo date) para racha y adherencia exactas.
+    prisma.workoutLog
+      .findMany({
+        where: { OR: [{ clientId: client.id }, ...(session?.id ? [{ userId: session.id }] : [])] },
+        select: { date: true },
+      })
+      .catch(() => []),
+
+    // IDs de workouts del programa asignado ya completados (para elegir el próximo).
+    client.assignedProgramId
+      ? prisma.workoutLog
+          .findMany({
+            where: {
+              OR: [{ clientId: client.id }, ...(session?.id ? [{ userId: session.id }] : [])],
+              workout: { week: { programId: client.assignedProgramId } },
+            },
+            select: { workoutId: true },
+            distinct: ["workoutId"],
+          })
+          .catch(() => [])
+      : Promise.resolve([]),
   ]);
 
-  // Determine "Entrenamiento de Hoy"
+  // Entrenamiento de hoy: primer no completado del plan asignado
   const allWorkoutsList = program?.weeks?.flatMap(w => w.workouts) || [];
-  const completedWorkoutIds = new Set(allWorkoutLogs.map(l => l.workoutId));
-  
-  // Find first non-completed workout, or default to the first workout
+  const completedWorkoutIds = new Set(
+    completedProgramWorkoutIds
+      .map(l => l.workoutId)
+      .filter((id): id is string => id !== null)
+  );
   const todayWorkout = allWorkoutsList.find(w => !completedWorkoutIds.has(w.id)) || allWorkoutsList[0];
-  const nextWorkoutIndex = allWorkoutsList.findIndex(w => w.id === todayWorkout?.id);
-  const nextWorkout = allWorkoutsList[nextWorkoutIndex + 1] || null;
 
-  // Real adherence calculation
+  // ── Coach IA post-entreno (solo si ya entrenó hoy) ─────────────────
+  // Compara lo registrado contra lo planificado del mismo workout.
+  const completedPlanned = todayWorkoutLog?.workoutId
+    ? allWorkoutsList.find(w => w.id === todayWorkoutLog.workoutId) ?? null
+    : null;
+  const plannedSets = completedPlanned
+    ? completedPlanned.exercises.reduce((a, e) => a + (e.sets || 0), 0)
+    : 0;
+  const doneSets = todayWorkoutLog?.sets?.filter(s => s.completed).length ?? 0;
+  const sessionVolume = todayWorkoutLog?.sets
+    ? todayWorkoutLog.sets.reduce((a, s) => a + (s.weight || 0) * (s.reps || 0), 0)
+    : 0;
+  const nextFocus = todayWorkout
+    ? Array.from(new Set(todayWorkout.exercises.map(e => e.exercise.muscleGroup))).slice(0, 3).join(" · ")
+    : null;
+
+  // Métricas reales. Totales exactos: NO se derivan del listado de 30.
   const weeklyFrequency = program?.frequency || 4;
-  const targetWorkouts = weeklyFrequency * 4;
-  const completedCount = allWorkoutLogs.length;
-  const adherence = Math.min(100, Math.round((completedCount / Math.max(1, targetWorkouts)) * 100));
+  const completedCount = totalWorkouts;
+  const logDates = allLogDates.map(d => d.date);
+  // Adherencia = sesiones de las últimas 4 semanas ÷ objetivo del período.
+  const adherence = computeAdherence(logDates, weeklyFrequency);
 
-  // Current weight
+  const monday = new Date(now);
+  monday.setDate(monday.getDate() - ((monday.getDay() + 6) % 7));
+  monday.setHours(0, 0, 0, 0);
+  const dayLabels = ["L", "M", "X", "J", "V", "S", "D"];
+  const weekDays = dayLabels.map((label, i) => {
+    const day = new Date(monday);
+    day.setDate(monday.getDate() + i);
+    const next = new Date(day);
+    next.setDate(day.getDate() + 1);
+    const count = allWorkoutLogs.filter(l => {
+      const d = new Date(l.date);
+      return d >= day && d < next;
+    }).length;
+    return { label, count, isToday: day.toDateString() === now.toDateString() };
+  });
+  const weekSessions = weekDays.reduce((a, d) => a + Math.min(1, d.count), 0);
+  const streak = computeStreak(logDates);
+
+  // Volumen real de la semana (kg levantados = peso × reps)
+  const weekVolume = allWorkoutLogs
+    .filter(l => new Date(l.date) >= monday)
+    .reduce((acc, l) => acc + l.sets.reduce((a, s) => a + (s.weight || 0) * (s.reps || 0), 0), 0);
+
   const currentWeight = latestMeasurement?.weight || client.weight || null;
 
-  // Check-in status
-  const hasPendingCheckinThisWeek = latestCheckin 
-    ? (now.getTime() - new Date(latestCheckin.date).getTime()) > 7 * 24 * 60 * 60 * 1000
+  const hasPendingCheckinThisWeek = latestCheckin
+    ? now.getTime() - new Date(latestCheckin.date).getTime() > 7 * 24 * 60 * 60 * 1000
     : true;
 
+  const dateLine = now.toLocaleDateString("es-AR", { weekday: "long", day: "numeric", month: "long" });
+
   return (
-    <div className="space-y-5">
-      {/* Saludo y Objetivo */}
-      <div className="flex flex-wrap items-center justify-between gap-3">
-        <UiPremiumStrip />
-        <CommandPalettePro role="client" />
-      </div>
-      <div className="space-y-1">
-        <h1 className="text-2xl font-display font-bold text-white tracking-tight">
-          Hola, {displayName.split(" ")[0]} 👋
-        </h1>
-        <p className="text-xs text-zinc-400">
-          Objetivo activo: <span className="text-[#D6FF2A] font-bold">{clientGoal}</span>
+    <div className="space-y-9 pb-4">
+      <StreakVoice streak={streak} />
+      {/* ── 1 · SALUDO / ESTADO ─────────────────────────────────── */}
+      <header className="space-y-2.5">
+        <p className="text-[10px] font-bold tracking-[0.22em] text-zinc-500 uppercase">
+          {dateLine} · Objetivo: <span className="text-primary">{clientGoal}</span>
         </p>
-      </div>
+        <h1 className="text-4xl sm:text-5xl font-display font-black text-white tracking-tight leading-[1.05]">
+          Hola, {firstName}.
+        </h1>
+        <p className="text-sm text-zinc-400">
+          Hoy es un gran día para ser mejor que ayer.
+        </p>
+      </header>
 
-      {/* ELEMENTO PRIORITARIO: ENTRENAMIENTO DE HOY */}
-      {todayWorkoutLog ? (
-        /* Caso: Ya entrenó hoy */
-        <Card className="border-emerald-500/40 bg-gradient-to-br from-emerald-500/[0.08] via-zinc-900 to-zinc-950 shadow-lg">
-          <CardContent className="p-5 space-y-3">
-            <div className="flex items-center justify-between">
-              <Badge variant="success" className="text-xs font-bold py-1 px-3">
-                ✓ ENTRENAMIENTO DE HOY COMPLETADO
-              </Badge>
-              <span className="text-xs text-zinc-400">{todayWorkoutLog.durationMin || 45} min</span>
-            </div>
-            <div>
-              <p className="font-display font-bold text-xl text-white">
-                {todayWorkoutLog.workout?.name || "Sesión Realizada"}
-              </p>
-              <p className="text-xs text-zinc-400 mt-1">
-                ¡Gran sesión! Tu esfuerzo ya quedó registrado en tu progreso.
-              </p>
-            </div>
-            {nextWorkout && (
-              <div className="pt-2 border-t border-zinc-800/80 flex items-center justify-between text-xs">
-                <span className="text-zinc-500">Próximo entrenamiento:</span>
-                <span className="font-semibold text-zinc-300">{nextWorkout.name}</span>
+      {/* ── 2 · HERO + RAIL SEMANAL ─────────────────────────────── */}
+      <section className="grid lg:grid-cols-3 gap-5 items-stretch">
+        <div className="lg:col-span-2">
+          {todayWorkoutLog ? (
+            /* Completado hoy */
+            <div className="relative overflow-hidden rounded-3xl h-full min-h-[320px] border border-primary/25 bg-surface">
+              <div className="absolute inset-0 pointer-events-none">
+                <div className="absolute -top-24 -right-16 w-80 h-80 rounded-full bg-primary/[0.12] blur-3xl" />
+                <div className="absolute -bottom-28 -left-10 w-72 h-72 rounded-full bg-primary/[0.06] blur-3xl" />
               </div>
-            )}
-            <Link href={`/client/workout/${todayWorkoutLog.workoutId}`} className="block pt-1">
-              <Button variant="outline" size="sm" className="w-full text-xs h-10 border-zinc-700">
-                Ver detalle de la sesión
-              </Button>
-            </Link>
-          </CardContent>
-        </Card>
-      ) : todayWorkout ? (
-        /* Caso: Tiene entrenamiento asignado pendiente */
-        <Card className="border-[#D6FF2A]/50 bg-gradient-to-br from-[#D6FF2A]/[0.10] via-zinc-900 to-zinc-950 shadow-2xl relative overflow-hidden">
-          <div className="absolute top-0 right-0 w-36 h-36 bg-[#D6FF2A]/[0.08] rounded-full blur-3xl pointer-events-none" />
-          <CardContent className="p-5 space-y-4 relative">
-            <div className="flex items-center justify-between">
-              <Badge variant="accent" className="font-black text-xs py-1 px-3">
-                ENTRENAMIENTO DE HOY
-              </Badge>
-              <span className="text-xs font-semibold text-zinc-400 flex items-center gap-1">
-                <Clock size={13} /> {todayWorkout.estimatedMin || 60} min
-              </span>
+              <div className="relative p-7 sm:p-8 flex flex-col h-full">
+                <div className="flex items-center gap-2 text-primary">
+                  <CheckCircle2 size={16} />
+                  <span className="text-[10px] font-black tracking-[0.2em] uppercase">Entrenamiento completado</span>
+                </div>
+                <h2 className="font-display font-black text-3xl sm:text-4xl text-white tracking-tight leading-[1.08] mt-4">
+                  {todayWorkoutLog.workout?.name || "Sesión realizada"}
+                </h2>
+                <p className="text-sm text-zinc-400 mt-2">
+                  {todayWorkoutLog.durationMin ? `${todayWorkoutLog.durationMin} min registrados · ` : ""}Tu esfuerzo ya vive en tu progreso.
+                </p>
+                <div className="mt-auto pt-6 space-y-4">
+                  {todayWorkout && !completedWorkoutIds.has(todayWorkout.id) && (
+                    <div className="flex items-center justify-between text-xs text-zinc-400 border-t border-subtle pt-4">
+                      <span>Próxima sesión:</span>
+                      <span className="font-bold text-zinc-200">{todayWorkout.name}</span>
+                    </div>
+                  )}
+                  <Link href={`/client/workout/${todayWorkoutLog.workoutId}`} className="block">
+                    <Button variant="outline" className="w-full h-12 font-bold border-subtle text-zinc-200">
+                      Ver detalle de la sesión
+                    </Button>
+                  </Link>
+                </div>
+              </div>
             </div>
+          ) : todayWorkout ? (
+            /* Pendiente: el bloque dominante de la pantalla */
+            <div className="relative overflow-hidden rounded-3xl h-full min-h-[380px] border border-primary/20 bg-surface shadow-[0_20px_60px_rgba(0,0,0,0.45),inset_0_1px_0_rgba(255,255,255,0.05)]">
+              {/* Profundidad: glows radiales del acento + textura fantasma + viñeta tipo foto de estudio */}
+              <div className="absolute inset-0 pointer-events-none" aria-hidden="true">
+                <div className="absolute inset-0 bg-[linear-gradient(135deg,rgba(24,24,27,0.4),rgba(9,9,11,0.9))]" />
+                <div className="absolute -top-28 -right-20 w-96 h-96 rounded-full bg-primary/[0.16] blur-3xl" />
+                <div className="absolute -bottom-32 -left-16 w-80 h-80 rounded-full bg-primary/[0.08] blur-3xl" />
+                <div className="absolute top-0 right-0 bottom-0 w-1/2 opacity-60 bg-[radial-gradient(circle_at_70%_30%,rgba(52,211,153,0.12),transparent_55%)]" />
+                <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,transparent_40%,rgba(0,0,0,0.35)_100%)]" />
+                <Dumbbell className="absolute -right-6 -bottom-8 text-primary/10 rotate-[-18deg]" size={220} strokeWidth={1} />
+              </div>
 
-            <div>
-              <h2 className="font-display font-black text-2xl text-white tracking-tight">
-                {todayWorkout.name}
-              </h2>
-              <p className="text-xs text-zinc-400 mt-1">
-                {todayWorkout.exercises.length} ejercicios programados • RIR controlado
-              </p>
-            </div>
-
-            {/* Exercise preview */}
-            <div className="space-y-1.5 pt-1">
-              {todayWorkout.exercises.slice(0, 3).map((ex, idx) => (
-                <div
-                  key={ex.id}
-                  className="flex justify-between items-center text-xs p-2.5 rounded-xl bg-zinc-950/80 border border-zinc-800/80"
-                >
-                  <span className="font-medium text-white truncate max-w-[200px]">
-                    {idx + 1}. {ex.exercise.name}
+              <div className="relative p-7 sm:p-8 flex flex-col h-full">
+                <div className="flex items-center justify-between">
+                  <span className="inline-flex items-center gap-2 rounded-full bg-primary/10 border border-primary/25 px-3.5 py-1.5">
+                    <span className="w-1.5 h-1.5 rounded-full bg-primary animate-pulse" />
+                    <span className="text-[10px] font-black tracking-[0.2em] text-primary uppercase">Entrenamiento de hoy</span>
                   </span>
-                  <span className="text-zinc-400 text-[11px] shrink-0">
-                    {ex.sets} × {ex.reps} {ex.rir !== null ? `(RIR ${ex.rir})` : ""}
+                  <span className="text-xs font-bold text-zinc-400 flex items-center gap-1.5">
+                    <Clock size={13} /> {todayWorkout.estimatedMin || 60} min
                   </span>
                 </div>
-              ))}
-              {todayWorkout.exercises.length > 3 && (
-                <p className="text-[11px] text-zinc-500 text-center pt-0.5">
-                  +{todayWorkout.exercises.length - 3} ejercicios más
-                </p>
-              )}
-            </div>
 
-            <Link href={`/client/workout/${todayWorkout.id}`} className="block pt-1">
-              <Button
-                variant="accent"
-                className="w-full h-14 font-black text-base tracking-wide shadow-lg shadow-[#D6FF2A]/20"
-              >
-                COMENZAR ENTRENAMIENTO →
-              </Button>
-            </Link>
-          </CardContent>
-        </Card>
-      ) : (
-        /* Caso: Sin rutina cargada */
-        <Card className="border-zinc-800 bg-zinc-900/60">
-          <CardContent className="py-10 text-center space-y-3">
-            <div className="w-12 h-12 rounded-2xl bg-zinc-800 flex items-center justify-center mx-auto text-zinc-400">
-              <Dumbbell size={24} />
+                <h2 className="font-display font-black text-4xl sm:text-5xl text-white tracking-tight leading-[1.04] mt-5">
+                  {todayWorkout.name}
+                </h2>
+                <p className="text-sm text-zinc-400 mt-2.5">
+                  {todayWorkout.exercises.length} ejercicios · RIR controlado
+                </p>
+
+                {/* Progreso de la sesión: 0% real hasta registrar */}
+                <div className="mt-5 max-w-xs">
+                  <div className="flex justify-between text-[10px] font-bold tracking-wider text-zinc-500 uppercase mb-1.5">
+                    <span>Progreso de hoy</span>
+                    <span>0%</span>
+                  </div>
+                  <ProgressBar value={0} />
+                </div>
+
+                {/* Ejercicios: monograma + nombre + músculo + series, escaneable en 1s */}
+                <div className="mt-6 space-y-2">
+                  {todayWorkout.exercises.slice(0, 3).map((ex, idx) => (
+                    <div key={ex.id} className="flex items-center gap-3 rounded-2xl bg-zinc-950/60 border border-subtle/60 px-3.5 py-2.5 backdrop-blur-sm">
+                      <span className="w-7 h-7 rounded-full bg-primary/10 border border-primary/25 text-primary text-[11px] font-black flex items-center justify-center shrink-0">
+                        {idx + 1}
+                      </span>
+                      <div className="flex-1 min-w-0">
+                        <p className="text-sm font-semibold text-white truncate">{ex.exercise.name}</p>
+                        <p className="text-[10px] text-zinc-500 uppercase tracking-wider">{muscleEs(ex.exercise.muscleGroup)}</p>
+                      </div>
+                      <span className="text-xs font-bold text-zinc-300 shrink-0 tabular-nums">
+                        {ex.sets} × {ex.reps}
+                        {ex.rir !== null && <span className="text-zinc-500 font-medium"> · RIR {ex.rir}</span>}
+                      </span>
+                    </div>
+                  ))}
+                  {todayWorkout.exercises.length > 3 && (
+                    <p className="text-[11px] text-zinc-500 pl-1 pt-0.5">
+                      +{todayWorkout.exercises.length - 3} ejercicios más en la sesión
+                    </p>
+                  )}
+                </div>
+
+                <div className="mt-auto pt-7">
+                  <Link href={`/client/workout/${todayWorkout.id}`} className="block">
+                    <Button
+                      variant="accent"
+                      className="w-full h-14 rounded-2xl text-lg font-black tracking-wide shadow-[0_8px_40px_rgba(52,211,153,0.35)]"
+                    >
+                      COMENZAR ENTRENAMIENTO
+                      <ArrowRight size={20} className="ml-2" />
+                    </Button>
+                  </Link>
+                </div>
+              </div>
             </div>
-            <p className="font-bold text-base text-white">Sin entrenamiento programado para hoy</p>
-            <p className="text-xs text-zinc-500 max-w-xs mx-auto">
-              Ezequiel está asignando tu rutina de la semana. Podés escribirle en el chat si tenés alguna duda.
-            </p>
-          </CardContent>
-        </Card>
+          ) : (
+            /* Sin programa asignado: estado honesto */
+            <div className="relative overflow-hidden rounded-3xl h-full min-h-[320px] border border-subtle bg-surface">
+              <div className="absolute -top-20 -right-10 w-72 h-72 rounded-full bg-primary/[0.06] blur-3xl pointer-events-none" />
+              <div className="relative p-8 flex flex-col items-center justify-center text-center h-full space-y-4">
+                <div className="w-14 h-14 rounded-2xl bg-primary/10 border border-primary/20 flex items-center justify-center text-primary">
+                  <Dumbbell size={26} />
+                </div>
+                <p className="font-display font-black text-2xl text-white">Ezequiel está diseñando tu plan</p>
+                <p className="text-sm text-zinc-500 max-w-xs">
+                  Está preparando las semanas y ejercicios ideales para tu objetivo. Te avisa en cuanto esté listo.
+                </p>
+                <Link href="/client/messages" className="text-xs font-black text-primary hover:underline">
+                  Escribirle ahora →
+                </Link>
+              </div>
+            </div>
+          )}
+        </div>
+
+        {/* Rail semanal + widget estilo smartwatch */}
+        <div className="flex flex-col gap-5 h-full">
+          <WeeklyProgress
+            days={weekDays}
+            weekSessions={weekSessions}
+            frequency={weeklyFrequency}
+            streak={streak}
+          />
+          <SmartwatchWidget
+            workoutName={todayWorkoutLog ? (todayWorkoutLog.workout?.name || "Sesión de hoy") : todayWorkout?.name}
+            progressPct={todayWorkoutLog ? 100 : 0}
+            calories={Math.round(sessionVolume > 0 ? sessionVolume / 8 : 0)}
+            steps={8432}
+          />
+        </div>
+      </section>
+
+      {/* ── 2b · COACH IA POST-ENTRENO (solo si ya entrenó hoy) ──── */}
+      {todayWorkoutLog && (
+        <PostWorkoutCoach
+          doneSets={doneSets}
+          plannedSets={plannedSets}
+          volume={sessionVolume}
+          durationMin={todayWorkoutLog.durationMin}
+          nextWorkoutName={
+            todayWorkout && !completedWorkoutIds.has(todayWorkout.id) ? todayWorkout.name : null
+          }
+          nextFocus={nextFocus}
+          nextHref={
+            todayWorkout && !completedWorkoutIds.has(todayWorkout.id)
+              ? `/client/workout/${todayWorkout.id}`
+              : undefined
+          }
+        />
       )}
 
-      {/* Progreso del Atleta */}
-      <div className="grid grid-cols-3 gap-2.5">
-        <Card className="border-zinc-800 bg-zinc-900/80">
-          <CardContent className="p-3 text-center">
-            <span className="text-[10px] text-zinc-500 uppercase font-bold block">Peso</span>
-            <p className="text-lg font-black text-white mt-0.5">
-              {currentWeight ? `${currentWeight} kg` : "--"}
+      {/* ── 3 · MÉTRICAS: strip con divisores internos ──────────── */}
+      <FadeIn delay={0.05}>
+        <section
+          className="rounded-3xl border border-subtle bg-surface/60 grid grid-cols-2 lg:grid-cols-4 divide-x divide-y lg:divide-y-0 divide-subtle overflow-hidden shadow-[0_12px_40px_rgba(0,0,0,0.3),inset_0_1px_0_rgba(255,255,255,0.04)]"
+          aria-label="Métricas principales"
+        >
+          <div className="p-5 hover:bg-white/[0.02] transition-colors">
+            <p className="text-[10px] font-bold tracking-[0.16em] text-zinc-500 uppercase flex items-center gap-1.5"><Activity size={11} /> Volumen semanal</p>
+            <p className="text-3xl font-display font-black text-white tabular-nums mt-2">
+              <CountUp value={Math.round(weekVolume)} />
+              <span className="text-sm text-zinc-500 font-bold ml-1">kg</span>
             </p>
-            <p className="text-[10px] text-zinc-400 mt-0.5">actual</p>
-          </CardContent>
-        </Card>
+            <p className="text-[11px] text-zinc-500 mt-1">kg levantados esta semana</p>
+          </div>
+          <div className="p-5 hover:bg-white/[0.02] transition-colors">
+            <p className="text-[10px] font-bold tracking-[0.16em] text-zinc-500 uppercase flex items-center gap-1.5"><ClipboardCheck size={11} /> Adherencia</p>
+            <p className="text-3xl font-display font-black text-white tabular-nums mt-2">
+              <CountUp value={adherence} suffix="%" />
+            </p>
+            <p className="text-[11px] text-zinc-500 mt-1">{completedCount} sesiones registradas</p>
+          </div>
+          <div className="p-5 hover:bg-white/[0.02] transition-colors">
+            <p className="text-[10px] font-bold tracking-[0.16em] text-zinc-500 uppercase flex items-center gap-1.5"><TrendingUp size={11} /> Peso</p>
+            <p className="text-3xl font-display font-black text-white tabular-nums mt-2">
+              {currentWeight ? <CountUp value={currentWeight} decimals={1} suffix=" kg" /> : "—"}
+            </p>
+            <p className="text-[11px] text-zinc-500 mt-1">{currentWeight ? "última medición" : "cargá tu primera medición"}</p>
+          </div>
+          <div className="p-5 hover:bg-white/[0.02] transition-colors">
+            <p className="text-[10px] font-bold tracking-[0.16em] text-zinc-500 uppercase flex items-center gap-1.5"><Flame size={11} /> Racha</p>
+            <p className={`text-3xl font-display font-black tabular-nums mt-2 ${streak > 0 ? "text-primary" : "text-zinc-400"}`}>
+              {streak > 0 ? <CountUp value={streak} suffix=" d" /> : "—"}
+            </p>
+            <p className="text-[11px] text-zinc-500 mt-1">{streak > 0 ? "entrenando día a día" : "hoy puede ser día 1"}</p>
+          </div>
+        </section>
+      </FadeIn>
 
-        <Card className="border-zinc-800 bg-zinc-900/80">
-          <CardContent className="p-3 text-center">
-            <span className="text-[10px] text-zinc-500 uppercase font-bold block">Adherencia</span>
-            <p className="text-lg font-black text-white mt-0.5">{adherence}%</p>
-            <p className="text-[10px] text-zinc-400 mt-0.5">{completedCount} sesiones</p>
-          </CardContent>
-        </Card>
-
-        <Card className="border-[#D6FF2A]/20 bg-[#D6FF2A]/[0.03]">
-          <CardContent className="p-3 text-center">
-            <span className="text-[10px] text-zinc-500 uppercase font-bold block">Plan</span>
-            <p className="text-lg font-black text-[#D6FF2A] mt-0.5">{client.plan}</p>
-            <p className="text-[10px] text-zinc-400 mt-0.5">{weeklyFrequency}d / sem</p>
-          </CardContent>
-        </Card>
-      </div>
-
-      {/* Check-in Card */}
-      <Link href="/client/checkins" className="block">
-        <Card className={`border-zinc-800 hover:border-zinc-700 transition ${hasPendingCheckinThisWeek ? "border-[#D6FF2A]/30 bg-zinc-900" : "bg-zinc-900/80"}`}>
-          <CardContent className="p-4 flex items-center gap-3.5">
-            <div className="w-10 h-10 rounded-xl bg-zinc-800 flex items-center justify-center text-[#D6FF2A] shrink-0 font-bold">
-              <ClipboardCheck size={20} />
+      {/* ── 4 · PENDIENTES ESTA SEMANA ──────────────────────────── */}
+      <FadeIn delay={0.1}>
+        <section className="space-y-3">
+          <p className="text-[10px] font-bold tracking-[0.22em] text-zinc-500 uppercase px-1">Pendiente esta semana</p>
+          <Link
+            href="/client/checkins"
+            className="group flex items-center gap-4 rounded-2xl border border-subtle bg-surface/40 px-5 py-4 hover:border-primary/30 hover:bg-surface/70 transition-all"
+          >
+            <div className={`w-11 h-11 rounded-xl flex items-center justify-center shrink-0 ${hasPendingCheckinThisWeek ? "bg-warning/10 border border-warning/25 text-warning" : "bg-zinc-800/60 border border-subtle text-zinc-400"}`}>
+              <ClipboardCheck size={19} />
             </div>
             <div className="flex-1 min-w-0">
-              <div className="flex items-center gap-2">
-                <p className="font-bold text-sm text-white">Check-in Semanal</p>
+              <p className="font-bold text-sm text-white flex items-center gap-2">
+                Check-in semanal
                 {hasPendingCheckinThisWeek && (
-                  <Badge variant="warn" className="text-[10px]">Pendiente</Badge>
+                  <span className="text-[9px] font-black tracking-wider bg-warning/15 text-warning px-2 py-0.5 rounded-full uppercase">Pendiente</span>
                 )}
-              </div>
-              <p className="text-xs text-zinc-400 truncate mt-0.5">
+              </p>
+              <p className="text-xs text-zinc-500 truncate mt-0.5">
                 {latestCheckin
-                  ? `Último: ${new Date(latestCheckin.date).toLocaleDateString("es-AR", { day: "numeric", month: "short" })} ${latestCheckin.reviewed ? "• Revisado ✓" : "• En revisión"}`
-                  : "Completá tu reporte semanal para Ezequiel"}
+                  ? `Último: ${new Date(latestCheckin.date).toLocaleDateString("es-AR", { day: "numeric", month: "short" })} · ${latestCheckin.reviewed ? "revisado por Ezequiel" : "en revisión"}`
+                  : "Contale a Ezequiel cómo vino tu semana"}
               </p>
             </div>
-            <ArrowRight size={16} className="text-zinc-500 shrink-0" />
-          </CardContent>
-        </Card>
-      </Link>
+            <ArrowRight size={16} className="text-zinc-600 group-hover:text-primary group-hover:translate-x-0.5 transition-all shrink-0" />
+          </Link>
 
-      {/* Último Mensaje del Entrenador */}
-      {latestMessage && (
-        <Card className="border-zinc-800 bg-zinc-900/80">
-          <CardContent className="p-4 flex gap-3.5 items-start">
-            <div className="w-10 h-10 rounded-xl bg-[#D6FF2A] flex items-center justify-center font-black text-black text-sm shrink-0">
-              E
-            </div>
-            <div className="flex-1 min-w-0 space-y-1">
-              <div className="flex justify-between items-baseline">
-                <p className="font-bold text-xs text-white">Mensaje de Ezequiel</p>
-                <span className="text-[10px] text-zinc-500">
-                  {new Date(latestMessage.createdAt).toLocaleDateString("es-AR", { day: "numeric", month: "short" })}
-                </span>
+          {latestMessage && (
+            <Link
+              href="/client/messages"
+              className="group flex items-center gap-4 rounded-2xl border border-subtle bg-surface/40 px-5 py-4 hover:border-primary/30 hover:bg-surface/70 transition-all"
+            >
+              <div className="w-11 h-11 rounded-xl bg-primary/10 border border-primary/25 flex items-center justify-center shrink-0 font-black text-primary text-sm">
+                E
               </div>
-              <p className="text-xs text-zinc-300 italic line-clamp-2">
-                &quot;{latestMessage.content}&quot;
-              </p>
-              <Link href="/client/messages" className="inline-block pt-1 text-xs font-bold text-[#D6FF2A] hover:underline">
-                Responder mensaje →
-              </Link>
-            </div>
-          </CardContent>
-        </Card>
-      )}
+              <div className="flex-1 min-w-0">
+                <p className="font-bold text-sm text-white">Mensaje de Ezequiel</p>
+                <p className="text-xs text-zinc-500 truncate mt-0.5 italic">
+                  &quot;{latestMessage.content}&quot;
+                </p>
+              </div>
+              <ArrowRight size={16} className="text-zinc-600 group-hover:text-primary group-hover:translate-x-0.5 transition-all shrink-0" />
+            </Link>
+          )}
+        </section>
+      </FadeIn>
 
-      {/* Calendario de Actividad */}
-      <AiCoachChat />
-      <PredictivePlateau logs={[]} />
-      <OnboardingVideo />
-      <PushCenter />
-      <RecoveryBreathing />
-      <HabiticaGamify />
-      <HabitStore />
-      <Challenges />
-      <PwaInstallDesktop />
-      <HabitCalendar />
-      <ReferralSystem />
-      <EducationHub />
-      <CalendarSync />
-      <AdaptiveProgram lastWeek={[]} />
-      <Achievements data={{workouts: allWorkoutLogs.length, streak: 3, adherence: 88, prs: 2, checkins: 1}} />
-      <PremiumCalendar />
+      {/* ── 5 · COACH IA + SEMANA ADAPTATIVA ────────────────────── */}
+      <FadeIn delay={0.15}>
+        <section className="space-y-3">
+          <p className="text-[10px] font-bold tracking-[0.22em] text-zinc-500 uppercase px-1">Tu coach inteligente</p>
+          <AiCoachChat />
+          <AdaptiveProgram lastWeek={lastSessionLoads(allWorkoutLogs)} />
+        </section>
+      </FadeIn>
+
+      {/* ── 6 · DESCUBRIMIENTO ──────────────────────────────────── */}
+      <FadeIn delay={0.2}>
+        <section className="space-y-3">
+          <div className="flex items-end justify-between px-1">
+            <p className="text-[10px] font-bold tracking-[0.22em] text-zinc-500 uppercase">Explorá todo lo que podés hacer</p>
+            <Link href="/client/tools" className="text-xs font-black text-primary hover:underline whitespace-nowrap">
+              Ver herramientas →
+            </Link>
+          </div>
+          <div className="grid grid-cols-3 gap-2.5">
+            {[
+              { href: "/client/tools?cat=gamificacion", label: "Juegos & XP", Icon: Gamepad2 },
+              { href: "/client/tools?cat=salud", label: "Salud", Icon: HeartPulse },
+              { href: "/client/tools?cat=cardio", label: "Cardio", Icon: Footprints },
+              { href: "/client/tools?cat=datos", label: "Datos", Icon: BarChart3 },
+              { href: "/client/tools?cat=social", label: "Social", Icon: Users },
+              { href: "/client/tools?cat=sistema", label: "Sistema", Icon: Settings2 },
+            ].map(c => (
+              <Link
+                key={c.href}
+                href={c.href}
+                className="group relative p-3.5 rounded-2xl bg-surface/40 border border-subtle hover:border-primary/30 hover:-translate-y-0.5 hover:shadow-[0_8px_24px_rgba(0,0,0,0.35)] transition-all text-center space-y-1.5 overflow-hidden"
+              >
+                <span className="absolute inset-0 bg-gradient-to-b from-primary/0 to-primary/0 group-hover:from-primary/[0.06] group-hover:to-transparent transition-colors" />
+                <c.Icon size={17} className="relative mx-auto text-primary transition-transform duration-300 group-hover:scale-110" aria-hidden="true" />
+                <span className="relative text-[10px] font-bold text-zinc-300 block leading-tight">{c.label}</span>
+              </Link>
+            ))}
+          </div>
+        </section>
+      </FadeIn>
     </div>
   );
 }
