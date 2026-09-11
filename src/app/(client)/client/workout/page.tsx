@@ -130,7 +130,7 @@ export default async function WorkoutListPage(){
                 <Link key={workout.id} href={`/client/workout/${workout.id}`}>
                   <Card className={`transition group ${isDone ? "bg-zinc-900/40 opacity-80 border-zinc-800" : isNext ? "bg-zinc-900/90 border-primary/40 shadow-[0_8px_32px_rgba(52,211,153,0.15)]" : "hover:border-zinc-700 border-zinc-800 bg-zinc-900/90"}`}>
                     <CardContent className="p-4 flex items-center gap-3.5">
-                      <div className={`w-11 h-11 rounded-xl flex items-center justify-center font-black text-sm shrink-0 transition ${isDone ? "bg-emerald-500/20 text-emerald-400 border border-emerald-500/30" : isNext ? "bg-primary text-black" : "bg-white text-black group-hover:bg-primary"}`}>
+                      <div className={`w-11 h-11 rounded-xl flex items-center justify-center font-black text-sm shrink-0 transition ${isDone ? "bg-emerald-500/20 text-emerald-400 border border-emerald-500/30" : isNext ? "bg-primary text-black" : "pill-active group-hover:bg-primary group-hover:text-black"}`}>
                         {isDone ? <CheckCircle2 size={20} /> : workout.dayNumber}
                       </div>
                       <div className="flex-1 min-w-0">

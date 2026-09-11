@@ -2,28 +2,16 @@ import { prisma } from "@/lib/db";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { TrainerControlCenter } from "@/components/trainer-control-center";
 import { TrainerInsights } from "@/components/trainer-insights";
-import { TrainerRevenuePro } from "@/components/trainer-revenue-pro";
-import { RevenueAnalytics } from "@/components/revenue-analytics";
-import { RiskMl } from "@/components/risk-ml";
-import { ProgramTuner } from "@/components/program-tuner";
-import { AutoMessageRisk } from "@/components/auto-message-risk";
-import { BulkAssign } from "@/components/bulk-assign";
-import { CrmPipeline } from "@/components/crm-pipeline";
 import { PwaInstallDesktop } from "@/components/pwa-install-desktop";
 import { LiveSession } from "@/components/live-session";
 import { ExportCenter } from "@/components/export-center";
-import { WorkoutCoolBanner } from "@/components/workoutcool-banner";
 import { LiftShiftAnalytics } from "@/components/liftshift-analytics";
-import { TrainerizeAllInOne } from "@/components/trainerize-allinone";
-import { EverfitUxBuilder } from "@/components/everfit-ux-builder";
-import { PtDistinctionAuto } from "@/components/pt-distinction-auto";
-import { FitbodAdaptive } from "@/components/fitbod-adaptive";
 import { Badge } from "@/components/ui/badge";
 import { ChangelogNotification } from "@/components/changelog-notification";
 import { AdherenceChart, RevenueChart, CheckinDonut } from "@/components/analytics-charts";
 import { Progress } from "@/components/ui/progress";
-import { CommandPalettePro } from "@/components/command-palette-pro";
-import { UiPremiumStrip, FadeIn } from "@/components/ui-premium";
+import { UiPremiumStrip, FadeIn, StaggerContainer, StaggerItem } from "@/components/ui-premium";
+import { CountUp, ProgressBar } from "@/components/animated-stats";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { 
@@ -37,7 +25,8 @@ import {
   ArrowRight,
   Clock,
   CheckCircle2,
-  AlertCircle
+  AlertCircle,
+  Wrench
 } from "lucide-react";
 
 export default async function TrainerDashboard(){
@@ -158,10 +147,6 @@ export default async function TrainerDashboard(){
   return (
     <div className="space-y-6">
       <ChangelogNotification />
-      <div className="flex flex-wrap items-center justify-between gap-3">
-        <UiPremiumStrip />
-        <CommandPalettePro role="trainer" />
-      </div>
       {/* Welcome & Top Actions */}
       <div className="flex flex-col sm:flex-row justify-between sm:items-center gap-4">
         <div>
@@ -169,7 +154,7 @@ export default async function TrainerDashboard(){
             Panel del Entrenador
           </h1>
           <p className="text-sm text-zinc-400">
-            Resumen en tiempo real • Marca: <span className="text-[#D6FF2A] font-bold">EZEQUIEL COACHING</span>
+            Resumen en tiempo real • Marca: <span className="text-primary font-bold">EZEQUIEL COACHING</span>
           </p>
         </div>
 
@@ -187,56 +172,76 @@ export default async function TrainerDashboard(){
         </div>
       </div>
 
-      {/* KPI Cards (100% Real Data) */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
+      {/* KPI Cards (100% Real Data) — contadores y barras animadas */}
+      <StaggerContainer className="grid grid-cols-2 lg:grid-cols-4 gap-3" stagger={0.08}>
+        <StaggerItem>
         <Card className="border-zinc-800 bg-zinc-900/90">
           <CardContent className="p-4">
             <span className="text-[10px] font-bold tracking-widest text-zinc-500 uppercase block">
               Clientes Activos
             </span>
-            <p className="text-3xl font-black text-white mt-1">{activeClients.length}</p>
+            <p className="text-3xl font-black text-white mt-1 tabular-nums">
+              <CountUp value={activeClients.length} />
+            </p>
             <p className="text-xs text-zinc-400 mt-0.5">
               +{newClientsThisWeek.length} nuevos esta semana
             </p>
+            <ProgressBar value={Math.min(100, activeClients.length * 10)} className="mt-3" />
           </CardContent>
         </Card>
+        </StaggerItem>
 
-        <Card className={`border-zinc-800 bg-zinc-900/90 ${pendingCheckins.length > 0 ? "border-[#D6FF2A]/30 bg-[#D6FF2A]/[0.03]" : ""}`}>
+        <StaggerItem>
+        <Card className={`border-zinc-800 bg-zinc-900/90 ${pendingCheckins.length > 0 ? "border-primary/30 bg-primary/[0.03]" : ""}`}>
           <CardContent className="p-4">
             <span className="text-[10px] font-bold tracking-widest text-zinc-500 uppercase block">
               Check-ins Pendientes
             </span>
-            <p className="text-3xl font-black text-white mt-1">{pendingCheckins.length}</p>
-            <p className={`text-xs mt-0.5 ${pendingCheckins.length > 0 ? "text-amber-400 font-medium" : "text-zinc-500"}`}>
-              {pendingCheckins.length > 0 ? "Requieren respuesta" : "Al día ✓"}
+            <p className="text-3xl font-black text-white mt-1 tabular-nums">
+              <CountUp value={pendingCheckins.length} />
             </p>
+            <p className={`text-xs mt-0.5 ${pendingCheckins.length > 0 ? "text-amber-400 font-medium" : "text-zinc-500"}`}>
+              {pendingCheckins.length > 0 ? "Requieren respuesta" : "Al día"}
+            </p>
+            <ProgressBar value={pendingCheckins.length > 0 ? 100 : 0} color={pendingCheckins.length > 0 ? "#fbbf24" : "#4ade80"} className="mt-3" />
           </CardContent>
         </Card>
+        </StaggerItem>
 
+        <StaggerItem>
         <Card className="border-zinc-800 bg-zinc-900/90">
           <CardContent className="p-4">
             <span className="text-[10px] font-bold tracking-widest text-zinc-500 uppercase block">
               Entrenamientos Hoy
             </span>
-            <p className="text-3xl font-black text-white mt-1">{workoutsToday.length}</p>
+            <p className="text-3xl font-black text-white mt-1 tabular-nums">
+              <CountUp value={workoutsToday.length} />
+            </p>
             <p className="text-xs text-zinc-400 mt-0.5">
               {workoutsToday.length === 1 ? "sesión finalizada" : "sesiones finalizadas"}
             </p>
+            <ProgressBar value={Math.min(100, workoutsToday.length * 25)} className="mt-3" />
           </CardContent>
         </Card>
+        </StaggerItem>
 
+        <StaggerItem>
         <Card className={`border-zinc-800 bg-zinc-900/90 ${unreadMessages.length > 0 ? "border-amber-500/30" : ""}`}>
           <CardContent className="p-4">
             <span className="text-[10px] font-bold tracking-widest text-zinc-500 uppercase block">
               Mensajes Sin Leer
             </span>
-            <p className="text-3xl font-black text-white mt-1">{unreadMessages.length}</p>
+            <p className="text-3xl font-black text-white mt-1 tabular-nums">
+              <CountUp value={unreadMessages.length} />
+            </p>
             <p className="text-xs text-zinc-400 mt-0.5">
               {unreadMessages.length > 0 ? "Conversaciones activas" : "Sin mensajes pendientes"}
             </p>
+            <ProgressBar value={Math.min(100, unreadMessages.length * 20)} color="#fbbf24" className="mt-3" />
           </CardContent>
         </Card>
-      </div>
+        </StaggerItem>
+      </StaggerContainer>
 
       {/* Main Grid: Atención Necesaria & Actividad Reciente */}
       <div className="grid lg:grid-cols-3 gap-5">
@@ -244,10 +249,10 @@ export default async function TrainerDashboard(){
         <Card className="lg:col-span-2 border-zinc-800 bg-zinc-900/90">
           <CardHeader className="flex flex-row items-center justify-between pb-3">
             <CardTitle className="text-base flex items-center gap-2">
-              <AlertCircle size={18} className="text-[#D6FF2A]" /> Atención Necesaria
+              <AlertCircle size={18} className="text-primary" /> Atención Necesaria
             </CardTitle>
             {pendingCheckins.length > 0 && (
-              <Link href="/trainer/checkins" className="text-xs text-[#D6FF2A] hover:underline font-bold">
+              <Link href="/trainer/checkins" className="text-xs text-primary hover:underline font-bold">
                 Ver todos ({pendingCheckins.length}) →
               </Link>
             )}
@@ -266,12 +271,12 @@ export default async function TrainerDashboard(){
               attentionItems.slice(0, 5).map(item => (
                 <Link key={item.id} href={item.link} className="block group">
                   <div className="p-3.5 rounded-xl bg-zinc-950 border border-zinc-800 hover:border-zinc-700 transition flex items-center gap-3">
-                    <div className="w-10 h-10 rounded-xl bg-zinc-900 border border-zinc-800 flex items-center justify-center font-bold text-sm text-white shrink-0 group-hover:bg-[#D6FF2A] group-hover:text-black transition">
+                    <div className="w-10 h-10 rounded-xl bg-zinc-900 border border-zinc-800 flex items-center justify-center font-bold text-sm text-white shrink-0 group-hover:bg-primary group-hover:text-black transition">
                       {item.title?.[0]?.toUpperCase() || "C"}
                     </div>
                     <div className="min-w-0 flex-1">
                       <div className="flex items-center justify-between gap-2">
-                        <p className="font-bold text-sm text-white truncate group-hover:text-[#D6FF2A] transition">
+                        <p className="font-bold text-sm text-white truncate group-hover:text-primary transition">
                           {item.title}
                         </p>
                         <Badge
@@ -294,7 +299,7 @@ export default async function TrainerDashboard(){
         <Card className="border-zinc-800 bg-zinc-900/90 flex flex-col justify-between">
           <CardHeader className="pb-3">
             <CardTitle className="text-base flex items-center gap-2">
-              <Clock size={18} className="text-[#D6FF2A]" /> Actividad Reciente
+              <Clock size={18} className="text-primary" /> Actividad Reciente
             </CardTitle>
           </CardHeader>
           <CardContent className="space-y-3 flex-1">
@@ -312,7 +317,9 @@ export default async function TrainerDashboard(){
                   <div key={w.id} className="p-2.5 bg-zinc-950 rounded-xl border border-zinc-800 text-xs flex justify-between items-center">
                     <div>
                       <p className="font-bold text-white">{w.client?.name || "Cliente"}</p>
-                      <p className="text-[11px] text-zinc-500">{w.workout?.name} ({w.durationMin || 45} min)</p>
+                      <p className="text-[11px] text-zinc-500">
+                        {w.workout?.name || w.workoutName || "Sesión"}{w.durationMin ? ` (${w.durationMin} min)` : ""}
+                      </p>
                     </div>
                     <Badge variant="success" className="text-[10px]">Completado</Badge>
                   </div>
@@ -341,9 +348,9 @@ export default async function TrainerDashboard(){
       <Card className="border-zinc-800 bg-zinc-900/90">
         <CardHeader className="flex flex-row items-center justify-between pb-3">
           <CardTitle className="text-base flex items-center gap-2">
-            <Users size={18} className="text-[#D6FF2A]" /> Clientes Recientes
+            <Users size={18} className="text-primary" /> Clientes Recientes
           </CardTitle>
-          <Link href="/trainer/clients" className="text-xs text-[#D6FF2A] hover:underline font-bold">
+          <Link href="/trainer/clients" className="text-xs text-primary hover:underline font-bold">
             Ver listado completo ({allClients.length}) →
           </Link>
         </CardHeader>
@@ -361,11 +368,11 @@ export default async function TrainerDashboard(){
                   className="p-3.5 rounded-xl bg-zinc-950 border border-zinc-800 hover:border-zinc-700 transition group"
                 >
                   <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 rounded-xl bg-white text-black flex items-center justify-center font-black text-sm group-hover:bg-[#D6FF2A] transition shrink-0">
+                    <div className="w-10 h-10 rounded-xl pill-active flex items-center justify-center font-black text-sm group-hover:bg-primary transition shrink-0">
                       {c.name?.[0]?.toUpperCase() || "C"}
                     </div>
                     <div className="min-w-0 flex-1">
-                      <p className="text-sm font-bold text-white truncate group-hover:text-[#D6FF2A] transition">
+                      <p className="text-sm font-bold text-white truncate group-hover:text-primary transition">
                         {c.name}
                       </p>
                       <p className="text-xs text-zinc-500 truncate">{c.email}</p>
@@ -386,11 +393,16 @@ export default async function TrainerDashboard(){
         </CardContent>
       </Card>
 
-      {/* Trainerize All-in-One + Everfit UX Builder — 77 MIT */}
-      <TrainerizeAllInOne />
-      <EverfitUxBuilder />
-      <PtDistinctionAuto />
-      <FitbodAdaptive />
+      {/* Herramientas avanzadas → Studio (CRM, Risk, plataformas, negocio) */}
+      <Link href="/trainer/studio" className="block">
+        <div className="bg-gradient-to-br from-violet-500/10 via-zinc-900 to-zinc-950 border border-violet-500/20 rounded-2xl p-4 flex items-center gap-3 hover:border-violet-500/40 transition">
+          <div className="w-10 h-10 rounded-xl bg-violet-500 flex items-center justify-center text-white shrink-0"><Wrench size={18} /></div>
+          <div className="flex-1">
+            <p className="font-bold text-sm text-white">Studio — herramientas avanzadas →</p>
+            <p className="text-xs text-zinc-500">CRM y retención, programación masiva, kits de plataformas y negocio</p>
+          </div>
+        </div>
+      </Link>
     </div>
   );
 }

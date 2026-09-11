@@ -32,7 +32,7 @@ export function ClientBottomNav(){
   return (
     <>
       <nav aria-label="Navegación principal" className="lg:hidden fixed bottom-3 left-3 right-3 z-40 max-w-[560px] mx-auto">
-        <div className="rounded-3xl bg-[#0D1319]/90 backdrop-blur-xl border border-subtle shadow-[0_12px_40px_rgba(0,0,0,0.5)] flex justify-around items-center px-2 py-2 pb-[max(0.5rem,env(safe-area-inset-bottom))]">
+        <div className="relative rounded-3xl bg-[#0D1319]/90 backdrop-blur-xl border border-subtle shadow-[0_16px_50px_rgba(0,0,0,0.55),inset_0_1px_0_rgba(255,255,255,0.06)] flex justify-around items-center px-2 py-2 pb-[max(0.5rem,env(safe-area-inset-bottom))] before:content-[''] before:absolute before:inset-0 before:rounded-3xl before:p-px before:bg-gradient-to-b before:from-white/10 before:to-transparent before:-z-10">
         {items.map(i => {
           const active = path === i.href || path.startsWith(i.href + "/");
           return (
@@ -46,10 +46,10 @@ export function ClientBottomNav(){
               <i.icon
                 size={22}
                 strokeWidth={active ? 2.5 : 2}
-                className={active ? "text-primary drop-shadow-[0_0_10px_rgba(52,211,153,0.9)]" : "text-zinc-500"}
+                className={active ? "nav-icon-active" : "nav-icon"}
               />
-              <span className={`text-[10px] tracking-wide ${active ? "font-black text-primary drop-shadow-[0_0_8px_rgba(52,211,153,0.7)]" : "font-semibold text-zinc-500"}`}>{i.label}</span>
-              {active && <span className="absolute -bottom-0.5 w-1 h-1 rounded-full bg-primary shadow-[0_0_6px_rgba(52,211,153,1)]" aria-hidden="true" />}
+              <span className={`text-[10px] tracking-wide ${active ? "nav-label-active" : "nav-label"}`}>{i.label}</span>
+              {active && <span className="nav-dot absolute -bottom-0.5 w-1 h-1 rounded-full" aria-hidden="true" />}
             </Link>
           );
         })}
@@ -62,10 +62,10 @@ export function ClientBottomNav(){
           <MoreHorizontal
             size={22}
             strokeWidth={isMoreActive || showMore ? 2.5 : 2}
-            className={isMoreActive || showMore ? "text-primary drop-shadow-[0_0_10px_rgba(52,211,153,0.9)]" : "text-zinc-500"}
+            className={isMoreActive || showMore ? "nav-icon-active" : "nav-icon"}
           />
-          <span className={`text-[10px] tracking-wide ${isMoreActive || showMore ? "font-black text-primary drop-shadow-[0_0_8px_rgba(52,211,153,0.7)]" : "font-semibold text-zinc-500"}`}>Más</span>
-          {(isMoreActive || showMore) && <span className="absolute -bottom-0.5 w-1 h-1 rounded-full bg-primary shadow-[0_0_6px_rgba(52,211,153,1)]" aria-hidden="true" />}
+          <span className={`text-[10px] tracking-wide ${isMoreActive || showMore ? "nav-label-active" : "nav-label"}`}>Más</span>
+          {(isMoreActive || showMore) && <span className="nav-dot absolute -bottom-0.5 w-1 h-1 rounded-full" aria-hidden="true" />}
         </button>
         </div>
       </nav>
@@ -111,11 +111,12 @@ export function ClientTopBar({ name }: { name?: string }){
   }
 
   return (
-    <header className="sticky top-0 z-30 bg-[#0A0F14]/85 backdrop-blur-xl border-b border-subtle">
+    <header className="sticky top-0 z-30 bg-[#0A0F14]/85 backdrop-blur-xl border-b border-subtle relative after:content-[''] after:absolute after:bottom-0 after:left-0 after:right-0 after:h-px after:bg-gradient-to-r after:from-transparent after:via-primary/25 after:to-transparent">
       <div className="flex items-center justify-between px-4 lg:px-8 h-[60px] max-w-[1100px] mx-auto w-full">
         <Link href="/client/dashboard" className="flex items-center gap-2.5 group">
-          <div className="w-9 h-9 rounded-xl bg-primary flex items-center justify-center font-black text-black text-base shadow-[0_4px_16px_rgba(52,211,153,0.3)] group-hover:shadow-[0_4px_20px_rgba(52,211,153,0.45)] transition-shadow">
-            E
+          <div className="relative w-9 h-9 rounded-xl bg-gradient-to-br from-primary to-primary-hover flex items-center justify-center font-black text-black text-base shadow-[0_4px_16px_rgba(52,211,153,0.35)] group-hover:shadow-[0_4px_24px_rgba(52,211,153,0.55)] transition-shadow">
+            <span className="absolute inset-0 rounded-xl bg-white/20 opacity-0 group-hover:opacity-100 transition-opacity" />
+            <span className="relative">E</span>
           </div>
           <div className="leading-none">
             <span className="font-display font-bold text-white text-sm tracking-tight block">EZEQUIEL COACHING</span>
