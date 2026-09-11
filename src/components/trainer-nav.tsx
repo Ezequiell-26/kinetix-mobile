@@ -99,19 +99,72 @@ export function TrainerNav(){
 }
 export function TrainerBottomNav(){
   const path=usePathname();
+  const r=useRouter();
+  const [open,setOpen]=useState(false);
+  async function logout(){ await fetch("/api/auth/logout",{method:"POST"}); r.push("/login"); r.refresh(); }
   const items=[
     {href:"/trainer/dashboard", icon:LayoutDashboard, label:"Inicio"},
     {href:"/trainer/clients", icon:Users, label:"Clientes"},
     {href:"/trainer/workouts", icon:Dumbbell, label:"Rutinas"},
     {href:"/trainer/messages", icon:MessageCircle, label:"Chat"},
-    {href:"/trainer/checkins", icon:ClipboardCheck, label:"Más"},
   ];
+  const moreItems: { href: string; icon: typeof LayoutDashboard; label: string; desc: string }[] = [
+    {href:"/trainer/checkins", icon:ClipboardCheck, label:"Check-ins", desc:"Revisiones pendientes"},
+    {href:"/trainer/analytics", icon:BarChart3, label:"Analíticas", desc:"Adherencia e ingresos"},
+    {href:"/trainer/exercises", icon:Activity, label:"Ejercicios", desc:"Biblioteca completa"},
+    {href:"/trainer/resources", icon:BookOpen, label:"Recursos", desc:"Videos y guías"},
+    {href:"/trainer/payments", icon:CreditCard, label:"Pagos", desc:"Suscripciones"},
+    {href:"/trainer/studio", icon:Wrench, label:"Studio", desc:"Herramientas avanzadas"},
+    {href:"/trainer/settings", icon:Settings, label:"Ajustes", desc:"Cuenta y app"},
+  ];
+  const isMoreActive = moreItems.some(i=> path===i.href || path.startsWith(i.href+"/"));
   return (
+    <>
     <nav aria-label="Navegación principal" className="lg:hidden fixed bottom-0 left-0 right-0 z-40 bg-[#0F0F0F]/95 backdrop-blur-xl border-t border-zinc-900 flex justify-around py-2 pb-[calc(0.5rem+env(safe-area-inset-bottom))]">
       {items.map(i=>{
         const active = path.startsWith(i.href);
         return <Link key={i.href} href={i.href} aria-current={active ? "page" : undefined} aria-label={i.label} className="relative flex flex-col items-center gap-1 px-3 py-1.5 min-h-[52px] min-w-[56px] justify-center transition-all active:scale-95"><i.icon size={22} strokeWidth={active?2.5:2} className={active?"nav-icon-active":"nav-icon"} /><span className={`text-[10px] tracking-wide ${active?"nav-label-active":"nav-label"}`}>{i.label}</span>{active && <span className="nav-dot absolute bottom-0 w-1 h-1 rounded-full" aria-hidden="true" />}</Link>
       })}
+      <button
+        onClick={()=>setOpen(!open)}
+        aria-expanded={open}
+        aria-label="Más opciones"
+        className="relative flex flex-col items-center gap-1 px-3 py-1.5 min-h-[52px] min-w-[56px] justify-center transition-all active:scale-95"
+      >
+        <Menu size={22} strokeWidth={isMoreActive || open ? 2.5 : 2} className={isMoreActive || open ? "nav-icon-active" : "nav-icon"} />
+        <span className={`text-[10px] tracking-wide ${isMoreActive || open ? "nav-label-active" : "nav-label"}`}>Más</span>
+        {(isMoreActive || open) && <span className="nav-dot absolute bottom-0 w-1 h-1 rounded-full" aria-hidden="true" />}
+      </button>
     </nav>
+
+    {open && (
+      <div className="lg:hidden fixed inset-0 z-50 flex items-end justify-center">
+        <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={()=>setOpen(false)} />
+        <div className="relative w-full max-w-[640px] bg-[#0D1319] border-t border-subtle rounded-t-3xl p-4 pb-[calc(1rem+env(safe-area-inset-bottom))] space-y-3">
+          <div className="flex justify-between items-center">
+            <p className="font-bold text-white">Más opciones</p>
+            <button onClick={()=>setOpen(false)} aria-label="Cerrar" className="w-9 h-9 rounded-full bg-zinc-900 border border-zinc-800 flex items-center justify-center text-zinc-400"><X size={16}/></button>
+          </div>
+          <div className="grid grid-cols-2 gap-2">
+            {moreItems.map(i=>{
+              const active = path===i.href;
+              return (
+                <Link key={i.href} href={i.href} onClick={()=>setOpen(false)} className={`p-3 rounded-xl border flex items-center gap-3 min-h-[60px] ${active?"bg-primary text-black border-primary font-bold":"bg-zinc-900 border-zinc-800 text-white hover:border-zinc-700"}`}>
+                  <div className={`w-9 h-9 rounded-xl flex items-center justify-center shrink-0 ${active?"bg-black text-primary":"bg-zinc-800 text-zinc-400"}`}><i.icon size={18}/></div>
+                  <div className="flex-1 min-w-0">
+                    <p className="text-sm font-bold leading-none">{i.label}</p>
+                    <p className="text-xs opacity-60 truncate mt-1">{i.desc}</p>
+                  </div>
+                </Link>
+              );
+            })}
+          </div>
+          <button onClick={logout} className="w-full p-3 rounded-xl border border-zinc-800 text-zinc-400 hover:text-white flex items-center justify-center gap-2 text-sm font-bold min-h-[52px]">
+            <LogOut size={16}/> Cerrar sesión
+          </button>
+        </div>
+      </div>
+    )}
+    </>
   );
 }

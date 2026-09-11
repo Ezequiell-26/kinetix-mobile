@@ -2,7 +2,7 @@
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { useState } from "react";
-import { Home, Dumbbell, TrendingUp, MessageCircle, User, LogOut, Apple, ClipboardCheck, Settings, MoreHorizontal, X, Timer, LayoutGrid, Clock } from "lucide-react";
+import { Home, Dumbbell, TrendingUp, MessageCircle, User, LogOut, Apple, ClipboardCheck, Settings, MoreHorizontal, X, Timer, LayoutGrid, Clock, BookOpen, type LucideIcon } from "lucide-react";
 import { ThemeToggle } from "@/components/theme-toggle";
 import { NotificationsBell } from "@/components/notifications-bell";
 import { CommandPalettePro } from "@/components/command-palette-pro";
@@ -17,14 +17,15 @@ export function ClientBottomNav(){
     { href: "/client/progress", icon: TrendingUp, label: "Progreso" },
   ];
 
-  const moreItems = [
-    { href: "/client/messages", icon: MessageCircle, label: "Mensajes" },
-    { href: "/client/tools", icon: LayoutGrid, label: "Herramientas", badge: "NUEVO" },
-    { href: "/client/timers", icon: Timer, label: "Cronómetros", badge: "PRO" },
-    { href: "/client/checkins", icon: ClipboardCheck, label: "Check-ins" },
-    { href: "/client/history", icon: Clock, label: "Historial" },
-    { href: "/client/profile", icon: User, label: "Perfil" },
-    { href: "/client/settings", icon: Settings, label: "Ajustes" },
+  const moreItems: { href: string; icon: LucideIcon; label: string; desc: string; badge?: string }[] = [
+    { href: "/client/messages", icon: MessageCircle, label: "Mensajes", desc: "Chat directo con Ezequiel" },
+    { href: "/client/checkins", icon: ClipboardCheck, label: "Check-ins", desc: "Tu reporte semanal" },
+    { href: "/client/timers", icon: Timer, label: "Cronómetros", desc: "Tabata, EMOM e HIIT", badge: "PRO" },
+    { href: "/client/history", icon: Clock, label: "Historial", desc: "Todas tus sesiones" },
+    { href: "/client/tools", icon: LayoutGrid, label: "Herramientas", desc: "Juegos, salud, datos y más", badge: "NUEVO" },
+    { href: "/client/resources", icon: BookOpen, label: "Recursos VIP", desc: "Videos y guías exclusivas" },
+    { href: "/client/profile", icon: User, label: "Mi perfil", desc: "Tus datos y objetivos" },
+    { href: "/client/settings", icon: Settings, label: "Ajustes", desc: "App y notificaciones" },
   ];
 
   const isMoreActive = moreItems.some(i=> path===i.href || path.startsWith(i.href+"/"));
@@ -87,13 +88,13 @@ export function ClientBottomNav(){
                     <div className={`w-9 h-9 rounded-xl flex items-center justify-center ${active?"bg-black text-primary":"bg-zinc-800 text-zinc-400"}`}><i.icon size={18}/></div>
                     <div className="flex-1 min-w-0">
                       <p className="text-sm font-bold leading-none">{i.label} {i.badge && <span className="text-[10px] bg-violet-500 text-white px-1.5 py-0.5 rounded-full ml-1">{i.badge}</span>}</p>
-                      <p className="text-xs opacity-60 truncate">{i.href}</p>
+                      <p className="text-xs opacity-60 truncate">{i.desc}</p>
                     </div>
                   </Link>
                 );
               })}
             </div>
-            <p className="text-[11px] text-zinc-600 text-center">Mensajes, herramientas, check-ins, perfil y ajustes</p>
+            <p className="text-[11px] text-zinc-600 text-center">Todo tu entreno y tu cuenta, en un lugar</p>
           </div>
         </div>
       )}
