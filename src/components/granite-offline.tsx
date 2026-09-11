@@ -15,6 +15,7 @@ export function GraniteOffline(){
 
   useEffect(()=>{
     const check=()=>{
+      if (document.hidden) return;
       setOffline(!navigator.onLine);
       // Count pending workout logs in localStorage
       try{
@@ -34,8 +35,9 @@ export function GraniteOffline(){
     };
     window.addEventListener("online", onOnline);
     window.addEventListener("offline", check);
-    const t=setInterval(check, 3000);
-    return ()=>{ window.removeEventListener("online", onOnline); window.removeEventListener("offline", check); clearInterval(t); };
+    document.addEventListener("visibilitychange", check);
+    const t=setInterval(check, 15000);
+    return ()=>{ window.removeEventListener("online", onOnline); window.removeEventListener("offline", check); document.removeEventListener("visibilitychange", check); clearInterval(t); };
   },[]);
 
   async function syncNow(){
