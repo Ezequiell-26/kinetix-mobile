@@ -3,7 +3,7 @@ import { prisma } from "@/lib/db";
 import { getClientForSession } from "@/lib/getClient";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Dumbbell, Calendar, CheckCircle2, Clock } from "lucide-react";
+import { Dumbbell, Calendar, CheckCircle2, Clock, Timer, ArrowRight } from "lucide-react";
 import { StrongTemplate } from "@/components/strong-template";
 import { WorkoutLolGenerator } from "@/components/workoutlol-generator";
 
@@ -112,6 +112,20 @@ export default async function WorkoutListPage(){
       </div>
 
       <StrongTemplate />
+
+      <Link
+        href="/client/timers"
+        className="group flex items-center gap-4 rounded-2xl border border-subtle bg-surface/40 px-5 py-4 hover:border-primary/30 hover:bg-surface/70 transition-all"
+      >
+        <div className="w-11 h-11 rounded-xl bg-primary/10 border border-primary/25 flex items-center justify-center shrink-0 text-primary">
+          <Timer size={19} />
+        </div>
+        <div className="flex-1 min-w-0">
+          <p className="font-bold text-sm text-white">Cronómetros PRO</p>
+          <p className="text-xs text-zinc-500 truncate mt-0.5">Tabata, EMOM e HIIT con tu voz de narrador</p>
+        </div>
+        <ArrowRight size={16} className="text-zinc-600 group-hover:text-primary group-hover:translate-x-0.5 transition-all shrink-0" />
+      </Link>
 
       {activeProgram.weeks.map(w => (
         <div key={w.id} className="space-y-3">
