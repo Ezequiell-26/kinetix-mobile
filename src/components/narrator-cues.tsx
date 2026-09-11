@@ -1,6 +1,7 @@
 "use client";
 import { useState, useEffect, useRef } from "react";
 import { playTrack, oncePerDay } from "@/lib/voice";
+import { CLIENT_TOUR_KEY } from "@/lib/tours";
 
 /** Narrador de racha: suena una vez por día si la racha viene en marcha. */
 export function StreakVoice({ streak }: { streak: number }) {
@@ -8,6 +9,10 @@ export function StreakVoice({ streak }: { streak: number }) {
   useEffect(() => {
     if (doneRef.current || streak < 2) return;
     doneRef.current = true;
+    // Si el tour de bienvenida aún no se vio, él tiene la palabra (sin pisarse).
+    try {
+      if (!localStorage.getItem(CLIENT_TOUR_KEY)) return;
+    } catch {}
     if (oncePerDay("racha")) playTrack("racha");
   }, [streak]);
   return null;
