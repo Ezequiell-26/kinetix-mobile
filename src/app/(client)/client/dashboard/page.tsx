@@ -6,7 +6,9 @@ import { AiCoachChat } from "@/components/ai-coach-chat";
 import { PostWorkoutCoach } from "@/components/post-workout-coach";
 import { AdaptiveProgram } from "@/components/adaptive-program";
 import { FadeIn } from "@/components/ui-premium";
-import { StreakVoice } from "@/components/narrator-cues";
+import { StreakVoice, TimeGreeting } from "@/components/narrator-cues";
+import { TourLauncher } from "@/components/guided-tour";
+import { CLIENT_TOUR, CLIENT_TOUR_KEY } from "@/lib/tours";
 import { CountUp, ProgressBar, ProgressRing } from "@/components/animated-stats";
 import { Gamepad2, HeartPulse, Footprints, BarChart3, Users, Settings2 } from "lucide-react";
 import { lastSessionLoads, computeStreak, computeAdherence } from "@/lib/stats";
@@ -245,13 +247,14 @@ export default async function ClientDashboardPage() {
   return (
     <div className="space-y-9 pb-4">
       <StreakVoice streak={streak} />
+      <TourLauncher steps={CLIENT_TOUR} storageKey={CLIENT_TOUR_KEY} tourName="Tu tour" />
       {/* ── 1 · SALUDO / ESTADO ─────────────────────────────────── */}
       <header className="space-y-2.5">
         <p className="text-[10px] font-bold tracking-[0.22em] text-zinc-500 uppercase">
           {dateLine} · Objetivo: <span className="text-primary">{clientGoal}</span>
         </p>
         <h1 className="text-4xl sm:text-5xl font-display font-black text-white tracking-tight leading-[1.05]">
-          Hola, {firstName}.
+          <TimeGreeting name={firstName} />
         </h1>
         <p className="text-sm text-zinc-400">
           Hoy es un gran día para ser mejor que ayer.
@@ -259,7 +262,7 @@ export default async function ClientDashboardPage() {
       </header>
 
       {/* ── 2 · HERO + RAIL SEMANAL ─────────────────────────────── */}
-      <section className="grid lg:grid-cols-3 gap-5 items-stretch">
+      <section className="grid lg:grid-cols-3 gap-5 items-stretch" data-tour="entreno-hoy">
         <div className="lg:col-span-2">
           {todayWorkoutLog ? (
             /* Completado hoy */

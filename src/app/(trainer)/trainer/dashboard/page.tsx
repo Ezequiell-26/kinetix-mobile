@@ -14,6 +14,8 @@ import { UiPremiumStrip, FadeIn, StaggerContainer, StaggerItem } from "@/compone
 import { CountUp, ProgressBar } from "@/components/animated-stats";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
+import { TourLauncher } from "@/components/guided-tour";
+import { TRAINER_TOUR, TRAINER_TOUR_KEY } from "@/lib/tours";
 import { 
   Users, 
   Dumbbell, 
@@ -147,6 +149,7 @@ export default async function TrainerDashboard(){
   return (
     <div className="space-y-6">
       <ChangelogNotification />
+      <TourLauncher steps={TRAINER_TOUR} storageKey={TRAINER_TOUR_KEY} tourName="Tour entrenador" />
       {/* Welcome & Top Actions */}
       <div className="flex flex-col sm:flex-row justify-between sm:items-center gap-4">
         <div>
@@ -173,6 +176,7 @@ export default async function TrainerDashboard(){
       </div>
 
       {/* KPI Cards (100% Real Data) — contadores y barras animadas */}
+      <div data-tour="kpis">
       <StaggerContainer className="grid grid-cols-2 lg:grid-cols-4 gap-3" stagger={0.08}>
         <StaggerItem>
         <Card className="border-zinc-800 bg-zinc-900/90">
@@ -242,11 +246,12 @@ export default async function TrainerDashboard(){
         </Card>
         </StaggerItem>
       </StaggerContainer>
+      </div>
 
       {/* Main Grid: Atención Necesaria & Actividad Reciente */}
       <div className="grid lg:grid-cols-3 gap-5">
         {/* Sección: Atención necesaria */}
-        <Card className="lg:col-span-2 border-zinc-800 bg-zinc-900/90">
+        <Card className="lg:col-span-2 border-zinc-800 bg-zinc-900/90" data-tour="atencion">
           <CardHeader className="flex flex-row items-center justify-between pb-3">
             <CardTitle className="text-base flex items-center gap-2">
               <AlertCircle size={18} className="text-primary" /> Atención Necesaria
@@ -345,7 +350,7 @@ export default async function TrainerDashboard(){
       </div>
 
       {/* Clientes Activos Recientes */}
-      <Card className="border-zinc-800 bg-zinc-900/90">
+      <Card className="border-zinc-800 bg-zinc-900/90" data-tour="clientes">
         <CardHeader className="flex flex-row items-center justify-between pb-3">
           <CardTitle className="text-base flex items-center gap-2">
             <Users size={18} className="text-primary" /> Clientes Recientes
