@@ -48,10 +48,37 @@ export function ExerciseImage({ src, alt, muscleGroup, name, className, priority
   priority?: boolean;
 }){
   const [failed,setFailed]=useState(false);
+  const [videoFailed,setVideoFailed]=useState(false);
   const [loaded,setLoaded]=useState(false);
 
   if(!src || failed){
     return <div className={className}><Illustration muscleGroup={muscleGroup} name={name} /></div>;
+  }
+
+  // Convención: si existe un .mp4 junto a la foto, se reproduce solo (sin cambios de DB).
+  const videoSrc = /\.(jpg|jpeg|png|webp)(\?.*)?$/i.test(src)
+    ? src.replace(/\.(jpg|jpeg|png|webp)(\?.*)?$/i, ".mp4")
+    : null;
+
+  if(videoSrc && !videoFailed){
+    return (
+      <div className={`relative overflow-hidden bg-zinc-900 ${className}`}>
+        <video
+          src={videoSrc}
+          poster={src}
+          autoPlay
+          muted
+          loop
+          playsInline
+          preload="metadata"
+          aria-label={alt}
+          onCanPlay={()=>setLoaded(true)}
+          onError={()=>setVideoFailed(true)}
+          className={`w-full h-full object-cover transition-opacity ${loaded?"opacity-100":"opacity-0"}`}
+        />
+        {!loaded && <div className="absolute inset-0 animate-pulse bg-zinc-800" />}
+      </div>
+    );
   }
 
   return (
