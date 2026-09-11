@@ -74,7 +74,7 @@ export function TrainerNav(){
               <p className="text-[10px] uppercase font-bold tracking-wider text-zinc-600 px-3 pt-2 pb-1">{g.label}</p>
               {g.links.map(l=>{
                 const active = path.startsWith(l.href);
-                return <Link key={l.href} href={l.href} className={`flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition ${active ? "bg-white text-black" : "text-zinc-400 hover:text-white hover:bg-zinc-900"}`}><l.icon size={18}/> {l.label}</Link>
+                return <Link key={l.href} href={l.href} className={`flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition min-h-[44px] ${active ? "pill-active" : "text-zinc-400 hover:text-white hover:bg-zinc-900"}`}><l.icon size={18}/> {l.label}</Link>
               })}
             </div>
           ))}
@@ -88,7 +88,7 @@ export function TrainerNav(){
               <div className="flex items-center justify-between mb-4"><span className="font-bold">Menú</span><button onClick={()=>setOpen(false)} className="text-zinc-500"><X size={16} /></button></div>
               {links.map(l=>{
                 const active = path.startsWith(l.href);
-                return <Link key={l.href} href={l.href} onClick={()=>setOpen(false)} className={`flex items-center gap-3 px-3 py-3 rounded-xl text-sm font-medium ${active ? "bg-white text-black" : "text-zinc-300 hover:bg-zinc-900"}`}><l.icon size={18}/> {l.label}</Link>
+                return <Link key={l.href} href={l.href} onClick={()=>setOpen(false)} className={`flex items-center gap-3 px-3 py-3 rounded-xl text-sm font-medium min-h-[48px] ${active ? "pill-active" : "text-zinc-300 hover:bg-zinc-900"}`}><l.icon size={18}/> {l.label}</Link>
               })}
             </div>
           </div>
@@ -110,7 +110,7 @@ export function TrainerBottomNav(){
     <nav aria-label="Navegación principal" className="lg:hidden fixed bottom-0 left-0 right-0 z-40 bg-[#0F0F0F]/95 backdrop-blur-xl border-t border-zinc-900 flex justify-around py-2 pb-[calc(0.5rem+env(safe-area-inset-bottom))]">
       {items.map(i=>{
         const active = path.startsWith(i.href);
-        return <Link key={i.href} href={i.href} aria-current={active ? "page" : undefined} aria-label={i.label} className="relative flex flex-col items-center gap-1 px-3 py-1.5 min-h-[52px] min-w-[56px] justify-center transition-all active:scale-95"><i.icon size={22} strokeWidth={active?2.5:2} className={active?"text-primary drop-shadow-[0_0_10px_rgba(52,211,153,0.9)]":"text-zinc-500"} /><span className={`text-[10px] tracking-wide ${active?"font-black text-primary drop-shadow-[0_0_8px_rgba(52,211,153,0.7)]":"font-semibold text-zinc-500"}`}>{i.label}</span>{active && <span className="absolute bottom-0 w-1 h-1 rounded-full bg-primary shadow-[0_0_6px_rgba(52,211,153,1)]" aria-hidden="true" />}</Link>
+        return <Link key={i.href} href={i.href} aria-current={active ? "page" : undefined} aria-label={i.label} className="relative flex flex-col items-center gap-1 px-3 py-1.5 min-h-[52px] min-w-[56px] justify-center transition-all active:scale-95"><i.icon size={22} strokeWidth={active?2.5:2} className={active?"nav-icon-active":"nav-icon"} /><span className={`text-[10px] tracking-wide ${active?"nav-label-active":"nav-label"}`}>{i.label}</span>{active && <span className="nav-dot absolute bottom-0 w-1 h-1 rounded-full" aria-hidden="true" />}</Link>
       })}
     </nav>
   );
