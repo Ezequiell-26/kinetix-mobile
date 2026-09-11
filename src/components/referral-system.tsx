@@ -4,22 +4,15 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Gift, Users, Share2, Star } from "lucide-react";
+import { copyText } from "@/lib/clipboard";
 
 // Inspirado en ReferralCandy + GrowSurf MIT — sistema de referidos
 export function ReferralSystem(){
   const [copied,setCopied]=useState(false);
   const link="https://ezequielcoaching.com/r/martin-f";
-  function copy(){
-    try{
-      const done = navigator.clipboard?.writeText(link);
-      if(done && typeof done.catch === "function"){
-        done.then(()=>setCopied(true)).catch(()=>setCopied(false));
-      }else{
-        setCopied(true);
-      }
-    }catch{
-      setCopied(false);
-    }
+  async function copy(){
+    const ok = await copyText(link);
+    setCopied(ok);
     setTimeout(()=>setCopied(false),2000);
   }
   return (
