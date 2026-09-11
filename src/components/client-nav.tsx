@@ -78,7 +78,7 @@ export function ClientBottomNav(){
           <div className="relative w-full max-w-[640px] bg-[#0D1319] border-t border-subtle rounded-t-3xl p-4 pb-[calc(1rem+env(safe-area-inset-bottom))] space-y-3 animate-in slide-in-from-bottom">
             <div className="flex justify-between items-center">
               <p className="font-bold text-white">Más opciones</p>
-              <button onClick={()=>setShowMore(false)} className="w-8 h-8 rounded-full bg-zinc-900 border border-zinc-800 flex items-center justify-center text-zinc-400"><X size={16}/></button>
+              <button onClick={()=>setShowMore(false)} aria-label="Cerrar menú" className="w-9 h-9 rounded-full bg-zinc-900 border border-zinc-800 flex items-center justify-center text-zinc-400"><X size={16}/></button>
             </div>
             <div className="grid grid-cols-2 gap-2">
               {moreItems.map(i=>{

@@ -182,6 +182,12 @@ class VoiceEngine {
     this.playing = false;
   }
 
+  /** Flag efectivo (hidrata settings). Lo usa el sistema legacy para unificar el mute. */
+  isEnabled(): boolean {
+    this.hydrate();
+    return this.settings.enabled;
+  }
+
   resetMotivation(): void {
     this.motivation.reset();
   }
