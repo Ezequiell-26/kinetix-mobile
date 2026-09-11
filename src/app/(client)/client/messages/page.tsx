@@ -4,7 +4,7 @@ import { useState, useEffect, useRef } from "react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { MessageFileButton } from "@/components/file-upload";
-import { MessageCircle, Send, Check, CheckCheck, Paperclip } from "lucide-react";
+import { MessageCircle, Send, Check, CheckCheck, Paperclip, ArrowLeft } from "lucide-react";
 
 type Msg = { 
   id: string; 
@@ -102,10 +102,13 @@ export default function ClientMessagesPage(){
   }
 
   return (
-    <div className="flex flex-col h-[calc(100dvh-56px-64px)] sm:h-[calc(100dvh-56px-24px)] -mx-4 sm:mx-0 -mt-4 sm:mt-0">
-      <div className="flex-1 flex flex-col overflow-hidden bg-[#080808] sm:rounded-2xl sm:border sm:border-zinc-800">
+    <div className="flex-1 flex flex-col min-h-0">
+      <div className="flex-1 flex flex-col overflow-hidden bg-[#080808] min-h-0">
         {/* Chat top bar - slim */}
-        <div className="shrink-0 px-3 py-2.5 border-b border-zinc-800/70 flex gap-2.5 items-center bg-zinc-950">
+        <div className="shrink-0 px-2 py-2.5 border-b border-zinc-800/70 flex gap-1.5 items-center bg-zinc-950">
+          <a href="/client/dashboard" aria-label="Volver" className="w-10 h-10 rounded-full flex items-center justify-center text-zinc-300 hover:bg-zinc-900 active:scale-95 transition shrink-0">
+            <ArrowLeft size={20} />
+          </a>
           <div className="w-9 h-9 rounded-full bg-primary flex items-center justify-center font-black text-black text-sm shrink-0">
             E
           </div>
