@@ -159,28 +159,44 @@ export default function WorkoutExecutionPage(){
     loadWorkout();
   }, [workoutId]);
 
-  // Handle rest timer countdown
+  // Rest timer con deadline (no deriva si la pestaña/pantalla se suspende:
+  // los intervalos se estrangulan en background, el deadline no).
+  const deadlineRef = useRef(0);
   useEffect(() => {
     if (!isResting || isTimerPaused) return;
+    if (deadlineRef.current === 0) {
+      deadlineRef.current = Date.now() + restRemaining * 1000;
+    }
     if (restRemaining <= 0) {
+      deadlineRef.current = 0;
       setIsResting(false);
       playBeep();
       try { navigator.vibrate?.([80, 50, 80]); } catch {}
       return;
     }
     const timer = setInterval(() => {
-      setRestRemaining(prev => {
-        if (prev <= 1) {
-          setIsResting(false);
-          playBeep();
-          try { navigator.vibrate?.([80, 50, 80]); } catch {}
-          return 0;
-        }
-        return prev - 1;
-      });
-    }, 1000);
+      const left = Math.ceil((deadlineRef.current - Date.now()) / 1000);
+      if (left <= 0) {
+        deadlineRef.current = 0;
+        setRestRemaining(0);
+        setIsResting(false);
+        playBeep();
+        try { navigator.vibrate?.([80, 50, 80]); } catch {}
+        return;
+      }
+      setRestRemaining((prev) => (prev === left ? prev : left));
+    }, 250);
     return () => clearInterval(timer);
   }, [isResting, isTimerPaused, restRemaining]);
+
+  // Al pausar se congela el restante real; al reanudar el deadline se recalcula.
+  useEffect(() => {
+    if (isTimerPaused && isResting && deadlineRef.current !== 0) {
+      setRestRemaining(Math.max(0, Math.ceil((deadlineRef.current - Date.now()) / 1000)));
+      deadlineRef.current = 0;
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isTimerPaused]);
 
   const currentExercise = workout?.exercises?.[currentExIdx];
   const totalTargetSets = workout?.exercises?.reduce((acc, e) => acc + e.sets, 0) || 1;
@@ -460,7 +476,14 @@ export default function WorkoutExecutionPage(){
                 variant="outline"
                 size="sm"
                 className="h-10 text-xs font-bold bg-zinc-900/90 border-zinc-700"
-                onClick={() => setRestRemaining(r => r + 30)}
+                onClick={() => {
+                  if (deadlineRef.current > 0) {
+                    deadlineRef.current += 30 * 1000;
+                  } else {
+                    deadlineRef.current = Date.now() + (restRemaining + 30) * 1000;
+                  }
+                  setRestRemaining(r => r + 30);
+                }}
               >
                 +30s
               </Button>
@@ -481,7 +504,10 @@ export default function WorkoutExecutionPage(){
                 variant="accent"
                 size="sm"
                 className="h-10 text-xs font-bold text-black"
-                onClick={() => setIsResting(false)}
+                onClick={() => {
+                  deadlineRef.current = 0;
+                  setIsResting(false);
+                }}
               >
                 Continuar ya →
               </Button>
