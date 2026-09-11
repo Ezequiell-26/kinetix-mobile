@@ -6,17 +6,23 @@ import { Badge } from "@/components/ui/badge";
 import { Mic, Volume2, Pause, SkipForward, Play } from "lucide-react";
 import {
   playNarratorCountdown,
+  playTrack,
   speakCue,
   stopVoice,
   isVoiceEnabled,
   setVoiceEnabled,
+  type TrackName,
 } from "@/lib/voice";
 
 // Aviso que manda la página: cuenta con narrador real o frase hablada.
 export type VoiceCue =
   | { id: number; kind: "countdown" }
+  | { id: number; kind: "track"; track: TrackName }
   | { id: number; kind: "say"; text: string };
-export type VoiceCueInput = { kind: "countdown" } | { kind: "say"; text: string };
+export type VoiceCueInput =
+  | { kind: "countdown" }
+  | { kind: "track"; track: TrackName }
+  | { kind: "say"; text: string };
 
 // Voz en entreno: narrador real (3-2-1-¡vamos!) + avisos automáticos.
 // Inspirado en Web Speech API + OpenHIIT audio cues (atribución en MIT_ATTRIBUTION).
@@ -44,6 +50,10 @@ export function VoiceCoach({
     if (!isVoiceEnabled()) return;
     if (cue.kind === "countdown") {
       playNarratorCountdown();
+      setSpeaking(true);
+      window.setTimeout(() => setSpeaking(false), 6500);
+    } else if (cue.kind === "track") {
+      playTrack(cue.track);
       setSpeaking(true);
       window.setTimeout(() => setSpeaking(false), 6500);
     } else {

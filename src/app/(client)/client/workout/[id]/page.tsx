@@ -203,7 +203,7 @@ export default function WorkoutExecutionPage(){
       return;
     }
     if (currentExercise) {
-      emitCue({ kind: "say", text: `Siguiente ejercicio: ${currentExercise.exercise.name}.` });
+      emitCue({ kind: "track", track: "siguiente" });
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [currentExIdx]);
@@ -211,10 +211,27 @@ export default function WorkoutExecutionPage(){
   // Aviso de voz al completar el entreno.
   useEffect(() => {
     if (finished) {
-      emitCue({ kind: "say", text: "Entrenamiento completado. Excelente trabajo." });
+      emitCue({ kind: "track", track: "cierre" });
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [finished]);
+
+  // "Serie lista, descansá" al arrancar cada descanso (salvo el primero: ahí va el arranque).
+  const startedRestRef = useRef(false);
+  const firstSetVoiceRef = useRef(false);
+  useEffect(() => {
+    if (isResting && !startedRestRef.current) {
+      startedRestRef.current = true;
+      if (firstSetVoiceRef.current) {
+        firstSetVoiceRef.current = false;
+      } else {
+        emitCue({ kind: "track", track: "descanso" });
+      }
+    } else if (!isResting) {
+      startedRestRef.current = false;
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isResting]);
 
   // Complete a set
   function handleSaveSet(){
@@ -237,6 +254,17 @@ export default function WorkoutExecutionPage(){
 
     // Haptic feedback
     try { navigator.vibrate?.(40); } catch {}
+
+    // Voz: arranque en la primera serie, mitad al 50%, último esfuerzo antes del cierre.
+    const newCount = totalCompletedSets + 1;
+    if (totalCompletedSets === 0) {
+      firstSetVoiceRef.current = true;
+      emitCue({ kind: "track", track: "arranque" });
+    } else if (totalTargetSets >= 4 && newCount === Math.floor(totalTargetSets / 2)) {
+      emitCue({ kind: "track", track: "mitad" });
+    } else if (newCount === totalTargetSets - 1) {
+      emitCue({ kind: "track", track: "ultimo" });
+    }
 
     // Check next set or next exercise
     if (currentSetIdx < currentExercise.sets - 1) {

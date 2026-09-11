@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Input, Label, Textarea } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { FileUpload } from "@/components/file-upload";
+import { CheckinVoice } from "@/components/narrator-cues";
 import { ClipboardCheck, Sparkles, Clock, CheckCircle2, MessageSquare } from "lucide-react";
 
 type CheckInHistoryItem = {
@@ -93,6 +94,14 @@ export default function ClientCheckinsPage(){
 
   return (
     <div className="space-y-5">
+      <CheckinVoice
+        pending={
+          !loadingHistory &&
+          (history.length === 0 ||
+            Date.now() - Math.max(...history.map((c) => new Date(c.date).getTime())) >
+              7 * 24 * 3600 * 1000)
+        }
+      />
       {/* Header */}
       <div className="flex justify-between items-center">
         <div>
@@ -100,7 +109,7 @@ export default function ClientCheckinsPage(){
           <p className="text-sm text-zinc-400">Revisión y feedback personalizado con Ezequiel</p>
         </div>
         <Badge variant={sent ? "success" : "accent"}>
-          {sent ? "Enviado ✓" : "Semanal"}
+          {sent ? "Enviado" : "Semanal"}
         </Badge>
       </div>
 
@@ -115,9 +124,9 @@ export default function ClientCheckinsPage(){
       {!showForm ? (
         <>
           {/* Prompt card */}
-          <Card className="border-[#D6FF2A]/20 bg-[#D6FF2A]/[0.04]">
+          <Card className="border-primary/20 bg-primary/[0.04]">
             <CardContent className="p-6 text-center space-y-3">
-              <div className="w-12 h-12 rounded-2xl bg-[#D6FF2A] flex items-center justify-center mx-auto text-black font-black">
+              <div className="w-12 h-12 rounded-2xl bg-primary flex items-center justify-center mx-auto text-black font-black">
                 <ClipboardCheck size={24} />
               </div>
               <h2 className="font-bold text-lg text-white">¿Cómo estuvo tu semana de entrenamiento?</h2>
@@ -157,7 +166,7 @@ export default function ClientCheckinsPage(){
                         {new Date(c.date).toLocaleDateString("es-AR", { day: "numeric", month: "long", year: "numeric" })}
                       </span>
                       <Badge variant={c.reviewed ? "success" : "warn"} className="text-[10px]">
-                        {c.reviewed ? "Revisado ✓" : "En revisión"}
+                        {c.reviewed ? "Revisado" : "En revisión"}
                       </Badge>
                     </div>
 
@@ -172,7 +181,7 @@ export default function ClientCheckinsPage(){
                       </div>
                       <div className="bg-zinc-900/80 p-2 rounded-lg">
                         <span className="text-[10px] text-zinc-500 block">Entrenos</span>
-                        <span className="font-bold text-[#D6FF2A]">{c.entrenos ?? "—"}</span>
+                        <span className="font-bold text-primary">{c.entrenos ?? "—"}</span>
                       </div>
                       <div className="bg-zinc-900/80 p-2 rounded-lg">
                         <span className="text-[10px] text-zinc-500 block">Rendimiento</span>
@@ -185,8 +194,8 @@ export default function ClientCheckinsPage(){
                     )}
 
                     {c.trainerReply && (
-                      <div className="p-3 rounded-xl bg-[#D6FF2A]/10 border border-[#D6FF2A]/20 text-xs space-y-1">
-                        <span className="font-bold text-[#D6FF2A] flex items-center gap-1">
+                      <div className="p-3 rounded-xl bg-primary/10 border border-primary/20 text-xs space-y-1">
+                        <span className="font-bold text-primary flex items-center gap-1">
                           <MessageSquare size={13} /> Devolución de Ezequiel:
                         </span>
                         <p className="text-zinc-200">{c.trainerReply}</p>
@@ -217,7 +226,7 @@ export default function ClientCheckinsPage(){
                 <div key={f.k} className="space-y-2 bg-zinc-950 p-3 rounded-xl border border-zinc-800/80">
                   <div className="flex justify-between text-xs">
                     <Label className="text-xs text-zinc-300">{f.label}</Label>
-                    <span className="text-[#D6FF2A] font-black text-sm">{f.val}/10</span>
+                    <span className="text-primary font-black text-sm">{f.val}/10</span>
                   </div>
                   <input
                     type="range"
@@ -225,7 +234,7 @@ export default function ClientCheckinsPage(){
                     max={10}
                     value={f.val}
                     onChange={e => setForm({ ...form, [f.k]: Number(e.target.value) })}
-                    className="w-full accent-[#D6FF2A] h-2 bg-zinc-800 rounded-lg cursor-pointer"
+                    className="w-full accent-primary h-2 bg-zinc-800 rounded-lg cursor-pointer"
                   />
                 </div>
               ))}
@@ -287,7 +296,7 @@ export default function ClientCheckinsPage(){
                   className="flex-1 h-12 font-black text-sm"
                   disabled={loading}
                 >
-                  {loading ? "Enviando..." : "ENVIAR CHECK-IN ✓"}
+                  {loading ? "Enviando..." : "ENVIAR CHECK-IN"}
                 </Button>
               </div>
             </form>

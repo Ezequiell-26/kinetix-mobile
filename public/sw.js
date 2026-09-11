@@ -9,6 +9,18 @@ const CORE = [
   "/client/progress",
   "/client/nutrition",
   "/audio/narrador-cuenta-regresiva.mp3",
+  "/audio/narrador-arranque.mp3",
+  "/audio/narrador-siguiente.mp3",
+  "/audio/narrador-descanso.mp3",
+  "/audio/narrador-mitad.mp3",
+  "/audio/narrador-ultimo.mp3",
+  "/audio/narrador-cierre.mp3",
+  "/audio/narrador-hiit-trabaja.mp3",
+  "/audio/narrador-hiit-descansa.mp3",
+  "/audio/narrador-hiit-ultima.mp3",
+  "/audio/narrador-hiit-fin.mp3",
+  "/audio/narrador-racha.mp3",
+  "/audio/narrador-checkin.mp3",
 ];
 self.addEventListener("install", (e) => {
   e.waitUntil(caches.open(CACHE).then((c) => c.addAll(CORE)).then(() => self.skipWaiting()));
