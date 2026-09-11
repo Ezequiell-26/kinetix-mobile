@@ -483,7 +483,7 @@ export default function WorkoutExecutionPage(){
             <span className="text-[11px] font-black uppercase tracking-widest text-primary flex items-center justify-center gap-1">
               <Clock size={14} /> Tiempo de Descanso
             </span>
-            <p className="text-5xl sm:text-6xl font-black font-mono text-white tracking-tight">
+            <p className={`text-5xl sm:text-6xl font-black font-mono text-white tracking-tight tabular-nums ${restRemaining <= 10 && restRemaining > 0 ? "urgent text-primary" : ""}`}>
               {Math.floor(restRemaining / 60)}:{String(restRemaining % 60).padStart(2, "0")}
             </p>
             <p className="text-xs text-zinc-400">

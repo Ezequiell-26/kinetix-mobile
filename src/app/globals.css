@@ -293,6 +293,50 @@ h1, h2 { text-wrap: balance; }
 /* Aceleración GPU para blur fijo en Windows/Mac de gama media */
 .glass, .cta-sticky { transform: translateZ(0); }
 
+/* ===== Motion system EZEQUIEL COACHING — rápido, físico, consistente =====
+   Tokens: fast 150ms (feedback), base 250ms (superficies), spring nativo.
+   Revive las clases animate-in usadas en drawers/modales sin dependencias. */
+:root {
+  --motion-fast: 150ms;
+  --motion-base: 250ms;
+  --motion-ease: cubic-bezier(0.22, 1, 0.36, 1);
+}
+@keyframes fade-in {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+@keyframes slide-in-from-bottom {
+  from { transform: translateY(28px); opacity: 0.4; }
+  to { transform: translateY(0); opacity: 1; }
+}
+@keyframes pop {
+  0% { transform: scale(0.6); }
+  60% { transform: scale(1.12); }
+  100% { transform: scale(1); }
+}
+.animate-in.fade-in, .fade-in {
+  animation: fade-in var(--motion-fast) ease-out both;
+}
+.slide-in-from-bottom {
+  animation: slide-in-from-bottom var(--motion-base) var(--motion-ease) both;
+}
+.pop {
+  animation: pop 220ms ease-out;
+}
+/* Pulso sobrio de urgencia (últimos segundos del descanso) */
+@keyframes urgent-pulse {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.06); }
+}
+.urgent {
+  animation: urgent-pulse 1s ease-in-out infinite;
+}
+@media (prefers-reduced-motion: reduce) {
+  .animate-in, .fade-in, .slide-in-from-bottom, .pop, .urgent {
+    animation: none;
+  }
+}
+
 /* Movimiento reducido: respeta al usuario (iOS/Android/Windows) */
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after {

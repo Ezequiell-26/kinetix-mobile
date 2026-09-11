@@ -61,7 +61,9 @@ export function RepCounter({ targetReps, setKey, onFirstTap }: { targetReps: num
           aria-label="Contar repetición"
           className="h-14 flex-1 rounded-2xl bg-primary text-black font-black text-xl tabular-nums active:scale-[0.97] transition-transform"
         >
-          {count === 0 ? "TAP · REP 1" : count}
+          <span key={count} className="pop inline-block">
+            {count === 0 ? "TAP · REP 1" : count}
+          </span>
         </button>
         <button
           onClick={() => setCount(0)}
