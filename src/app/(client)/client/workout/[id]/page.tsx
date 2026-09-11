@@ -85,16 +85,35 @@ export default function WorkoutExecutionPage(){
   const [reps, setReps] = useState<string>("");
   const [rir, setRir] = useState<string>("2");
 
-  // Track completed sets
+  // Track completed sets (+ ref espejo para el guard anti-doble-tap)
   const [loggedSets, setLoggedSets] = useState<Record<string, CompletedSetRecord>>({});
+  const loggedKeysRef = useRef<Set<string>>(new Set());
 
   // Rest Timer State
   const [restRemaining, setRestRemaining] = useState<number>(0);
   const [isResting, setIsResting] = useState<boolean>(false);
   const [isTimerPaused, setIsTimerPaused] = useState<boolean>(false);
 
-  // Session timing
+  // Session timing + borrador anti-refresh (se pierde la página, no la sesión)
   const [startTime] = useState<number>(Date.now());
+  const draftStartRef = useRef<number>(0);
+  const [draftRestored, setDraftRestored] = useState(false);
+  const draftKey = `ec:draft:${workoutId}`;
+  function persistDraft(next: Record<string, CompletedSetRecord>, exIdx: number, setIdx: number) {
+    try {
+      localStorage.setItem(draftKey, JSON.stringify({
+        sets: next, exIdx, setIdx,
+        start: draftStartRef.current || startTime,
+        savedAt: Date.now(),
+      }));
+    } catch {}
+  }
+  function clearDraft() {
+    loggedKeysRef.current.clear();
+    try {
+      localStorage.removeItem(draftKey);
+    } catch {}
+  }
   const [finished, setFinished] = useState<boolean>(false);
   const [gymMode, setGymMode] = useState<boolean>(false);
   const [finalComment, setFinalComment] = useState<string>("");
@@ -148,6 +167,27 @@ export default function WorkoutExecutionPage(){
         if (!res.ok) throw new Error("No se pudo cargar el entrenamiento");
         const data = await res.json();
         setWorkout(data);
+        // Restaura el borrador si la página se recargó a mitad de sesión (<12h).
+        try {
+          const raw = localStorage.getItem(`ec:draft:${workoutId}`);
+          if (raw) {
+            const d = JSON.parse(raw) as {
+              sets: Record<string, CompletedSetRecord>;
+              exIdx: number; setIdx: number; start: number; savedAt: number;
+            };
+            const count = Object.keys(d.sets || {}).length;
+            if (count > 0 && Date.now() - d.savedAt < 12 * 3600 * 1000) {
+              setLoggedSets(d.sets);
+              loggedKeysRef.current = new Set(Object.keys(d.sets));
+              setCurrentExIdx(Math.min(d.exIdx, (data.exercises?.length || 1) - 1));
+              setCurrentSetIdx(d.setIdx);
+              draftStartRef.current = d.start;
+              setDraftRestored(true);
+            } else {
+              localStorage.removeItem(`ec:draft:${workoutId}`);
+            }
+          }
+        } catch {}
         if (data.exercises?.[0]) {
           const firstEx = data.exercises[0];
           setReps(firstEx.reps?.split("-")?.[0] || "8");
@@ -253,9 +293,19 @@ export default function WorkoutExecutionPage(){
     };
 
     setLoggedSets(prev => ({ ...prev, [key]: record }));
+    const nextSets = { ...loggedSets, [key]: record };
 
     // Haptic feedback
     try { navigator.vibrate?.(40); } catch {}
+
+    // Anti-doble-tap: la misma serie dos veces seguidas actualiza el registro
+    // SIN avanzar (el state llega tarde al segundo tap; el ref no).
+    const isRepeat = loggedKeysRef.current.has(key);
+    loggedKeysRef.current.add(key);
+    if (isRepeat) {
+      persistDraft(nextSets, currentExIdx, currentSetIdx);
+      return;
+    }
 
     // Voice Engine: arranque en la primera serie, hitos, serie completada + motivación.
     voiceEngine.unlock();
@@ -273,6 +323,7 @@ export default function WorkoutExecutionPage(){
     // Check next set or next exercise
     if (currentSetIdx < currentExercise.sets - 1) {
       setCurrentSetIdx(prev => prev + 1);
+      persistDraft(nextSets, currentExIdx, currentSetIdx + 1);
       const rest = currentExercise.restSec || 90;
       setRestRemaining(rest);
       voiceEngine.emit("REST_STARTED", { rest });
@@ -281,6 +332,7 @@ export default function WorkoutExecutionPage(){
     } else if (currentExIdx < (workout?.exercises?.length || 0) - 1) {
       setCurrentExIdx(prev => prev + 1);
       setCurrentSetIdx(0);
+      persistDraft(nextSets, currentExIdx + 1, 0);
       setRestRemaining(90);
       voiceEngine.emit("REST_STARTED", { rest: 90 });
       setIsResting(true);
@@ -314,7 +366,7 @@ export default function WorkoutExecutionPage(){
     if (!workout) return;
     setSavingLog(true);
 
-    const durationMin = Math.max(1, Math.round((Date.now() - startTime) / (1000 * 60)));
+    const durationMin = Math.max(1, Math.round((Date.now() - (draftStartRef.current || startTime)) / (1000 * 60)));
     const setsPayload = Object.values(loggedSets);
     const payload = {
       workoutId: workout.id,
@@ -331,19 +383,25 @@ export default function WorkoutExecutionPage(){
       setSavedOffline(true);
     };
 
+    const ctrl = new AbortController();
+    const timeout = setTimeout(() => ctrl.abort(), 15000);
     try {
       const res = await fetch("/api/workout-logs", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(payload)
+        body: JSON.stringify(payload),
+        signal: ctrl.signal,
       });
+      clearTimeout(timeout);
 
       if (res.ok) {
+        clearDraft();
         router.push("/client/dashboard");
       } else {
         queueOffline();
       }
     } catch {
+      clearTimeout(timeout);
       queueOffline();
     } finally {
       setSavingLog(false);
@@ -381,7 +439,7 @@ export default function WorkoutExecutionPage(){
 
   // Final Summary Screen
   if (finished) {
-    const elapsedMinutes = Math.max(1, Math.round((Date.now() - startTime) / (1000 * 60)));
+    const elapsedMinutes = Math.max(1, Math.round((Date.now() - (draftStartRef.current || startTime)) / (1000 * 60)));
     const totalVolume = Object.values(loggedSets).reduce((acc, s) => acc + (s.weight * s.reps), 0);
     const exercisesDoneCount = new Set(Object.values(loggedSets).map(s => s.exerciseName)).size;
 
@@ -460,6 +518,13 @@ export default function WorkoutExecutionPage(){
 
   return (
     <div className="space-y-4 pb-12 select-none">
+      {draftRestored && (
+        <div className="flex items-center gap-2 rounded-2xl border border-primary/30 bg-primary/[0.07] px-4 py-3">
+          <CheckCircle size={16} className="text-primary shrink-0" />
+          <p className="text-xs text-zinc-300 flex-1">Sesión recuperada donde la dejaste.</p>
+          <button onClick={() => setDraftRestored(false)} aria-label="Ocultar aviso" className="text-zinc-500 hover:text-white text-sm leading-none px-2 min-h-[32px]">×</button>
+        </div>
+      )}
       {/* Top Session Progress Bar */}
       <div className="space-y-2 bg-zinc-950/80 p-3 rounded-2xl border border-zinc-800">
         <div className="flex items-center justify-between text-xs">
