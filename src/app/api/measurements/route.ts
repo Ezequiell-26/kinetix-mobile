@@ -44,6 +44,11 @@ export async function GET(req: Request){
   return NextResponse.json(measurements);
 }
 
+function fin(v: unknown): number | null {
+  const n = typeof v === "number" ? v : parseFloat(String(v ?? ""));
+  return Number.isFinite(n) ? n : null;
+}
+
 export async function POST(req: Request){
   const s = await getSession();
   if(!s) return NextResponse.json({error:"No auth"},{status:401});
@@ -59,12 +64,12 @@ export async function POST(req: Request){
     clientId = client?.id || null;
   }
 
-  const weight = body.weight !== undefined && body.weight !== null ? Number(body.weight) : null;
-  const chest = body.chest !== undefined && body.chest !== null ? Number(body.chest) : null;
-  const waist = body.waist !== undefined && body.waist !== null ? Number(body.waist) : null;
-  const arm = body.arm !== undefined && body.arm !== null ? Number(body.arm) : null;
-  const leg = body.leg !== undefined && body.leg !== null ? Number(body.leg) : null;
-  const bodyFat = body.bodyFat !== undefined && body.bodyFat !== null ? Number(body.bodyFat) : null;
+  const weight = body.weight !== undefined && body.weight !== null ? fin(body.weight) : null;
+  const chest = body.chest !== undefined && body.chest !== null ? fin(body.chest) : null;
+  const waist = body.waist !== undefined && body.waist !== null ? fin(body.waist) : null;
+  const arm = body.arm !== undefined && body.arm !== null ? fin(body.arm) : null;
+  const leg = body.leg !== undefined && body.leg !== null ? fin(body.leg) : null;
+  const bodyFat = body.bodyFat !== undefined && body.bodyFat !== null ? fin(body.bodyFat) : null;
 
   const measurement = await prisma.progressMeasurement.create({
     data: {

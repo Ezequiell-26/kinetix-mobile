@@ -42,6 +42,11 @@ export async function GET(req: Request){
   return NextResponse.json(checkins);
 }
 
+function fin(v: unknown): number | null {
+  const n = typeof v === "number" ? v : parseFloat(String(v ?? ""));
+  return Number.isFinite(n) ? n : null;
+}
+
 export async function POST(req: Request){
   const s = await getSession();
   if(!s) return NextResponse.json({error:"No auth"},{status:401});
@@ -61,14 +66,14 @@ export async function POST(req: Request){
     data: {
       userId: s.id,
       clientId: clientId,
-      energia: body.energia ? Number(body.energia) : null,
-      sueno: body.sueno ? Number(body.sueno) : null,
-      estres: body.estres ? Number(body.estres) : null,
-      entrenos: body.entrenos ? Number(body.entrenos) : null,
-      rendimiento: body.rendimiento ? Number(body.rendimiento) : null,
+      energia: body.energia ? fin(body.energia) : null,
+      sueno: body.sueno ? fin(body.sueno) : null,
+      estres: body.estres ? fin(body.estres) : null,
+      entrenos: body.entrenos ? fin(body.entrenos) : null,
+      rendimiento: body.rendimiento ? fin(body.rendimiento) : null,
       molestias: body.molestias || null,
       alimentacion: body.alimentacion || null,
-      progreso: body.progreso ? Number(body.progreso) : null,
+      progreso: body.progreso ? fin(body.progreso) : null,
       comentario: body.comentario || null,
       fotos: body.fotos || null,
       reviewed: false,
