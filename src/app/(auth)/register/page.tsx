@@ -7,7 +7,7 @@ import { Input, Label } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle, CardDesc } from "@/components/ui/card";
 export default function RegisterPage(){
   const r=useRouter();
-  const [form,setForm]=useState({name:"",email:"",password:"", role:"CLIENT"});
+  const [form,setForm]=useState({name:"",email:"",password:""});
   const [err,setErr]=useState(""); const [loading,setLoading]=useState(false);
   async function submit(e:React.FormEvent){
     e.preventDefault(); setLoading(true); setErr("");
@@ -28,11 +28,9 @@ export default function RegisterPage(){
             <div className="space-y-2"><Label>Nombre completo</Label><Input value={form.name} onChange={e=>setForm({...form,name:e.target.value})} required /></div>
             <div className="space-y-2"><Label>Email</Label><Input type="email" value={form.email} onChange={e=>setForm({...form,email:e.target.value})} required /></div>
             <div className="space-y-2"><Label>Contraseña</Label><Input type="password" value={form.password} onChange={e=>setForm({...form,password:e.target.value})} required /></div>
-            <div className="space-y-2"><Label>Rol</Label>
-              <select value={form.role} onChange={e=>setForm({...form,role:e.target.value})} className="w-full h-11 px-4 bg-zinc-900 border border-zinc-800 rounded-xl text-sm text-white">
-                <option value="CLIENT">Cliente</option><option value="TRAINER">Entrenador</option>
-              </select>
-            </div>
+            <p className="text-xs text-zinc-500 rounded-xl border border-zinc-800 bg-zinc-900/60 px-3 py-2.5">
+              Tu cuenta es de <span className="font-bold text-zinc-200">atleta</span>. Si eres entrenador, escríbele a Ezequiel para tu acceso.
+            </p>
             {err && <p role="alert" className="text-sm text-red-400 bg-red-500/10 border border-red-500/20 rounded-xl p-3">{err}</p>}
             <Button type="submit" variant="accent" className="w-full" disabled={loading}>{loading?"Creando...":"CREAR CUENTA"}</Button>
             <p className="text-center text-xs text-zinc-500">¿Ya tienes cuenta? <Link href="/login" className="text-white hover:underline">Ingresar</Link></p>
