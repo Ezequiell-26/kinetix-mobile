@@ -4,26 +4,38 @@ import { getSession } from "@/lib/auth";
 export async function POST(req: Request){
   const s = await getSession();
   if(!s) return NextResponse.json({error:"No auth"},{status:401});
-  const body = await req.json();
+  const body = await req.json().catch(() => null);
+  if(!body) return NextResponse.json({error:"Cuerpo requerido"},{status:400});
 
   // Resolve client
   let clientId: string | null = null;
+  let assignedProgramId: string | null = null;
   if(s.role === "CLIENT"){
     const client = await prisma.client.findFirst({where:{OR:[{userId:s.id},{email:s.email}]}});
     clientId = client?.id || null;
+    assignedProgramId = client?.assignedProgramId || null;
   } else if(body.clientId){
     clientId = body.clientId;
   }
 
-  // Resolve valid workout ID
-  let workoutId = body.workoutId;
-  if(workoutId){
-    const exists = await prisma.workout.findUnique({where:{id: workoutId}});
-    if(!exists) workoutId = (await prisma.workout.findFirst())?.id;
-  } else {
-    workoutId = (await prisma.workout.findFirst())?.id;
+  // Validar el workoutId SIN sustituirlo: si no existe o no pertenece al
+  // programa asignado del atleta, se rechaza el guardado (antes se guardaba
+  // contra el primer workout de la base, atribuyendo el entrenamiento a un
+  // plan que el atleta nunca recibió).
+  const workoutId = body.workoutId;
+  if(!workoutId || typeof workoutId !== "string"){
+    return NextResponse.json({error:"Falta el ID del entrenamiento"}, {status:400});
   }
-  if(!workoutId) return NextResponse.json({error:"No hay entrenamientos en la base de datos"}, {status:400});
+  const workout = await prisma.workout.findUnique({
+    where: { id: workoutId },
+    include: { week: { select: { programId: true } } },
+  });
+  if(!workout){
+    return NextResponse.json({error:"El entrenamiento no existe"}, {status:404});
+  }
+  if(s.role === "CLIENT" && workout.week.programId !== assignedProgramId){
+    return NextResponse.json({error:"Ese entrenamiento no pertenece a tu programa asignado"}, {status:403});
+  }
 
   // Prepare sets if provided
   const setsData = Array.isArray(body.sets) ? body.sets.map((st: {
@@ -49,6 +61,7 @@ export async function POST(req: Request){
       userId: s.id,
       clientId: clientId,
       workoutId: workoutId,
+      workoutName: workout.name,
       durationMin: body.durationMin ? Number(body.durationMin) : null,
       comment: body.comment || null,
       completed: body.completed ?? true,
@@ -70,7 +83,7 @@ export async function POST(req: Request){
         data:{
           userId: trainer.id,
           title: `${s.name} completó un entrenamiento`,
-          body: `${log.workout.name} (${log.durationMin || 0} min)`,
+          body: `${workout.name} (${log.durationMin || 0} min)`,
           type: "workout",
           link: `/trainer/clients/${clientId}`
         }
