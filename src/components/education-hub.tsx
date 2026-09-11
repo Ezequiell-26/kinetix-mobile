@@ -14,10 +14,10 @@ const ARTICLES=[
 export function EducationHub(){
   return (
     <Card>
-      <CardHeader><CardTitle className="flex items-center gap-2"><BookOpen size={16} className="text-violet-400"/> Educación <Badge variant="muted">Wiki.js MIT</Badge></CardTitle><p className="text-xs text-zinc-500">Artículos y videos de Ezequiel — sin YouTube, todo en la app</p></CardHeader>
+      <CardHeader><CardTitle className="flex items-center gap-2"><BookOpen size={16} className="text-violet-400"/> Educación</CardTitle><p className="text-xs text-zinc-500">Artículos y videos de Ezequiel — sin YouTube, todo en la app</p></CardHeader>
       <CardContent className="space-y-2">
         {ARTICLES.map(a=>(
-          <a key={a.title} href="#" className="flex gap-3 p-3 rounded-xl bg-zinc-900 border border-zinc-800 hover:border-zinc-700 transition">
+          <a key={a.title} href="/client/resources" className="flex gap-3 p-3 rounded-xl bg-zinc-900 border border-zinc-800 hover:border-zinc-700 transition">
             <div className={`w-10 h-10 rounded-xl flex items-center justify-center shrink-0 ${a.type==="video"?"bg-red-500/20 text-red-400":"bg-violet-500/20 text-violet-400"}`}>{a.type==="video"?<Play size={16}/>:<FileText size={16}/>}</div>
             <div className="flex-1 min-w-0">
               <p className="font-bold text-sm truncate">{a.title}</p>
@@ -26,7 +26,6 @@ export function EducationHub(){
             <Badge variant="muted" className="shrink-0 text-[11px]">{a.type}</Badge>
           </a>
         ))}
-        <p className="text-[11px] text-zinc-600 text-center">Wiki.js MIT — KB privada, sin Notion, todo en tu dominio</p>
       </CardContent>
     </Card>
   );

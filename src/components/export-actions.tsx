@@ -16,7 +16,26 @@ export function ExportActions(){
       <CardContent className="pt-4 flex gap-2">
         <Button variant="outline" size="sm" className="flex-1" onClick={exportCSV}>Descargar CSV</Button>
         <Button variant="outline" size="sm" className="flex-1" onClick={printPDF}>Imprimir PDF</Button>
-        <Button variant="accent" size="sm" className="flex-1" onClick={()=>navigator.share?.({title:"Mi progreso", text:"Mira mi progreso en EZEQUIEL COACHING"}) || exportCSV()}>Compartir</Button>
+        <Button
+          variant="accent"
+          size="sm"
+          className="flex-1 min-h-[44px]"
+          onClick={async ()=>{
+            const data = {title:"Mi progreso", text:"Mira mi progreso en EZEQUIEL COACHING"};
+            try{
+              if(navigator.share){
+                await navigator.share(data);
+              }else{
+                exportCSV();
+              }
+            }catch(e){
+              // Cancelar no descarga nada; otro error sí cae al CSV.
+              if((e as Error)?.name !== "AbortError") exportCSV();
+            }
+          }}
+        >
+          Compartir
+        </Button>
       </CardContent>
     </Card>
   );

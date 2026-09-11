@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 
 export function CalorieCalculator(){
+  const [copied,setCopied]=useState(false);
   const [sex,setSex]=useState<"M"|"F">("M");
   const [age,setAge]=useState(28);
   const [weight,setWeight]=useState(86.8);
@@ -45,15 +46,15 @@ export function CalorieCalculator(){
       </Card>
 
       <div className="grid sm:grid-cols-3 gap-3">
-        <Card className="border-[#D6FF2A]/20 bg-[#D6FF2A]/[0.06]"><CardContent className="pt-4 text-center"><p className="text-xs text-zinc-500 uppercase tracking-widest">TMB</p><p className="text-2xl font-black">{result.bmr.toLocaleString("es-AR")}</p><p className="text-xs text-zinc-500">kcal/día</p></CardContent></Card>
-        <Card className="border-[#D6FF2A]/20 bg-[#D6FF2A]/[0.06]"><CardContent className="pt-4 text-center"><p className="text-xs text-zinc-500 uppercase tracking-widest">TDEE</p><p className="text-2xl font-black">{result.tdee.toLocaleString("es-AR")}</p><p className="text-xs text-zinc-500">mantener</p></CardContent></Card>
-        <Card className="bg-[#111111] border-zinc-800"><CardContent className="pt-4 text-center"><p className="text-xs text-zinc-500 uppercase tracking-widest">Objetivo</p><p className="text-2xl font-black text-[#D6FF2A]">{result.target.toLocaleString("es-AR")}</p><p className="text-xs text-zinc-500">kcal/día</p></CardContent></Card>
+        <Card className="border-primary/20 bg-primary/[0.06]"><CardContent className="pt-4 text-center"><p className="text-xs text-zinc-500 uppercase tracking-widest">TMB</p><p className="text-2xl font-black">{result.bmr.toLocaleString("es-AR")}</p><p className="text-xs text-zinc-500">kcal/día</p></CardContent></Card>
+        <Card className="border-primary/20 bg-primary/[0.06]"><CardContent className="pt-4 text-center"><p className="text-xs text-zinc-500 uppercase tracking-widest">TDEE</p><p className="text-2xl font-black">{result.tdee.toLocaleString("es-AR")}</p><p className="text-xs text-zinc-500">mantener</p></CardContent></Card>
+        <Card className="bg-[#111111] border-zinc-800"><CardContent className="pt-4 text-center"><p className="text-xs text-zinc-500 uppercase tracking-widest">Objetivo</p><p className="text-2xl font-black text-primary">{result.target.toLocaleString("es-AR")}</p><p className="text-xs text-zinc-500">kcal/día</p></CardContent></Card>
       </div>
 
       <Card>
         <CardHeader><CardTitle>Macros diarios</CardTitle><p className="text-xs text-zinc-500">Basado en {weight}kg • proteína 2g/kg, grasa 0.85g/kg</p></CardHeader>
         <CardContent className="grid grid-cols-3 gap-3">
-          <div className="bg-zinc-900 border border-zinc-800 rounded-2xl p-4 text-center"><p className="text-xs text-zinc-500">Proteína</p><p className="text-xl font-black">{result.protein}g</p><p className="text-xs text-zinc-500">{result.protein*4} kcal</p><div className="mt-2 h-1.5 bg-zinc-800 rounded-full overflow-hidden"><div className="h-full bg-[#D6FF2A]" style={{width:"35%"}} /></div></div>
+          <div className="bg-zinc-900 border border-zinc-800 rounded-2xl p-4 text-center"><p className="text-xs text-zinc-500">Proteína</p><p className="text-xl font-black">{result.protein}g</p><p className="text-xs text-zinc-500">{result.protein*4} kcal</p><div className="mt-2 h-1.5 bg-zinc-800 rounded-full overflow-hidden"><div className="h-full bg-primary" style={{width:"35%"}} /></div></div>
           <div className="bg-zinc-900 border border-zinc-800 rounded-2xl p-4 text-center"><p className="text-xs text-zinc-500">Carbos</p><p className="text-xl font-black">{result.carbs}g</p><p className="text-xs text-zinc-500">{result.carbs*4} kcal</p><div className="mt-2 h-1.5 bg-zinc-800 rounded-full overflow-hidden"><div className="h-full bg-white" style={{width:"45%"}} /></div></div>
           <div className="bg-zinc-900 border border-zinc-800 rounded-2xl p-4 text-center"><p className="text-xs text-zinc-500">Grasas</p><p className="text-xl font-black">{result.fat}g</p><p className="text-xs text-zinc-500">{result.fat*9} kcal</p><div className="mt-2 h-1.5 bg-zinc-800 rounded-full overflow-hidden"><div className="h-full bg-zinc-500" style={{width:"20%"}} /></div></div>
         </CardContent>
@@ -67,7 +68,23 @@ export function CalorieCalculator(){
 
       <Card className="border-zinc-800">
         <CardContent className="pt-4 flex gap-2">
-          <Button variant="accent" className="flex-1" onClick={()=>navigator.clipboard?.writeText(`Objetivo ${result.target} kcal — P:${result.protein} C:${result.carbs} G:${result.fat}`)}>Copiar macros</Button>
+          <Button
+            variant="accent"
+            className="flex-1 min-h-[44px]"
+            onClick={()=>{
+              try{
+                const done = navigator.clipboard?.writeText(`Objetivo ${result.target} kcal — P:${result.protein} C:${result.carbs} G:${result.fat}`);
+                if(done && typeof done.then === "function"){
+                  done.then(()=>{ setCopied(true); setTimeout(()=>setCopied(false),2000); }).catch(()=>{});
+                }else{
+                  setCopied(true);
+                  setTimeout(()=>setCopied(false),2000);
+                }
+              }catch{}
+            }}
+          >
+            {copied ? "Copiado ✓" : "Copiar macros"}
+          </Button>
           <Button variant="outline" className="flex-1" onClick={()=>window.print()}>Exportar PDF</Button>
         </CardContent>
       </Card>
@@ -90,7 +107,7 @@ export function OneRMCalculator(){
           <div className="space-y-2"><Label>Reps</Label><Input type="number" value={reps} onChange={e=>setReps(Number(e.target.value))} /></div>
         </div>
         <div className="grid grid-cols-2 gap-3">
-          <div className="bg-[#D6FF2A]/10 border border-[#D6FF2A]/20 p-4 rounded-2xl text-center"><p className="text-xs text-zinc-500">Epley</p><p className="text-2xl font-black">{epley} kg</p></div>
+          <div className="bg-primary/10 border border-primary/20 p-4 rounded-2xl text-center"><p className="text-xs text-zinc-500">Epley</p><p className="text-2xl font-black">{epley} kg</p></div>
           <div className="bg-zinc-900 border border-zinc-800 p-4 rounded-2xl text-center"><p className="text-xs text-zinc-500">Brzycki</p><p className="text-2xl font-black">{brzycki} kg</p></div>
         </div>
         <div className="grid grid-cols-4 gap-2 text-xs">
