@@ -25,8 +25,10 @@ import { Lightbulb,
   ChevronRight, 
   Flame, 
   Info,
-  Check
+  Check,
+  Gauge
 } from "lucide-react";
+import { CollapsibleSection } from "@/components/ui/accordion";
 
 type WorkoutExerciseItem = {
   id: string;
@@ -467,7 +469,7 @@ export default function WorkoutExecutionPage(){
           <p className="font-bold text-white truncate max-w-[200px]">{workout.name}</p>
           <div className="flex items-center gap-2"><Badge variant="accent" className="font-bold">
             {currentExIdx + 1} / {workout.exercises.length}
-          </Badge><button onClick={()=>setGymMode(true)} className="text-[11px] font-black bg-primary text-black px-2.5 py-1 rounded-full">GYM MODE</button></div>
+          </Badge><button onClick={()=>setGymMode(true)} className="text-[11px] font-black bg-primary text-black px-3.5 min-h-[44px] rounded-full">GYM MODE</button></div>
         </div>
         <Progress value={progressPercent} className="h-2 bg-zinc-800" />
         <div className="flex justify-between text-[11px] text-zinc-400">
@@ -539,7 +541,7 @@ export default function WorkoutExecutionPage(){
         <Card className="border-zinc-800 bg-zinc-900/90 overflow-hidden">
           {/* Header image / Banner */}
           {currentExercise.exercise.image && (
-            <div className="h-40 sm:h-48 w-full bg-zinc-950 relative overflow-hidden">
+            <div className="h-32 sm:h-48 w-full bg-zinc-950 relative overflow-hidden">
               <ExerciseImage src={currentExercise.exercise.image} alt={currentExercise.exercise.name} muscleGroup={currentExercise.exercise.muscleGroup} name={currentExercise.exercise.name} className="w-full h-full object-cover opacity-80" />
               <div className="absolute inset-0 bg-gradient-to-t from-zinc-950 via-zinc-950/40 to-transparent" />
               <div className="absolute bottom-3 left-4 right-4 flex justify-between items-end">
@@ -675,15 +677,7 @@ export default function WorkoutExecutionPage(){
                 </div>
               </div>
 
-              {/* Big Action Button */}
-              <Button
-                variant="accent"
-                onClick={handleSaveSet}
-                className="w-full h-14 text-base font-black tracking-wide"
-              >
-                COMPLETAR SERIE
-              </Button>
-
+              {/* Contador en vivo ANTES de completar: primero contás, después cerrás */}
               <RepCounter
                 key={`${currentExIdx}-${currentSetIdx}`}
                 targetReps={parseInt(currentExercise.reps?.split("-")?.[0] || "8", 10) || 8}
@@ -697,10 +691,28 @@ export default function WorkoutExecutionPage(){
                   })
                 }
               />
+
+              {/* Big Action Button — pegado abajo en móvil (zona pulgar) */}
+              <div className="cta-sticky">
+                <Button
+                  variant="accent"
+                  onClick={handleSaveSet}
+                  className="w-full h-14 text-base font-black tracking-wide shadow-[0_8px_32px_rgba(52,211,153,0.35)]"
+                >
+                  COMPLETAR SERIE
+                </Button>
+              </div>
             </div>
 
-            <VelocityTracker />
-            <FormCheck />
+            {/* Análisis avanzado plegado: en plena serie solo importa serie/reps/peso */}
+            <CollapsibleSection
+              title="Análisis avanzado"
+              subtitle="Velocidad y técnica (opcional)"
+              icon={<Gauge size={18} />}
+            >
+              <VelocityTracker />
+              <FormCheck />
+            </CollapsibleSection>
             <VoiceCoach exerciseName={currentExercise.exercise.name} nextExercise={workout.exercises[currentExIdx+1]?.exercise.name} />
             {/* Navigation & Complete Exercise */}
             <div className="flex gap-2">
