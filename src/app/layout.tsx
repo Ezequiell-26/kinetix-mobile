@@ -1,7 +1,11 @@
 import type { Metadata, Viewport } from "next";
+import { Inter, Space_Grotesk } from "next/font/google";
 import "./globals.css";
 import { PwaRegister } from "@/components/pwa-register";
 import { ThemeProvider } from "@/components/theme-provider";
+
+const inter = Inter({ subsets: ["latin"], variable: "--font-inter", display: "swap" });
+const grotesk = Space_Grotesk({ subsets: ["latin"], variable: "--font-display", display: "swap", weight: ["500", "600", "700"] });
 
 export const metadata: Metadata = {
   title: "EZEQUIEL COACHING \u2014 Entrenamiento Personalizado Online",
@@ -33,7 +37,7 @@ export const metadata: Metadata = {
 };
 
 export const viewport: Viewport = {
-  themeColor: "#080808",
+  themeColor: "#0A0F14",
   width: "device-width",
   initialScale: 1,
   maximumScale: 1,
@@ -49,7 +53,7 @@ export default function RootLayout({children}:{children:React.ReactNode}){
         <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
         <script dangerouslySetInnerHTML={{__html: `(function(){try{var t=localStorage.getItem('ec-theme')||'dark';document.documentElement.classList.add(t);document.documentElement.setAttribute('data-theme',t);}catch(e){}})()`}} />
       </head>
-      <body className="min-h-screen bg-[#080808] text-zinc-100 antialiased selection:bg-[#D6FF2A] selection:text-black">
+      <body className={`${inter.variable} ${grotesk.variable} min-h-screen bg-[#080808] text-zinc-100 antialiased selection:bg-primary selection:text-black`}>
         <ThemeProvider>
           {children}
           <PwaRegister />

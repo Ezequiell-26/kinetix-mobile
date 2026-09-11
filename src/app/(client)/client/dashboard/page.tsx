@@ -1,10 +1,23 @@
 import Link from "next/link";
+import dynamic from "next/dynamic";
 import { prisma } from "@/lib/db";
 import { getClientForSession } from "@/lib/getClient";
 import { Button } from "@/components/ui/button";
-import { AiCoachChat } from "@/components/ai-coach-chat";
-import { PostWorkoutCoach } from "@/components/post-workout-coach";
-import { AdaptiveProgram } from "@/components/adaptive-program";
+const AiCoachChat = dynamic(() => import("@/components/ai-coach-chat").then((m) => m.AiCoachChat), {
+  loading: () => <div className="rounded-3xl border border-subtle bg-surface/40 p-6 text-xs text-zinc-500">Cargando coach IA…</div>,
+});
+const PostWorkoutCoach = dynamic(
+  () => import("@/components/post-workout-coach").then((m) => m.PostWorkoutCoach),
+  {
+    loading: () => null,
+  }
+);
+const AdaptiveProgram = dynamic(
+  () => import("@/components/adaptive-program").then((m) => m.AdaptiveProgram),
+  {
+    loading: () => null,
+  }
+);
 import { FadeIn } from "@/components/ui-premium";
 import { StreakVoice, TimeGreeting } from "@/components/narrator-cues";
 import { TourLauncher } from "@/components/guided-tour";

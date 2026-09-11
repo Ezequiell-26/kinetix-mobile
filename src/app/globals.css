@@ -2,7 +2,7 @@
 @tailwind components;
 @tailwind utilities;
 
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Space+Grotesk:wght@500;600;700&display=swap');
+/* Fuentes via next/font (variables --font-inter/--font-display en <body>) */
 
 :root {
   /* ===== Tokens FitSync (canales RGB para alpha de Tailwind) ===== */
@@ -40,7 +40,7 @@ html:not(.light) ::-webkit-scrollbar-thumb { background: #2b3a42; }
 body {
   background: #080808;
   color: #FAFAFA;
-  font-family: 'Inter', system-ui, sans-serif;
+  font-family: var(--font-inter), system-ui, sans-serif;
   -webkit-font-smoothing: antialiased;
   overscroll-behavior-y: contain;
   -webkit-tap-highlight-color: transparent;
@@ -73,7 +73,7 @@ body::after {
 html.light body::before { background: radial-gradient(ellipse 80% 60% at 15% -10%, rgba(5,150,105,0.05), transparent 60%); }
 html.light body::after { opacity: 0.015; }
 #__next, body > div, main { position: relative; z-index: 1; }
-h1,h2,h3 { font-family: 'Space Grotesk', sans-serif; letter-spacing: -0.02em; }
+h1,h2,h3 { font-family: var(--font-display), 'Space Grotesk', sans-serif; letter-spacing: -0.02em; }
 ::-webkit-scrollbar { width: 6px; height: 6px; }
 ::-webkit-scrollbar-thumb { background: #27272A; border-radius: 999px; transition: background 0.2s; }
 ::-webkit-scrollbar-track { background: transparent; }

@@ -542,7 +542,7 @@ export default function WorkoutExecutionPage(){
           {/* Header image / Banner */}
           {currentExercise.exercise.image && (
             <div className="h-32 sm:h-48 w-full bg-zinc-950 relative overflow-hidden">
-              <ExerciseImage src={currentExercise.exercise.image} alt={currentExercise.exercise.name} muscleGroup={currentExercise.exercise.muscleGroup} name={currentExercise.exercise.name} className="w-full h-full object-cover opacity-80" />
+              <ExerciseImage src={currentExercise.exercise.image} alt={currentExercise.exercise.name} muscleGroup={currentExercise.exercise.muscleGroup} name={currentExercise.exercise.name} className="w-full h-full object-cover opacity-80" priority />
               <div className="absolute inset-0 bg-gradient-to-t from-zinc-950 via-zinc-950/40 to-transparent" />
               <div className="absolute bottom-3 left-4 right-4 flex justify-between items-end">
                 <div>
