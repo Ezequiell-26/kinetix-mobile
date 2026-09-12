@@ -5,7 +5,12 @@ const nextConfig = {
     // Tree-shaking agresivo de estos paquetes: evita que Next empaquete
     // toda la librería de íconos/animaciones cuando solo se usan algunos.
     // Reduce el JS que baja el navegador sin cambiar ningún comportamiento.
-    optimizePackageImports: ["lucide-react", "framer-motion", "recharts", "date-fns"],
+    optimizePackageImports: [
+      "lucide-react",
+      "framer-motion",
+      "recharts",
+      "date-fns",
+    ],
   },
   images: {
     // AVIF/WebP automático + caché largo para las imágenes servidas por next/image
@@ -58,7 +63,8 @@ const nextConfig = {
     return [
       {
         // Aplicar a todas las rutas excepto archivos estáticos.
-        source: "/((?!_next/static|_next/image|favicon.ico|icons|manifest.json).* )",
+        source:
+          "/((?!_next/static|_next/image|favicon.ico|icons|manifest.json).* )",
         headers: [
           ...cspHeader,
           {

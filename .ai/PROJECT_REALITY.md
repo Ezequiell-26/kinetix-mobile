@@ -15,26 +15,26 @@
 
 ### WEB APP — rutas (34 page.tsx en apps/mobile/src/app)
 
-| Área | Estado | Verificación |
-|---|---|---|
-| `/` → redirect por rol | IMPLEMENTED | `src/app/page.tsx` usa `getSession()` fail-closed (2026-09-12). Antes verificaba con secreto hardcodeado |
-| `(auth)/login` | VERIFIED | HTTP 200 + `POST /api/auth/login` → `{"ok":true,"role":"CLIENT"}` con `martin@demo.com`. Demos: trainer `ezequiel@ezequielcoaching.com/Admin123!`, cliente `martin@demo.com/cliente123` |
-| `(auth)/register`, `forgot-password` | IMPLEMENTED | register fuerza `role:"CLIENT"`; reset con token 1 uso TTL 30min (store en memoria — se pierde al reiniciar) |
-| `(client)/*` 16 rutas | PARTIAL | 500 `useTheme...` CORREGIDO y VERIFICADO en vivo 2026-09-12: `/client/workout`, `/client/progress`, `/client/dashboard` → 200 con sesión real (causa: provider sin valor en SSR; fix: Provider siempre renderizado) |
-| `(trainer)/*` 14 rutas | PARTIAL | Mismo 500 (mismo chrome). Mismo fix |
-| `loading.tsx` / `error.tsx` / `not-found.tsx` | NOT IMPLEMENTED | Cero archivos en `app/`. Existen `ui/skeleton`, `ui/loading-state`, `ui/empty-state` sin usar en rutas |
-| UX states por página | PARTIAL | dashboard: catch por fuente ✅; workout: `.catch(()=>null)`; progress/nutrition/messages: `catch{}` silenciosos ❌; messages: polling 3s + rollback optimista |
+| Área                                          | Estado          | Verificación                                                                                                                                                                                                        |
+| --------------------------------------------- | --------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `/` → redirect por rol                        | IMPLEMENTED     | `src/app/page.tsx` usa `getSession()` fail-closed (2026-09-12). Antes verificaba con secreto hardcodeado                                                                                                            |
+| `(auth)/login`                                | VERIFIED        | HTTP 200 + `POST /api/auth/login` → `{"ok":true,"role":"CLIENT"}` con `martin@demo.com`. Demos: trainer `ezequiel@ezequielcoaching.com/Admin123!`, cliente `martin@demo.com/cliente123`                             |
+| `(auth)/register`, `forgot-password`          | IMPLEMENTED     | register fuerza `role:"CLIENT"`; reset con token 1 uso TTL 30min (store en memoria — se pierde al reiniciar)                                                                                                        |
+| `(client)/*` 16 rutas                         | PARTIAL         | 500 `useTheme...` CORREGIDO y VERIFICADO en vivo 2026-09-12: `/client/workout`, `/client/progress`, `/client/dashboard` → 200 con sesión real (causa: provider sin valor en SSR; fix: Provider siempre renderizado) |
+| `(trainer)/*` 14 rutas                        | PARTIAL         | Mismo 500 (mismo chrome). Mismo fix                                                                                                                                                                                 |
+| `loading.tsx` / `error.tsx` / `not-found.tsx` | NOT IMPLEMENTED | Cero archivos en `app/`. Existen `ui/skeleton`, `ui/loading-state`, `ui/empty-state` sin usar en rutas                                                                                                              |
+| UX states por página                          | PARTIAL         | dashboard: catch por fuente ✅; workout: `.catch(()=>null)`; progress/nutrition/messages: `catch{}` silenciosos ❌; messages: polling 3s + rollback optimista                                                       |
 
 ### DOMAIN (packages/shared/src)
 
-| Pieza | Estado |
-|---|---|
-| `domain/fitness` (MuscleId 15, MuscleRole, ExerciseDefinition, MovementPattern, Equipment, Difficulty, Laterality, COMMON_EXERCISES 6) | IMPLEMENTED + VERIFIED (tsc) |
-| `utils` (cn, fechas, cálculos, XP) | IMPLEMENTED |
-| `constants` (BRAND, colores, spacing…) | IMPLEMENTED (2026-09-12: eliminado `APP_CONFIG` fantasma del default export → tsc verde) |
-| `components` (button, card, input, badge, skeleton, empty-state) | IMPLEMENTED |
-| `services/background-sync.ts` | PARTIAL (registra SW, sin sync real verificada) |
-| `types` | IMPLEMENTED |
+| Pieza                                                                                                                                  | Estado                                                                                   |
+| -------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------- |
+| `domain/fitness` (MuscleId 15, MuscleRole, ExerciseDefinition, MovementPattern, Equipment, Difficulty, Laterality, COMMON_EXERCISES 6) | IMPLEMENTED + VERIFIED (tsc)                                                             |
+| `utils` (cn, fechas, cálculos, XP)                                                                                                     | IMPLEMENTED                                                                              |
+| `constants` (BRAND, colores, spacing…)                                                                                                 | IMPLEMENTED (2026-09-12: eliminado `APP_CONFIG` fantasma del default export → tsc verde) |
+| `components` (button, card, input, badge, skeleton, empty-state)                                                                       | IMPLEMENTED                                                                              |
+| `services/background-sync.ts`                                                                                                          | PARTIAL (registra SW, sin sync real verificada)                                          |
+| `types`                                                                                                                                | IMPLEMENTED                                                                              |
 
 **Regla**: `apps/mobile` importa dominio vía `@kinetix/shared` (tsconfig `paths` → `../../packages/shared/src/*`; el `../` anterior rompía todo con 500 — no repetir). No usar `name.includes("press")` como lógica canónica (V8 §19).
 

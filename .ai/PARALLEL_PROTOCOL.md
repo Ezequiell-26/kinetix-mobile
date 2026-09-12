@@ -63,7 +63,7 @@ WHAT CHANGED / VERIFIED (comando + resultado) / REMAINS / RISKS / FILES.
 ### 7. Fuente de verdad
 
 1. runtime real → 2. código → 3. tests → 4. schema/migraciones →
-5. contratos → 6. docs. Si un doc contradice al código, se arregla el doc.
+2. contratos → 6. docs. Si un doc contradice al código, se arregla el doc.
 
 ### 8. Prohibido (V8 §2, §95)
 

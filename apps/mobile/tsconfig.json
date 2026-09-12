@@ -1,11 +1,7 @@
 {
   "compilerOptions": {
     "target": "ES2017",
-    "lib": [
-      "dom",
-      "dom.iterable",
-      "esnext"
-    ],
+    "lib": ["dom", "dom.iterable", "esnext"],
     "allowJs": false,
     "skipLibCheck": true,
     "strict": true,
@@ -23,15 +19,9 @@
       }
     ],
     "paths": {
-      "@/*": [
-        "./src/*"
-      ],
-      "@kinetix/shared": [
-        "../../packages/shared/src"
-      ],
-      "@kinetix/shared/*": [
-        "../../packages/shared/src/*"
-      ]
+      "@/*": ["./src/*"],
+      "@kinetix/shared": ["../../packages/shared/src"],
+      "@kinetix/shared/*": ["../../packages/shared/src/*"]
     },
     "baseUrl": "."
   },
@@ -42,7 +32,5 @@
     "next-env.d.ts",
     ".next-dev/types/**/*.ts"
   ],
-  "exclude": [
-    "node_modules"
-  ]
+  "exclude": ["node_modules"]
 }
