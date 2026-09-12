@@ -19,7 +19,7 @@ export default function TrainerSettings(){
       <Card><CardHeader><CardTitle>Apariencia</CardTitle></CardHeader>
         <CardContent className="space-y-3">
           <p className="text-sm text-zinc-500">Blanco y negro premium — minimalista, prolijo, profesional. Cambia el tema de toda la app.</p>
-          <ThemeToggle variant="full" />
+          <ThemeToggle />
           <p className="text-xs text-zinc-500">Se guarda automáticamente • funciona en Android e iOS • sin recargar</p>
         </CardContent>
       </Card>

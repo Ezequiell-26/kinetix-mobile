@@ -1,62 +1,94 @@
 ```
-# TypeScript build artifacts
-*.tsbuildinfo
-
 # Dependencies
 node_modules/
-.pnpm-store/
 
-# Build outputs
+# Build artifacts
 dist/
 build/
-target/
+.next/
+out/
 
 # Logs
 *.log
 
-# Environment
+# Environment variables
 .env
 .env.local
-*.env.*
+.env.*
 
-# Editors
+# IDE files
 .vscode/
 .idea/
-*.swp
-*.swo
 
-# OS
+# OS generated files
 .DS_Store
 Thumbs.db
 
-# Coverage
-coverage/
-htmlcov/
-.coverage
-
-# Python (if present)
+# Python
 __pycache__/
 *.pyc
 *.pyo
 *.pyd
-.pytest_cache/
-.mypy_cache/
+.Python
+env/
+venv/
+ENV/
 
-# Java (if present)
-*.class
-*.jar
-*.war
-*.ear
-target/
-.gradle/
-!gradle/wrapper/gradle-wrapper.jar
+# Compiled JavaScript
+*.js.map
 
-# Node.js
-npm-debug.log*
-yarn-debug.log*
-yarn-error.log*
+# Coverage
+coverage/
+.nyc_output/
+istanbul/
+.html
 
 # Temporary files
 *.tmp
 *.temp
+*.bak
+
+# Lock files
+package-lock.json
+yarn.lock
+
+# Database
+*.db
+*.db-journal
+
+# Compression
+*.zip
+*.tar
+*.gz
+*.tgz
+*.rar
+*.7z
+*.bz2
+*.xz
+*.zst
+*.lz4
+*.lzh
+*.cab
+*.arj
+*.rpm
+*.deb
+*.Z
+*.lz
+*.lzo
+*.tar.gz
+*.tar.bz2
+*.tar.xz
+*.tar.zst
+
 ```
+# Build outputs
+.next/
+build/
+dist/
+
+# Dependencies
+node_modules/
+
+# Cache
+.cache/
+*.pack

@@ -1,6 +1,7 @@
-import { CapacitorConfig } from '@capacitor/cli';
+// Capacitor configuration - types imported dynamically to avoid build issues
+// import { CapacitorConfig } from '@capacitor/cli';
 
-const config: CapacitorConfig = {
+const config = {
   appId: 'com.kinetixfitt.app',
   appName: 'KinetixFitt',
   webDir: 'out',

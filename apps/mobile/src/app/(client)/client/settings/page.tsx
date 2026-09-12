@@ -18,7 +18,7 @@ export default function ClientSettings(){
       <Card><CardHeader><CardTitle>Apariencia</CardTitle></CardHeader>
         <CardContent className="space-y-3">
           <p className="text-sm text-zinc-500">Elegí blanco o negro — minimalista y premium, se ve prolijo en cualquier celu.</p>
-          <ThemeToggle variant="full" />
+          <ThemeToggle />
         </CardContent>
       </Card>
       <Card><CardHeader><CardTitle>Notificaciones</CardTitle></CardHeader>
