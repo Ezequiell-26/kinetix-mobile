@@ -88,6 +88,7 @@ Trackeados indebidos: `apps/mobile/.next/*`, `*.tsbuildinfo`, `prisma/*.db`, `pa
 - Tests: `test:stats` + `test:core` + `test:domain` (24 asserts) + `test:security` E2E (nuevo 2026-09-12: 20 asserts con login REAL, fixtures aisladas y control positivo anti-vacuo; el test anterior usaba tokens mock y borraba la DB — reemplazado). Total 69 pass. `test:security` es OPT-IN (requiere servidor vivo). Sin pirámide E2E de journeys aún.
 - CI: `.github/workflows/ci.yml` (typecheck+test+build) creado 2026-09-12. Línea base VERIFICADA: `tsc --noEmit` ✅ 0 errores · `npm run test` ✅ 25 pass (16 stats+voice, 9 core) · `npm run build` ✅ 35+ rutas compilan · login API ✅.
 - Scripts raíz con `--if-present` + `typecheck` agregado (2026-09-12; antes `npm run build --workspaces` rompía por paquetes sin script y AGENTS exigía un `typecheck` inexistente).
+- DEUDA "doble lock": hay `package-lock.json` en raíz y en `apps/mobile/`; `npm ci` a secas resuelve el RAÍZ (obsoleto) y falla. El CI usa `npm ci --prefix <ws>/apps/mobile` (lock verificado). Unificación real = quitar workspaces fantasmas (core/ai-models/native-modules sin package.json) y un solo lock; hasta entonces NO tocar el Install del CI.
 
 ## Incidente 2026-09-12 16:17 — dev.db borrada por sesión paralela
 

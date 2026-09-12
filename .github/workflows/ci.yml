@@ -27,7 +27,14 @@ jobs:
           cache-dependency-path: apps/mobile/package-lock.json
 
       - name: Install
-        run: npm ci
+        # Instalación standalone del miembro (igual que en dev local):
+        # el repo tiene workspaces declarados sin package.json
+        # (core/ai-models/native-modules), así que `npm ci` a secas
+        # resuelve el lock RAÍZ y falla. Con --prefix usa el lock
+        # verificado de apps/mobile. NO cambiar sin unificar workspaces
+        # (ver .ai/PROJECT_REALITY.md → deuda "doble lock").
+        run: npm ci --prefix ${{ github.workspace }}/apps/mobile
+        working-directory: .
 
       - name: Typecheck (0 errores)
         run: npm run typecheck
