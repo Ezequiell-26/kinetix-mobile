@@ -93,3 +93,6 @@ out/
 # también matchearía src/app/api/uploads/ (la ruta API, que SÍ se commitea).
 public/uploads/
 apps/mobile/uploads/
+
+# Uploads privados (fuera de public, servidos por /api/uploads/serve)
+storage/

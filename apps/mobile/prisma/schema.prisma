@@ -57,6 +57,7 @@ model User {
   notifications Notification[]
   checkIns CheckIn[]
   workoutLogs WorkoutLog[]
+  sessions Session[]
   progressMeasurements ProgressMeasurement[]
   progressPhotos ProgressPhoto[]
 
@@ -114,13 +115,14 @@ model Client {
   createdAt     DateTime @default(now())
   updatedAt     DateTime @updatedAt
   assignedProgramId String?
-  assignedProgram Program? @relation(fields: [assignedProgramId], references: [id])
+  assignedProgram Program? @relation(fields: [assignedProgramId], references: [id], onDelete: SetNull)
   workoutLogs   WorkoutLog[]
   checkIns      CheckIn[]
   messages      Message[]
   progressMeasurements ProgressMeasurement[]
   progressPhotos ProgressPhoto[]
   subscription  Subscription?
+  payments    Payment[]
 
   @@index([email])
   @@index([status])
@@ -360,6 +362,7 @@ model Subscription {
 model Payment {
   id        String @id @default(cuid())
   clientId  String?
+  client    Client? @relation(fields: [clientId], references: [id], onDelete: SetNull)
   email     String?
   amount    Float
   currency  String @default("ARS")
@@ -367,6 +370,7 @@ model Payment {
   method    String?
   date      DateTime @default(now())
   description String?
+  @@index([clientId])
 }
 
 // Recuperación de contraseña persistente (reemplaza el Map en memoria, que
@@ -383,4 +387,33 @@ model PasswordReset {
 
   @@index([email])
   @@index([expires])
+}
+
+model PasswordResetToken {
+  id        String   @id @default(cuid())
+  email     String
+  token     String   @unique
+  expiresAt DateTime
+  used      Boolean  @default(false)
+  createdAt DateTime @default(now())
+
+  @@index([email])
+  @@index([expiresAt])
+}
+
+model Session {
+  id        String   @id @default(cuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  token     String   @unique
+  userAgent String?
+  ipAddress String?
+  createdAt DateTime @default(now())
+  expiresAt DateTime
+  revoked   Boolean  @default(false)
+  lastUsed  DateTime @default(now())
+
+  @@index([userId])
+  @@index([token])
+  @@index([revoked])
 }

@@ -12,7 +12,7 @@ import { issueResetToken } from "@/lib/password-reset-store";
  */
 export async function POST(req: Request){
   const { email } = await req.json().catch(() => ({} as { email?: string }));
-  if(!email) return NextResponse.json({error:"Email requerido"},{status:400});
+  if(!email || !email.includes("@")) return NextResponse.json({error:"Email válido requerido"},{status:400});
 
   // Respuesta genérica siempre, para no filtrar si el email existe.
   const generic = {ok:true, message:"Si el email existe, recibirás instrucciones."};
