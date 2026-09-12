@@ -25,6 +25,12 @@
     "paths": {
       "@/*": [
         "./src/*"
+      ],
+      "@kinetix/shared": [
+        "../packages/shared/src"
+      ],
+      "@kinetix/shared/*": [
+        "../packages/shared/src/*"
       ]
     },
     "baseUrl": "."
