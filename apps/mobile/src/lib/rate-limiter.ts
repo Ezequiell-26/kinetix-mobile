@@ -137,10 +137,22 @@ export const RATE_LIMIT_PROFILES = {
  *    dejan pasar del cliente), o
  *  - un proxy propio (Caddy/Nginx/Ingress k8s) configurado para descartar
  *    cualquier X-Forwarded-For entrante del cliente y setear el suyo.
- * Sin esa variable, se usa `request.ip` (poblado por la plataforma en
- * Vercel, no spoofeable por el cliente) o "unknown" como último recurso.
- * "unknown" agrupa a todos los clientes sin proxy confiable en un mismo
- * balde de rate limit — no ideal, pero preferible a un límite evadible.
+ * Sin esa variable, se usa la IP que aporta la plataforma o "unknown" como
+ * último recurso. "unknown" agrupa a todos los clientes sin proxy confiable
+ * en un mismo balde de rate limit — no ideal, pero preferible a un límite
+ * evadible.
+ *
+ * OJO (Next.js 15): `NextRequest.ip` fue ELIMINADO de la API pública. El
+ * código anterior hacía `return req.ip || "unknown"`, así que en Next 15
+ * SIEMPRE devolvía "unknown" y todos los clientes compartían un único balde
+ * de 5 intentos/minuto: cualquiera podía dejar fuera del login al resto
+ * (DoS) y, a la vez, el atacante se auto-limitaba. Se corrige resolviendo la
+ * IP en este orden:
+ *   1. TRUST_PROXY_HEADERS=true  -> headers de proxy (proxy propio/Cloudflare)
+ *   2. Entorno Vercel (VERCEL=1) -> x-forwarded-for (Vercel lo sobreescribe
+ *      en su borde, el cliente no puede falsificarlo)
+ *   3. req.ip si el runtime todavía lo expone (compatibilidad)
+ *   4. "unknown"
  */
 export function getClientIp(req: { headers: Headers; ip?: string }): string {
   if (process.env.TRUST_PROXY_HEADERS === "true") {
@@ -150,5 +162,17 @@ export function getClientIp(req: { headers: Headers; ip?: string }): string {
       req.headers.get("cf-connecting-ip");
     if (forwarded) return forwarded;
   }
-  return req.ip || "unknown";
+
+  // Vercel sobreescribe x-forwarded-for en su borde con la IP real de
+  // conexión, por lo que no es spoofeable por el cliente.
+  if (process.env.VERCEL) {
+    const vercelIp =
+      req.headers.get("x-real-ip") ||
+      req.headers.get("x-forwarded-for")?.split(",")[0].trim();
+    if (vercelIp) return vercelIp;
+  }
+
+  if (req.ip) return req.ip;
+
+  return "unknown";
 }

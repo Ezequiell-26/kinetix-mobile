@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
 import { getSession } from "@/lib/auth";
-import { assertTrainerOwnsClient } from "@/lib/authorization";
+import { assertTrainerOwnsClient, resolveTrainerIdForClient } from "@/lib/authorization";
 
 export async function POST(req: Request){
   const s = await getSession();
@@ -84,11 +84,12 @@ export async function POST(req: Request){
 
   // If client finished a workout, create a notification for trainer
   if(s.role === "CLIENT"){
-    const trainer = await prisma.user.findFirst({where:{role:"TRAINER"}});
-    if(trainer){
+    // Al trainer dueño de la ficha, no al primer trainer de la base.
+    const trainerId = await resolveTrainerIdForClient(clientId);
+    if(trainerId){
       await prisma.notification.create({
         data:{
-          userId: trainer.id,
+          userId: trainerId,
           title: `${s.name} completó un entrenamiento`,
           body: `${workout.name} (${log.durationMin || 0} min)`,
           type: "workout",
@@ -139,9 +140,17 @@ export async function GET(req: Request){
     return NextResponse.json(logs);
   }
 
-  // All recent workouts for trainer
+  // All recent workouts for trainer — P0 Security: acotado a SUS clientes.
+  // Antes devolvía los logs de todo el sistema, incluyendo el objeto `user`
+  // completo (con el hash de password).
   const logs = await prisma.workoutLog.findMany({
-    include: { sets: true, workout: true, client: true, user: true },
+    where: { client: { trainerId: s.id } },
+    include: {
+      sets: true,
+      workout: true,
+      client: { select: { id: true, name: true, email: true, avatar: true } },
+      user: { select: { id: true, name: true, email: true, avatar: true } },
+    },
     orderBy: { date: "desc" },
     take: 50
   });

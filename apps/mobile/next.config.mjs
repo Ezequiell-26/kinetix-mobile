@@ -34,6 +34,15 @@ const nextConfig = {
     // next@15.5.24+ está instalado Y que el fix de libheif ya se propagó.
     formats: ["image/webp"],
     minimumCacheTTL: 60 * 60 * 24 * 30,
+    // Hosts externos permitidos para next/image. Sin esto, los avatares y las
+    // imagenes de Unsplash obligaban a usar <img> crudo (sin optimizacion ni
+    // lazy loading). Solo se listan dominios HTTPS concretos.
+    remotePatterns: [
+      { protocol: "https", hostname: "images.unsplash.com" },
+      { protocol: "https", hostname: "lh3.googleusercontent.com" },
+      { protocol: "https", hostname: "avatars.githubusercontent.com" },
+      { protocol: "https", hostname: "www.gravatar.com" },
+    ],
   },
   compress: true,
   // Permite un directorio de build alternativo (p. ej. si `.next` queda bloqueado).
@@ -82,7 +91,7 @@ const nextConfig = {
       {
         // Aplicar a todas las rutas excepto archivos estáticos.
         source:
-          "/((?!_next/static|_next/image|favicon.ico|icons|manifest.json).* )",
+          "/((?!_next/static|_next/image|favicon.ico|icons|manifest.json).*)",
         headers: [
           ...cspHeader,
           {

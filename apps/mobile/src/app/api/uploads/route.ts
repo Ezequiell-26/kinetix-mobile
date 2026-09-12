@@ -25,7 +25,10 @@ export async function POST(req: Request){
   const type = rawType;
   if(!file) return NextResponse.json({error:"Falta archivo"},{status:400});
   if(file.size > 5 * 1024 * 1024) return NextResponse.json({error:"Máx 5MB"},{status:400});
-  if(!(ALLOWED_MIME_TYPES as readonly string[]).includes(file.type) && !file.type.startsWith("image/")) return NextResponse.json({error:"Tipo no permitido"},{status:400});
+  // Allowlist estricta: el escape `|| file.type.startsWith("image/")` dejaba
+  // pasar `image/svg+xml`, que es un documento con scripts. La firma binaria
+  // de abajo lo rechazaba igual, pero la guarda era engañosa.
+  if(!(ALLOWED_MIME_TYPES as readonly string[]).includes(file.type)) return NextResponse.json({error:"Tipo no permitido"},{status:400});
 
   const bytes = await file.arrayBuffer();
   const buffer = Buffer.from(bytes);

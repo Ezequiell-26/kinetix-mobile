@@ -87,6 +87,12 @@ out/
 # SQLite (datos locales: cada dev genera los suyos con db:migrate + db:seed)
 *.db
 *.db-journal
+# Backups/copias de la base (dev.db.backup-AAAAMMDD, dev.db.bak, etc.).
+# El patron `*.db` NO cubria estos nombres, y `dev.db.backup-20260910` quedo
+# commiteado con hashes bcrypt de usuarios y datos de clientes.
+*.db.*
+*.sqlite
+*.sqlite3
 
 # Uploads de usuarios (se sirven por /api/uploads, nunca se commitean).
 # OJO: solo estos dos dirs de datos. NO usar `uploads/` a secas porque

@@ -24,7 +24,9 @@ export async function POST(req: Request){
   }
 
   const user = await prisma.user.findUnique({where:{email}});
-  if(!user) return NextResponse.json({error:"Usuario no encontrado"},{status:404});
+  // Anti-enumeración: el token ya se consumió, así que un email inexistente y
+  // un token inválido son indistinguibles para el llamador.
+  if(!user) return NextResponse.json({error:"Token inválido o expirado"},{status:403});
 
   const hashed = await hashPassword(password);
   await prisma.user.update({where:{email}, data:{password: hashed}});

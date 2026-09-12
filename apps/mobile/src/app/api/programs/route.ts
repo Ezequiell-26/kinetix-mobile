@@ -54,7 +54,10 @@ export async function GET(){
         select: { id: true, name: true }
       }
     },
-    orderBy: { updatedAt: "desc" }
+    orderBy: { updatedAt: "desc" },
+    // `take` explícito: antes se serializaba la biblioteca completa (programas
+    // → semanas → workouts → ejercicios → exercise) sin límite.
+    take: 50
   });
 
   return NextResponse.json(programs);
@@ -111,7 +114,7 @@ export async function POST(req: Request){
 
     return NextResponse.json(created);
   } catch (error: unknown) {
-    const msg = error instanceof Error ? error.message : "Error al guardar programa";
-    return NextResponse.json({error: msg}, {status: 500});
+    console.error("[programs:POST]", error);
+    return NextResponse.json({error: "No se pudo guardar el programa"}, {status: 500});
   }
 }

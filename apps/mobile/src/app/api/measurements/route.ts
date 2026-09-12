@@ -42,8 +42,11 @@ export async function GET(req: Request){
     return NextResponse.json(measurements);
   }
 
+  // P0 Security: sin clientId explícito, el trainer solo ve las mediciones de
+  // SUS clientes. Antes devolvía las de todo el sistema.
   const measurements = await prisma.progressMeasurement.findMany({
-    include: { client: true },
+    where: { client: { trainerId: s.id } },
+    include: { client: { select: { id: true, name: true, email: true, avatar: true } } },
     orderBy: { date: "desc" },
     take: 50
   });

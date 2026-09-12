@@ -146,7 +146,7 @@ export async function PATCH(
 
     return NextResponse.json(updated);
   } catch (error: unknown) {
-    const msg = error instanceof Error ? error.message : "Error al actualizar cliente";
-    return NextResponse.json({error: msg}, {status: 500});
+    console.error("[clients/:id:PATCH]", error);
+    return NextResponse.json({error: "No se pudo actualizar el cliente"}, {status: 500});
   }
 }

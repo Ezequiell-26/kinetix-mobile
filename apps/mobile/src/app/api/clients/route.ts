@@ -9,10 +9,16 @@ export async function GET(){
   if(s.role!=="TRAINER") return NextResponse.json({error:"Solo trainer"},{status:403});
   
   // P0: solo los clientes de ESTE trainer (ownership real por trainerId).
+  // `take` explícito: la lista crecía sin límite con cada cliente nuevo.
+  // Se traen solo los campos que consume la UI (antes `assignedProgram: true`
+  // serializaba el programa completo con sus fases y metadatos).
   const clients = await prisma.client.findMany({
     where:{trainerId:s.id},
-    orderBy:{createdAt:"desc"}, 
-    include:{assignedProgram:true}
+    orderBy:{createdAt:"desc"},
+    take: 200,
+    include:{
+      assignedProgram:{select:{id:true,name:true,frequency:true,durationWeeks:true}}
+    }
   });
   return NextResponse.json(clients);
 }

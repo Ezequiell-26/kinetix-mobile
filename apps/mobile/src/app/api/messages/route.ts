@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
 import { getSession } from "@/lib/auth";
-import { assertTrainerOwnsClient } from "@/lib/authorization";
+import { assertTrainerOwnsClient, resolveTrainerIdForClient } from "@/lib/authorization";
 
 export async function GET(req: Request){
   const s = await getSession();
@@ -9,13 +9,19 @@ export async function GET(req: Request){
   const url = new URL(req.url);
   const withUserId = url.searchParams.get("with");
   if(s.role==="CLIENT"){
-    const trainer = await prisma.user.findFirst({where:{role:"TRAINER"}});
-    if(!trainer) return NextResponse.json([]);
+    // El cliente conversa con SU trainer (Client.trainerId), no con el primer
+    // trainer de la base — con varios entrenadores eso cruzaba conversaciones.
+    const client = await prisma.client.findFirst({
+      where:{OR:[{userId:s.id},{email:s.email}]},
+      select:{id:true}
+    });
+    const trainerId = await resolveTrainerIdForClient(client?.id);
+    if(!trainerId) return NextResponse.json([]);
     const msgs = await prisma.message.findMany({
       where:{
         OR:[
-          {senderId: s.id, receiverId: trainer.id},
-          {senderId: trainer.id, receiverId: s.id},
+          {senderId: s.id, receiverId: trainerId},
+          {senderId: trainerId, receiverId: s.id},
         ]
       },
       orderBy:{createdAt:"asc"},
@@ -56,7 +62,12 @@ export async function GET(req: Request){
     where:{ OR:[{senderId: s.id}, {receiverId: s.id}]},
     orderBy:{createdAt:"desc"},
     take:50,
-    include:{sender:true, receiver:true}
+    // P0 Security: `include: {sender: true}` serializaba TODOS los campos del
+    // User, incluido el hash de password. Se usa un select explícito.
+    include:{
+      sender:{select:{id:true,name:true,email:true,avatar:true,role:true}},
+      receiver:{select:{id:true,name:true,email:true,avatar:true,role:true}}
+    }
   });
   return NextResponse.json(msgs);
 }
@@ -67,20 +78,45 @@ export async function POST(req: Request){
   const body = await req.json().catch(() => null);
   if(!body) return NextResponse.json({error:"Cuerpo requerido"},{status:400});
   let { receiverId, content, clientId } = body;
-  if(!content) return NextResponse.json({error:"Faltan datos"},{status:400});
-  // Auto-resolve trainer for CLIENT if no receiverId
-  if(s.role==="CLIENT" && !receiverId){
-    const trainer = await prisma.user.findFirst({where:{role:"TRAINER"}});
-    receiverId = trainer?.id;
+
+  // Validación: el contenido iba a Prisma sin límite (payload arbitrario en
+  // la DB y en la notificación).
+  if(typeof content !== "string" || content.trim().length === 0){
+    return NextResponse.json({error:"Faltan datos"},{status:400});
   }
-  if(!receiverId) return NextResponse.json({error:"Faltan datos"},{status:400});
-  // Security: CLIENT can only message their trainer
+  if(content.length > 4000){
+    return NextResponse.json({error:"El mensaje es demasiado largo (máx 4000)"},{status:400});
+  }
+
   if(s.role==="CLIENT"){
-    const trainer = await prisma.user.findFirst({where:{role:"TRAINER"}});
-    if(receiverId !== trainer?.id) return NextResponse.json({error:"No autorizado"},{status:403});
-    const client = await prisma.client.findFirst({where:{OR:[{userId:s.id},{email:s.email}]}});
+    const client = await prisma.client.findFirst({
+      where:{OR:[{userId:s.id},{email:s.email}]},
+      select:{id:true}
+    });
+    // El cliente solo puede escribir a SU trainer, no al primer trainer de la
+    // base ni a cualquier userId arbitrario.
+    const trainerId = await resolveTrainerIdForClient(client?.id);
+    if(!trainerId) return NextResponse.json({error:"No autorizado"},{status:403});
+    if(receiverId && receiverId !== trainerId){
+      return NextResponse.json({error:"No autorizado"},{status:403});
+    }
+    receiverId = trainerId;
     clientId = client?.id || null;
+  } else if(s.role === "TRAINER"){
+    // El trainer solo puede escribir a sus propios clientes.
+    if(!receiverId) return NextResponse.json({error:"Faltan datos"},{status:400});
+    const targetClient = await prisma.client.findFirst({
+      where:{userId: receiverId},
+      select:{id:true}
+    });
+    if(targetClient){
+      const owns = await assertTrainerOwnsClient(s.id, targetClient.id);
+      if(!owns) return NextResponse.json({error:"No autorizado"},{status:403});
+      clientId = targetClient.id;
+    }
   }
+
+  if(!receiverId) return NextResponse.json({error:"Faltan datos"},{status:400});
   const msg = await prisma.message.create({data:{
     senderId: s.id,
     receiverId,

@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
 import { getSession } from "@/lib/auth";
-import { assertTrainerOwnsClient } from "@/lib/authorization";
+import { assertTrainerOwnsClient, resolveTrainerIdForClient } from "@/lib/authorization";
 
 export async function GET(req: Request){
   const s = await getSession();
@@ -34,14 +34,21 @@ export async function GET(req: Request){
     }
     const checkins = await prisma.checkIn.findMany({
       where: { clientId },
-      include: { client: true },
-      orderBy: { date: "desc" }
+      include: { client: { select: { id: true, name: true, email: true, avatar: true } } },
+      orderBy: { date: "desc" },
+      take: 100
     });
     return NextResponse.json(checkins);
   }
 
+  // P0 Security: sin clientId explícito, el trainer solo ve los check-ins de
+  // SUS clientes (Client.trainerId). Antes devolvía los de todo el sistema.
   const checkins = await prisma.checkIn.findMany({
-    include: { client: true, user: true },
+    where: { client: { trainerId: s.id } },
+    include: {
+      client: { select: { id: true, name: true, email: true, avatar: true } },
+      user: { select: { id: true, name: true, email: true, avatar: true } },
+    },
     orderBy: { date: "desc" },
     take: 50
   });
@@ -146,7 +153,8 @@ export async function PATCH(req: Request){
 
     return NextResponse.json(updated);
   } catch (error: unknown) {
-    const msg = error instanceof Error ? error.message : "Error al actualizar check-in";
-    return NextResponse.json({error: msg}, {status: 500});
+    // No exponer detalles internos (nombres de constraints, rutas, etc.).
+    console.error("[checkins:PATCH]", error);
+    return NextResponse.json({error: "No se pudo actualizar el check-in"}, {status: 500});
   }
 }

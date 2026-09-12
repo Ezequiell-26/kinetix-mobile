@@ -29,7 +29,10 @@ export async function POST(req:Request){
     await setAuthCookie(token);
     return NextResponse.json({ok:true, role:user.role});
   }catch(e:unknown){
-    const msg = e instanceof Error ? e.message : "Error";
-    return NextResponse.json({error:msg},{status:400});
+    // Mensaje genérico: `e.message` de zod/Prisma revelaba rutas de campos y
+    // detalles del motor. Además, un body malformado no debe distinguirse de
+    // credenciales inválidas.
+    console.error("[auth/login]", e);
+    return NextResponse.json({error:"Credenciales inválidas"},{status:401});
   }
 }

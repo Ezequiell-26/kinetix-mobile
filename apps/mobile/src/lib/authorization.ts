@@ -28,6 +28,39 @@ export async function assertTrainerOwnsClient(
 }
 
 /**
+ * Resuelve el trainer que debe recibir las notificaciones de un cliente.
+ *
+ * Antes se usaba `prisma.user.findFirst({ where: { role: "TRAINER" } })`, que
+ * devuelve el PRIMER trainer de la base. Con más de un entrenador eso
+ * enrutaba las notificaciones de todos los clientes a un solo trainer.
+ * Acá se usa el dueño real de la ficha (Client.trainerId).
+ *
+ * @param clientId ficha del cliente (opcional)
+ * @param fallbackToAnyTrainer si no hay dueño, ¿usar el primer trainer? Se
+ *   mantiene en true para no romper instalaciones de un solo entrenador con
+ *   fichas históricas sin trainerId.
+ */
+export async function resolveTrainerIdForClient(
+  clientId: string | null | undefined,
+  fallbackToAnyTrainer = true
+): Promise<string | null> {
+  if (clientId) {
+    const client = await prisma.client.findUnique({
+      where: { id: clientId },
+      select: { trainerId: true },
+    });
+    if (client?.trainerId) return client.trainerId;
+  }
+  if (!fallbackToAnyTrainer) return null;
+  const anyTrainer = await prisma.user.findFirst({
+    where: { role: "TRAINER" },
+    select: { id: true },
+    orderBy: { createdAt: "asc" },
+  });
+  return anyTrainer?.id ?? null;
+}
+
+/**
  * Obtiene el clientId asociado a un usuario CLIENT.
  * Retorna null si el usuario no es CLIENT o no tiene cliente asociado.
  */

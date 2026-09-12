@@ -8,10 +8,21 @@ import { Input, Label } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle, CardDesc } from "@/components/ui/card";
 import { motion } from "framer-motion";
 
+// Los accesos de demostración se activan SOLO si el entorno define
+// NEXT_PUBLIC_DEMO_* (ver .env.example). Antes el email y la contraseña del
+// trainer estaban escritos en el código: se compilaban al bundle de cliente
+// y quedaban visibles para cualquiera que abriera el inspector, además de
+// venir precargados en el formulario.
+const DEMO_TRAINER_EMAIL = process.env.NEXT_PUBLIC_DEMO_TRAINER_EMAIL ?? "";
+const DEMO_TRAINER_PASSWORD = process.env.NEXT_PUBLIC_DEMO_TRAINER_PASSWORD ?? "";
+const DEMO_CLIENT_EMAIL = process.env.NEXT_PUBLIC_DEMO_CLIENT_EMAIL ?? "";
+const DEMO_CLIENT_PASSWORD = process.env.NEXT_PUBLIC_DEMO_CLIENT_PASSWORD ?? "";
+const SHOW_DEMO_BUTTONS = Boolean(DEMO_TRAINER_EMAIL && DEMO_CLIENT_EMAIL);
+
 export default function LoginPage() {
   const r = useRouter();
-  const [email, setEmail] = useState("ezequiel@ezequielcoaching.com");
-  const [password, setPassword] = useState("Admin123!");
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
   const [showPw, setShowPw] = useState(false);
   const [err, setErr] = useState("");
   const [loading, setLoading] = useState(false);
@@ -88,31 +99,33 @@ export default function LoginPage() {
               Atletas entrenando cada semana con Ezequiel
             </motion.div>
 
-            {/* Demo accounts */}
-            <div className="flex gap-2 justify-center pt-2">
-              <button
-                type="button"
-                onClick={() => {
-                  setEmail("ezequiel@ezequielcoaching.com");
-                  setPassword("Admin123!");
-                }}
-                className="group text-[11px] font-bold px-3.5 py-2 rounded-full bg-zinc-900/80 text-zinc-400 hover:text-white hover:bg-zinc-800 border border-zinc-800 hover:border-zinc-700 min-h-[36px] transition-all flex items-center gap-1.5"
-              >
-                <Dumbbell size={12} />
-                Trainer demo
-              </button>
-              <button
-                type="button"
-                onClick={() => {
-                  setEmail("martin@demo.com");
-                  setPassword("cliente123");
-                }}
-                className="group text-[11px] font-bold px-3.5 py-2 rounded-full bg-zinc-900/80 text-zinc-400 hover:text-white hover:bg-zinc-800 border border-zinc-800 hover:border-zinc-700 min-h-[36px] transition-all flex items-center gap-1.5"
-              >
-                <ArrowRight size={12} />
-                Cliente demo
-              </button>
-            </div>
+            {/* Accesos de demostración (solo si el entorno los habilita) */}
+            {SHOW_DEMO_BUTTONS && (
+              <div className="flex gap-2 justify-center pt-2">
+                <button
+                  type="button"
+                  onClick={() => {
+                    setEmail(DEMO_TRAINER_EMAIL);
+                    setPassword(DEMO_TRAINER_PASSWORD);
+                  }}
+                  className="group text-[11px] font-bold px-3.5 py-2 rounded-full bg-zinc-900/80 text-zinc-400 hover:text-white hover:bg-zinc-800 border border-zinc-800 hover:border-zinc-700 min-h-[36px] transition-all flex items-center gap-1.5"
+                >
+                  <Dumbbell size={12} aria-hidden="true" />
+                  Trainer demo
+                </button>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setEmail(DEMO_CLIENT_EMAIL);
+                    setPassword(DEMO_CLIENT_PASSWORD);
+                  }}
+                  className="group text-[11px] font-bold px-3.5 py-2 rounded-full bg-zinc-900/80 text-zinc-400 hover:text-white hover:bg-zinc-800 border border-zinc-800 hover:border-zinc-700 min-h-[36px] transition-all flex items-center gap-1.5"
+                >
+                  <ArrowRight size={12} aria-hidden="true" />
+                  Cliente demo
+                </button>
+              </div>
+            )}
           </CardHeader>
 
           <CardContent className="pb-8 pt-4">
@@ -210,7 +223,7 @@ export default function LoginPage() {
         </Card>
 
         {/* Footer */}
-        <p className="text-center text-[11px] text-zinc-600 mt-4">
+        <p className="text-center text-[11px] text-zinc-400 mt-4">
           KinetiX © 2026 · Tu mejor versión, cada día
         </p>
       </motion.div>
