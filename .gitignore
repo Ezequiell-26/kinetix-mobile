@@ -92,3 +92,4 @@ node_modules/
 # Cache
 .cache/
 *.pack
+packages/core/rust/target/
