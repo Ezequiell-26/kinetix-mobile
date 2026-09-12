@@ -21,7 +21,10 @@
   "dependencies": {
     "@hookform/resolvers": "^5.0.1",
     "@prisma/client": "^6.8.2",
+    "@react-three/drei": "^10.7.8",
+    "@react-three/fiber": "^9.7.0",
     "@sentry/nextjs": "^10.74.0",
+    "@types/three": "^0.186.0",
     "bcryptjs": "^3.0.2",
     "clsx": "^2.1.1",
     "date-fns": "^4.1.0",
@@ -35,6 +38,7 @@
     "react-hook-form": "^7.56.4",
     "recharts": "^2.13.0",
     "tailwind-merge": "^3.3.0",
+    "three": "^0.186.0",
     "zod": "^3.24.4"
   },
   "devDependencies": {

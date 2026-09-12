@@ -15,7 +15,8 @@ import {
   PeriodComparison,
   TrendAnalysis,
 } from '@/lib/progress-analyzer';
-import { FadeIn, FadeInUp, StaggeredList, ScaleIn } from './ui/animations';
+import { FadeIn, FadeInUp, ScaleIn } from './ui/animations';
+import { StaggerContainer as StaggeredList } from './ui/animations';
 import {
   TrendingUp,
   TrendingDown,

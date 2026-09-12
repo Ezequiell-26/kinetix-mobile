@@ -50,15 +50,6 @@ Sentry.init({
     return event;
   },
   
-  // Integrations
-  integrations: [
-    new Sentry.BrowserTracing({
-      // Route changes
-      routingInstrumentation: Sentry.nextRouterInstrumentation,
-    }),
-    new Sentry.Replay({
-      maskAllText: true,
-      blockAllMedia: true,
-    }),
-  ],
+  // Integrations - simplified for build compatibility
+  integrations: [],
 });
