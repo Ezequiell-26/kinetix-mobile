@@ -45,7 +45,30 @@ export async function middleware(req: NextRequest) {
   }
 
   // ────────────────────────────────────────────────────────────────
-  // 2. Auth + verificación de rol para rutas protegidas.
+  // 2. Raíz "/" session-aware: con sesión válida va al panel (evita el
+  //    flash de landing). Se hace AQUÍ y no con redirect() en page.tsx:
+  //    el redirect del Server Component llegaba serializado como error
+  //    (digest NEXT_REDIRECT en el stream RSC) en vez de 307.
+  // ────────────────────────────────────────────────────────────────
+  if (path === "/") {
+    const token = req.cookies.get("ec_token")?.value;
+    if (token) {
+      try {
+        const { payload } = await jose.jwtVerify(token, SECRET);
+        const role = (payload as unknown as { role: string }).role;
+        if (role === "TRAINER")
+          return NextResponse.redirect(new URL("/trainer/dashboard", req.url));
+        if (role === "CLIENT")
+          return NextResponse.redirect(new URL("/client/dashboard", req.url));
+      } catch {
+        // Token inválido: se muestra la landing (el login la reemplaza).
+      }
+    }
+    return NextResponse.next();
+  }
+
+  // ────────────────────────────────────────────────────────────────
+  // 3. Auth + verificación de rol para rutas protegidas.
   // ────────────────────────────────────────────────────────────────
   const isTrainer = path.startsWith("/trainer");
   const isClient = path.startsWith("/client");
@@ -92,7 +115,8 @@ function rateLimitResponse(resetMs: number) {
 
 export const config = {
   matcher: [
-    // Rutas protegidas (auth) + toda la API pública.
+    // Raíz session-aware (landing vs panel) + rutas protegidas + API.
+    "/",
     "/trainer/:path*",
     "/client/:path*",
     "/api/:path*",
