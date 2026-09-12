@@ -89,7 +89,15 @@ Trackeados indebidos: `apps/mobile/.next/*`, `*.tsbuildinfo`, `prisma/*.db`, `pa
 - CI: `.github/workflows/ci.yml` (typecheck+test+build) creado 2026-09-12. Línea base VERIFICADA: `tsc --noEmit` ✅ 0 errores · `npm run test` ✅ 25 pass (16 stats+voice, 9 core) · `npm run build` ✅ 35+ rutas compilan · login API ✅.
 - Scripts raíz con `--if-present` + `typecheck` agregado (2026-09-12; antes `npm run build --workspaces` rompía por paquetes sin script y AGENTS exigía un `typecheck` inexistente).
 
-## Fixes 2026-09-12 (sesión Hermes, SIN commitear — los sube Qwen)
+## Incidente 2026-09-12 16:17 — dev.db borrada por sesión paralela
+
+`prisma/dev.db` apareció en 0 bytes (tablas inexistentes → login 500 P2021).
+Recuperación (2 min, sin parar nada más): `npx prisma migrate deploy &&
+npx tsx prisma/seed.ts` desde `apps/mobile`. NO commitear dev.db jamás
+(está untrackeada a propósito): cada clon la regenera con migrate+seed.
+Si el login devuelve `The table main.User does not exist`, es esto.
+
+## Fixes 2026-09-12 (sesión Hermes, subidos en b2e46b1 + 8f13224)
 
 1. `apps/mobile/tsconfig.json`: `paths @kinetix/shared` `../` → `../../` (500 global).
 2. `apps/mobile/next.config.mjs`: CSP solo en prod + `cdn.jsdelivr.net` en style-src (blanco en dev).
