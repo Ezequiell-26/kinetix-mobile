@@ -23,7 +23,10 @@ export async function verifyToken(token:string):Promise<JWTPayload|null>{
 
 export async function setAuthCookie(token:string){
   const c = await cookies();
-  c.set(COOKIE_NAME, token, { httpOnly:true, secure:false, sameSite:"lax", maxAge:MAX_AGE, path:"/" });
+  // secure solo en producción HTTPS: con secure:true en http://localhost el
+  // navegador descarta la cookie y el login "funciona" pero nunca hay sesión.
+  const isProd = process.env.NODE_ENV === "production";
+  c.set(COOKIE_NAME, token, { httpOnly:true, secure:isProd, sameSite:"lax", maxAge:MAX_AGE, path:"/" });
 }
 export async function clearAuthCookie(){
   const c = await cookies();

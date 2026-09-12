@@ -90,7 +90,8 @@ Cargo.lock
 *.db
 *.db-journal
 
-# Uploads de usuarios (se sirven por /api/uploads, nunca se commitean)
+# Uploads de usuarios (se sirven por /api/uploads, nunca se commitean).
+# OJO: solo estos dos dirs de datos. NO usar `uploads/` a secas porque
+# también matchearía src/app/api/uploads/ (la ruta API, que SÍ se commitea).
 public/uploads/
-uploads/
->>>>>>> 1e68f0b (chore: untrack build artifacts, db files y node_modules)
+apps/mobile/uploads/

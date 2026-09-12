@@ -1,15 +1,12 @@
 import { redirect } from "next/navigation";
-import { cookies } from "next/headers";
-import * as jose from "jose";
+import { getSession } from "@/lib/auth";
+
+// La verificación usa getJwtSecret() (fail-closed en producción).
+// Antes había un fallback hardcodeado al secreto de dev que puenteaba
+// esa protección si JWT_SECRET no estaba definido.
 export default async function Home(){
-  const c = await cookies();
-  const t = c.get("ec_token")?.value;
-  if(!t) redirect("/login");
-  try{
-    const secret = new TextEncoder().encode(process.env.JWT_SECRET || "ezequiel-coaching-super-secret-jwt-32chars!");
-    const {payload} = await jose.jwtVerify(t, secret);
-    const role = (payload as unknown as {role:string}).role;
-    if(role==="TRAINER") redirect("/trainer/dashboard");
-    redirect("/client/dashboard");
-  }catch{ redirect("/login"); }
+  const s = await getSession();
+  if(!s) redirect("/login");
+  if(s.role==="TRAINER") redirect("/trainer/dashboard");
+  redirect("/client/dashboard");
 }

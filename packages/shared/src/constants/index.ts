@@ -364,7 +364,7 @@ export const ANIMATION = {
 } as const;
 
 export default {
-  APP_CONFIG,
+  BRAND,
   COLORS,
   SPACING,
   RADIUS,

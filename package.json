@@ -12,11 +12,12 @@
     "packages/native-modules"
   ],
   "scripts": {
-    "dev": "npm run dev --workspaces",
-    "build": "npm run build --workspaces",
-    "test": "npm run test --workspaces",
-    "lint": "npm run lint --workspaces",
-    "format": "npm run format --workspaces",
+    "dev": "npm run dev --workspaces --if-present",
+    "build": "npm run build --workspaces --if-present",
+    "test": "npm run test --workspaces --if-present",
+    "lint": "npm run lint --workspaces --if-present",
+    "typecheck": "npm run typecheck --workspaces --if-present",
+    "format": "npm run format --workspaces --if-present",
     "mobile": "npm -w apps/mobile run dev",
     "mobile:build": "npm -w apps/mobile run build",
     "clean": "npm run clean --workspaces && rm -rf node_modules .turbo"

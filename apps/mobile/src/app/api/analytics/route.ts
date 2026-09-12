@@ -1,16 +1,19 @@
 import { NextRequest, NextResponse } from "next/server";
+import { getSession, requireRole } from "@/lib/auth";
 import { prisma } from "@/lib/db";
 
 /**
- * POST /api/analytics
- * Store analytics events for custom tracking
+ * POST /api/analytics — ingesta de eventos (fire-and-forget).
+ * El userId se toma de la SESIÓN cuando existe; el `userId` del body se
+ * ignora (antes se aceptaba arbitrario sin auth). Sin sesión se acepta
+ * igual (endpoint de telemetría, no de datos) pero sin atribución.
  */
 export async function POST(req: NextRequest) {
   try {
+    const s = await getSession().catch(() => null);
     const body = await req.json();
-    const { event, properties, userId, timestamp, url, userAgent } = body;
+    const { event, properties, timestamp } = body;
 
-    // Validate required fields
     if (!event || !timestamp) {
       return NextResponse.json(
         { error: "Missing required fields" },
@@ -18,33 +21,15 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    // Store in database (optional - for custom analytics)
-    // You can create an AnalyticsEvent model in Prisma
-    // await prisma.analyticsEvent.create({
-    //   data: {
-    //     event,
-    //     properties: properties || {},
-    //     userId,
-    //     timestamp: new Date(timestamp),
-    //     url,
-    //     userAgent,
-    //   },
-    // });
-
-    // For now, just log to console in development
+    // Solo en desarrollo se loguea (no hay email real configurado).
+    // Nunca incluye secretos: event + userId de sesión + props.
     if (process.env.NODE_ENV === "development") {
       console.log("[Analytics Event]", {
         event,
-        userId,
+        userId: s?.id ?? null,
         properties,
       });
     }
-
-    // You could also send to external services here:
-    // - PostHog
-    // - Mixpanel
-    // - Amplitude
-    // - Custom data warehouse
 
     return NextResponse.json({ success: true });
   } catch (error) {
@@ -57,35 +42,83 @@ export async function POST(req: NextRequest) {
 }
 
 /**
- * GET /api/analytics
- * Retrieve analytics data (for trainer dashboard)
+ * GET /api/analytics — agregados REALES (solo TRAINER).
+ * Antes devolvía mock con ceros sin auth. Sin retención: no se inventa
+ * cohorte day1/day7/day30 — el campo se omite hasta implementarlo.
  */
 export async function GET(req: NextRequest) {
+  const t = await requireRole(["TRAINER"]);
+  if (!t) return NextResponse.json({ error: "No auth" }, { status: 401 });
+
   try {
-    // Get query params
     const { searchParams } = new URL(req.url);
-    const userId = searchParams.get("userId");
+    const clientId = searchParams.get("clientId");
     const startDate = searchParams.get("startDate");
     const endDate = searchParams.get("endDate");
 
-    // TODO: Implement actual analytics queries
-    // This would aggregate data from your AnalyticsEvent table
-    // or from external analytics services
+    if (clientId) {
+      const exists = await prisma.client.findUnique({
+        where: { id: clientId },
+        select: { id: true },
+      });
+      if (!exists)
+        return NextResponse.json(
+          { error: "Cliente inexistente" },
+          { status: 404 }
+        );
+    }
 
-    // For now, return mock data
-    const mockData = {
-      totalWorkouts: 0,
-      totalVolume: 0,
-      averageDuration: 0,
-      mostPopularExercises: [],
-      retention: {
-        day1: 0,
-        day7: 0,
-        day30: 0,
-      },
+    const date: { gte?: Date; lte?: Date } = {};
+    if (startDate) date.gte = new Date(startDate);
+    if (endDate) date.lte = new Date(endDate);
+    const where = {
+      completed: true,
+      ...(clientId ? { clientId } : {}),
+      ...(startDate || endDate ? { date } : {}),
     };
 
-    return NextResponse.json(mockData);
+    const [totalWorkouts, logs] = await Promise.all([
+      prisma.workoutLog.count({ where }),
+      prisma.workoutLog.findMany({
+        where,
+        select: {
+          durationMin: true,
+          sets: { select: { exerciseName: true, weight: true, reps: true } },
+        },
+      }),
+    ]);
+
+    let totalVolume = 0;
+    let durationSum = 0;
+    let durationN = 0;
+    const byExercise = new Map<string, number>();
+    for (const log of logs) {
+      if (log.durationMin != null) {
+        durationSum += log.durationMin;
+        durationN++;
+      }
+      for (const set of log.sets) {
+        totalVolume += (set.weight ?? 0) * (set.reps ?? 0);
+        byExercise.set(
+          set.exerciseName,
+          (byExercise.get(set.exerciseName) ?? 0) + 1
+        );
+      }
+    }
+
+    const mostPopularExercises = [...byExercise.entries()]
+      .sort((a, b) => b[1] - a[1])
+      .slice(0, 5)
+      .map(([name, sets]) => ({ name, sets }));
+
+    return NextResponse.json({
+      totalWorkouts,
+      totalVolume: Math.round(totalVolume * 100) / 100,
+      averageDuration: durationN
+        ? Math.round((durationSum / durationN) * 10) / 10
+        : 0,
+      mostPopularExercises,
+    });
   } catch (error) {
     console.error("Analytics GET error:", error);
     return NextResponse.json(

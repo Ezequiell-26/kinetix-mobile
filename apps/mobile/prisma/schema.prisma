@@ -258,6 +258,10 @@ model ProgressMeasurement {
   arm       Float?
   leg       Float?
   bodyFat   Float?
+
+  @@index([userId])
+  @@index([clientId])
+  @@index([date])
 }
 
 model ProgressPhoto {
@@ -270,6 +274,10 @@ model ProgressPhoto {
   date      DateTime @default(now())
   note      String?
   isPrivate Boolean @default(true)
+
+  @@index([userId])
+  @@index([clientId])
+  @@index([date])
 }
 
 model CheckIn {
@@ -295,6 +303,7 @@ model CheckIn {
   @@index([reviewed])
   @@index([date])
   @@index([clientId])
+  @@index([userId])
 }
 
 model Message {
@@ -312,6 +321,7 @@ model Message {
 
   @@index([read])
   @@index([receiverId])
+  @@index([senderId])
   @@index([createdAt])
 }
 
@@ -325,6 +335,9 @@ model Notification {
   read      Boolean @default(false)
   link      String?
   createdAt DateTime @default(now())
+
+  @@index([userId])
+  @@index([read])
 }
 
 model Subscription {

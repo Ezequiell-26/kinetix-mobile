@@ -94,11 +94,12 @@ export function ThemeProvider({
     return () => mediaQuery.removeEventListener("change", handleChange);
   }, [theme, mounted]);
 
-  // Prevent flash of wrong theme
-  if (!mounted) {
-    return <>{children}</>;
-  }
-
+  // El Provider se renderiza SIEMPRE, incluso en SSR/prerender (!mounted).
+  // Antes se retornaba <>{children}</> sin Provider y todo useTheme()
+  // (ThemeToggle en el chrome cliente/trainer) reventaba con 500
+  // "useTheme must be used within a ThemeProvider". El valor pre-mount
+  // usa los defaults del state; el script anti-FOUC del layout ya evita
+  // el flash de tema incorrecto.
   return (
     <ThemeContext.Provider value={{ theme, setTheme, resolvedTheme }}>
       {children}

@@ -31,7 +31,7 @@ const nextConfig = {
     const csp = [
       "default-src 'self'",
       "script-src 'self' 'unsafe-inline' https://www.googletagmanager.com https://www.google-analytics.com",
-      "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
+      "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://cdn.jsdelivr.net",
       "img-src 'self' data: blob: https: http:",
       "font-src 'self' https://fonts.gstatic.com",
       "connect-src 'self' https://*.sentry.io https://www.google-analytics.com",
@@ -41,15 +41,26 @@ const nextConfig = {
       "form-action 'self'",
     ].join("; ");
 
-    return [
-      {
-        // Aplicar a todas las rutas excepto archivos estáticos.
-        source: "/((?!_next/static|_next/image|favicon.ico|icons|manifest.json).*)",
-        headers: [
+    // En desarrollo Next.js (React Refresh) evalúa código al vuelo y el
+    // script-src sin 'unsafe-eval' deja la página en blanco (en consola:
+    // "EvalError ... violates ... Content Security Policy"). El CSP se
+    // aplica solo en producción.
+    const isDev = process.env.NODE_ENV === "development";
+    const cspHeader = isDev
+      ? []
+      : [
           {
             key: "Content-Security-Policy",
             value: csp,
           },
+        ];
+
+    return [
+      {
+        // Aplicar a todas las rutas excepto archivos estáticos.
+        source: "/((?!_next/static|_next/image|favicon.ico|icons|manifest.json).* )",
+        headers: [
+          ...cspHeader,
           {
             // Evita clickjacking: impide que la app se embeba en iframes externos.
             key: "X-Frame-Options",

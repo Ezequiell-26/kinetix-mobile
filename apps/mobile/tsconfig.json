@@ -27,10 +27,10 @@
         "./src/*"
       ],
       "@kinetix/shared": [
-        "../packages/shared/src"
+        "../../packages/shared/src"
       ],
       "@kinetix/shared/*": [
-        "../packages/shared/src/*"
+        "../../packages/shared/src/*"
       ]
     },
     "baseUrl": "."
