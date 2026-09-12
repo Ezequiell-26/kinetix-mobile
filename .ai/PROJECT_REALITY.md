@@ -22,8 +22,8 @@
 | `(auth)/register`, `forgot-password`          | IMPLEMENTED     | register fuerza `role:"CLIENT"`; reset con token 1 uso TTL 30min (store en memoria — se pierde al reiniciar)                                                                                                        |
 | `(client)/*` 16 rutas                         | PARTIAL         | 500 `useTheme...` CORREGIDO y VERIFICADO en vivo 2026-09-12: `/client/workout`, `/client/progress`, `/client/dashboard` → 200 con sesión real (causa: provider sin valor en SSR; fix: Provider siempre renderizado) |
 | `(trainer)/*` 14 rutas                        | PARTIAL         | Mismo 500 (mismo chrome). Mismo fix                                                                                                                                                                                 |
-| `loading.tsx` / `error.tsx` / `not-found.tsx` | NOT IMPLEMENTED | Cero archivos en `app/`. Existen `ui/skeleton`, `ui/loading-state`, `ui/empty-state` sin usar en rutas                                                                                                              |
-| UX states por página                          | PARTIAL         | dashboard: catch por fuente ✅; workout: `.catch(()=>null)`; progress/nutrition/messages: `catch{}` silenciosos ❌; messages: polling 3s + rollback optimista                                                       |
+| `loading.tsx` / `error.tsx` / `not-found.tsx` | IMPLEMENTED 2026-09-12 | Creados a nivel `app/` (loading con spinner+aria, error con retry, 404 con volver) |
+| UX states por página                          | PARTIAL→70%     | progress: banner error + retry ✅; messages: banner offline + error envío ✅ + empty honesto ✅; dashboard: catch por fuente ✅; nutrition: comentado (sin red) |
 
 ### DOMAIN (packages/shared/src)
 
@@ -75,7 +75,7 @@ Migraciones aplicadas ✅ · seed OK (trainer + 3 clientes demo + programa + men
 ### DUPLICADOS conocidos (V8 §8)
 
 - `command-palette.tsx` = shim de `command-palette-pro.tsx` ✅ resuelto.
-- `photo-compare.tsx` vs `photo-ai-compare.tsx` → DUPLICADO real, pendiente unificar.
+- `photo-compare.tsx` vs `photo-ai-compare.tsx` → RESUELTO 2026-09-12: el AI tenía medidas hardcodeadas falsas ("118→121cm"); migrado a `PhotoCompare` real y archivo borrado.
 - Timers: `timers-hub.tsx` ⊃ `hiit-timer.tsx` + ruta `client/timers` → pendiente unificar en Hub.
 - Nutrición fragmentada (nutrition-pro / macro-timing / food-database / openfoodfacts-pro) → pendiente diseño único.
 
@@ -85,7 +85,7 @@ Trackeados indebidos: `apps/mobile/.next/*`, `*.tsbuildinfo`, `prisma/*.db`, `pa
 
 ### TESTS / CI
 
-- Tests: `test:stats` + `test:core` (tsx puntuales). Sin pirámide (V8 §52 = REMAINING).
+- Tests: `test:stats` + `test:core` + `test:domain` (nuevo 2026-09-12: 24 asserts de dominio canónico — 16 músculos, registro, BMI/BMR/1RM). Total 49 pass. Sin pirámide E2E aún (V8 §52 = REMAINING).
 - CI: `.github/workflows/ci.yml` (typecheck+test+build) creado 2026-09-12. Línea base VERIFICADA: `tsc --noEmit` ✅ 0 errores · `npm run test` ✅ 25 pass (16 stats+voice, 9 core) · `npm run build` ✅ 35+ rutas compilan · login API ✅.
 - Scripts raíz con `--if-present` + `typecheck` agregado (2026-09-12; antes `npm run build --workspaces` rompía por paquetes sin script y AGENTS exigía un `typecheck` inexistente).
 

@@ -15,7 +15,8 @@
     "test:stats": "tsx tests/stats.test.ts",
     "test:voice": "tsx tests/voice-engine.test.ts",
     "test:core": "node -e \"require('fs').copyFileSync('prisma/dev.db','prisma/test-core.db')\" && tsx tests/program-edit.test.ts",
-    "test": "npm run test:stats && npm run test:core",
+    "test:domain": "tsx tests/domain.test.ts",
+    "test": "npm run test:stats && npm run test:core && npm run test:domain",
     "postinstall": "prisma generate",
     "prepare": "husky"
   },

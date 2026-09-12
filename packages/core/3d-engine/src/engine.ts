@@ -57,7 +57,9 @@ export class Kinetix3DEngine {
 
   private initWebGL(config: RenderConfig): void {
     if (!(this.canvas instanceof HTMLCanvasElement)) {
-      console.warn('Kinetix3DEngine: OffscreenCanvas not supported, falling back to 2D canvas');
+      // Honestidad V8 §30: este engine es WebGL en hilo principal. No existe
+      // OffscreenCanvas ni worker real; si el canvas no sirve, va a 2D.
+      console.warn('Kinetix3DEngine: canvas no utilizable, usando fallback 2D (sin OffscreenCanvas/workers)');
       this.initFallback();
       return;
     }

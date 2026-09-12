@@ -27,14 +27,19 @@ export default function NutritionPage(){
     try {
       const raw = localStorage.getItem(dayKey);
       if (raw) setToday(JSON.parse(raw) as DayFood[]);
-    } catch {}
+    } catch {
+      // JSON corrupto (ej. escritura interrumpida): se arranca el día vacío.
+      // No hay acción de red que reintentar, por eso no hay banner de error.
+    }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
   function persist(list: DayFood[]) {
     setToday(list);
     try {
       localStorage.setItem(dayKey, JSON.stringify(list));
-    } catch {}
+    } catch {
+      // Cuota llena o modo privado: el día vive solo en memoria esta sesión.
+    }
   }
   function addFood(f: { name: string; kcal?: number; calories?: number; p?: number; protein?: number; c?: number; carbs?: number; f?: number; fat?: number }) {
     persist([...today, {

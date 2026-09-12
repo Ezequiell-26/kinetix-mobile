@@ -26,6 +26,8 @@ export default function ClientMessagesPage(){
   const [input, setInput] = useState("");
   const [meId, setMeId] = useState("");
   const [sending, setSending] = useState(false);
+  const [loadError, setLoadError] = useState(false);
+  const [sendError, setSendError] = useState(false);
   const bottomRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
 
@@ -40,7 +42,10 @@ export default function ClientMessagesPage(){
         if (Array.isArray(data)) setMsgs(data);
       }
       if (meRes?.user?.id) setMeId(meRes.user.id);
-    } catch {}
+      setLoadError(false);
+    } catch {
+      setLoadError(true);
+    }
   }
 
   useEffect(() => {
@@ -57,6 +62,7 @@ export default function ClientMessagesPage(){
     const contentToSend = (customContent || input).trim();
     if (!contentToSend || sending) return;
     setSending(true);
+    setSendError(false);
     setInput("");
     const temp: Msg = {
       id: "tmp" + Date.now(),
@@ -75,11 +81,13 @@ export default function ClientMessagesPage(){
       });
       if (!res.ok) {
         setMsgs(m => m.filter(x => x.id !== temp.id));
+        setSendError(true);
       } else {
         load();
       }
     } catch {
       setMsgs(m => m.filter(x => x.id !== temp.id));
+      setSendError(true);
     } finally {
       setSending(false);
       inputRef.current?.focus();
@@ -121,6 +129,15 @@ export default function ClientMessagesPage(){
         </div>
 
         {/* Messages - premium canvas */}
+        {loadError && (
+          <button
+            role="alert"
+            onClick={() => { setLoadError(false); load(); }}
+            className="mx-3 mt-3 rounded-full bg-red-950/60 border border-red-900/50 text-zinc-300 text-xs font-bold px-4 py-2.5 min-h-[44px]"
+          >
+            Sin conexión — tocá para reintentar
+          </button>
+        )}
         <div
           className="chat-canvas flex-1 overflow-y-auto px-3 sm:px-6 py-4 space-y-2.5 overscroll-contain"
           style={{ WebkitOverflowScrolling: "touch" }}
@@ -178,6 +195,11 @@ export default function ClientMessagesPage(){
         </div>
 
         {/* Input pill - safe-area */}
+        {sendError && (
+          <p role="alert" className="px-4 pb-1 text-[11px] font-bold text-red-400">
+            No se pudo enviar el mensaje. Reintentá.
+          </p>
+        )}
         <div className="shrink-0 px-3 pt-1.5 bg-zinc-950/90 backdrop-blur-md pb-[calc(0.75rem+env(safe-area-inset-bottom))] sm:pb-3">
           <div className="flex gap-1.5 items-center bg-white/[0.05] border border-white/10 rounded-full pl-1 pr-1.5 py-1.5 focus-within:border-primary/50 transition">
             <MessageFileButton onFile={url => send(url)} />

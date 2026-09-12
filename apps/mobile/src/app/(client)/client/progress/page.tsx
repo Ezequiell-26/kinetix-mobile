@@ -14,7 +14,6 @@ import { OptiLiftsProgression } from "@/components/optilifts-progression";
 import { Achievements } from "@/components/achievements";
 import { PredictivePlateau } from "@/components/predictive-plateau";
 import { AkiloTracker } from "@/components/akilo-tracker";
-import { PhotoAiCompare } from "@/components/photo-ai-compare";
 import { HealthBox } from "@/components/healthbox";
 import { FitTrackeePro } from "@/components/fittrackee-pro";
 import { SleepTracker } from "@/components/sleep-tracker";
@@ -102,6 +101,7 @@ export default function ProgressPage(){
   const [checkinsCount, setCheckinsCount] = useState(0);
   const [summary, setSummary] = useState<Summary | null>(null);
   const [loading, setLoading] = useState(true);
+  const [loadError, setLoadError] = useState(false);
   const [programFrequency, setProgramFrequency] = useState<number | null>(null);
   const [muscleByName, setMuscleByName] = useState<Record<string, string>>({});
 
@@ -158,7 +158,10 @@ export default function ProgressPage(){
         const sm = await sRes.json();
         if (sm && typeof sm.totalWorkouts === "number") setSummary(sm as Summary);
       }
-    } catch {}
+      setLoadError(false);
+    } catch {
+      setLoadError(true);
+    }
     setLoading(false);
   }
 
@@ -251,6 +254,22 @@ export default function ProgressPage(){
 
   return (
     <div className="space-y-5">
+      {loadError && (
+        <div
+          role="alert"
+          className="rounded-2xl border border-red-900/50 bg-red-950/30 p-4 flex flex-col sm:flex-row sm:items-center gap-3"
+        >
+          <p className="text-sm text-zinc-300 flex-1">
+            No pudimos cargar tu progreso. Revisá tu conexión e intentá de nuevo.
+          </p>
+          <button
+            onClick={() => { setLoadError(false); loadData(); }}
+            className="min-h-[44px] px-5 rounded-full bg-[#D6FF2A] text-black text-sm font-black shrink-0"
+          >
+            Reintentar
+          </button>
+        </div>
+      )}
       {/* ── Header ───────────────────────────────────────────── */}
       <div className="flex flex-col sm:flex-row justify-between sm:items-center gap-3">
         <div>
@@ -541,7 +560,6 @@ export default function ProgressPage(){
                     <Badge variant="muted">Privado</Badge>
                   </CardHeader>
                   <CardContent className="p-4 space-y-4">
-                    <PhotoAiCompare />
                     <PhotoCompare
                       beforeUrl={beforePhoto?.url}
                       afterUrl={currentPhoto?.url || beforePhoto?.url}
