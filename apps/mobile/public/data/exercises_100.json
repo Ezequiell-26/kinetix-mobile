@@ -1,0 +1,1002 @@
+[
+  {
+    "id": "Alternating_Floor_Press",
+    "name": "Alternating Floor Press",
+    "muscleGroup": "chest",
+    "equipment": "kettlebells",
+    "level": "beginner",
+    "instructions": "Lie on the floor with two kettlebells next to your shoulders.",
+    "image": "/exercises/free/Alternating_Floor_Press.jpg",
+    "source": "free-exercise-db"
+  },
+  {
+    "id": "Around_The_Worlds",
+    "name": "Around The Worlds",
+    "muscleGroup": "chest",
+    "equipment": "dumbbell",
+    "level": "intermediate",
+    "instructions": "Lay down on a flat bench holding a dumbbell in each hand with the palms of the hands facing towards the ceiling. Tip: Your arms should be parallel to the floor and next to your thighs. To avoid injury, make sure that you keep your elbows slightly bent. This will be your starting position.",
+    "image": "/exercises/free/Around_The_Worlds.jpg",
+    "source": "free-exercise-db"
+  },
+  {
+    "id": "Barbell_Bench_Press_-_Medium_Grip",
+    "name": "Barbell Bench Press - Medium Grip",
+    "muscleGroup": "chest",
+    "equipment": "barbell",
+    "level": "beginner",
+    "instructions": "Lie back on a flat bench. Using a medium width grip (a grip that creates a 90-degree angle in the middle of the movement between the forearms and the upper arms), lift the bar from the rack and hold it straight over you with your arms locked. This will be your starting position.",
+    "image": "/exercises/free/Barbell_Bench_Press_-_Medium_Grip.jpg",
+    "source": "free-exercise-db"
+  },
+  {
+    "id": "Barbell_Guillotine_Bench_Press",
+    "name": "Barbell Guillotine Bench Press",
+    "muscleGroup": "chest",
+    "equipment": "barbell",
+    "level": "intermediate",
+    "instructions": "Using a medium width grip (a grip that creates a 90-degree angle in the middle of the movement between the forearms and the upper arms), lift the bar from the rack and hold it straight over your neck with your arms locked. This will be your starting position.",
+    "image": "/exercises/free/Barbell_Guillotine_Bench_Press.jpg",
+    "source": "free-exercise-db"
+  },
+  {
+    "id": "Barbell_Incline_Bench_Press_-_Medium_Grip",
+    "name": "Barbell Incline Bench Press - Medium Grip",
+    "muscleGroup": "chest",
+    "equipment": "barbell",
+    "level": "beginner",
+    "instructions": "Lie back on an incline bench. Using a medium-width grip (a grip that creates a 90-degree angle in the middle of the movement between the forearms and the upper arms), lift the bar from the rack and hold it straight over you with your arms locked. This will be your starting position.",
+    "image": "/exercises/free/Barbell_Incline_Bench_Press_-_Medium_Grip.jpg",
+    "source": "free-exercise-db"
+  },
+  {
+    "id": "Behind_Head_Chest_Stretch",
+    "name": "Behind Head Chest Stretch",
+    "muscleGroup": "chest",
+    "equipment": "other",
+    "level": "expert",
+    "instructions": "Sit upright on the floor with your partner behind you.",
+    "image": "/exercises/free/Behind_Head_Chest_Stretch.jpg",
+    "source": "free-exercise-db"
+  },
+  {
+    "id": "Alternating_Cable_Shoulder_Press",
+    "name": "Alternating Cable Shoulder Press",
+    "muscleGroup": "shoulders",
+    "equipment": "cable",
+    "level": "beginner",
+    "instructions": "Move the cables to the bottom of the tower and select an appropriate weight.",
+    "image": "/exercises/free/Alternating_Cable_Shoulder_Press.jpg",
+    "source": "free-exercise-db"
+  },
+  {
+    "id": "Alternating_Deltoid_Raise",
+    "name": "Alternating Deltoid Raise",
+    "muscleGroup": "shoulders",
+    "equipment": "dumbbell",
+    "level": "beginner",
+    "instructions": "In a standing position, hold a pair of dumbbells at your side.",
+    "image": "/exercises/free/Alternating_Deltoid_Raise.jpg",
+    "source": "free-exercise-db"
+  },
+  {
+    "id": "Alternating_Kettlebell_Press",
+    "name": "Alternating Kettlebell Press",
+    "muscleGroup": "shoulders",
+    "equipment": "kettlebells",
+    "level": "intermediate",
+    "instructions": "Clean two kettlebells to your shoulders. Clean the kettlebells to your shoulders by extending through the legs and hips as you pull the kettlebells towards your shoulders. Rotate your wrists as you do so.",
+    "image": "/exercises/free/Alternating_Kettlebell_Press.jpg",
+    "source": "free-exercise-db"
+  },
+  {
+    "id": "Anti-Gravity_Press",
+    "name": "Anti-Gravity Press",
+    "muscleGroup": "shoulders",
+    "equipment": "barbell",
+    "level": "beginner",
+    "instructions": "Place a bar on the ground behind the head of an incline bench.",
+    "image": "/exercises/free/Anti-Gravity_Press.jpg",
+    "source": "free-exercise-db"
+  },
+  {
+    "id": "Arm_Circles",
+    "name": "Arm Circles",
+    "muscleGroup": "shoulders",
+    "equipment": null,
+    "level": "beginner",
+    "instructions": "Stand up and extend your arms straight out by the sides. The arms should be parallel to the floor and perpendicular (90-degree angle) to your torso. This will be your starting position.",
+    "image": "/exercises/free/Arm_Circles.jpg",
+    "source": "free-exercise-db"
+  },
+  {
+    "id": "Arnold_Dumbbell_Press",
+    "name": "Arnold Dumbbell Press",
+    "muscleGroup": "shoulders",
+    "equipment": "dumbbell",
+    "level": "intermediate",
+    "instructions": "Sit on an exercise bench with back support and hold two dumbbells in front of you at about upper chest level with your palms facing your body and your elbows bent. Tip: Your arms should be next to your torso. The starting position should look like the contracted portion of a dumbbell curl.",
+    "image": "/exercises/free/Arnold_Dumbbell_Press.jpg",
+    "source": "free-exercise-db"
+  },
+  {
+    "id": "Alternate_Hammer_Curl",
+    "name": "Alternate Hammer Curl",
+    "muscleGroup": "biceps",
+    "equipment": "dumbbell",
+    "level": "beginner",
+    "instructions": "Stand up with your torso upright and a dumbbell in each hand being held at arms length. The elbows should be close to the torso.",
+    "image": "/exercises/free/Alternate_Hammer_Curl.jpg",
+    "source": "free-exercise-db"
+  },
+  {
+    "id": "Alternate_Incline_Dumbbell_Curl",
+    "name": "Alternate Incline Dumbbell Curl",
+    "muscleGroup": "biceps",
+    "equipment": "dumbbell",
+    "level": "beginner",
+    "instructions": "Sit down on an incline bench with a dumbbell in each hand being held at arms length. Tip: Keep the elbows close to the torso.This will be your starting position.",
+    "image": "/exercises/free/Alternate_Incline_Dumbbell_Curl.jpg",
+    "source": "free-exercise-db"
+  },
+  {
+    "id": "Barbell_Curl",
+    "name": "Barbell Curl",
+    "muscleGroup": "biceps",
+    "equipment": "barbell",
+    "level": "beginner",
+    "instructions": "Stand up with your torso upright while holding a barbell at a shoulder-width grip. The palm of your hands should be facing forward and the elbows should be close to the torso. This will be your starting position.",
+    "image": "/exercises/free/Barbell_Curl.jpg",
+    "source": "free-exercise-db"
+  },
+  {
+    "id": "Barbell_Curls_Lying_Against_An_Incline",
+    "name": "Barbell Curls Lying Against An Incline",
+    "muscleGroup": "biceps",
+    "equipment": "barbell",
+    "level": "beginner",
+    "instructions": "Lie against an incline bench, with your arms holding a barbell and hanging down in a horizontal line. This will be your starting position.",
+    "image": "/exercises/free/Barbell_Curls_Lying_Against_An_Incline.jpg",
+    "source": "free-exercise-db"
+  },
+  {
+    "id": "Brachialis-SMR",
+    "name": "Brachialis-SMR",
+    "muscleGroup": "biceps",
+    "equipment": "foam roll",
+    "level": "intermediate",
+    "instructions": "Lie on your side, with your upper arm against the foam roller. The upper arm should be more or less aligned with your body, with the outside of the bicep pressed against the foam roller.",
+    "image": "/exercises/free/Brachialis-SMR.jpg",
+    "source": "free-exercise-db"
+  },
+  {
+    "id": "Cable_Hammer_Curls_-_Rope_Attachment",
+    "name": "Cable Hammer Curls - Rope Attachment",
+    "muscleGroup": "biceps",
+    "equipment": "cable",
+    "level": "beginner",
+    "instructions": "Attach a rope attachment to a low pulley and stand facing the machine about 12 inches away from it.",
+    "image": "/exercises/free/Cable_Hammer_Curls_-_Rope_Attachment.jpg",
+    "source": "free-exercise-db"
+  },
+  {
+    "id": "Band_Skull_Crusher",
+    "name": "Band Skull Crusher",
+    "muscleGroup": "triceps",
+    "equipment": "bands",
+    "level": "beginner",
+    "instructions": "Secure a band to the base of a rack or the bench. Lay on the bench so that the band is lined up with your head.",
+    "image": "/exercises/free/Band_Skull_Crusher.jpg",
+    "source": "free-exercise-db"
+  },
+  {
+    "id": "Bench_Dips",
+    "name": "Bench Dips",
+    "muscleGroup": "triceps",
+    "equipment": "body only",
+    "level": "beginner",
+    "instructions": "For this exercise you will need to place a bench behind your back. With the bench perpendicular to your body, and while looking away from it, hold on to the bench on its edge with the hands fully extended, separated at shoulder width. The legs will be extended forward, bent at the waist and perpendicular to your torso. This will be your starting position.",
+    "image": "/exercises/free/Bench_Dips.jpg",
+    "source": "free-exercise-db"
+  },
+  {
+    "id": "Bench_Press_-_Powerlifting",
+    "name": "Bench Press - Powerlifting",
+    "muscleGroup": "triceps",
+    "equipment": "barbell",
+    "level": "intermediate",
+    "instructions": "Begin by lying on the bench, getting your head beyond the bar if possible. Tuck your feet underneath you and arch your back. Using the bar to help support your weight, lift your shoulder off the bench and retract them, squeezing the shoulder blades together. Use your feet to drive your traps into the bench. Maintain this tight body position throughout the movement.",
+    "image": "/exercises/free/Bench_Press_-_Powerlifting.jpg",
+    "source": "free-exercise-db"
+  },
+  {
+    "id": "Bench_Press_with_Chains",
+    "name": "Bench Press with Chains",
+    "muscleGroup": "triceps",
+    "equipment": "barbell",
+    "level": "expert",
+    "instructions": "Adjust the leader chain, shortening it to the desired length.Place the chains on the sleeves of the bar.",
+    "image": "/exercises/free/Bench_Press_with_Chains.jpg",
+    "source": "free-exercise-db"
+  },
+  {
+    "id": "Board_Press",
+    "name": "Board Press",
+    "muscleGroup": "triceps",
+    "equipment": "barbell",
+    "level": "intermediate",
+    "instructions": "Begin by lying on the bench, getting your head beyond the bar if possible. One to five boards, made out of 2x6's, can be screwed together and held in place by a training partner, bands, or just tucked under your shirt.",
+    "image": "/exercises/free/Board_Press.jpg",
+    "source": "free-exercise-db"
+  },
+  {
+    "id": "Body-Up",
+    "name": "Body-Up",
+    "muscleGroup": "triceps",
+    "equipment": "body only",
+    "level": "intermediate",
+    "instructions": "Assume a plank position on the ground. You should be supporting your bodyweight on your toes and forearms, keeping your torso straight. Your forearms should be shoulder-width apart. This will be your starting position.",
+    "image": "/exercises/free/Body-Up.jpg",
+    "source": "free-exercise-db"
+  },
+  {
+    "id": "3_4_Sit-Up",
+    "name": "3/4 Sit-Up",
+    "muscleGroup": "abdominals",
+    "equipment": "body only",
+    "level": "beginner",
+    "instructions": "Lie down on the floor and secure your feet. Your legs should be bent at the knees.",
+    "image": "/exercises/free/3_4_Sit-Up.jpg",
+    "source": "free-exercise-db"
+  },
+  {
+    "id": "Ab_Crunch_Machine",
+    "name": "Ab Crunch Machine",
+    "muscleGroup": "abdominals",
+    "equipment": "machine",
+    "level": "intermediate",
+    "instructions": "Select a light resistance and sit down on the ab machine placing your feet under the pads provided and grabbing the top handles. Your arms should be bent at a 90 degree angle as you rest the triceps on the pads provided. This will be your starting position.",
+    "image": "/exercises/free/Ab_Crunch_Machine.jpg",
+    "source": "free-exercise-db"
+  },
+  {
+    "id": "Ab_Roller",
+    "name": "Ab Roller",
+    "muscleGroup": "abdominals",
+    "equipment": "other",
+    "level": "intermediate",
+    "instructions": "Hold the Ab Roller with both hands and kneel on the floor.",
+    "image": "/exercises/free/Ab_Roller.jpg",
+    "source": "free-exercise-db"
+  },
+  {
+    "id": "Advanced_Kettlebell_Windmill",
+    "name": "Advanced Kettlebell Windmill",
+    "muscleGroup": "abdominals",
+    "equipment": "kettlebells",
+    "level": "intermediate",
+    "instructions": "Clean and press a kettlebell overhead with one arm.",
+    "image": "/exercises/free/Advanced_Kettlebell_Windmill.jpg",
+    "source": "free-exercise-db"
+  },
+  {
+    "id": "Air_Bike",
+    "name": "Air Bike",
+    "muscleGroup": "abdominals",
+    "equipment": "body only",
+    "level": "beginner",
+    "instructions": "Lie flat on the floor with your lower back pressed to the ground. For this exercise, you will need to put your hands beside your head. Be careful however to not strain with the neck as you perform it. Now lift your shoulders into the crunch position.",
+    "image": "/exercises/free/Air_Bike.jpg",
+    "source": "free-exercise-db"
+  },
+  {
+    "id": "Alternate_Heel_Touchers",
+    "name": "Alternate Heel Touchers",
+    "muscleGroup": "abdominals",
+    "equipment": "body only",
+    "level": "beginner",
+    "instructions": "Lie on the floor with the knees bent and the feet on the floor around 18-24 inches apart. Your arms should be extended by your side. This will be your starting position.",
+    "image": "/exercises/free/Alternate_Heel_Touchers.jpg",
+    "source": "free-exercise-db"
+  },
+  {
+    "id": "Ankle_On_The_Knee",
+    "name": "Ankle On The Knee",
+    "muscleGroup": "glutes",
+    "equipment": null,
+    "level": "beginner",
+    "instructions": "From a lying position, bend your knees and keep your feet on the floor.",
+    "image": "/exercises/free/Ankle_On_The_Knee.jpg",
+    "source": "free-exercise-db"
+  },
+  {
+    "id": "Barbell_Glute_Bridge",
+    "name": "Barbell Glute Bridge",
+    "muscleGroup": "glutes",
+    "equipment": "barbell",
+    "level": "intermediate",
+    "instructions": "Begin seated on the ground with a loaded barbell over your legs. Using a fat bar or having a pad on the bar can greatly reduce the discomfort caused by this exercise. Roll the bar so that it is directly above your hips, and lay down flat on the floor.",
+    "image": "/exercises/free/Barbell_Glute_Bridge.jpg",
+    "source": "free-exercise-db"
+  },
+  {
+    "id": "Barbell_Hip_Thrust",
+    "name": "Barbell Hip Thrust",
+    "muscleGroup": "glutes",
+    "equipment": "barbell",
+    "level": "intermediate",
+    "instructions": "Begin seated on the ground with a bench directly behind you. Have a loaded barbell over your legs. Using a fat bar or having a pad on the bar can greatly reduce the discomfort caused by this exercise.",
+    "image": "/exercises/free/Barbell_Hip_Thrust.jpg",
+    "source": "free-exercise-db"
+  },
+  {
+    "id": "Butt_Lift_Bridge",
+    "name": "Butt Lift (Bridge)",
+    "muscleGroup": "glutes",
+    "equipment": "body only",
+    "level": "beginner",
+    "instructions": "Lie flat on the floor on your back with the hands by your side and your knees bent. Your feet should be placed around shoulder width. This will be your starting position.",
+    "image": "/exercises/free/Butt_Lift_Bridge.jpg",
+    "source": "free-exercise-db"
+  },
+  {
+    "id": "Downward_Facing_Balance",
+    "name": "Downward Facing Balance",
+    "muscleGroup": "glutes",
+    "equipment": "exercise ball",
+    "level": "intermediate",
+    "instructions": "Lie facedown on top of an exercise ball.",
+    "image": "/exercises/free/Downward_Facing_Balance.jpg",
+    "source": "free-exercise-db"
+  },
+  {
+    "id": "Flutter_Kicks",
+    "name": "Flutter Kicks",
+    "muscleGroup": "glutes",
+    "equipment": "body only",
+    "level": "beginner",
+    "instructions": "On a flat bench lie facedown with the hips on the edge of the bench, the legs straight with toes high off the floor and with the arms on top of the bench holding on to the front edge.",
+    "image": "/exercises/free/Flutter_Kicks.jpg",
+    "source": "free-exercise-db"
+  },
+  {
+    "id": "h_3294",
+    "name": "Archer Push Up",
+    "muscleGroup": "Chest",
+    "equipment": "Body Weight",
+    "level": "Intermedio",
+    "instructions": "Comienza en posición de flexión de brazos con las manos un poco más separadas que el ancho de los hombros. Extiende un brazo hacia el lado, paralelo al suelo. Baja el cuerpo flexionando los codos, man",
+    "image": "/exercises/hasaneyldrm/3294-A9qxk2F.jpg",
+    "source": "hasaneyldrm"
+  },
+  {
+    "id": "h_0009",
+    "name": "Assisted Chest Dip (Kneeling)",
+    "muscleGroup": "Chest",
+    "equipment": "Leverage Machine",
+    "level": "Intermedio",
+    "instructions": "Ajusta la máquina a la altura deseada y asegura las rodillas sobre la almohadilla. Agarra las agarraderas con las palmas hacia abajo y los brazos completamente extendidos. Baja el cuerpo flexionando l",
+    "image": "/exercises/hasaneyldrm/0009-PAgTVaK.jpg",
+    "source": "hasaneyldrm"
+  },
+  {
+    "id": "h_1716",
+    "name": "Assisted Seated Pectoralis Major Stretch With Stability Ball",
+    "muscleGroup": "Chest",
+    "equipment": "Assisted",
+    "level": "Intermedio",
+    "instructions": "Siéntate sobre un balón de estabilidad con los pies apoyados en el suelo y la espalda recta. Sostén un balón de estabilidad con ambas manos y extiende los brazos rectos frente a ti. Baja lentamente el",
+    "image": "/exercises/hasaneyldrm/1716-RoV1Rfa.jpg",
+    "source": "hasaneyldrm"
+  },
+  {
+    "id": "h_2364",
+    "name": "Assisted Wide-Grip Chest Dip (Kneeling)",
+    "muscleGroup": "Chest",
+    "equipment": "Leverage Machine",
+    "level": "Intermedio",
+    "instructions": "Ajusta la máquina a la altura deseada y asegura las rodillas sobre la almohadilla. Agarra las agarraderas con un agarre amplio y mantén los codos ligeramente flexionados. Baja el cuerpo flexionando lo",
+    "image": "/exercises/hasaneyldrm/2364-PnZJIrk.jpg",
+    "source": "hasaneyldrm"
+  },
+  {
+    "id": "h_1254",
+    "name": "Band Bench Press",
+    "muscleGroup": "Chest",
+    "equipment": "Band",
+    "level": "Intermedio",
+    "instructions": "Túmbate sobre un banco con los pies apoyados en el suelo y la espalda presionada contra el banco. Agarra las agarraderas de la banda con un agarre prono, un poco más separadas que el ancho de los homb",
+    "image": "/exercises/hasaneyldrm/1254-khlHMqs.jpg",
+    "source": "hasaneyldrm"
+  },
+  {
+    "id": "h_0989",
+    "name": "Band One Arm Twisting Chest Press",
+    "muscleGroup": "Chest",
+    "equipment": "Band",
+    "level": "Intermedio",
+    "instructions": "Sujeta la banda a un punto de anclaje resistente a la altura del pecho. Ponte de pie con el costado hacia el punto de anclaje y agarra la banda con una mano. Aléjate del punto de anclaje para generar ",
+    "image": "/exercises/hasaneyldrm/0989-c16nYGA.jpg",
+    "source": "hasaneyldrm"
+  },
+  {
+    "id": "h_0025",
+    "name": "Barbell Bench Press",
+    "muscleGroup": "Chest",
+    "equipment": "Barbell",
+    "level": "Intermedio",
+    "instructions": "Túmbate sobre un banco con los pies apoyados en el suelo y la espalda presionada contra el banco. Agarra la barra con un agarre pronado un poco más ancho que la separación de los hombros. Levanta la b",
+    "image": "/exercises/hasaneyldrm/0025-EIeI8Vf.jpg",
+    "source": "hasaneyldrm"
+  },
+  {
+    "id": "h_0033",
+    "name": "Barbell Decline Bench Press",
+    "muscleGroup": "Chest",
+    "equipment": "Barbell",
+    "level": "Intermedio",
+    "instructions": "Túmbate en un banco declinado con los pies sujetos y la cabeza más baja que las caderas. Agarra la barra con un agarre pronado un poco más ancho que la separación de los hombros. Saca la barra del sop",
+    "image": "/exercises/hasaneyldrm/0033-GrO65fd.jpg",
+    "source": "hasaneyldrm"
+  },
+  {
+    "id": "h_0007",
+    "name": "Alternate Lateral Pulldown",
+    "muscleGroup": "Back",
+    "equipment": "Cable",
+    "level": "Intermedio",
+    "instructions": "Siéntate en la máquina de cable con la espalda recta y los pies apoyados en el suelo. Agarra las agarraderas con un agarre prono, un poco más separadas que el ancho de los hombros. Inclínate ligeramen",
+    "image": "/exercises/hasaneyldrm/0007-4IKbhHV.jpg",
+    "source": "hasaneyldrm"
+  },
+  {
+    "id": "h_3293",
+    "name": "Archer Pull Up",
+    "muscleGroup": "Back",
+    "equipment": "Body Weight",
+    "level": "Intermedio",
+    "instructions": "Comienza colgándote de una barra de dominadas con un agarre prono, un poco más separado que el ancho de los hombros. Activa el core y lleva los omóplatos hacia abajo y atrás. Mientras te elevas, flexi",
+    "image": "/exercises/hasaneyldrm/3293-72BC5Za.jpg",
+    "source": "hasaneyldrm"
+  },
+  {
+    "id": "h_0015",
+    "name": "Assisted Parallel Close Grip Pull-Up",
+    "muscleGroup": "Back",
+    "equipment": "Leverage Machine",
+    "level": "Intermedio",
+    "instructions": "Ajusta la máquina al peso y la altura deseados. Coloca las manos en las barras paralelas con un agarre cerrado, con las palmas mirándose entre sí. Cuélgate de las barras con los brazos completamente e",
+    "image": "/exercises/hasaneyldrm/0015-vrhHa6D.jpg",
+    "source": "hasaneyldrm"
+  },
+  {
+    "id": "h_0017",
+    "name": "Assisted Pull-Up",
+    "muscleGroup": "Back",
+    "equipment": "Leverage Machine",
+    "level": "Intermedio",
+    "instructions": "Ajusta la máquina a los valores de peso y altura deseados. Agarra las agarraderas con un agarre prono, un poco más separadas que el ancho de los hombros. Cuélgate con los brazos completamente extendid",
+    "image": "/exercises/hasaneyldrm/0017-kiJ4Z2K.jpg",
+    "source": "hasaneyldrm"
+  },
+  {
+    "id": "h_1431",
+    "name": "Assisted Standing Chin-Up",
+    "muscleGroup": "Back",
+    "equipment": "Leverage Machine",
+    "level": "Intermedio",
+    "instructions": "Ajusta la máquina al nivel de asistencia deseado. Sube a la plataforma para los pies y agarra las agarraderas con un agarre prono, un poco más separadas que el ancho de los hombros. Mantén el pecho ar",
+    "image": "/exercises/hasaneyldrm/1431-7OeHptV.jpg",
+    "source": "hasaneyldrm"
+  },
+  {
+    "id": "h_1432",
+    "name": "Assisted Standing Pull-Up",
+    "muscleGroup": "Back",
+    "equipment": "Leverage Machine",
+    "level": "Intermedio",
+    "instructions": "Ajusta la máquina a los valores de peso y altura deseados. Ponte de pie frente a la máquina con los pies separados a la altura de los hombros. Agarra las agarraderas con un agarre prono, un poco más s",
+    "image": "/exercises/hasaneyldrm/1432-f4xtKBj.jpg",
+    "source": "hasaneyldrm"
+  },
+  {
+    "id": "h_1314",
+    "name": "Back Extension On Exercise Ball",
+    "muscleGroup": "Back",
+    "equipment": "Stability Ball",
+    "level": "Intermedio",
+    "instructions": "Coloca el balón de estabilidad en el suelo y túmbate boca abajo sobre él, con las caderas apoyadas en el balón y los pies contra una pared u otra superficie estable. Coloca las manos detrás de la cabe",
+    "image": "/exercises/hasaneyldrm/1314-qLpO4vV.jpg",
+    "source": "hasaneyldrm"
+  },
+  {
+    "id": "h_3297",
+    "name": "Back Lever",
+    "muscleGroup": "Back",
+    "equipment": "Body Weight",
+    "level": "Intermedio",
+    "instructions": "Comienza colgándote de una barra de dominadas con un agarre prono, con las manos un poco más separadas que el ancho de los hombros. Activa el core y lleva los omóplatos hacia abajo y atrás. Flexiona l",
+    "image": "/exercises/hasaneyldrm/3297-GaSzzuh.jpg",
+    "source": "hasaneyldrm"
+  },
+  {
+    "id": "h_0001",
+    "name": "3/4 Sit-Up",
+    "muscleGroup": "Waist",
+    "equipment": "Body Weight",
+    "level": "Intermedio",
+    "instructions": "Túmbate sobre tu espalda con las rodillas flexionadas y los pies apoyados en el suelo. Coloca las manos detrás de la cabeza con los codos apuntando hacia afuera. Activando el abdomen, levanta lentamen",
+    "image": "/exercises/hasaneyldrm/0001-2gPfomN.jpg",
+    "source": "hasaneyldrm"
+  },
+  {
+    "id": "h_0002",
+    "name": "45° Side Bend",
+    "muscleGroup": "Waist",
+    "equipment": "Body Weight",
+    "level": "Intermedio",
+    "instructions": "Ponte de pie con los pies separados a la altura de los hombros y los brazos extendidos hacia abajo a los lados. Manteniendo la espalda recta y el core activado, flexiona lentamente el torso hacia un l",
+    "image": "/exercises/hasaneyldrm/0002-Hy9D21L.jpg",
+    "source": "hasaneyldrm"
+  },
+  {
+    "id": "h_0003",
+    "name": "Air Bike",
+    "muscleGroup": "Waist",
+    "equipment": "Body Weight",
+    "level": "Intermedio",
+    "instructions": "Túmbate sobre tu espalda con las manos colocadas detrás de la cabeza. Levanta las piernas del suelo y flexiona las rodillas formando un ángulo de 90 grados. Lleva el codo derecho hacia la rodilla izqu",
+    "image": "/exercises/hasaneyldrm/0003-1ZFqTDN.jpg",
+    "source": "hasaneyldrm"
+  },
+  {
+    "id": "h_0006",
+    "name": "Alternate Heel Touchers",
+    "muscleGroup": "Waist",
+    "equipment": "Body Weight",
+    "level": "Intermedio",
+    "instructions": "Túmbate sobre tu espalda con las rodillas flexionadas y los pies apoyados en el suelo. Extiende los brazos hacia los lados, paralelos al suelo. Activando el abdomen, levanta los hombros del suelo y ll",
+    "image": "/exercises/hasaneyldrm/0006-qaZVsGk.jpg",
+    "source": "hasaneyldrm"
+  },
+  {
+    "id": "h_2355",
+    "name": "Arm Slingers Hanging Bent Knee Legs",
+    "muscleGroup": "Waist",
+    "equipment": "Body Weight",
+    "level": "Intermedio",
+    "instructions": "Cuélgate de una barra de dominadas con los brazos completamente extendidos y las rodillas flexionadas formando un ángulo de 90 grados. Activa el core y levanta las rodillas hacia el pecho, acercándola",
+    "image": "/exercises/hasaneyldrm/2355-uWpxD4v.jpg",
+    "source": "hasaneyldrm"
+  },
+  {
+    "id": "h_2333",
+    "name": "Arm Slingers Hanging Straight Legs",
+    "muscleGroup": "Waist",
+    "equipment": "Body Weight",
+    "level": "Intermedio",
+    "instructions": "Cuélgate de una barra de dominadas con los brazos completamente extendidos y las piernas estiradas hacia abajo. Activa el core y levanta las piernas hacia adelante hasta que queden paralelas al suelo.",
+    "image": "/exercises/hasaneyldrm/2333-PXTIwgu.jpg",
+    "source": "hasaneyldrm"
+  },
+  {
+    "id": "h_3204",
+    "name": "Arms Overhead Full Sit-Up (Male)",
+    "muscleGroup": "Waist",
+    "equipment": "Body Weight",
+    "level": "Intermedio",
+    "instructions": "Túmbate sobre tu espalda con las rodillas flexionadas y los pies apoyados en el suelo. Extiende los brazos por encima de la cabeza, manteniéndolos rectos. Activando el abdomen, levanta lentamente la p",
+    "image": "/exercises/hasaneyldrm/3204-NAkmgdx.jpg",
+    "source": "hasaneyldrm"
+  },
+  {
+    "id": "h_0011",
+    "name": "Assisted Hanging Knee Raise",
+    "muscleGroup": "Waist",
+    "equipment": "Assisted",
+    "level": "Intermedio",
+    "instructions": "Cuélgate de una barra de dominadas con los brazos completamente extendidos y las palmas mirando hacia afuera. Activa el core y levanta las rodillas hacia el pecho, flexionando las caderas y las rodill",
+    "image": "/exercises/hasaneyldrm/0011-03lzqwk.jpg",
+    "source": "hasaneyldrm"
+  },
+  {
+    "id": "h_1512",
+    "name": "All Fours Squad Stretch",
+    "muscleGroup": "Upper Legs",
+    "equipment": "Body Weight",
+    "level": "Intermedio",
+    "instructions": "Comienza apoyado sobre manos y rodillas, con las manos justo debajo de los hombros y las rodillas justo debajo de las caderas. Extiende una pierna hacia atrás, manteniendo la rodilla flexionada y el p",
+    "image": "/exercises/hasaneyldrm/1512-qBcKorM.jpg",
+    "source": "hasaneyldrm"
+  },
+  {
+    "id": "h_3214",
+    "name": "Arms Apart Circular Toe Touch (Male)",
+    "muscleGroup": "Upper Legs",
+    "equipment": "Body Weight",
+    "level": "Intermedio",
+    "instructions": "Ponte de pie con los pies separados a la altura de los hombros y los brazos extendidos hacia los lados. Manteniendo las piernas rectas, flexiona el torso hacia adelante desde la cintura y lleva la man",
+    "image": "/exercises/hasaneyldrm/3214-RtyAsy1.jpg",
+    "source": "hasaneyldrm"
+  },
+  {
+    "id": "h_1709",
+    "name": "Assisted Lying Glutes Stretch",
+    "muscleGroup": "Upper Legs",
+    "equipment": "Assisted",
+    "level": "Intermedio",
+    "instructions": "Túmbate sobre tu espalda con las piernas extendidas. Flexiona la rodilla derecha y coloca el tobillo derecho sobre el muslo izquierdo, justo encima de la rodilla. Agarra el muslo izquierdo con ambas m",
+    "image": "/exercises/hasaneyldrm/1709-yn0LjwL.jpg",
+    "source": "hasaneyldrm"
+  },
+  {
+    "id": "h_1710",
+    "name": "Assisted Lying Gluteus And Piriformis Stretch",
+    "muscleGroup": "Upper Legs",
+    "equipment": "Assisted",
+    "level": "Intermedio",
+    "instructions": "Túmbate sobre tu espalda con las piernas extendidas. Flexiona la rodilla derecha y coloca el tobillo derecho sobre el muslo izquierdo, justo encima de la rodilla. Agarra el muslo izquierdo con ambas m",
+    "image": "/exercises/hasaneyldrm/1710-RQNVT10.jpg",
+    "source": "hasaneyldrm"
+  },
+  {
+    "id": "h_0016",
+    "name": "Assisted Prone Hamstring",
+    "muscleGroup": "Upper Legs",
+    "equipment": "Assisted",
+    "level": "Intermedio",
+    "instructions": "Túmbate boca abajo sobre una esterilla o un banco con las piernas completamente extendidas. Pide a un compañero o usa una banda elástica para sujetar tus tobillos. Activa los isquiotibiales y levanta ",
+    "image": "/exercises/hasaneyldrm/0016-VedGSby.jpg",
+    "source": "hasaneyldrm"
+  },
+  {
+    "id": "h_1713",
+    "name": "Assisted Prone Lying Quads Stretch",
+    "muscleGroup": "Upper Legs",
+    "equipment": "Assisted",
+    "level": "Intermedio",
+    "instructions": "Túmbate boca abajo en el suelo con las piernas extendidas. Flexiona la rodilla izquierda y lleva la mano izquierda hacia atrás para agarrar el pie o el tobillo izquierdo. Jala suavemente el pie izquie",
+    "image": "/exercises/hasaneyldrm/1713-YUYAMEj.jpg",
+    "source": "hasaneyldrm"
+  },
+  {
+    "id": "h_1712",
+    "name": "Assisted Side Lying Adductor Stretch",
+    "muscleGroup": "Upper Legs",
+    "equipment": "Assisted",
+    "level": "Intermedio",
+    "instructions": "Túmbate de lado con las piernas rectas y apiladas una sobre la otra. Flexiona ligeramente la pierna de abajo para mayor estabilidad. Coloca el pie de arriba sobre una superficie estable, como un banco",
+    "image": "/exercises/hasaneyldrm/1712-hC6oYY5.jpg",
+    "source": "hasaneyldrm"
+  },
+  {
+    "id": "h_1473",
+    "name": "Backward Jump",
+    "muscleGroup": "Upper Legs",
+    "equipment": "Body Weight",
+    "level": "Intermedio",
+    "instructions": "Ponte de pie con los pies separados a la altura de los hombros. Flexiona ligeramente las rodillas y salta hacia atrás, impulsándote con ambos pies. Aterriza suavemente sobre la punta de los pies, flex",
+    "image": "/exercises/hasaneyldrm/1473-SaDOwk7.jpg",
+    "source": "hasaneyldrm"
+  },
+  {
+    "id": "h_0977",
+    "name": "Band Front Lateral Raise",
+    "muscleGroup": "Shoulders",
+    "equipment": "Band",
+    "level": "Intermedio",
+    "instructions": "Ponte de pie con los pies separados a la altura de los hombros y sostén la banda frente a los muslos con las palmas hacia abajo. Mantén los brazos rectos y levanta la banda frente a ti hasta que los b",
+    "image": "/exercises/hasaneyldrm/0977-sTg7iys.jpg",
+    "source": "hasaneyldrm"
+  },
+  {
+    "id": "h_0978",
+    "name": "Band Front Raise",
+    "muscleGroup": "Shoulders",
+    "equipment": "Band",
+    "level": "Intermedio",
+    "instructions": "Ponte de pie con los pies separados a la altura de los hombros y sostén la banda frente a los muslos con las palmas hacia abajo. Mantén los brazos rectos y levántalos lentamente hacia adelante hasta q",
+    "image": "/exercises/hasaneyldrm/0978-TFA88iB.jpg",
+    "source": "hasaneyldrm"
+  },
+  {
+    "id": "h_0993",
+    "name": "Band Reverse Fly",
+    "muscleGroup": "Shoulders",
+    "equipment": "Band",
+    "level": "Intermedio",
+    "instructions": "Sujeta la banda a un objeto fijo a la altura del pecho. Ponte de pie con los pies separados a la altura de los hombros y sostén la banda con ambas manos frente a ti. Mantén los brazos rectos y levánta",
+    "image": "/exercises/hasaneyldrm/0993-sTfvVsG.jpg",
+    "source": "hasaneyldrm"
+  },
+  {
+    "id": "h_0997",
+    "name": "Band Shoulder Press",
+    "muscleGroup": "Shoulders",
+    "equipment": "Band",
+    "level": "Intermedio",
+    "instructions": "Ponte de pie con los pies separados a la altura de los hombros y coloca la banda bajo los pies. Sostén la banda con las palmas hacia adelante y eleva las manos a la altura de los hombros, con los codo",
+    "image": "/exercises/hasaneyldrm/0997-peAeMR3.jpg",
+    "source": "hasaneyldrm"
+  },
+  {
+    "id": "h_1022",
+    "name": "Band Standing Rear Delt Row",
+    "muscleGroup": "Shoulders",
+    "equipment": "Band",
+    "level": "Intermedio",
+    "instructions": "Ponte de pie con los pies separados a la altura de los hombros y coloca la banda bajo los pies. Sostén las agarraderas de la banda con las palmas mirándose entre sí y los brazos extendidos frente a ti",
+    "image": "/exercises/hasaneyldrm/1022-tc5dYrf.jpg",
+    "source": "hasaneyldrm"
+  },
+  {
+    "id": "h_1012",
+    "name": "Band Twisting Overhead Press",
+    "muscleGroup": "Shoulders",
+    "equipment": "Band",
+    "level": "Intermedio",
+    "instructions": "Ponte de pie con los pies separados a la altura de los hombros y coloca la banda bajo los pies. Sujeta las asas de la banda a la altura de los hombros con las palmas mirando hacia delante. Activa el c",
+    "image": "/exercises/hasaneyldrm/1012-u4bAmKp.jpg",
+    "source": "hasaneyldrm"
+  },
+  {
+    "id": "h_1017",
+    "name": "Band Y-Raise",
+    "muscleGroup": "Shoulders",
+    "equipment": "Band",
+    "level": "Intermedio",
+    "instructions": "Ponte de pie con los pies separados a la altura de los hombros y sujeta la banda frente a los muslos con las palmas mirando hacia adentro. Mantén los brazos rectos y levántalos hacia arriba y hacia lo",
+    "image": "/exercises/hasaneyldrm/1017-aHDy5O5.jpg",
+    "source": "hasaneyldrm"
+  },
+  {
+    "id": "h_0041",
+    "name": "Barbell Front Raise",
+    "muscleGroup": "Shoulders",
+    "equipment": "Barbell",
+    "level": "Intermedio",
+    "instructions": "Ponte de pie con los pies separados a la altura de los hombros y sujeta una barra frente a los muslos con un agarre pronado. Mantén los brazos rectos y levanta la barra hacia delante y hacia arriba ha",
+    "image": "/exercises/hasaneyldrm/0041-b2Uoz54.jpg",
+    "source": "hasaneyldrm"
+  },
+  {
+    "id": "h_0018",
+    "name": "Assisted Standing Triceps Extension (With Towel)",
+    "muscleGroup": "Upper Arms",
+    "equipment": "Assisted",
+    "level": "Intermedio",
+    "instructions": "Ponte de pie con los pies separados a la altura de los hombros y sostén una toalla con ambas manos detrás de la cabeza. Mantén los codos cerca de las orejas y la parte superior de los brazos quieta. E",
+    "image": "/exercises/hasaneyldrm/0018-7HcfMBP.jpg",
+    "source": "hasaneyldrm"
+  },
+  {
+    "id": "h_0019",
+    "name": "Assisted Triceps Dip (Kneeling)",
+    "muscleGroup": "Upper Arms",
+    "equipment": "Leverage Machine",
+    "level": "Intermedio",
+    "instructions": "Ajusta la máquina al peso y la altura deseados. Arrodíllate sobre la almohadilla frente a la máquina, con las manos sujetando las agarraderas. Baja el cuerpo flexionando los codos, manteniendo la espa",
+    "image": "/exercises/hasaneyldrm/0019-J60bN17.jpg",
+    "source": "hasaneyldrm"
+  },
+  {
+    "id": "h_0968",
+    "name": "Band Alternating Biceps Curl",
+    "muscleGroup": "Upper Arms",
+    "equipment": "Band",
+    "level": "Intermedio",
+    "instructions": "Ponte de pie con los pies separados a la altura de los hombros y sostén la banda con un agarre supino, con las palmas hacia arriba. Mantén los codos cerca de los costados y flexiona lentamente un braz",
+    "image": "/exercises/hasaneyldrm/0968-3omWx6P.jpg",
+    "source": "hasaneyldrm"
+  },
+  {
+    "id": "h_0975",
+    "name": "Band Close-Grip Push-Up",
+    "muscleGroup": "Upper Arms",
+    "equipment": "Band",
+    "level": "Intermedio",
+    "instructions": "Coloca una banda alrededor de la parte superior de los brazos, justo por encima de los codos. Adopta una posición de flexión de brazos con las manos justo debajo de los hombros y el cuerpo en línea re",
+    "image": "/exercises/hasaneyldrm/0975-ufaxB52.jpg",
+    "source": "hasaneyldrm"
+  },
+  {
+    "id": "h_0976",
+    "name": "Band Concentration Curl",
+    "muscleGroup": "Upper Arms",
+    "equipment": "Band",
+    "level": "Intermedio",
+    "instructions": "Siéntate en un banco o silla con las piernas separadas y los pies apoyados en el suelo. Sostén un extremo de la banda en la mano y pisa el otro extremo con el pie del mismo lado. Inclínate ligeramente",
+    "image": "/exercises/hasaneyldrm/0976-kmVVAfu.jpg",
+    "source": "hasaneyldrm"
+  },
+  {
+    "id": "h_0986",
+    "name": "Band One Arm Overhead Biceps Curl",
+    "muscleGroup": "Upper Arms",
+    "equipment": "Band",
+    "level": "Intermedio",
+    "instructions": "Ponte de pie con los pies separados a la altura de los hombros y coloca un extremo de la banda bajo el pie. Sostén el otro extremo de la banda con el brazo completamente extendido por encima de la cab",
+    "image": "/exercises/hasaneyldrm/0986-UNAB8ak.jpg",
+    "source": "hasaneyldrm"
+  },
+  {
+    "id": "h_0998",
+    "name": "Band Side Triceps Extension",
+    "muscleGroup": "Upper Arms",
+    "equipment": "Band",
+    "level": "Intermedio",
+    "instructions": "Ponte de pie con los pies separados a la altura de los hombros y sostén la banda con ambas manos, con las palmas hacia abajo. Extiende los brazos hacia los lados, manteniéndolos paralelos al suelo. Fl",
+    "image": "/exercises/hasaneyldrm/0998-obe5LMq.jpg",
+    "source": "hasaneyldrm"
+  },
+  {
+    "id": "h_0023",
+    "name": "Barbell Alternate Biceps Curl",
+    "muscleGroup": "Upper Arms",
+    "equipment": "Barbell",
+    "level": "Intermedio",
+    "instructions": "Ponte de pie con los pies separados a la altura de los hombros y sujeta una barra en cada mano, con las palmas mirando hacia delante. Mantén los brazos superiores fijos y exhala mientras levantas el p",
+    "image": "/exercises/hasaneyldrm/0023-Yza7XrQ.jpg",
+    "source": "hasaneyldrm"
+  },
+  {
+    "id": "h_1368",
+    "name": "Ankle Circles",
+    "muscleGroup": "Lower Legs",
+    "equipment": "Body Weight",
+    "level": "Intermedio",
+    "instructions": "Siéntate en el suelo con las piernas extendidas frente a ti. Levanta una pierna del suelo y rota el tobillo con un movimiento circular. Realiza el número de círculos deseado en una dirección, luego ca",
+    "image": "/exercises/hasaneyldrm/1368-uL9CsKm.jpg",
+    "source": "hasaneyldrm"
+  },
+  {
+    "id": "h_1708",
+    "name": "Assisted Lying Calves Stretch",
+    "muscleGroup": "Lower Legs",
+    "equipment": "Assisted",
+    "level": "Intermedio",
+    "instructions": "Túmbate sobre tu espalda con las piernas extendidas. Flexiona una rodilla y coloca el pie plano sobre el suelo. Con las manos o una toalla, jala suavemente los dedos del pie hacia tu cuerpo, sintiendo",
+    "image": "/exercises/hasaneyldrm/1708-GxDwDX0.jpg",
+    "source": "hasaneyldrm"
+  },
+  {
+    "id": "h_0999",
+    "name": "Band Single Leg Calf Raise",
+    "muscleGroup": "Lower Legs",
+    "equipment": "Band",
+    "level": "Intermedio",
+    "instructions": "Ponte de pie con los pies separados a la altura de las caderas y coloca la banda alrededor de la base de los dedos del pie izquierdo. Sujétate de un objeto estable para mantener el equilibrio si es ne",
+    "image": "/exercises/hasaneyldrm/0999-9JprnPh.jpg",
+    "source": "hasaneyldrm"
+  },
+  {
+    "id": "h_1000",
+    "name": "Band Single Leg Reverse Calf Raise",
+    "muscleGroup": "Lower Legs",
+    "equipment": "Band",
+    "level": "Intermedio",
+    "instructions": "Ponte de pie con los pies separados a la altura de las caderas y coloca la banda alrededor de la base de los dedos del pie. Sujétate de un objeto estable para mantener el equilibrio. Levanta lentament",
+    "image": "/exercises/hasaneyldrm/1000-QsSQWbf.jpg",
+    "source": "hasaneyldrm"
+  },
+  {
+    "id": "h_1369",
+    "name": "Band Two Legs Calf Raise - (Band Under Both Legs) V. 2",
+    "muscleGroup": "Lower Legs",
+    "equipment": "Band",
+    "level": "Intermedio",
+    "instructions": "Ponte de pie con los pies separados a la altura de los hombros y coloca una banda elástica bajo ambos pies. Sujeta los extremos de la banda con las manos para mantener el equilibrio. Levanta los talon",
+    "image": "/exercises/hasaneyldrm/1369-jl6uxZV.jpg",
+    "source": "hasaneyldrm"
+  },
+  {
+    "id": "h_1370",
+    "name": "Barbell Floor Calf Raise",
+    "muscleGroup": "Lower Legs",
+    "equipment": "Barbell",
+    "level": "Intermedio",
+    "instructions": "Coloca una barra en el suelo frente a ti. Ponte de pie con la parte delantera de los pies sobre el borde de la barra, dejando los talones colgando. Sujétate de un objeto estable para mantener el equil",
+    "image": "/exercises/hasaneyldrm/1370-2IHEa2T.jpg",
+    "source": "hasaneyldrm"
+  },
+  {
+    "id": "h_0088",
+    "name": "Barbell Seated Calf Raise",
+    "muscleGroup": "Lower Legs",
+    "equipment": "Barbell",
+    "level": "Intermedio",
+    "instructions": "Siéntate en un banco con los pies planos sobre el suelo y una barra apoyada sobre los muslos. Coloca la parte delantera de los pies sobre una plataforma elevada, como un bloque o un escalón. Coloca la",
+    "image": "/exercises/hasaneyldrm/0088-ktsFQAZ.jpg",
+    "source": "hasaneyldrm"
+  },
+  {
+    "id": "h_1371",
+    "name": "Barbell Seated Calf Raise",
+    "muscleGroup": "Lower Legs",
+    "equipment": "Barbell",
+    "level": "Intermedio",
+    "instructions": "Siéntate en un banco con los pies planos sobre el suelo y una barra apoyada sobre los muslos. Coloca la parte delantera de los pies sobre una plataforma elevada, como un bloque o un escalón. Baja los ",
+    "image": "/exercises/hasaneyldrm/1371-ipvgBnC.jpg",
+    "source": "hasaneyldrm"
+  },
+  {
+    "id": "h_3220",
+    "name": "Astride Jumps (Male)",
+    "muscleGroup": "Cardio",
+    "equipment": "Body Weight",
+    "level": "Intermedio",
+    "instructions": "Ponte de pie con los pies separados a la altura de los hombros. Flexiona las rodillas y baja el cuerpo hacia una posición de sentadilla. Salta explosivamente hacia arriba, extendiendo las piernas y lo",
+    "image": "/exercises/hasaneyldrm/3220-f9lVSSI.jpg",
+    "source": "hasaneyldrm"
+  },
+  {
+    "id": "h_3672",
+    "name": "Back And Forth Step",
+    "muscleGroup": "Cardio",
+    "equipment": "Body Weight",
+    "level": "Intermedio",
+    "instructions": "Ponte de pie con los pies separados a la altura de los hombros. Da un paso adelante con el pie derecho, flexionando la rodilla y bajando el cuerpo hacia una posición de zancada. Empuja con el pie dere",
+    "image": "/exercises/hasaneyldrm/3672-fNGumX0.jpg",
+    "source": "hasaneyldrm"
+  },
+  {
+    "id": "h_3360",
+    "name": "Bear Crawl",
+    "muscleGroup": "Cardio",
+    "equipment": "Body Weight",
+    "level": "Intermedio",
+    "instructions": "Comienza apoyado sobre manos y rodillas, con las manos justo debajo de los hombros y las rodillas justo debajo de las caderas. Levanta las rodillas ligeramente del suelo, manteniendo la espalda plana ",
+    "image": "/exercises/hasaneyldrm/3360-0Yz8WdV.jpg",
+    "source": "hasaneyldrm"
+  },
+  {
+    "id": "h_1160",
+    "name": "Burpee",
+    "muscleGroup": "Cardio",
+    "equipment": "Body Weight",
+    "level": "Intermedio",
+    "instructions": "Comienza de pie con los pies separados a la altura de los hombros. Baja el cuerpo hacia una posición de sentadilla flexionando las rodillas y colocando las manos en el suelo frente a ti. Lleva los pie",
+    "image": "/exercises/hasaneyldrm/1160-dK9394r.jpg",
+    "source": "hasaneyldrm"
+  },
+  {
+    "id": "h_2331",
+    "name": "Cycle Cross Trainer",
+    "muscleGroup": "Cardio",
+    "equipment": "Leverage Machine",
+    "level": "Intermedio",
+    "instructions": "Ajusta la altura del asiento y colócate en la bicicleta elíptica. Coloca los pies en los pedales y sujeta el manillar. Comienza a pedalear con un movimiento suave y controlado. Mantén un ritmo constan",
+    "image": "/exercises/hasaneyldrm/2331-XSCHmiI.jpg",
+    "source": "hasaneyldrm"
+  },
+  {
+    "id": "h_1201",
+    "name": "Dumbbell Burpee",
+    "muscleGroup": "Cardio",
+    "equipment": "Dumbbell",
+    "level": "Intermedio",
+    "instructions": "Comienza de pie con los pies separados a la altura de los hombros y una mancuerna en cada mano. Baja el cuerpo a una posición de sentadilla, colocando las mancuernas en el suelo frente a ti. Lleva los",
+    "image": "/exercises/hasaneyldrm/1201-0JtKWum.jpg",
+    "source": "hasaneyldrm"
+  },
+  {
+    "id": "h_3221",
+    "name": "Half Knee Bends (Male)",
+    "muscleGroup": "Cardio",
+    "equipment": "Body Weight",
+    "level": "Intermedio",
+    "instructions": "Ponte de pie con los pies separados a la altura de los hombros. Dobla las rodillas y baja el cuerpo como si te fueras a sentar en una silla. Mantén el pecho elevado y el peso en los talones. Haz una p",
+    "image": "/exercises/hasaneyldrm/3221-ia6kIIl.jpg",
+    "source": "hasaneyldrm"
+  },
+  {
+    "id": "h_3636",
+    "name": "High Knee Against Wall",
+    "muscleGroup": "Cardio",
+    "equipment": "Body Weight",
+    "level": "Intermedio",
+    "instructions": "Ponte de pie frente a una pared con los pies separados a la altura de las caderas. Coloca las manos en la pared para mayor apoyo. Activa el core y levanta la rodilla derecha hacia el pecho, mientras m",
+    "image": "/exercises/hasaneyldrm/3636-ealLwvX.jpg",
+    "source": "hasaneyldrm"
+  }
+]

@@ -1,0 +1,645 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Fuentes via next/font (variables --font-inter/--font-display en <body>) */
+
+:root {
+  /* ===== DARK MODE (default) ===== */
+  --primary: 52 211 153;        /* emerald-400 */
+  --primary-hover: 110 231 183; /* emerald-300 */
+  --surface: 14 22 32;          /* obsidian slate */
+  --surface-elevated: 19 30 44;   /* elevated slate */
+  --subtle: 30 45 62;           /* subtle slate border */
+  --success: 52 211 153;
+  --warning: 251 191 36;        /* amber-400 */
+  --danger: 248 113 113;        /* red-400 */
+  --info: 56 189 248;           /* sky-400 */
+  --ai: 167 139 250;            /* violet-400 */
+  --premium: 167 139 250;
+  --background: 206 33% 5%;
+  --foreground: 0 0% 98%;
+  --card: 208 39% 9%;
+  --card-foreground: 0 0% 98%;
+  --border: 208 35% 18%;
+  --accent: 160 84% 39%;
+  --safe-top: env(safe-area-inset-top);
+  --safe-bottom: env(safe-area-inset-bottom);
+}
+
+/* ===== LIGHT MODE ===== */
+.light {
+  --primary: 16 185 129;        /* emerald-500 */
+  --primary-hover: 5 150 105;   /* emerald-600 */
+  --surface: 255 255 255;       /* white */
+  --surface-elevated: 249 250 251; /* gray-50 */
+  --subtle: 229 231 235;        /* gray-200 */
+  --success: 16 185 129;
+  --warning: 245 158 11;        /* amber-500 */
+  --danger: 239 68 68;          /* red-500 */
+  --info: 14 165 233;           /* sky-500 */
+  --ai: 139 92 246;             /* violet-500 */
+  --premium: 139 92 246;
+  --background: 0 0% 100%;
+  --foreground: 0 0% 3.9%;
+  --card: 0 0% 100%;
+  --card-foreground: 0 0% 3.9%;
+  --border: 0 0% 89.8%;
+  --accent: 160 84% 39%;
+}
+
+.light body {
+  background: #FFFFFF;
+  color: #0F0F0F;
+}
+
+.light .bg-zinc-950 {
+  background-color: #F9FAFB;
+}
+
+.light .bg-zinc-900 {
+  background-color: #FFFFFF;
+}
+
+.light .bg-zinc-800 {
+  background-color: #F3F4F6;
+}
+
+.light .text-white {
+  color: #0F0F0F;
+}
+
+.light .text-zinc-400 {
+  color: #6B7280;
+}
+
+.light .text-zinc-500 {
+  color: #6B7280;
+}
+
+.light .border-zinc-800 {
+  border-color: #E5E7EB;
+}
+
+.light .bg-surface {
+  background-color: rgb(var(--surface));
+}
+
+.light .bg-surface\/40 {
+  background-color: rgba(var(--surface), 0.4);
+}
+
+.light .border-subtle {
+  border-color: rgb(var(--subtle));
+}
+* { border-color: hsl(var(--border)); }
+html { scroll-behavior: smooth; -webkit-text-size-adjust: 100%; transition: background-color 0.3s ease; }
+/* ===== TEMA OSCURO FITSYNC: azul-negro obsidiana premium ===== */
+html:not(.light) body { background: #080D11; }
+html:not(.light) .bg-\[\#080808\] { background-color: #080D11; }
+html:not(.light) .bg-\[\#080808\]\/80 { background-color: rgba(8,13,17,0.85); }
+html:not(.light) .bg-\[\#0F0F0F\] { background-color: #0C131A; }
+html:not(.light) .bg-\[\#111111\] { background-color: #0E1620; }
+html:not(.light) * { scrollbar-color: #1e2d3d #080D11; }
+html:not(.light) ::-webkit-scrollbar-track { background: #080D11; }
+html:not(.light) ::-webkit-scrollbar-thumb { background: #1e2d3d; }
+body {
+  background: #080D11;
+  color: #FAFAFA;
+  font-family: var(--font-inter), system-ui, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  overscroll-behavior-y: contain;
+  -webkit-tap-highlight-color: transparent;
+  padding-top: env(safe-area-inset-top);
+  transition: background-color 0.3s ease, color 0.3s ease;
+  position: relative;
+}
+/* ===== Textura premium de fondo: viñeta obsidiana + grano sutil ===== */
+body::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  background:
+    radial-gradient(ellipse 80% 60% at 15% -10%, rgba(52,211,153,0.07), transparent 55%),
+    radial-gradient(ellipse 60% 40% at 85% 110%, rgba(52,211,153,0.04), transparent 55%),
+    radial-gradient(ellipse 100% 70% at 50% -5%, rgba(14,22,32,0.8), transparent 50%),
+    radial-gradient(ellipse 120% 80% at 50% 0%, rgba(0,0,0,0), rgba(0,0,0,0.45) 100%);
+}
+body::after {
+  content: '';
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  opacity: 0.035;
+  mix-blend-mode: overlay;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+}
+html.light body::before { background: radial-gradient(ellipse 80% 60% at 15% -10%, rgba(5,150,105,0.05), transparent 60%); }
+html.light body::after { opacity: 0.015; }
+#__next, body > div, main { position: relative; z-index: 1; }
+h1,h2,h3 { font-family: var(--font-display), 'Space Grotesk', sans-serif; letter-spacing: -0.02em; }
+::-webkit-scrollbar { width: 6px; height: 6px; }
+::-webkit-scrollbar-thumb { background: #1e2d3d; border-radius: 999px; transition: background 0.2s; }
+::-webkit-scrollbar-track { background: transparent; }
+/* Premium selection */
+::selection { background: var(--primary); color: #000; }
+html.light ::selection { background: #0A0A0A; color: #fff; }
+/* Premium focus */
+*:focus-visible { outline: 2px solid var(--primary); outline-offset: 2px; }
+html.light *:focus-visible { outline-color: #0A0A0A; }
+/* PWA standalone */
+@media (display-mode: standalone) {
+  body { background: #080D11; }
+}
+@media (display-mode: standalone) {
+  html.light body { background: #FAFAFA; }
+}
+/* iOS safe bottom for fixed navs */
+@supports (padding: env(safe-area-inset-bottom)) {
+  .safe-bottom { padding-bottom: env(safe-area-inset-bottom); }
+}
+
+/* ===== TEMA CLARO PREMIUM — paleta completa y consistente =====
+   Dirección: página blanca, superficies gris muy claro, acento lima intacto.
+   El acento como TEXTO se oscurece a lime-700 para contraste AA sobre blanco. */
+html.light {
+  --primary: 5 150 105;         /* emerald-600 (AA sobre blanco) */
+  --primary-hover: 4 120 87;    /* emerald-700 */
+  --surface: 242 242 242;
+  --surface-elevated: 247 247 248;
+  --subtle: 228 228 231;
+  --success: 5 150 105;
+  --warning: 217 119 6;
+  --danger: 220 38 38;
+  --info: 2 132 199;
+  --ai: 124 58 237;
+  --premium: 124 58 237;
+  --background: 0 0% 100%;
+  --foreground: 0 0% 3.5%;
+  --card: 0 0% 98%;
+  --card-foreground: 0 0% 3.5%;
+  --border: 0 0% 90%;
+  /* El offset del anillo de foco debe ser claro: en oscuro es #080808 */
+  --tw-ring-offset-color: #FAFAFA;
+}
+html.light body {
+  background: #FAFAFA;
+  color: #18181B;
+}
+html.light h1, html.light h2, html.light h3 { color: #0A0A0A; }
+html.light ::-webkit-scrollbar-thumb { background: #D4D4D8; }
+html.light ::-webkit-scrollbar-track { background: transparent; }
+html.light * { scrollbar-color: #D4D4D8 #FAFAFA; }
+
+/* --- Fondos: páginas, navs, drawers --- */
+html.light .bg-\[\#080808\] { background-color: #FAFAFA !important; }
+html.light .bg-\[\#080808\]\/80 { background-color: rgba(250,250,250,0.85) !important; }
+html.light .bg-\[\#0F0F0F\] { background-color: #FFFFFF !important; }
+html.light .bg-\[\#111111\] { background-color: #FFFFFF !important; }
+html.light .bg-zinc-950 { background-color: #F4F4F5 !important; }
+html.light .bg-zinc-950\/50 { background-color: rgba(244,244,245,0.6) !important; }
+html.light .bg-zinc-900 { background-color: #F2F2F2 !important; }
+html.light .bg-zinc-900\/30 { background-color: rgba(242,242,242,0.4) !important; }
+html.light .bg-zinc-900\/50 { background-color: rgba(242,242,242,0.6) !important; }
+html.light .bg-zinc-900\/60 { background-color: rgba(242,242,242,0.7) !important; }
+html.light .bg-zinc-900\/80 { background-color: rgba(242,242,242,0.85) !important; }
+html.light .bg-zinc-900\/90 { background-color: #F2F2F2 !important; }
+html.light .bg-zinc-900\/95 { background-color: #F4F4F5 !important; }
+html.light .bg-zinc-950\/80 { background-color: rgba(244,244,245,0.9) !important; }
+html.light .bg-zinc-950\/60 { background-color: rgba(244,244,245,0.7) !important; }
+html.light .bg-zinc-800 { background-color: #E4E4E7 !important; }
+html.light .bg-black\/60 { background-color: rgba(0,0,0,0.25) !important; }
+/* Overlay de drawer: veladura clara */
+html.light .bg-black\/60.backdrop-blur-sm { background-color: rgba(250,250,250,0.6) !important; }
+html.light .glass { background: rgba(255,255,255,0.8); border: 1px solid rgba(228,228,231,0.9); }
+
+/* --- Bordes --- */
+html.light .border-zinc-900 { border-color: #EFEFEF !important; }
+html.light .border-zinc-800 { border-color: #E4E4E7 !important; }
+html.light .border-zinc-700 { border-color: #D4D4D8 !important; }
+html.light .border-zinc-600 { border-color: #C4C4CD !important; }
+html.light .border-white { border-color: #0A0A0A !important; }
+html.light .hover\:border-zinc-700:hover { border-color: #C4C4CD !important; }
+html.light .hover\:border-zinc-600:hover { border-color: #A1A1AA !important; }
+html.light .hover\:border-zinc-500:hover { border-color: #71717A !important; }
+
+/* --- Textos: contraste AA real --- */
+html.light .text-white { color: #0A0A0A !important; }
+html.light .text-zinc-100 { color: #18181B !important; }
+html.light .text-zinc-200 { color: #27272A !important; }
+html.light .text-zinc-300 { color: #3F3F46 !important; }
+html.light .text-zinc-400 { color: #52525B !important; }
+html.light .text-zinc-500 { color: #71717A !important; }
+html.light .text-zinc-600 { color: #8E8E99 !important; }
+/* Acento lima como texto: ilegible sobre blanco -> lime-700 (mismo tono de marca, AA) */
+html.light .hover\:text-white:hover { color: #0A0A0A !important; }
+
+/* --- Selección secundaria: chip blanco con borde negro (sin invertir) --- */
+html.light .bg-white { background-color: #FFFFFF !important; }
+/* OJO: text-black NO se toca — sobre botones lima (bg-primary text-black)
+   debe seguir siendo negro. La versión anterior lo invertía a blanco y
+   hacía los botones lima ilegibles en modo claro. */
+
+/* --- Estados hover --- */
+html.light .hover\:bg-zinc-900:hover { background-color: #E9E9EC !important; }
+html.light .hover\:bg-zinc-800:hover { background-color: #E0E0E3 !important; }
+html.light .hover\:bg-zinc-950:hover { background-color: #E4E4E7 !important; }
+
+/* --- Gradientes decorativos (from/via/to zinc y hex oscuros) --- */
+html.light .from-zinc-900 { --tw-gradient-from: #F2F2F2 !important; }
+html.light .from-zinc-950 { --tw-gradient-from: #F7F7F8 !important; }
+html.light .via-zinc-900 { --tw-gradient-stops: var(--tw-gradient-from), #F0F0F1 var(--tw-gradient-via-position), var(--tw-gradient-to) !important; }
+html.light .via-zinc-950 { --tw-gradient-stops: var(--tw-gradient-from), #F4F4F5 var(--tw-gradient-via-position), var(--tw-gradient-to) !important; }
+html.light .to-zinc-900 { --tw-gradient-to: #EFEFEF !important; }
+html.light .to-zinc-950 { --tw-gradient-to: #F4F4F5 !important; }
+html.light .from-\[\#111111\] { --tw-gradient-from: #F5F5F6 !important; }
+html.light .to-\[\#111111\] { --tw-gradient-to: #F5F5F6 !important; }
+html.light .from-\[\#0F0F0F\] { --tw-gradient-from: #F6F6F7 !important; }
+html.light .to-\[\#080808\] { --tw-gradient-to: #FAFAFA !important; }
+html.light .via-\[\#111111\] { --tw-gradient-stops: var(--tw-gradient-from), #F2F2F3 var(--tw-gradient-via-position), var(--tw-gradient-to) !important; }
+
+/* --- Sombras: en claro deben ser sutiles --- */
+html.light .shadow-2xl { box-shadow: 0 8px 30px rgba(0,0,0,0.08) !important; }
+html.light .shadow-lg { box-shadow: 0 4px 16px rgba(0,0,0,0.06) !important; }
+html.light .card-premium:hover { box-shadow: 0 8px 24px rgba(0,0,0,0.08), 0 0 0 1px rgba(228,228,231,0.9); }
+html.light .shimmer::after { background: linear-gradient(90deg, transparent, rgba(0,0,0,0.04), transparent); }
+
+/* --- Inputs: fondos y bordes en modo claro --- */
+html.light input.bg-zinc-900,
+html.light textarea.bg-zinc-900,
+html.light select.bg-zinc-900 {
+  background-color: #FFFFFF !important;
+  border-color: #D4D4D8 !important;
+  color: #18181B !important;
+}
+html.light input.bg-zinc-900::placeholder,
+html.light textarea.bg-zinc-900::placeholder {
+  color: #A1A1AA !important;
+}
+html.light input.bg-zinc-900:focus,
+html.light textarea.bg-zinc-900:focus,
+html.light select.bg-zinc-900:focus {
+  border-color: rgb(var(--primary)) !important;
+  box-shadow: 0 0 0 3px rgba(5,150,105,0.12) !important;
+}
+
+/* --- Badges: adaptables al modo claro --- */
+html.light .bg-zinc-900.text-zinc-300.border-zinc-800 {
+  background-color: #F4F4F5 !important;
+  color: #3F3F46 !important;
+  border-color: #E4E4E7 !important;
+}
+html.light .bg-zinc-800.text-zinc-400.border-zinc-700 {
+  background-color: #E4E4E7 !important;
+  color: #52525B !important;
+  border-color: #D4D4D8 !important;
+}
+html.light .bg-emerald-500\/10.text-emerald-400.border-emerald-500\/20 {
+  background-color: rgba(5,150,105,0.08) !important;
+  color: #047857 !important;
+  border-color: rgba(5,150,105,0.2) !important;
+}
+html.light .bg-amber-500\/10.text-amber-400.border-amber-500\/20 {
+  background-color: rgba(217,119,6,0.08) !important;
+  color: #B45309 !important;
+  border-color: rgba(217,119,6,0.2) !important;
+}
+
+/* --- Progress bars: track en modo claro --- */
+html.light .bg-zinc-800 {
+  background-color: #E4E4E7 !important;
+}
+
+/* --- Pills/chips interiores: fondos oscuros dentro de cards --- */
+html.light .bg-zinc-950\/60 {
+  background-color: rgba(244,244,245,0.8) !important;
+}
+html.light .bg-zinc-950 {
+  background-color: #F4F4F5 !important;
+}
+
+/* --- Botones: modo claro --- */
+html.light .bg-zinc-900.text-white.hover\:bg-zinc-800 {
+  background-color: #F4F4F5 !important;
+  color: #18181B !important;
+  border-color: #E4E4E7 !important;
+}
+html.light .bg-zinc-900.text-white.hover\:bg-zinc-800:hover {
+  background-color: #E4E4E7 !important;
+}
+html.light .border-zinc-700.text-zinc-100.hover\:bg-zinc-900 {
+  border-color: #D4D4D8 !important;
+  color: #18181B !important;
+}
+html.light .border-zinc-700.text-zinc-100.hover\:bg-zinc-900:hover {
+  background-color: #F4F4F5 !important;
+  border-color: #A1A1AA !important;
+}
+html.light .bg-transparent.text-zinc-400.hover\:text-white:hover {
+  color: #18181B !important;
+  background-color: #F4F4F5 !important;
+}
+
+/* --- Botones demo en login: claros --- */
+html.light .bg-zinc-900\/80 {
+  background-color: #F4F4F5 !important;
+}
+html.light .border-zinc-800 {
+  border-color: #E4E4E7 !important;
+}
+
+/* --- Textos en modo claro: asegurar contraste --- */
+html.light .text-zinc-300 {
+  color: #3F3F46 !important;
+}
+html.light .text-zinc-200 {
+  color: #27272A !important;
+}
+
+/* --- Dividers y separadores --- */
+html.light .divide-zinc-800 > * + * {
+  border-color: #E4E4E7 !important;
+}
+html.light .divide-subtle > * + * {
+  border-color: #E4E4E7 !important;
+}
+
+/* --- Focus ring offset en modo claro (debe ser claro sobre fondo claro) --- */
+html.light .focus-visible\:ring-offset-\[\#080808\]:focus-visible {
+  --tw-ring-offset-color: #FAFAFA !important;
+}
+
+/* --- Scrollbars en modo claro --- */
+html.light * {
+  scrollbar-color: #D4D4D8 #FAFAFA;
+}
+html.light ::-webkit-scrollbar-thumb {
+  background: #D4D4D8 !important;
+}
+html.light ::-webkit-scrollbar-track {
+  background: transparent !important;
+}
+
+/* --- Nav iconos y labels en modo claro --- */
+html.light .nav-icon { color: #71717A; }
+html.light .nav-icon-active { color: rgb(var(--primary)); filter: drop-shadow(0 0 6px rgba(5,150,105,0.25)); }
+html.light .nav-label { color: #71717A; }
+html.light .nav-label-active { color: rgb(var(--primary)); filter: none; font-weight: 800; }
+
+/* --- Topbar / header fondos en modo claro --- */
+html.light .bg-\[\#0A0F14\]\/85 { background-color: rgba(255,255,255,0.92) !important; }
+html.light .bg-\[\#0D1319\]\/90 { background-color: rgba(255,255,255,0.95) !important; }
+html.light .bg-\[\#0C131A\] { background-color: #FFFFFF !important; }
+html.light .bg-\[\#0C131A\]\/92 { background-color: rgba(255,255,255,0.95) !important; }
+
+/* VIP Polish — EZEQUIEL COACHING alto nivel */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: #27272a #080808;
+}
+*::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+*::-webkit-scrollbar-track {
+  background: #080808;
+}
+*::-webkit-scrollbar-thumb {
+  background: #27272a;
+  border-radius: 999px;
+}
+*::-webkit-scrollbar-thumb:hover {
+  background: #3f3f46;
+}
+::selection {
+  background: var(--primary);
+  color: #000;
+}
+:focus-visible {
+  outline: 2px solid var(--primary);
+  outline-offset: 2px;
+}
+/* Glassmorphism utility */
+.glass {
+  background: rgba(14, 22, 32, 0.85);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid rgba(30, 45, 62, 0.5);
+}
+/* Shimmer animation */
+@keyframes shimmer {
+  0% { transform: translateX(-100%); }
+  100% { transform: translateX(100%); }
+}
+.shimmer {
+  position: relative;
+  overflow: hidden;
+}
+.shimmer::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.08), transparent);
+  animation: shimmer 2s infinite;
+}
+/* Premium card hover */
+.card-premium {
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+.card-premium:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 12px 40px rgba(0,0,0,0.45), 0 0 0 1px rgba(30,45,62,0.6), inset 0 1px 0 rgba(255,255,255,0.06);
+}
+/* Sombra de tarjeta theme-aware: hairline superior iluminado en oscuro,
+   sombra suave y limpia en claro (evita el bloque negro pesado). */
+.surface-card {
+  background-color: #0E1620;
+  border: 1px solid rgba(30,45,62,0.35);
+  box-shadow: inset 0 1px 0 rgba(255,255,255,0.05), 0 10px 38px rgba(0,0,0,0.22), 0 0 0 1px rgba(30,45,62,0.25);
+}
+html.light .surface-card {
+  background-color: #FFFFFF;
+  border: 1px solid rgba(228,228,231,0.7);
+  box-shadow: 0 6px 22px rgba(0,0,0,0.07), 0 0 0 1px rgba(228,228,231,0.7);
+}
+
+/* ===== Sistema visual EZEQUIEL COACHING — cross-platform (Windows/Mac/Android/iOS) ===== */
+
+/* Etiqueta de sección: eyebrow 10px uppercase — escaneo en F en 1s */
+.section-eyebrow {
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: #71717a;
+}
+
+/* CTA pegajoso en zona pulgar (móvil): blur + safe-area iOS/Android */
+.cta-sticky {
+  position: sticky;
+  bottom: calc(84px + env(safe-area-inset-bottom));
+  z-index: 30;
+  background: linear-gradient(to top, #080D11 55%, transparent);
+  padding: 12px 0 calc(8px + env(safe-area-inset-bottom));
+}
+@media (min-width: 1024px) {
+  .cta-sticky { position: static; background: none; padding: 0; }
+}
+
+/* Sin scrollbar visible para rails horizontales (Windows/Mac táctil) */
+.no-scrollbar { scrollbar-width: none; -ms-overflow-style: none; }
+.no-scrollbar::-webkit-scrollbar { display: none; }
+
+/* Evita salto de layout por scrollbar en Windows */
+html { scrollbar-gutter: stable; }
+
+/* Balanceo de titulares premium */
+h1, h2 { text-wrap: balance; }
+
+/* Aceleración GPU para blur fijo en Windows/Mac de gama media */
+.glass, .cta-sticky { transform: translateZ(0); }
+
+/* ===== Motion system EZEQUIEL COACHING — rápido, físico, consistente =====
+   Tokens: fast 150ms (feedback), base 250ms (superficies), spring nativo.
+   Revive las clases animate-in usadas en drawers/modales sin dependencias. */
+:root {
+  --motion-fast: 150ms;
+  --motion-base: 250ms;
+  --motion-ease: cubic-bezier(0.22, 1, 0.36, 1);
+}
+@keyframes fade-in {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+@keyframes slide-in-from-bottom {
+  from { transform: translateY(28px); opacity: 0.4; }
+  to { transform: translateY(0); opacity: 1; }
+}
+@keyframes pop {
+  0% { transform: scale(0.6); }
+  60% { transform: scale(1.12); }
+  100% { transform: scale(1); }
+}
+.animate-in.fade-in, .fade-in {
+  animation: fade-in var(--motion-fast) ease-out both;
+}
+.slide-in-from-bottom {
+  animation: slide-in-from-bottom var(--motion-base) var(--motion-ease) both;
+}
+.pop {
+  animation: pop 220ms ease-out;
+}
+/* Pulso sobrio de urgencia (últimos segundos del descanso) */
+@keyframes urgent-pulse {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.06); }
+}
+.urgent {
+  animation: urgent-pulse 1s ease-in-out infinite;
+}
+
+/* ===== Celebración (recompensa tras completar) — confeti sin dependencias =====
+   Refuerzo positivo inmediato → hábito y retención. Se desactiva con
+   prefers-reduced-motion (accesibilidad vestibular). */
+@keyframes confetti-fall {
+  0% { transform: translate3d(0, 0, 0) rotate(0deg); opacity: 1; }
+  85% { opacity: 1; }
+  100% { transform: translate3d(var(--dx, 0px), 105vh, 0) rotate(var(--rot, 540deg)); opacity: 0; }
+}
+.confetti-piece { animation-name: confetti-fall; animation-timing-function: cubic-bezier(0.25, 0.6, 0.4, 1); animation-fill-mode: forwards; }
+/* Anillo que se expande al confirmar (achievement) */
+@keyframes ring-burst {
+  0% { transform: scale(0.7); opacity: 0.7; }
+  100% { transform: scale(1.9); opacity: 0; }
+}
+.ring-burst { animation: ring-burst 900ms var(--motion-ease) both; }
+
+/* ===== Transición de página (App Router template.tsx) =====
+   Cada navegación entra con un fade + leve desplazamiento → la app se siente
+   fluida y "nativa" (iOS/Android/Windows/Mac). Se desactiva con reduced-motion. */
+@keyframes page-enter {
+  from { opacity: 0; transform: translateY(8px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+.page-enter { animation: page-enter 280ms var(--motion-ease) both; }
+@media (prefers-reduced-motion: reduce) { .page-enter { animation: none; } }
+@media (prefers-reduced-motion: reduce) {
+  .confetti-piece, .ring-burst { display: none; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .animate-in, .fade-in, .slide-in-from-bottom, .pop, .urgent {
+    animation: none;
+  }
+}
+
+/* Movimiento reducido: respeta al usuario (iOS/Android/Windows) */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+  }
+  .shimmer::after { display: none; }
+}
+
+/* ===== MODO CLARO PROFESIONAL — barras, pills, glows y CTA ===== */
+
+/* Barras de navegación: en claro son blancas translúcidas, no cajas negras */
+html.light .bg-\[\#0D1319\] { background-color: #FFFFFF !important; }
+html.light .bg-\[\#0D1319\]\/90 { background-color: rgba(255,255,255,0.92) !important; }
+html.light .bg-\[\#0F0F0F\]\/95 { background-color: rgba(255,255,255,0.95) !important; }
+html.light .bg-\[\#0A0F14\]\/85 { background-color: rgba(255,255,255,0.88) !important; }
+
+/* Texto sobre acento: en claro el fondo es emerald-600 → letra blanca (AA) */
+html.light .bg-primary.text-black { color: #FFFFFF !important; }
+html.light .hover\:bg-primary:hover { color: #FFFFFF !important; }
+
+/* Sombras neón (oscuras) → suaves en claro */
+html.light [class*="rgba(52,211,153"] { box-shadow: 0 6px 20px rgba(5,150,105,0.22) !important; }
+html.light [class*="rgba(0,0,0,0.5)"] { box-shadow: 0 8px 28px rgba(0,0,0,0.12) !important; }
+
+/* Iconos de navegación: brillo neón en oscuro, halo sobrio en claro */
+.nav-icon { color: #71717a; }
+.nav-icon-active {
+  color: rgb(var(--primary));
+  filter: drop-shadow(0 0 10px rgba(52,211,153,0.9));
+}
+.nav-label { color: #71717a; font-weight: 600; }
+.nav-label-active {
+  color: rgb(var(--primary));
+  font-weight: 800;
+  filter: drop-shadow(0 0 8px rgba(52,211,153,0.7));
+}
+.nav-dot {
+  background: rgb(var(--primary));
+  box-shadow: 0 0 6px rgba(52,211,153,1);
+}
+html.light .nav-icon-active { filter: drop-shadow(0 0 6px rgba(5,150,105,0.35)); }
+html.light .nav-label-active { filter: none; }
+html.light .nav-dot { box-shadow: 0 0 4px rgba(5,150,105,0.6); }
+
+/* Pill activa (sidebar trainer, badges de día): emerald en oscuro, negra en claro */
+.pill-active {
+  background: linear-gradient(135deg, rgba(52,211,153,0.15), rgba(52,211,153,0.08));
+  color: rgb(var(--primary));
+  border: 1px solid rgba(52,211,153,0.25);
+  font-weight: 700;
+}
+html.light .pill-active { background: #0A0A0A !important; color: #FFFFFF !important; border-color: transparent !important; }
+html.light .group:hover .group-hover\:bg-primary { color: #FFFFFF !important; }
+/* Chat premium: textura sutil + entrada de mensajes */
+.chat-canvas {
+  background-color: #080D11;
+  background-image: radial-gradient(rgba(255,255,255,0.03) 1px, transparent 1px);
+  background-size: 22px 22px;
+}
+@keyframes msg-in {
+  from { opacity: 0; transform: translateY(6px) scale(0.98); }
+  to { opacity: 1; transform: none; }
+}
+.msg-in { animation: msg-in 0.22s ease-out; }
+@media (prefers-reduced-motion: reduce) {
+  .msg-in { animation: none; }
+}

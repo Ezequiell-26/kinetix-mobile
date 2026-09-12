@@ -1,0 +1,32 @@
+{
+  "name": "kinetix",
+  "version": "1.0.0",
+  "description": "Kinetix - Unified Platform for fitness coaching (mobile app + web dashboard)",
+  "private": true,
+  "type": "module",
+  "workspaces": [
+    "apps/mobile",
+    "apps/web",
+    "packages/shared",
+    "packages/config"
+  ],
+  "scripts": {
+    "dev": "npm run dev --workspaces",
+    "build": "npm run build --workspaces",
+    "test": "npm run test --workspaces",
+    "lint": "npm run lint --workspaces",
+    "format": "npm run format --workspaces",
+    "mobile": "npm -w apps/mobile run dev",
+    "web": "npm -w apps/web run dev",
+    "mobile:build": "npm -w apps/mobile run build",
+    "web:build": "npm -w apps/web run build",
+    "clean": "npm run clean --workspaces && rm -rf node_modules .turbo"
+  },
+  "devDependencies": {
+    "typescript": "^5.3.3"
+  },
+  "engines": {
+    "node": ">=18.0.0",
+    "npm": ">=9.0.0"
+  }
+}

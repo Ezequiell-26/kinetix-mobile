@@ -1,0 +1,85 @@
+# Dependencies
+node_modules
+.pnp
+.pnp.js
+
+# Next.js
+.next
+.next-*
+out
+dist
+build
+
+# Database
+prisma/dev.db
+prisma/dev.db-journal
+*.db
+*.db-journal
+
+# Env
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+
+# Logs
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+logs
+*.log
+
+# OS
+.DS_Store
+Thumbs.db
+*.swp
+*.swo
+*~
+
+# IDE
+.vscode
+.idea
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
+
+# Uploads (keep folder but ignore content)
+public/uploads/*
+!public/uploads/.gitkeep
+
+# Uploads privados: fuera de public/, servidos solo por /api/uploads (autenticado)
+uploads/
+
+# Vercel
+.vercel
+
+# Testing
+coverage
+
+# Misc
+.cache
+.parcel-cache
+*.txt
+cookies*.txt
+test*.txt
+tmp-gym
+tmp-gym/
+
+# tmp datasets (local only, regenerated)
+tmp-*/
+tmp-exercises-dataset/
+tsconfig.tsbuildinfo
+
+# DB temporal del test de regresión
+prisma/test-core.db
+# Monorepo
+.turbo/
+.turbopack/
+
+# Temporary clone directories
+kinetix-web-temp/
+kinetix-mobile-temp/
