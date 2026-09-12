@@ -69,4 +69,28 @@ htmlcov/
 *.tar.bz2
 *.tar.xz
 *.tar.zst
-```
+
+# Cache directories
+.cache/
+.parcel-cache/
+
+# Rust
+Cargo.lock
+**/target/
+
+# WASM
+*.wasm.map
+
+# TypeScript
+*.tsbuildinfo
+.next-dev*/
+.next-stale*/
+
+# SQLite (datos locales: cada dev genera los suyos con db:migrate + db:seed)
+*.db
+*.db-journal
+
+# Uploads de usuarios (se sirven por /api/uploads, nunca se commitean)
+public/uploads/
+uploads/
+>>>>>>> 1e68f0b (chore: untrack build artifacts, db files y node_modules)
