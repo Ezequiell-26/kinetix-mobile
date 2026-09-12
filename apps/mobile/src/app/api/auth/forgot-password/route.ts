@@ -19,7 +19,7 @@ export async function POST(req: Request){
 
   const user = await prisma.user.findUnique({where:{email}}).catch(() => null);
   if(user){
-    const token = issueResetToken(email);
+    const token = await issueResetToken(email);
     // Solo desarrollo local: log del enlace. En producción esto va por email
     // y JAMÁS se loguea (el token equivale a la contraseña).
     if(process.env.NODE_ENV !== "production"){

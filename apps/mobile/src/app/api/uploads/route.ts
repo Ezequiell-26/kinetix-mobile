@@ -4,6 +4,7 @@ import { prisma } from "@/lib/db";
 import { writeFile, mkdir } from "fs/promises";
 import { join } from "path";
 import { randomUUID } from "crypto";
+import { verifyFileSignature } from "@/lib/file-signature";
 
 export async function POST(req: Request){
   const s = await getSession();
@@ -22,6 +23,14 @@ export async function POST(req: Request){
 
   const bytes = await file.arrayBuffer();
   const buffer = Buffer.from(bytes);
+
+  // Verificación de contenido real (magic bytes): el Content-Type que manda
+  // el navegador lo declara el cliente y se puede falsificar. Si el archivo
+  // no empieza con la firma binaria real de su tipo declarado, se rechaza
+  // acá aunque haya pasado el chequeo de MIME/extensión de arriba.
+  if(!verifyFileSignature(buffer, file.type)){
+    return NextResponse.json({error:"El archivo no coincide con su tipo declarado"},{status:400});
+  }
   // Extensión sanitizada por allowlist: antes salía de file.name sin validar
   // (ej. ".exe" o con caracteres de ruta). Si no matchea, se deriva del MIME.
   const EXT_ALLOW = ["jpg","jpeg","png","webp","gif","mp4","pdf"];

@@ -1,7 +1,16 @@
 /** @type {import("next").NextConfig} */
 const nextConfig = {
   experimental: {
-    serverActions: { allowedOrigins: ["*"] },
+    // OJO seguridad: NO usar ["*"] acá. Next.js valida el header Origin de
+    // los Server Actions contra esta lista para prevenir CSRF; "*" apaga esa
+    // protección por completo. Sin este campo, Next usa por defecto el propio
+    // host de la request (correcto para same-origin). Se agregan dominios de
+    // producción reales vía env var cuando existan.
+    serverActions: {
+      allowedOrigins: process.env.NEXT_PUBLIC_APP_URL
+        ? [new URL(process.env.NEXT_PUBLIC_APP_URL).host]
+        : undefined,
+    },
     // Tree-shaking agresivo de estos paquetes: evita que Next empaquete
     // toda la librería de íconos/animaciones cuando solo se usan algunos.
     // Reduce el JS que baja el navegador sin cambiar ningún comportamiento.
@@ -13,8 +22,12 @@ const nextConfig = {
     ],
   },
   images: {
-    // AVIF/WebP automático + caché largo para las imágenes servidas por next/image
-    formats: ["image/avif", "image/webp"],
+    // OJO seguridad: AVIF deshabilitado a propósito. La optimización AVIF de
+    // Next.js depende de libheif, que tuvo una vulnerabilidad de RCE no
+    // autenticado explotable en servidores Windows (parche Next.js ago 2026,
+    // v15.5.24). Reactivar "image/avif" solo después de confirmar que
+    // next@15.5.24+ está instalado Y que el fix de libheif ya se propagó.
+    formats: ["image/webp"],
     minimumCacheTTL: 60 * 60 * 24 * 30,
   },
   compress: true,

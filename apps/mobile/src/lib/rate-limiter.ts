@@ -121,14 +121,34 @@ export const RATE_LIMIT_PROFILES = {
 } as const;
 
 /**
- * Helper para leer headers de IP desde request.
- * Funciona con proxies comunes (Vercel, Cloudflare, Nginx).
+ * Helper para leer la IP del cliente desde el request.
+ *
+ * RIESGO DE SEGURIDAD (corregido acá): `X-Forwarded-For` / `X-Real-IP` /
+ * `CF-Connecting-IP` son headers HTTP normales — cualquier cliente puede
+ * enviarlos con el valor que quiera. Si la app no está detrás de un proxy
+ * que los SOBREESCRIBE (no que los agrega) con la IP real de conexión,
+ * confiar en ellos permite evadir el rate limiting entero con solo rotar
+ * el header en cada request (login por fuerza bruta sin límite, spam de
+ * registro, etc.).
+ *
+ * Por eso estos headers solo se usan si TRUST_PROXY_HEADERS=true está
+ * seteado explícitamente en el entorno. Activarlo es correcto SOLO si:
+ *  - Vercel/Cloudflare (ellos sobreescriben el header en su borde, no lo
+ *    dejan pasar del cliente), o
+ *  - un proxy propio (Caddy/Nginx/Ingress k8s) configurado para descartar
+ *    cualquier X-Forwarded-For entrante del cliente y setear el suyo.
+ * Sin esa variable, se usa `request.ip` (poblado por la plataforma en
+ * Vercel, no spoofeable por el cliente) o "unknown" como último recurso.
+ * "unknown" agrupa a todos los clientes sin proxy confiable en un mismo
+ * balde de rate limit — no ideal, pero preferible a un límite evadible.
  */
-export function getClientIp(req: { headers: Headers }): string {
-  return (
-    req.headers.get("x-real-ip") ||
-    req.headers.get("x-forwarded-for")?.split(",")[0].trim() ||
-    req.headers.get("cf-connecting-ip") ||
-    "unknown"
-  );
+export function getClientIp(req: { headers: Headers; ip?: string }): string {
+  if (process.env.TRUST_PROXY_HEADERS === "true") {
+    const forwarded =
+      req.headers.get("x-real-ip") ||
+      req.headers.get("x-forwarded-for")?.split(",")[0].trim() ||
+      req.headers.get("cf-connecting-ip");
+    if (forwarded) return forwarded;
+  }
+  return req.ip || "unknown";
 }

@@ -10,7 +10,7 @@ import { Card, CardContent, CardHeader, CardTitle, CardDesc } from "@/components
 
 export default function RegisterPage(){
   const r = useRouter();
-  const [form, setForm] = useState({ name: "", email: "", password: "" });
+  const [form, setForm] = useState({ name: "", email: "", password: "", company: "" });
   const [err, setErr] = useState("");
   const [loading, setLoading] = useState(false);
 
@@ -101,6 +101,22 @@ export default function RegisterPage(){
                   placeholder="••••••••"
                   required
                   className="bg-zinc-950/50 border-zinc-800 focus:border-primary/50"
+                />
+              </div>
+
+              {/* Honeypot anti-bot: campo invisible para personas, tentador para
+                  bots que autocompletan formularios. Nadie debería tocarlo nunca;
+                  si llega lleno, el backend descarta el registro en silencio. */}
+              <div style={{position:"absolute", left:"-9999px", width:1, height:1, overflow:"hidden"}} aria-hidden="true">
+                <label htmlFor="company">No completar este campo</label>
+                <input
+                  id="company"
+                  name="company"
+                  type="text"
+                  tabIndex={-1}
+                  autoComplete="off"
+                  value={form.company}
+                  onChange={e => setForm({...form, company: e.target.value})}
                 />
               </div>
 

@@ -6,6 +6,14 @@ import { registerSchema } from "@/lib/validations";
 export async function POST(req: Request){
   try{
     const body = await req.json();
+
+    // Honeypot: si el campo trampa viene lleno, es un bot. Se responde
+    // éxito falso (sin crear nada) para no enseñarle al script que fue
+    // detectado — así no reintenta variando el payload.
+    if(typeof body.company === "string" && body.company.trim() !== ""){
+      return NextResponse.json({ok:true, role:"CLIENT"});
+    }
+
     const data = registerSchema.parse(body);
     const exists = await prisma.user.findUnique({where:{email:data.email}});
     if(exists) return NextResponse.json({error:"Email ya registrado"}, {status:400});

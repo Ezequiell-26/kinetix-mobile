@@ -19,7 +19,7 @@ export async function POST(req: Request){
   if(!email || typeof email !== "string") return NextResponse.json({error:"Email requerido"},{status:400});
 
   // Validar el token antes de tocar la base de datos.
-  if(!consumeResetToken(token, email)){
+  if(!(await consumeResetToken(token, email))){
     return NextResponse.json({error:"Token inválido o expirado"},{status:403});
   }
 

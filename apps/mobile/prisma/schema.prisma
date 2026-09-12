@@ -362,3 +362,19 @@ model Payment {
   date      DateTime @default(now())
   description String?
 }
+
+// Recuperación de contraseña persistente (reemplaza el Map en memoria, que
+// se perdía en cada reinicio del server y no funcionaba con más de una
+// instancia). Se guarda un HASH del token (sha256), nunca el token en
+// texto plano, por si la base de datos se filtra alguna vez.
+model PasswordReset {
+  id        String   @id @default(cuid())
+  email     String
+  tokenHash String   @unique
+  expires   DateTime
+  used      Boolean  @default(false)
+  createdAt DateTime @default(now())
+
+  @@index([email])
+  @@index([expires])
+}
