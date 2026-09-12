@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getSession, requireRole } from "@/lib/auth";
 import { prisma } from "@/lib/db";
+import { assertTrainerOwnsClient, validateClientIdForTrainer } from "@/lib/authorization";
 
 /**
  * POST /api/analytics — ingesta de eventos (fire-and-forget).
@@ -43,8 +44,9 @@ export async function POST(req: NextRequest) {
 
 /**
  * GET /api/analytics — agregados REALES (solo TRAINER).
- * Antes devolvía mock con ceros sin auth. Sin retención: no se inventa
- * cohorte day1/day7/day30 — el campo se omite hasta implementarlo.
+ * Ahora con verificación de ownership: un trainer solo puede ver analytics
+ * de sus propios clientes. Si se pasa clientId, se verifica que pertenezca
+ * al trainer autenticado.
  */
 export async function GET(req: NextRequest) {
   const t = await requireRole(["TRAINER"]);
@@ -56,16 +58,16 @@ export async function GET(req: NextRequest) {
     const startDate = searchParams.get("startDate");
     const endDate = searchParams.get("endDate");
 
+    // P0 Security: verificar ownership del clientId si se proporciona
     if (clientId) {
-      const exists = await prisma.client.findUnique({
-        where: { id: clientId },
-        select: { id: true },
-      });
-      if (!exists)
+      const ownsClient = await assertTrainerOwnsClient(t.id, clientId);
+      if (!ownsClient) {
+        // 404 para no revelar si el cliente existe o no
         return NextResponse.json(
-          { error: "Cliente inexistente" },
+          { error: "Cliente no encontrado" },
           { status: 404 }
         );
+      }
     }
 
     const date: { gte?: Date; lte?: Date } = {};

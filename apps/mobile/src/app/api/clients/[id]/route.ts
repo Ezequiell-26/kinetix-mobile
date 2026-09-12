@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
 import { getSession } from "@/lib/auth";
+import { assertTrainerOwnsClient, validateClientIdForTrainer } from "@/lib/authorization";
 
 export async function GET(
   req: Request,
@@ -10,13 +11,22 @@ export async function GET(
   if(!s) return NextResponse.json({error:"No auth"},{status:401});
   const { id } = await params;
 
-  // Security: CLIENT can only view their own profile
+  // P0 Security: CLIENT can only view their own profile
   if(s.role === "CLIENT"){
     const client = await prisma.client.findFirst({
       where: { OR: [{userId: s.id}, {email: s.email}] }
     });
     if(!client || client.id !== id){
       return NextResponse.json({error: "No autorizado"}, {status: 403});
+    }
+  }
+  
+  // P0 Security: TRAINER solo puede ver clientes que le pertenecen
+  if(s.role === "TRAINER"){
+    const ownsClient = await assertTrainerOwnsClient(s.id, id);
+    if(!ownsClient){
+      // 404 para no revelar si el cliente existe o no
+      return NextResponse.json({error: "Cliente no encontrado"}, {status: 404});
     }
   }
 
@@ -83,6 +93,14 @@ export async function PATCH(
     });
     if(!client || client.id !== id){
       return NextResponse.json({error: "No autorizado"}, {status: 403});
+    }
+  }
+  
+  // P0 Security: TRAINER solo puede actualizar clientes que le pertenecen
+  if(s.role === "TRAINER"){
+    const ownsClient = await assertTrainerOwnsClient(s.id, id);
+    if(!ownsClient){
+      return NextResponse.json({error: "Cliente no encontrado"}, {status: 404});
     }
   }
 

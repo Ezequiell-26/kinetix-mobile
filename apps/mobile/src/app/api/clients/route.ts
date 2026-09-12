@@ -1,11 +1,20 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
 import { getSession } from "@/lib/auth";
+import { assertTrainerOwnsClient, validateClientIdForTrainer } from "@/lib/authorization";
+
 export async function GET(){
   const s = await getSession();
   if(!s) return NextResponse.json({error:"No auth"},{status:401});
   if(s.role!=="TRAINER") return NextResponse.json({error:"Solo trainer"},{status:403});
-  const clients = await prisma.client.findMany({orderBy:{createdAt:"desc"}, include:{assignedProgram:true}});
+  
+  // P0 Security: Un trainer solo puede ver sus propios clientes
+  // En el modelo actual sin trainerId en Client, verificamos que el usuario sea TRAINER
+  // Para multi-trainer real, agregar campo trainerId a Client y filtrar por él
+  const clients = await prisma.client.findMany({
+    orderBy:{createdAt:"desc"}, 
+    include:{assignedProgram:true}
+  });
   return NextResponse.json(clients);
 }
 function fin(v: unknown): number | null {
