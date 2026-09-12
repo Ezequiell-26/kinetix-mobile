@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
 import { getSession } from "@/lib/auth";
+import { assertTrainerOwnsClient } from "@/lib/authorization";
 
 export async function GET(req: Request){
   const s = await getSession();
@@ -26,6 +27,11 @@ export async function GET(req: Request){
 
   // Trainer
   if(clientId){
+    // P0 Security: TRAINER solo puede ver checkins de sus propios clientes
+    const ownsClient = await assertTrainerOwnsClient(s.id, clientId);
+    if(!ownsClient){
+      return NextResponse.json({error:"Cliente no encontrado"}, {status:404});
+    }
     const checkins = await prisma.checkIn.findMany({
       where: { clientId },
       include: { client: true },
@@ -58,8 +64,13 @@ export async function POST(req: Request){
   if(s.role === "CLIENT"){
     const client = await prisma.client.findFirst({where:{OR:[{userId:s.id},{email:s.email}]}});
     clientId = client?.id || null;
-  } else {
-    clientId = body.clientId || null;
+  } else if(body.clientId && s.role === "TRAINER"){
+    // P0 Security: TRAINER solo puede crear checkins para sus propios clientes
+    const ownsClient = await assertTrainerOwnsClient(s.id, body.clientId);
+    if(!ownsClient){
+      return NextResponse.json({error:"Cliente no encontrado"}, {status:404});
+    }
+    clientId = body.clientId;
   }
 
   const checkin = await prisma.checkIn.create({

@@ -3,6 +3,7 @@ import { readFile } from "fs/promises";
 import { join, extname } from "path";
 import { getSession, type JWTPayload } from "@/lib/auth";
 import { prisma } from "@/lib/db";
+import { assertTrainerOwnsClient } from "@/lib/authorization";
 
 /**
  * Lectura autenticada de archivos subidos.
@@ -67,41 +68,71 @@ export async function GET(
 }
 
 async function canAccess(s: JWTPayload, type: string, url: string): Promise<boolean> {
-  // El trainer es dueño de la relación con sus atletas: ve sus archivos.
-  if (s.role === "TRAINER") return true;
+  // El trainer solo puede acceder a archivos de sus propios clientes
+  if (s.role === "TRAINER") {
+    // Extraer clientId del archivo y verificar ownership
+    if (type === "progress") {
+      const photo = await prisma.progressPhoto.findFirst({
+        where: { url },
+        select: { clientId: true },
+      });
+      if (!photo) return false;
+      if (!photo.clientId) return false;
+      return assertTrainerOwnsClient(s.id, photo.clientId);
+    }
 
+    if (type === "checkin") {
+      const checkin = await prisma.checkIn.findFirst({
+        where: { fotos: { contains: url } },
+        select: { clientId: true },
+      });
+      if (!checkin) return false;
+      if (!checkin.clientId) return false;
+      return assertTrainerOwnsClient(s.id, checkin.clientId);
+    }
+
+    if (type === "message") {
+      const msg = await prisma.message.findFirst({
+        where: { image: url },
+        select: { senderId: true, receiverId: true },
+      });
+      if (!msg) return false;
+      return msg.senderId === s.id || msg.receiverId === s.id;
+    }
+
+    return false;
+  }
+
+  // CLIENT solo puede ver sus propios archivos
   const client = await prisma.client.findFirst({
     where: { OR: [{ userId: s.id }, { email: s.email }] },
     select: { id: true },
   });
 
+  if (!client) return false;
+
   if (type === "progress") {
     const photo = await prisma.progressPhoto.findFirst({
-      where: { url },
-      select: { userId: true, clientId: true },
+      where: { url, clientId: client.id },
+      select: { id: true },
     });
-    if (!photo) return false;
-    if (photo.userId === s.id) return true;
-    return !!client && photo.clientId === client.id;
+    return !!photo;
   }
 
   if (type === "checkin") {
     const checkin = await prisma.checkIn.findFirst({
-      where: { fotos: { contains: url } },
-      select: { userId: true, clientId: true },
+      where: { fotos: { contains: url }, clientId: client.id },
+      select: { id: true },
     });
-    if (!checkin) return false;
-    if (checkin.userId === s.id) return true;
-    return !!client && checkin.clientId === client.id;
+    return !!checkin;
   }
 
   if (type === "message") {
     const msg = await prisma.message.findFirst({
-      where: { image: url },
-      select: { senderId: true, receiverId: true },
+      where: { image: url, OR: [{ senderId: s.id }, { receiverId: s.id }] },
+      select: { id: true },
     });
-    if (!msg) return false;
-    return msg.senderId === s.id || msg.receiverId === s.id;
+    return !!msg;
   }
 
   return false;

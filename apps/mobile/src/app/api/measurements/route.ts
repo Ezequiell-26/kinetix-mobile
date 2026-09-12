@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
 import { getSession } from "@/lib/auth";
+import { assertTrainerOwnsClient } from "@/lib/authorization";
 
 export async function GET(req: Request){
   const s = await getSession();
@@ -28,6 +29,11 @@ export async function GET(req: Request){
 
   // Trainer
   if(clientId){
+    // P0 Security: TRAINER solo puede ver mediciones de sus propios clientes
+    const ownsClient = await assertTrainerOwnsClient(s.id, clientId);
+    if(!ownsClient){
+      return NextResponse.json({error:"Cliente no encontrado"}, {status:404});
+    }
     const measurements = await prisma.progressMeasurement.findMany({
       where: { clientId },
       orderBy: { date: "desc" },
@@ -62,6 +68,12 @@ export async function POST(req: Request){
       where: { OR: [{userId: s.id}, {email: s.email}] }
     });
     clientId = client?.id || null;
+  } else if(clientId && s.role === "TRAINER"){
+    // P0 Security: TRAINER solo puede crear mediciones para sus propios clientes
+    const ownsClient = await assertTrainerOwnsClient(s.id, clientId);
+    if(!ownsClient){
+      return NextResponse.json({error:"Cliente no encontrado"}, {status:404});
+    }
   }
 
   const weight = body.weight !== undefined && body.weight !== null ? fin(body.weight) : null;
