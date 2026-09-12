@@ -1,69 +1,85 @@
+import { randomBytes } from "crypto";
+import { prisma } from "./db";
+
+const TOKEN_LENGTH = 32;
+const EXPIRY_MS = 60 * 60 * 1000; // 1 hora
+
 /**
- * Almacén de tokens de recuperación de contraseña — persistente en DB.
- *
- * Historial de la auditoría:
- *  - Antes, `reset-password` IGNORABA el token y restablecía la contraseña
- *    de cualquier cuenta con solo conocer su email (toma de cuenta).
- *  - Luego se agregó un Map en memoria para exigir un token válido, pero
- *    quedaba documentado como "no usar en producción": se perdía en cada
- *    reinicio del server y no funcionaba con más de una instancia corriendo
- *    (cada una tendría su propio Map, inconsistente entre sí).
- *
- * Ahora el token vive en la tabla PasswordReset (ver schema.prisma). Se
- * guarda únicamente el HASH sha256 del token, nunca el token en texto
- * plano, para que una filtración de la base de datos no equivalga a tener
- * las claves de recuperación de todos los usuarios.
- *
- * Pendiente real fuera del alcance de este archivo: el envío del link por
- * email todavía no existe (forgot-password solo lo loguea en desarrollo).
- * Para producción hace falta un proveedor de email (Resend, SendGrid, etc.)
- * con su propia API key configurada — no es algo que se pueda resolver solo
- * editando código, requiere una cuenta de servicio externa.
+ * Genera un token criptográficamente seguro para reset de password.
  */
-
-import { randomUUID, createHash } from "crypto";
-import { prisma } from "@/lib/db";
-
-const TTL_MS = 1000 * 60 * 30; // 30 min
-
-function hashToken(token: string): string {
-  return createHash("sha256").update(token).digest("hex");
+export function generateSecureToken(): string {
+  return randomBytes(TOKEN_LENGTH).toString("hex");
 }
 
-/** Crea y guarda un token para el email, invalidando tokens previos del mismo email. */
-export async function issueResetToken(email: string): Promise<string> {
-  // Invalidar tokens previos del mismo email (evita acumular basura y
-  // reentradas: si alguien pide "olvidé mi contraseña" varias veces,
-  // solo el último link sirve).
-  await prisma.passwordReset.updateMany({
+/**
+ * Crea un token de reseteo y lo guarda en DB.
+ * Retorna el token plaintext (única vez que se ve).
+ */
+export async function issueResetToken(email: string): Promise<string | null> {
+  const user = await prisma.user.findUnique({ where: { email } });
+  if (!user) {
+    // Anti-enumeración: mismo comportamiento si existe o no
+    return null;
+  }
+
+  // Invalidar tokens previos no usados
+  await prisma.passwordResetToken.updateMany({
     where: { email, used: false },
     data: { used: true },
   });
 
-  const token = randomUUID();
-  await prisma.passwordReset.create({
+  const token = generateSecureToken();
+  const expiresAt = new Date(Date.now() + EXPIRY_MS);
+
+  await prisma.passwordResetToken.create({
     data: {
       email,
-      tokenHash: hashToken(token),
-      expires: new Date(Date.now() + TTL_MS),
+      token,
+      expiresAt,
+      used: false,
     },
   });
+
   return token;
 }
 
-/** Valida el token contra el email. Devuelve true si es válido, no usado y no expirado. */
-export async function consumeResetToken(token: string, email: string): Promise<boolean> {
-  const tokenHash = hashToken(token);
-  const entry = await prisma.passwordReset.findUnique({ where: { tokenHash } });
-  if (!entry) return false;
-  if (entry.used) return false;
-  if (entry.email !== email) return false;
-  if (Date.now() > entry.expires.getTime()) return false;
+/**
+ * Valida un token: verifica existencia, expiración y uso.
+ * Retorna el email asociado si es válido, null si no.
+ */
+export async function validateResetToken(token: string): Promise<string | null> {
+  const record = await prisma.passwordResetToken.findUnique({
+    where: { token },
+  });
 
-  // Marcar como usado atómicamente antes de devolver true (de un solo uso).
-  await prisma.passwordReset.update({
-    where: { tokenHash },
+  if (!record) return null;
+  if (record.used) return null;
+  if (record.expiresAt < new Date()) return null;
+
+  return record.email;
+}
+
+/**
+ * Marca un token como usado después de un reset exitoso.
+ */
+export async function consumeResetToken(token: string): Promise<void> {
+  await prisma.passwordResetToken.updateMany({
+    where: { token, used: false },
     data: { used: true },
   });
-  return true;
+}
+
+/**
+ * Limpia tokens expirados o usados (llamar periódicamente).
+ */
+export async function cleanupExpiredTokens(): Promise<number> {
+  const result = await prisma.passwordResetToken.deleteMany({
+    where: {
+      OR: [
+        { expiresAt: { lt: new Date() } },
+        { used: true },
+      ],
+    },
+  });
+  return result.count;
 }
