@@ -84,7 +84,7 @@ export default function WorkoutsPage(){
   const [selectedProgramId, setSelectedProgramId] = useState<string>("new");
   
   const [programName, setProgramName] = useState("Programa Hipertrofia 12 Semanas");
-  const [description, setDescription] = useState("Programa personalizado EZEQUIEL COACHING");
+  const [description, setDescription] = useState("Programa personalizado KinetiX");
   const [freq, setFreq] = useState(4);
   const [weeks, setWeeks] = useState<ProgramWeekData[]>([
     {

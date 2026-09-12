@@ -25,7 +25,7 @@ export function PushCenter(){
     setEnabled(p==="granted");
     if(p==="granted"){
       // En prod: registrar con OneSignal/FCM y guardar token en /api/push/subscribe
-      try{ new Notification("EZEQUIEL COACHING", {body:"¡Notificaciones activadas! Te aviso de entrenos y check-ins.", icon:"/icons/icon-192.png"}); }catch{}
+      try{ new Notification("KinetiX", {body:"¡Notificaciones activadas! Te aviso de entrenos y check-ins.", icon:"/icons/icon-192.png"}); }catch{}
     }
   }
 

@@ -9,13 +9,13 @@ export default function InstallPage(){
       <header className="sticky top-0 z-10 bg-[#080808]/80 backdrop-blur border-b border-zinc-900">
         <div className="flex items-center gap-2 px-4 h-[56px] max-w-[640px] mx-auto w-full">
           <div className="w-8 h-8 rounded-lg bg-primary flex items-center justify-center font-black text-black text-sm">E</div>
-          <span className="font-display font-bold text-sm">EZEQUIEL COACHING</span>
+          <span className="font-display font-bold text-sm">KinetiX</span>
         </div>
       </header>
       <main className="flex-1 max-w-[640px] mx-auto w-full px-4 py-6 space-y-4">
         <div className="text-center py-4">
           <div className="w-20 h-20 mx-auto rounded-2xl bg-primary flex items-center justify-center font-black text-black text-3xl">E</div>
-          <h1 className="text-2xl font-display font-bold mt-4">Instalar EZEQUIEL COACHING</h1>
+          <h1 className="text-2xl font-display font-bold mt-4">Instalar KinetiX</h1>
           <p className="text-sm text-zinc-500 mt-2">Como app nativa en Android y iPhone. Funciona offline, icono en inicio, pantalla completa.</p>
         </div>
 

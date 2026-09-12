@@ -1,7 +1,7 @@
 {
-  "name": "EZEQUIEL COACHING",
-  "short_name": "EZEQUIEL",
-  "description": "Entrenamiento personalizado online — plataforma premium de Ezequiel",
+  "name": "KinetiX",
+  "short_name": "KinetiX",
+  "description": "Plataforma premium de entrenamiento y coaching fitness KinetiX",
   "start_url": "/login",
   "display": "standalone",
   "background_color": "#0A0F14",

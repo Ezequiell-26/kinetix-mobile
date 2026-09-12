@@ -3,7 +3,7 @@
 
 const config = {
   appId: 'com.kinetixfitt.app',
-  appName: 'KinetixFitt',
+  appName: 'KinetiX',
   webDir: 'out',
   bundledWebRuntime: false,
   server: {
