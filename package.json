@@ -18,9 +18,7 @@
     "lint": "npm run lint --workspaces",
     "format": "npm run format --workspaces",
     "mobile": "npm -w apps/mobile run dev",
-    "web": "echo 'Web app not yet implemented'",
     "mobile:build": "npm -w apps/mobile run build",
-    "web:build": "echo 'Web app not yet implemented'",
     "clean": "npm run clean --workspaces && rm -rf node_modules .turbo"
   },
   "devDependencies": {
