@@ -178,6 +178,23 @@ function MovementIndicator({ type }: { type: 'up' | 'down' | 'push' | 'pull' }) 
   );
 }
 
+// Helper component to notify parent when controls are ready
+function ControlsNotifier({ 
+  controlsRef, 
+  onControlsReady 
+}: { 
+  controlsRef: React.RefObject<any>; 
+  onControlsReady?: (controls: any) => void;
+}) {
+  useEffect(() => {
+    if (controlsRef.current && onControlsReady) {
+      onControlsReady(controlsRef.current);
+    }
+  }, [controlsRef, onControlsReady]);
+  
+  return null;
+}
+
 // Escena principal del viewer
 function ExerciseScene({ 
   exerciseName, 
@@ -236,11 +253,10 @@ function ExerciseScene({
         maxPolarAngle={Math.PI / 2.5}
         autoRotate={autoRotate}
         autoRotateSpeed={0.5}
-        onInit={(controls) => {
-          controlsRef.current = controls;
-          onControlsReady?.(controls);
-        }}
       />
+
+      {/* Notify parent when controls are ready */}
+      <ControlsNotifier controlsRef={controlsRef} onControlsReady={onControlsReady} />
       
       {/* Iluminación */}
       <ambientLight intensity={0.4} />
