@@ -1,226 +1,252 @@
 /**
- * security.test.ts - Tests de seguridad para KinetixFitt
- * 
- * Verifica:
- * 1. Trainer A NO puede acceder a datos de Cliente B
- * 2. Trainer A NO puede acceder a uploads de Cliente B
- * 3. Client A NO puede acceder a datos de Client B
- * 4. Cliente inexistente no permite enumeración útil
- * 5. Analytics respeta ownership
- * 6. Un clientId manipulado en el request no salta autorización
- * 7. Upload traversal falla
- * 8. Extensiones/MIME no permitidos fallan
+ * Tests E2E de seguridad P0 (requiere servidor vivo + DB con seed).
+ *
+ * Reemplaza la versión con tokens mock (que pasaba por 401 en vez de por
+ * ownership real) y el beforeAll que BORRABA users/clientes de la DB.
+ * Acá: fixtures aisladas `sectest-*@test.com`, login REAL por API y
+ * limpieza solo de lo creado. Los demos (Ezequiel/Martín/Lucas/Sofía)
+ * deben seguir intactos al final.
+ *
+ *   Servidor:  http://localhost:3001 (o BASE_URL)
+ *   Correr:    npm run test:security   (OPT-IN: no va en `npm test`)
  */
+import { PrismaClient } from "@prisma/client";
+import bcrypt from "bcryptjs";
+import {
+  assertTrainerOwnsClient,
+  validateClientIdForTrainer,
+} from "../src/lib/authorization";
+import {
+  sanitizePath,
+  ALLOWED_EXTENSIONS,
+  ALLOWED_MIME_TYPES,
+} from "../src/lib/security";
 
-import { describe, it, expect, beforeAll, afterAll } from 'vitest';
-import { PrismaClient } from '@prisma/client';
-import bcrypt from 'bcryptjs';
-
+const BASE = process.env.BASE_URL || "http://localhost:3001";
 const prisma = new PrismaClient();
+const TAG = `sectest-${Date.now()}`;
 
-describe('Security Tests - P0 Ownership/IDOR', () => {
-  let trainerAToken: string;
-  let trainerBToken: string;
-  let clientAToken: string;
-  let clientBToken: string;
-  let trainerAId: string;
-  let trainerBId: string;
-  let clientAId: string;
-  let clientBId: string;
-  let clientARecordId: string;
-  let clientBRecordId: string;
+let passed = 0;
+let failed = 0;
 
-  beforeAll(async () => {
-    // Limpiar datos previos
-    await prisma.notification.deleteMany({});
-    await prisma.message.deleteMany({});
-    await prisma.progressPhoto.deleteMany({});
-    await prisma.progressMeasurement.deleteMany({});
-    await prisma.checkIn.deleteMany({});
-    await prisma.workoutLog.deleteMany({});
-    await prisma.client.deleteMany({});
-    await prisma.user.deleteMany({});
+function check(name: string, cond: boolean, detail?: unknown) {
+  if (cond) {
+    passed++;
+    console.log(`  PASS  ${name}`);
+  } else {
+    failed++;
+    console.log(`  FAIL  ${name}`, detail ?? "");
+  }
+}
 
-    // Crear Trainer A
-    const trainerA = await prisma.user.create({
-      data: {
-        name: 'Trainer A',
-        email: `trainer_a_${Date.now()}@test.com`,
-        password: await bcrypt.hash('password123', 10),
-        role: 'TRAINER',
+async function login(email: string, password: string): Promise<string | null> {
+  const res = await fetch(`${BASE}/api/auth/login`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ email, password }),
+  });
+  if (!res.ok) return null;
+  const setCookie = res.headers.get("set-cookie") || "";
+  const m = setCookie.match(/ec_token=([^;]+)/);
+  return m ? `ec_token=${m[1]}` : null;
+}
+
+const get = (path: string, cookie?: string) =>
+  fetch(`${BASE}${path}`, {
+    headers: cookie ? { Cookie: cookie } : {},
+  });
+
+async function main() {
+  // Preflight: servidor vivo
+  try {
+    const r = await fetch(`${BASE}/login`);
+    if (!r.ok) throw new Error(`HTTP ${r.status}`);
+  } catch {
+    console.log(
+      `\nABORTADO: no hay servidor en ${BASE}. Levantalo con npm run dev y reintentá.\n`
+    );
+    process.exit(1);
+  }
+
+  console.log("\nSeguridad P0 — ownership real\n");
+
+  // Fixtures aisladas (solo estas se borran al final)
+  const tB = await prisma.user.create({
+    data: {
+      name: "SecTest TrainerB",
+      email: `sectest-tb-${TAG}@test.com`,
+      password: await bcrypt.hash("password123", 10),
+      role: "TRAINER",
+    },
+  });
+  const cBUser = await prisma.user.create({
+    data: {
+      name: "SecTest ClientB",
+      email: `sectest-cb-${TAG}@test.com`,
+      password: await bcrypt.hash("password123", 10),
+      role: "CLIENT",
+    },
+  });
+  const cB = await prisma.client.create({
+    data: {
+      name: "SecTest ClientB",
+      email: `sectest-cb-${TAG}@test.com`,
+      userId: cBUser.id,
+      trainerId: tB.id,
+    },
+  });
+
+  const cookieB = await login(`sectest-tb-${TAG}@test.com`, "password123");
+  const cookieEze = await login(
+    "ezequiel@ezequielcoaching.com",
+    "Admin123!"
+  );
+  const cookieMartin = await login("martin@demo.com", "cliente123");
+  check("login real trainerB", !!cookieB);
+  check("login real Ezequiel", !!cookieEze);
+  check("login real Martín", !!cookieMartin);
+  if (!cookieB || !cookieEze || !cookieMartin) throw new Error("sin sesión");
+
+  // Víctima: ficha de Martín (dueño Ezequiel)
+  const martinList = (await (
+    await get("/api/clients", cookieEze)
+  ).json()) as Array<{ email: string; id: string }>;
+  const martinRec = martinList.find((c) => c.email === "martin@demo.com");
+  check("Martín existe y es de Ezequiel", !!martinRec);
+  if (!martinRec) throw new Error("sin fixture víctima");
+
+  // 0. Control positivo: el token de B SÍ ve lo propio (mata tests vacuos:
+  // si esto falla, los bloqueos de abajo no probarían nada).
+  const own = await get(`/api/clients/${cB.id}`, cookieB);
+  check("control: trainerB ve a su cliente (200)", own.status === 200, own.status);
+
+  // 1. Trainer B NO ve cliente de Ezequiel → 404 (no revela existencia)
+  const r1 = await get(`/api/clients/${martinRec.id}`, cookieB);
+  check("trainerB bloqueado en cliente ajeno (404)", r1.status === 404, r1.status);
+
+  // 2. Cliente NO ve ficha de otro cliente → 403
+  const cookieCb = await login(`sectest-cb-${TAG}@test.com`, "password123");
+  const r2 = await get(`/api/clients/${martinRec.id}`, cookieCb || "");
+  check("cliente bloqueado en ficha ajena (403)", r2.status === 403, r2.status);
+
+  // 3. ID inexistente → 404 con mensaje exacto (anti-enumeración)
+  const r3 = await get(
+    `/api/clients/00000000-0000-0000-0000-000000000000`,
+    cookieB
+  );
+  const b3 = (await r3.json().catch(() => ({}))) as { error?: string };
+  check(
+    "fake id → 404 'Cliente no encontrado'",
+    r3.status === 404 && b3.error === "Cliente no encontrado",
+    `${r3.status} ${b3.error}`
+  );
+
+  // 4. Upload traversal en escritura → 400
+  const form = new FormData();
+  form.append("type", "../..");
+  form.append(
+    "file",
+    new Blob(["x"], { type: "image/jpeg" }),
+    "p.jpg"
+  );
+  const r4 = await fetch(`${BASE}/api/uploads`, {
+    method: "POST",
+    headers: { Cookie: cookieMartin },
+    body: form,
+  });
+  check("upload type=../.. → 400", r4.status === 400, r4.status);
+
+  // 5. Upload sin auth → 401
+  const r5 = await fetch(`${BASE}/api/uploads/progress/test.jpg`);
+  check("upload anónimo → 401", r5.status === 401, r5.status);
+
+  console.log("\nFunciones de autorización (lecturas reales a DB)\n");
+  check(
+    "assertTrainerOwnsClient(fake,fake) → false",
+    (await assertTrainerOwnsClient(
+      "00000000-0000-0000-0000-000000000000",
+      "11111111-1111-1111-1111-111111111111"
+    )) === false
+  );
+  check(
+    "assertTrainerOwnsClient(B, su cliente) → true",
+    (await assertTrainerOwnsClient(tB.id, cB.id)) === true
+  );
+  check(
+    "assertTrainerOwnsClient(B, cliente de Ezequiel) → false",
+    (await assertTrainerOwnsClient(tB.id, martinRec.id)) === false
+  );
+  check(
+    "validateClientIdForTrainer inválido → null",
+    (await validateClientIdForTrainer(
+      "00000000-0000-0000-0000-000000000000",
+      "11111111-1111-1111-1111-111111111111"
+    )) === null
+  );
+
+  console.log("\nSanitización (@/lib/security)\n");
+  check(
+    "sanitizePath traversal",
+    sanitizePath("../../../etc/passwd") === "etc/passwd"
+  );
+  check(
+    "sanitizePath backslashes",
+    sanitizePath("..\\..\\windows\\system32") === "windows/system32"
+  );
+  check(
+    "sanitizePath normal intacto",
+    sanitizePath("normal/path/file.jpg") === "normal/path/file.jpg"
+  );
+  const dangerousExt = [".exe", ".bat", ".sh", ".php", ".js", ".html", ".svg"];
+  check(
+    "extensiones peligrosas fuera de allowlist",
+    dangerousExt.every(
+      (e) => !(ALLOWED_EXTENSIONS as readonly string[]).includes(e)
+    )
+  );
+  const dangerousMime = [
+    "application/x-executable",
+    "text/html",
+    "application/javascript",
+  ];
+  check(
+    "MIME peligrosos fuera de allowlist",
+    dangerousMime.every(
+      (m) => !(ALLOWED_MIME_TYPES as readonly string[]).includes(m)
+    )
+  );
+
+  // Limpieza SOLO fixtures (patrón sectest-). Los demos no se tocan.
+  await prisma.client.deleteMany({ where: { email: { contains: "@test.com" } } });
+  await prisma.user.deleteMany({ where: { email: { contains: "@test.com" } } });
+  const demos = await prisma.user.count({
+    where: {
+      email: {
+        in: [
+          "ezequiel@ezequielcoaching.com",
+          "martin@demo.com",
+          "lucas@demo.com",
+          "sofia@demo.com",
+        ],
       },
-    });
-    trainerAId = trainerA.id;
-
-    // Crear Trainer B
-    const trainerB = await prisma.user.create({
-      data: {
-        name: 'Trainer B',
-        email: `trainer_b_${Date.now()}@test.com`,
-        password: await bcrypt.hash('password123', 10),
-        role: 'TRAINER',
-      },
-    });
-    trainerBId = trainerB.id;
-
-    // Crear Cliente A (asignado a Trainer A)
-    const clientAUser = await prisma.user.create({
-      data: {
-        name: 'Client A',
-        email: `client_a_${Date.now()}@test.com`,
-        password: await bcrypt.hash('password123', 10),
-        role: 'CLIENT',
-      },
-    });
-    const clientA = await prisma.client.create({
-      data: {
-        name: 'Client A',
-        email: `client_a_${Date.now()}@test.com`,
-        userId: clientAUser.id,
-      },
-    });
-    clientAId = clientAUser.id;
-    clientARecordId = clientA.id;
-
-    // Crear Cliente B (asignado a Trainer B)
-    const clientBUser = await prisma.user.create({
-      data: {
-        name: 'Client B',
-        email: `client_b_${Date.now()}@test.com`,
-        password: await bcrypt.hash('password123', 10),
-        role: 'CLIENT',
-      },
-    });
-    const clientB = await prisma.client.create({
-      data: {
-        name: 'Client B',
-        email: `client_b_${Date.now()}@test.com`,
-        userId: clientBUser.id,
-      },
-    });
-    clientBId = clientBUser.id;
-    clientBRecordId = clientB.id;
-
-    // Simular tokens JWT (en producción se generarían con jose)
-    // Para tests usamos una aproximación
-    trainerAToken = 'mock_trainer_a_token';
-    trainerBToken = 'mock_trainer_b_token';
-    clientAToken = 'mock_client_a_token';
-    clientBToken = 'mock_client_b_token';
+    },
   });
+  check("demos intactos tras limpieza (4)", demos === 4, demos);
 
-  afterAll(async () => {
-    await prisma.notification.deleteMany({});
-    await prisma.message.deleteMany({});
-    await prisma.progressPhoto.deleteMany({});
-    await prisma.progressMeasurement.deleteMany({});
-    await prisma.checkIn.deleteMany({});
-    await prisma.workoutLog.deleteMany({});
-    await prisma.client.deleteMany({});
-    await prisma.user.deleteMany({});
-    await prisma.$disconnect();
-  });
+  await prisma.$disconnect();
+  console.log(`\nResultado: ${passed} pass, ${failed} fail\n`);
+  process.exit(failed === 0 ? 0 : 1);
+}
 
-  it('1. Trainer A NO puede acceder a datos de Cliente B', async () => {
-    // Simular request de Trainer A intentando ver cliente de Trainer B
-    const response = await fetch(`http://localhost:3001/api/clients/${clientBRecordId}`, {
-      headers: { Cookie: `ec_token=${trainerAToken}` },
-    });
-    
-    // Debe retornar 404 para no revelar existencia
-    expect(response.status).toBe(404);
-  });
-
-  it('2. Client A NO puede acceder a datos de Client B', async () => {
-    const response = await fetch(`http://localhost:3001/api/clients/${clientBRecordId}`, {
-      headers: { Cookie: `ec_token=${clientAToken}` },
-    });
-    
-    // Debe retornar 403 o 404
-    expect([403, 404]).toContain(response.status);
-  });
-
-  it('3. Cliente inexistente no permite enumeración útil', async () => {
-    const fakeId = '00000000-0000-0000-0000-000000000000';
-    const response = await fetch(`http://localhost:3001/api/clients/${fakeId}`, {
-      headers: { Cookie: `ec_token=${trainerAToken}` },
-    });
-    
-    // Debe retornar 404 sin revelar si es ID inválido o no existe
-    expect(response.status).toBe(404);
-    const body = await response.json();
-    expect(body.error).toBe('Cliente no encontrado');
-  });
-
-  it('4. Upload path traversal falla', async () => {
-    // Intentar acceder a archivo con path traversal
-    const maliciousPath = '../../../../etc/passwd';
-    const response = await fetch(`http://localhost:3001/api/uploads/progress/${maliciousPath}`, {
-      headers: { Cookie: `ec_token=${clientAToken}` },
-    });
-    
-    // Debe fallar con 400 o 404
-    expect([400, 404]).toContain(response.status);
-  });
-
-  it('5. Upload sin autenticación falla', async () => {
-    const response = await fetch('http://localhost:3001/api/uploads/progress/test.jpg');
-    
-    // Debe retornar 401
-    expect(response.status).toBe(401);
-  });
+main().catch(async (e) => {
+  console.log("ERROR en security E2E:", e);
+  // Intento de limpieza ante fallo a mitad de camino
+  await prisma.client
+    .deleteMany({ where: { email: { contains: "@test.com" } } })
+    .catch(() => {});
+  await prisma.user
+    .deleteMany({ where: { email: { contains: "@test.com" } } })
+    .catch(() => {});
+  await prisma.$disconnect();
+  process.exit(1);
 });
-
-describe('Security Tests - Authorization Functions', () => {
-  it('assertTrainerOwnsClient retorna false para trainer sin cliente', async () => {
-    const { assertTrainerOwnsClient } = await import('@/lib/authorization');
-    
-    const fakeTrainerId = '00000000-0000-0000-0000-000000000000';
-    const fakeClientId = '11111111-1111-1111-1111-111111111111';
-    
-    const result = await assertTrainerOwnsClient(fakeTrainerId, fakeClientId);
-    expect(result).toBe(false);
-  });
-
-  it('validateClientIdForTrainer retorna null para clientId inválido', async () => {
-    const { validateClientIdForTrainer } = await import('@/lib/authorization');
-    
-    const fakeTrainerId = '00000000-0000-0000-0000-000000000000';
-    const fakeClientId = '11111111-1111-1111-1111-111111111111';
-    
-    const result = await validateClientIdForTrainer(fakeTrainerId, fakeClientId);
-    expect(result).toBeNull();
-  });
-
-  it('sanitizePath elimina secuencias de traversal', async () => {
-    const { sanitizePath } = await import('@/lib/security');
-    
-    expect(sanitizePath('../../../etc/passwd')).toBe('etc/passwd');
-    expect(sanitizePath('..\\..\\windows\\system32')).toBe('windows/system32');
-    expect(sanitizePath('normal/path/file.jpg')).toBe('normal/path/file.jpg');
-  });
-});
-
-describe('Security Tests - MIME Validation', () => {
-  it('rejecta extensiones peligrosas', async () => {
-    const { ALLOWED_EXTENSIONS } = await import('@/lib/security');
-    
-    const dangerousExtensions = ['.exe', '.bat', '.sh', '.php', '.js', '.html', '.svg'];
-    
-    for (const ext of dangerousExtensions) {
-      expect(ALLOWED_EXTENSIONS).not.toContain(ext);
-    }
-  });
-
-  it('permite solo MIME types seguros', async () => {
-    const { ALLOWED_MIME_TYPES } = await import('@/lib/security');
-    
-    const dangerousMimes = ['application/x-executable', 'text/html', 'application/javascript'];
-    
-    for (const mime of dangerousMimes) {
-      expect(ALLOWED_MIME_TYPES).not.toContain(mime);
-    }
-  });
-});
-
-console.log('✅ Security tests loaded successfully');

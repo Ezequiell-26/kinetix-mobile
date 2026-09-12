@@ -47,7 +47,7 @@ Auth por `getSession()` en todas salvo `version` (pública intencional). Ownersh
 - bcrypt cost 10 ✅ · JWT HS256 7d ✅ (sin refresh; logout solo borra cookie — token robado vive hasta expirar).
 - Cookie `secure` environment-sensitive (fix 2026-09-12; antes `false` siempre).
 - `secret.ts` fail-closed en prod ✅.
-- `POST /api/uploads`: allowlist `type ∈ {progress,checkin,message}` + extensión por allowlist (fix 2026-09-12; antes traversal `type=../..` + ext arbitraria).
+- `POST /api/uploads`: allowlist + firmas binarias (Qwen) + fuente única `@/lib/security.ts` (nuevo 2026-09-12: `sanitizePath`, allowlists, `sanitizeExtension`; testeado en E2E).
 - Rate-limit en memoria (se pierde al reiniciar).
 - Reset-password: token logueado en consola SOLO en dev (sin email real configurado) — riesgo aceptado y documentado.
 - CSP: solo producción (en dev dejaba página en blanco por React Refresh `eval`). `cdn.jsdelivr.net` permitido en `style-src`.
@@ -85,7 +85,7 @@ Trackeados indebidos: `apps/mobile/.next/*`, `*.tsbuildinfo`, `prisma/*.db`, `pa
 
 ### TESTS / CI
 
-- Tests: `test:stats` + `test:core` + `test:domain` (nuevo 2026-09-12: 24 asserts de dominio canónico — 16 músculos, registro, BMI/BMR/1RM). Total 49 pass. Sin pirámide E2E aún (V8 §52 = REMAINING).
+- Tests: `test:stats` + `test:core` + `test:domain` (24 asserts) + `test:security` E2E (nuevo 2026-09-12: 20 asserts con login REAL, fixtures aisladas y control positivo anti-vacuo; el test anterior usaba tokens mock y borraba la DB — reemplazado). Total 69 pass. `test:security` es OPT-IN (requiere servidor vivo). Sin pirámide E2E de journeys aún.
 - CI: `.github/workflows/ci.yml` (typecheck+test+build) creado 2026-09-12. Línea base VERIFICADA: `tsc --noEmit` ✅ 0 errores · `npm run test` ✅ 25 pass (16 stats+voice, 9 core) · `npm run build` ✅ 35+ rutas compilan · login API ✅.
 - Scripts raíz con `--if-present` + `typecheck` agregado (2026-09-12; antes `npm run build --workspaces` rompía por paquetes sin script y AGENTS exigía un `typecheck` inexistente).
 
