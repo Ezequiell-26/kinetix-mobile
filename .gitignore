@@ -2,27 +2,17 @@
 # Dependencies
 node_modules/
 
-# Build artifacts
-dist/
-build/
-.next/
-out/
-
-# Logs
-*.log
-
-# Environment variables
+# Environment
 .env
 .env.local
 .env.*
 
-# IDE files
+# Logs
+*.log
+
+# IDE
 .vscode/
 .idea/
-
-# OS generated files
-.DS_Store
-Thumbs.db
 
 # Python
 __pycache__/
@@ -30,41 +20,34 @@ __pycache__/
 *.pyo
 *.pyd
 .Python
-env/
-venv/
-ENV/
+*.so
 
-# Compiled JavaScript
-*.js.map
-
-# Coverage
+# Build outputs
+dist/
+build/
+*.egg-info/
+.coverage
+htmlcov/
 coverage/
-.nyc_output/
-istanbul/
-.html
 
-# Temporary files
+# Temp files
 *.tmp
-*.temp
-*.bak
+*.swp
+*.swo
 
-# Lock files
-package-lock.json
-yarn.lock
-
-# Database
-*.db
-*.db-journal
+# OS
+.DS_Store
+Thumbs.db
 
 # Compression
 *.zip
-*.tar
 *.gz
+*.tar
 *.tgz
-*.rar
-*.7z
 *.bz2
 *.xz
+*.7z
+*.rar
 *.zst
 *.lz4
 *.lzh
@@ -79,17 +62,4 @@ yarn.lock
 *.tar.bz2
 *.tar.xz
 *.tar.zst
-
 ```
-# Build outputs
-.next/
-build/
-dist/
-
-# Dependencies
-node_modules/
-
-# Cache
-.cache/
-*.pack
-packages/core/rust/target/
