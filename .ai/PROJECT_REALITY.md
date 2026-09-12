@@ -40,7 +40,7 @@
 
 ### BACKEND / API (24 rutas en src/app/api)
 
-Auth por `getSession()` en todas salvo `version` (pública intencional). `GET /api/analytics` reescrito 2026-09-12: solo TRAINER + agregados reales (sin mock, sin retención inventada) — verificado: trainer 200, cliente 401, anónimo 401. `POST /api/analytics` atribuye sesión, ignora `userId` del body. Ownership CLIENT-scoped ✅ en checkins/measurements/photos/workout-logs/messages/notifications/uploads. Brecha: ramas TRAINER aceptan cualquier `clientId` sin verificar pertenencia (OK con 1 trainer; IDOR horizontal si hay 2+).
+Auth por `getSession()` en todas salvo `version` (pública intencional). Ownership REAL multi-trainer desde 2026-09-12 (rescatado del tar paralelo): `Client.trainerId` + `assertTrainerOwnsClient` estricto + `GET /api/clients` filtrado + POST asigna dueño + seed backfill. Verificado en vivo: trainer ve sus 3, cliente 403 en lista y en ficha ajena. Brecha: ramas TRAINER aceptan cualquier `clientId` sin verificar pertenencia (OK con 1 trainer; IDOR horizontal si hay 2+).
 
 ### AUTH / SEGURIDAD
 

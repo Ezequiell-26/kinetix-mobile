@@ -51,7 +51,7 @@ model User {
   profile   Profile?
   client    Client?
   trainerProfile TrainerProfile?
-  trainerClients Client[] @relation("TrainerClients") // P0 Security: relación inversa para ownership multi-trainer
+  trainerClients Client[] @relation("TrainerClients")
   messagesSent Message[] @relation("Sent")
   messagesReceived Message[] @relation("Received")
   notifications Notification[]
@@ -91,7 +91,9 @@ model Client {
   id            String       @id @default(cuid())
   userId        String?      @unique
   user          User?        @relation(fields: [userId], references: [id], onDelete: SetNull)
-  trainerId     String?      // P0 Security: ownership real multi-trainer
+  // Ownership multi-trainer (P0): un trainer solo opera sus clientes.
+  // Los clientes existentes (trainerId null) los adopta el seed/QA.
+  trainerId     String?
   trainer       User?        @relation("TrainerClients", fields: [trainerId], references: [id], onDelete: SetNull)
   name          String
   email         String       @unique

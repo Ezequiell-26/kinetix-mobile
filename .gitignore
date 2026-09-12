@@ -1,35 +1,92 @@
-```
-# Database files
-*.db
-*.db-journal
-
-# Prisma migration files
-prisma/migrations/
-
 # Dependencies
 node_modules/
-**/node_modules/
 
 # Environment variables
 .env
 .env.local
 .env.*
 
-# IDE files
+# IDE specific
 .vscode/
 .idea/
-*.swp
-*.swo
 
 # Logs
 *.log
 
-# OS generated files
-.DS_Store
-Thumbs.db
+# Temporary files
+*.tmp
+*.swp
+*.swo
 
 # Build outputs
 dist/
 build/
 target/
-```
+
+# Python specific
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.Python
+env/
+venv/
+.venv/
+pip-log.txt
+pip-delete-this-directory.txt
+
+# Coverage reports
+coverage/
+htmlcov/
+
+# MyPy cache
+.mypy_cache/
+.dmypy.json
+dmypy.json
+
+# Pytest cache
+.pytest_cache/
+
+# OS generated files
+.DS_Store
+Thumbs.db
+
+# Compressed files
+*.zip
+*.gz
+*.tar
+*.tgz
+*.bz2
+*.xz
+*.7z
+*.rar
+*.zst
+*.lz4
+*.lzh
+*.cab
+*.arj
+*.rpm
+*.deb
+*.Z
+*.lz
+*.lzo
+*.tar.gz
+*.tar.bz2
+*.tar.xz
+*.tar.zst
+
+# ── KinetixFitt: higiene local (2026-09-12, NO BORRAR este bloque) ──
+# TypeScript / Next
+*.tsbuildinfo
+.next-dev*/
+.next-stale*/
+
+# SQLite (datos locales: cada dev genera los suyos con db:migrate + db:seed)
+*.db
+*.db-journal
+
+# Uploads de usuarios (se sirven por /api/uploads, nunca se commitean).
+# OJO: solo estos dos dirs de datos. NO usar `uploads/` a secas porque
+# también matchearía src/app/api/uploads/ (la ruta API, que SÍ se commitea).
+public/uploads/
+apps/mobile/uploads/

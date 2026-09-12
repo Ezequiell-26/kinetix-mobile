@@ -8,10 +8,9 @@ export async function GET(){
   if(!s) return NextResponse.json({error:"No auth"},{status:401});
   if(s.role!=="TRAINER") return NextResponse.json({error:"Solo trainer"},{status:403});
   
-  // P0 Security: Un trainer solo puede ver sus propios clientes
-  // En el modelo actual sin trainerId en Client, verificamos que el usuario sea TRAINER
-  // Para multi-trainer real, agregar campo trainerId a Client y filtrar por él
+  // P0: solo los clientes de ESTE trainer (ownership real por trainerId).
   const clients = await prisma.client.findMany({
+    where:{trainerId:s.id},
     orderBy:{createdAt:"desc"}, 
     include:{assignedProgram:true}
   });
@@ -38,7 +37,7 @@ export async function POST(req:Request){
       name: body.name.trim(), email: body.email.trim(), goal: body.goal || "HIPERTROFIA",
       status: body.status || "ACTIVO", plan: body.plan || "PERSONALIZADO",
       age: fin(body.age), weight: fin(body.weight),
-      notes: body.notes || null
+      notes: body.notes || null, trainerId: s.id
     }});
     await tx.subscription.create({data:{clientId:created.id, plan:created.plan, status:"ACTIVA", nextPayment: new Date(Date.now()+30*24*60*60*1000), price: created.plan==="PREMIUM"?25000: created.plan==="PERSONALIZADO"?18000:12000 }});
     return created;
