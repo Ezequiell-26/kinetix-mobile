@@ -6,9 +6,10 @@
   "type": "module",
   "workspaces": [
     "apps/mobile",
-    "apps/web",
     "packages/shared",
-    "packages/config"
+    "packages/ai-models",
+    "packages/core",
+    "packages/native-modules"
   ],
   "scripts": {
     "dev": "npm run dev --workspaces",
@@ -17,9 +18,9 @@
     "lint": "npm run lint --workspaces",
     "format": "npm run format --workspaces",
     "mobile": "npm -w apps/mobile run dev",
-    "web": "npm -w apps/web run dev",
+    "web": "echo 'Web app not yet implemented'",
     "mobile:build": "npm -w apps/mobile run build",
-    "web:build": "npm -w apps/web run build",
+    "web:build": "echo 'Web app not yet implemented'",
     "clean": "npm run clean --workspaces && rm -rf node_modules .turbo"
   },
   "devDependencies": {
