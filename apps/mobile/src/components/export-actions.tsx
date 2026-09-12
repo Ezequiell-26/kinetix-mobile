@@ -21,7 +21,7 @@ export function ExportActions(){
           size="sm"
           className="flex-1 min-h-[44px]"
           onClick={async ()=>{
-            const data = {title:"Mi progreso", text:"Mira mi progreso en EZEQUIEL COACHING"};
+            const data = {title:"Mi progreso", text:"Mira mi progreso en KinetiX"};
             try{
               if(navigator.share){
                 await navigator.share(data);

@@ -67,7 +67,7 @@ export default function LoginPage() {
             </motion.div>
 
             <div className="space-y-1">
-              <CardTitle className="text-2xl tracking-tight">EZEQUIEL COACHING</CardTitle>
+              <CardTitle className="text-2xl tracking-tight">KinetiX</CardTitle>
               <CardDesc>Entrenamiento personalizado online</CardDesc>
             </div>
 
@@ -211,7 +211,7 @@ export default function LoginPage() {
 
         {/* Footer */}
         <p className="text-center text-[11px] text-zinc-600 mt-4">
-          EZEQUIEL COACHING © 2026 · Tu mejor versión, cada día
+          KinetiX © 2026 · Tu mejor versión, cada día
         </p>
       </motion.div>
     </div>

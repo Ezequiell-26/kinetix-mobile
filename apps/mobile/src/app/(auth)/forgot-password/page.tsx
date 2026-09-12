@@ -158,7 +158,7 @@ export default function ForgotPage(){
 
         {/* Footer */}
         <p className="text-center text-[11px] text-zinc-600 mt-4">
-          EZEQUIEL COACHING © 2026 · Tu mejor versión, cada día
+          KinetiX © 2026 · Tu mejor versión, cada día
         </p>
       </motion.div>
     </div>

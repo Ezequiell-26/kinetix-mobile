@@ -27,7 +27,7 @@ export function ExportCenter({ type="client" }:{ type?: "client"|"trainer"}){
 
   function exportPdf(){
     // Mock: en prod sería jsPDF
-    download("reporte_progreso.txt", "EZEQUIEL COACHING — Reporte de Progreso\n\nPeso: 81.2kg (-1.2kg)\nAdherencia: 88%\nVolumen: 42.000kg\n", "text/plain");
+    download("reporte_progreso.txt", "KinetiX — Reporte de Progreso\n\nPeso: 81.2kg (-1.2kg)\nAdherencia: 88%\nVolumen: 42.000kg\n", "text/plain");
   }
 
   return (

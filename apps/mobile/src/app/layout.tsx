@@ -8,14 +8,14 @@ const inter = Inter({ subsets: ["latin"], variable: "--font-inter", display: "sw
 const grotesk = Space_Grotesk({ subsets: ["latin"], variable: "--font-display", display: "swap", weight: ["500", "600", "700"] });
 
 export const metadata: Metadata = {
-  title: "EZEQUIEL COACHING \u2014 Entrenamiento Personalizado Online",
+  title: "KinetiX — Entrenamiento Personalizado Online",
   description: "Plataforma premium de coaching online. Entrenamiento personalizado, seguimiento y progreso.",
-  applicationName: "EZEQUIEL COACHING",
+  applicationName: "KinetiX",
   manifest: "/manifest.json",
   appleWebApp: {
     capable: true,
     statusBarStyle: "black-translucent",
-    title: "EZEQUIEL",
+    title: "KinetiX",
   },
   formatDetection: { telephone: false },
   icons: {
@@ -29,8 +29,8 @@ export const metadata: Metadata = {
     ],
   },
   openGraph: {
-    title: "EZEQUIEL COACHING",
-    description: "Entrenamiento personalizado online \u2014 premium, simple, efectivo.",
+    title: "KinetiX",
+    description: "Entrenamiento personalizado online — plataforma premium.",
     type: "website",
     locale: "es_AR",
   },
