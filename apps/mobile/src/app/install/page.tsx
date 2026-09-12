@@ -1,7 +1,17 @@
+import type { Metadata } from "next";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
 import { Zap, Bell, Smartphone, Lock } from "lucide-react";
+
+// Página pública indexable: sin metadata propio heredaba el título genérico
+// del layout raíz en los resultados de búsqueda.
+export const metadata: Metadata = {
+  title: "Instalar KinetiX — App para Android e iPhone",
+  description:
+    "Instalá KinetiX como app nativa en tu celular: funciona offline, con ícono en el inicio y pantalla completa.",
+  alternates: { canonical: "/install" },
+};
 
 export default function InstallPage(){
   return (

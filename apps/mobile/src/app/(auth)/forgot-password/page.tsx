@@ -91,12 +91,16 @@ export default function ForgotPage(){
             {!sent ? (
               <form onSubmit={submit} className="space-y-4">
                 <div className="space-y-2">
-                  <Label>Email</Label>
+                  <Label htmlFor="email">Email</Label>
                   <Input
+                    id="email"
+                    name="email"
                     value={email}
                     onChange={e => setEmail(e.target.value)}
                     required
                     type="email"
+                    inputMode="email"
+                    autoComplete="email"
                     placeholder="tu@email.com"
                     className="bg-zinc-950/50 border-zinc-800 focus:border-primary/50"
                   />
@@ -119,6 +123,7 @@ export default function ForgotPage(){
                   className="w-full"
                   type="submit"
                   disabled={loading}
+                  aria-busy={loading}
                 >
                   {loading ? (
                     <><Loader2 size={18} className="animate-spin" /> Enviando...</>

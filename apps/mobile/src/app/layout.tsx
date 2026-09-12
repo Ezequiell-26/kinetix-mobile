@@ -3,6 +3,7 @@ import { Inter, Space_Grotesk } from "next/font/google";
 import "./globals.css";
 import { PwaRegister } from "@/components/pwa-register";
 import { ThemeProvider } from "@/components/theme-provider";
+import { MotionProvider } from "@/components/motion-provider";
 
 const inter = Inter({ subsets: ["latin"], variable: "--font-inter", display: "swap" });
 const grotesk = Space_Grotesk({ subsets: ["latin"], variable: "--font-display", display: "swap", weight: ["500", "600", "700"] });
@@ -21,7 +22,6 @@ export const metadata: Metadata = {
   formatDetection: { telephone: false },
   icons: {
     icon: [
-      { url: "/favicon.ico", sizes: "48x48", type: "image/x-icon" },
       { url: "/icons/icon-192.png", sizes: "192x192", type: "image/png" },
       { url: "/icons/icon-512.png", sizes: "512x512", type: "image/png" },
       { url: "/icons/icon.svg", type: "image/svg+xml" },
@@ -47,10 +47,14 @@ export const metadata: Metadata = {
 };
 
 export const viewport: Viewport = {
-  themeColor: "#0A0F14",
+  // Coincide con el fondo real (globals.css --background) en cada tema, no con
+  // un tercer color que no aparece en ninguna parte de la UI.
+  themeColor: "#080808",
   width: "device-width",
   initialScale: 1,
-  maximumScale: 1,
+  // `maximumScale: 1` bloqueaba el zoom por pinza (WCAG 1.4.4, Nivel AA):
+  // dejaba sin salida a usuarios con baja visión. Se permite escalar hasta 5x.
+  maximumScale: 5,
   viewportFit: "cover",
 };
 
@@ -64,9 +68,17 @@ export default function RootLayout({children}:{children:React.ReactNode}){
         <script dangerouslySetInnerHTML={{__html: `(function(){try{var t=localStorage.getItem('ec-theme')||'dark';document.documentElement.classList.add(t);document.documentElement.setAttribute('data-theme',t);}catch(e){}})()`}} />
       </head>
       <body className={`${inter.variable} ${grotesk.variable} min-h-screen bg-[#080808] text-zinc-100 antialiased selection:bg-primary selection:text-black`}>
-        <ThemeProvider>
-          {children}
-          <PwaRegister />
+        {/* storageKey alineado con la clave que lee el script anti-FOUC de
+            arriba ('ec-theme'). Antes el provider usaba
+            "ezequiel-coaching-theme": se escribía en una clave y se leía de
+            otra, así que el tema elegido no sobrevivía al reload. */}
+        <ThemeProvider storageKey="ec-theme" defaultTheme="dark">
+          {/* Desactiva las animaciones de Framer Motion si el sistema pide
+              movimiento reducido (globals.css ya cubría solo las de CSS). */}
+          <MotionProvider>
+            {children}
+            <PwaRegister />
+          </MotionProvider>
         </ThemeProvider>
       </body>
     </html>

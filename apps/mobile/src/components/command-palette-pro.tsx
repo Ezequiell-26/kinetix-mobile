@@ -200,12 +200,21 @@ export function CommandPalettePro({ role = "trainer" }: { role?: "trainer" | "cl
                     setIdx(0);
                   }}
                   onKeyDown={onKeyDown}
+                  // Patrón combobox: el input es el dueño del foco y
+                  // aria-activedescendant apunta a la opción resaltada, así el
+                  // lector de pantalla anuncia la fila activa sin mover el foco.
+                  role="combobox"
+                  aria-expanded={true}
+                  aria-controls="cmdk-list"
+                  aria-activedescendant={filtered.length ? `cmdk-opt-${idx}` : undefined}
+                  aria-label="Buscar en la aplicación"
+                  autoComplete="off"
                   placeholder={
                     role === "client"
                       ? "Buscar entrenos, progreso, nutrición…"
                       : "Buscar clientes, rutinas, check-ins…"
                   }
-                  className="flex-1 bg-transparent outline-none text-[16px] sm:text-sm placeholder:text-zinc-500 text-white"
+                  className="flex-1 bg-transparent outline-none text-[16px] sm:text-sm placeholder:text-zinc-400 text-white"
                 />
                 <button
                   onClick={() => setOpen(false)}
@@ -262,7 +271,12 @@ export function CommandPalettePro({ role = "trainer" }: { role?: "trainer" | "cl
               )}
 
               {/* Grouped results — cmdk groups */}
-              <div className="overflow-y-auto flex-1 p-2 space-y-4">
+              <div
+                id="cmdk-list"
+                role="listbox"
+                aria-label="Resultados de búsqueda"
+                className="overflow-y-auto flex-1 p-2 space-y-4"
+              >
                 {filtered.length === 0 ? (
                   <div className="py-10 text-center space-y-1">
                     <p className="text-sm font-bold text-white">Sin resultados</p>
@@ -270,19 +284,27 @@ export function CommandPalettePro({ role = "trainer" }: { role?: "trainer" | "cl
                   </div>
                 ) : (
                   groups.map(([group, items]) => (
-                    <div key={group}>
-                      <p className="text-[10px] font-bold tracking-widest text-zinc-500 uppercase px-2 mb-1">{group}</p>
+                    <div key={group} role="group" aria-label={group}>
+                      <p className="text-[10px] font-bold tracking-widest text-zinc-400 uppercase px-2 mb-1" aria-hidden="true">{group}</p>
                       <div className="space-y-1">
                         {items.map((c) => {
                           const globalIdx = flat.indexOf(c);
                           const active = globalIdx === idx;
                           return (
-                            <button
+                            // role="option" en un div, no un <button>: antes
+                            // había un <button> anidado dentro de otro (el de
+                            // favoritos), que es HTML inválido y descoloca el
+                            // orden de tabulación y a los lectores de pantalla.
+                            <div
                               key={c.href + c.label}
+                              id={`cmdk-opt-${globalIdx}`}
+                              role="option"
+                              aria-selected={active}
+                              tabIndex={-1}
                               onClick={() => go(c)}
                               onMouseEnter={() => setIdx(globalIdx)}
                               className={cn(
-                                "w-full text-left px-3 py-2.5 rounded-xl flex justify-between items-center border transition",
+                                "w-full text-left px-3 py-2.5 rounded-xl flex justify-between items-center border transition cursor-pointer",
                                 active
                                   ? "bg-white text-black border-white"
                                   : "bg-zinc-900/50 text-zinc-200 border-zinc-800 hover:border-zinc-700 hover:bg-zinc-900"
@@ -293,7 +315,7 @@ export function CommandPalettePro({ role = "trainer" }: { role?: "trainer" | "cl
                                   {highlight(c.label, q)}
                                 </span>
                                 {c.desc && (
-                                  <span className={cn("text-[11px] truncate block", active ? "text-black/60" : "text-zinc-500")}>
+                                  <span className={cn("text-[11px] truncate block", active ? "text-black/60" : "text-zinc-400")}>
                                     {c.desc}
                                   </span>
                                 )}
@@ -312,13 +334,13 @@ export function CommandPalettePro({ role = "trainer" }: { role?: "trainer" | "cl
                               )}
                               <button
                                 onClick={(e) => { e.stopPropagation(); toggleFav({ href: c.href, label: c.label }); }}
-                                aria-label={isFav(c.href) ? "Quitar de favoritos" : "Agregar a favoritos"}
+                                aria-label={isFav(c.href) ? `Quitar ${c.label} de favoritos` : `Agregar ${c.label} a favoritos`}
                                 title={isFav(c.href) ? "Quitar de favoritos" : "Favorito"}
-                                className={cn("ml-1 p-1.5 rounded-lg shrink-0 transition", isFav(c.href) ? "text-primary" : "text-zinc-500 hover:text-zinc-300")}
+                                className={cn("ml-1 p-1.5 rounded-lg shrink-0 transition", isFav(c.href) ? "text-primary" : "text-zinc-400 hover:text-zinc-200")}
                               >
-                                <Star size={14} className={isFav(c.href) ? "fill-primary" : ""} />
+                                <Star size={14} className={isFav(c.href) ? "fill-primary" : ""} aria-hidden="true" />
                               </button>
-                            </button>
+                            </div>
                           );
                         })}
                       </div>
@@ -327,10 +349,10 @@ export function CommandPalettePro({ role = "trainer" }: { role?: "trainer" | "cl
                 )}
               </div>
 
-              <div className="p-2.5 border-t border-zinc-800 text-[11px] text-zinc-500 flex items-center justify-between shrink-0">
+              <div className="p-2.5 border-t border-zinc-800 text-[11px] text-zinc-400 flex items-center justify-between shrink-0">
                 <span className="hidden sm:inline">↑↓ navegar • ↵ seleccionar • ESC cerrar</span>
                 <span className="sm:hidden">↵ seleccionar • / para abrir</span>
-                <span className="text-zinc-500">{filtered.length} comandos</span>
+                <span className="text-zinc-400">{filtered.length} comandos</span>
               </div>
             </motion.div>
           </motion.div>

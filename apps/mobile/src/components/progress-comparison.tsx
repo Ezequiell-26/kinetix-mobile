@@ -47,6 +47,15 @@ interface ProgressReportProps {
   onPeriodChange?: (period: TimePeriod) => void;
 }
 
+// Los valores del enum son técnicos ('up' | 'down' | ...): se mostraban
+// capitalizados en inglés ("Up"). Se traducen para la UI.
+const TREND_LABELS: Record<TrendDirection, string> = {
+  up: "Sube",
+  down: "Baja",
+  stable: "Estable",
+  volatile: "Irregular",
+};
+
 interface MetricCardProps {
   label: string;
   value: string | number;
@@ -574,11 +583,13 @@ function ComparisonCard({ comparison }: ComparisonChartProps) {
         <table className="w-full text-sm">
           <thead>
             <tr className="border-b">
-              <th className="text-left py-2 font-semibold">Metric</th>
-              <th className="text-right py-2 font-semibold">Current</th>
-              <th className="text-right py-2 font-semibold">Previous</th>
-              <th className="text-right py-2 font-semibold">Change</th>
-              <th className="text-center py-2 font-semibold">Trend</th>
+              {/* Encabezados en español: la app es es-AR y esta tabla era la
+                  única en inglés. */}
+              <th scope="col" className="text-left py-2 font-semibold">Métrica</th>
+              <th scope="col" className="text-right py-2 font-semibold">Actual</th>
+              <th scope="col" className="text-right py-2 font-semibold">Anterior</th>
+              <th scope="col" className="text-right py-2 font-semibold">Cambio</th>
+              <th scope="col" className="text-center py-2 font-semibold">Tendencia</th>
             </tr>
           </thead>
           <tbody>

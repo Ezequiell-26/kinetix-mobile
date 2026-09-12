@@ -72,8 +72,14 @@ export default function RegisterPage(){
           <CardContent className="pb-8 pt-4">
             <form onSubmit={submit} className="space-y-4">
               <div className="space-y-2">
-                <Label>Nombre completo</Label>
+                {/* htmlFor/id: sin ellos la etiqueta no está asociada al
+                    campo y los lectores de pantalla anuncian el input sin
+                    nombre (el login ya lo hacía bien). */}
+                <Label htmlFor="name">Nombre completo</Label>
                 <Input
+                  id="name"
+                  name="name"
+                  autoComplete="name"
                   value={form.name}
                   onChange={e => setForm({...form, name: e.target.value})}
                   placeholder="Tu nombre"
@@ -82,9 +88,13 @@ export default function RegisterPage(){
                 />
               </div>
               <div className="space-y-2">
-                <Label>Email</Label>
+                <Label htmlFor="email">Email</Label>
                 <Input
+                  id="email"
+                  name="email"
                   type="email"
+                  inputMode="email"
+                  autoComplete="email"
                   value={form.email}
                   onChange={e => setForm({...form, email: e.target.value})}
                   placeholder="tu@email.com"
@@ -93,15 +103,23 @@ export default function RegisterPage(){
                 />
               </div>
               <div className="space-y-2">
-                <Label>Contraseña</Label>
+                <Label htmlFor="password">Contraseña</Label>
                 <Input
+                  id="password"
+                  name="password"
                   type="password"
+                  autoComplete="new-password"
+                  minLength={6}
                   value={form.password}
                   onChange={e => setForm({...form, password: e.target.value})}
                   placeholder="••••••••"
                   required
+                  aria-describedby="password-hint"
                   className="bg-zinc-950/50 border-zinc-800 focus:border-primary/50"
                 />
+                <p id="password-hint" className="text-[11px] text-zinc-400">
+                  Mínimo 6 caracteres.
+                </p>
               </div>
 
               {/* Honeypot anti-bot: campo invisible para personas, tentador para
@@ -158,7 +176,7 @@ export default function RegisterPage(){
         </Card>
 
         {/* Footer */}
-        <p className="text-center text-[11px] text-zinc-600 mt-4">
+        <p className="text-center text-[11px] text-zinc-400 mt-4">
           KinetiX © 2026 · Tu mejor versión, cada día
         </p>
       </motion.div>

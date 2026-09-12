@@ -25,7 +25,24 @@
   --accent: 160 84% 39%;
   --safe-top: env(safe-area-inset-top);
   --safe-bottom: env(safe-area-inset-bottom);
+
+  /* Marca: fuente única para el lima de la landing y el fondo profundo.
+     Estaban repetidos como hex sueltos en page.tsx, site-nav y site-footer. */
+  --brand-lime: #D6FF2A;
+  --deep-space: #080808;
+
+  /* Hace que los controles nativos (scrollbar, autofill, date/select) usen la
+     paleta oscura. Sin esto, en modo oscuro el navegador pintaba widgets
+     claros sobre fondos negros. */
+  color-scheme: dark;
 }
+
+/* --- Contraste AA en oscuro ---------------------------------------------
+   zinc-500 (#71717A) sobre el fondo real (#080808) da ~4.13:1, por debajo
+   del 4.5:1 que exige WCAG AA para texto normal — y se usa en etiquetas de
+   10-12px. Se eleva a zinc-400 (#A1A1AA, ~7.8:1). En modo claro la regla no
+   aplica (:not(.light)) y rige el remapeo de más abajo. */
+:root:not(.light) .text-zinc-500 { color: #A1A1AA; }
 
 /* ===== LIGHT MODE ===== */
 .light {
@@ -177,6 +194,8 @@ html.light {
   --info: 2 132 199;
   --ai: 124 58 237;
   --premium: 124 58 237;
+  --muted: 228 228 231;              /* zinc-200 */
+  --muted-foreground: 82 82 91;      /* zinc-600: 7.5:1 sobre #FAFAFA */
   --background: 0 0% 100%;
   --foreground: 0 0% 3.5%;
   --card: 0 0% 98%;
@@ -184,6 +203,9 @@ html.light {
   --border: 0 0% 90%;
   /* El offset del anillo de foco debe ser claro: en oscuro es #080808 */
   --tw-ring-offset-color: #FAFAFA;
+
+  /* Widgets nativos (scrollbar, autofill, date/select) en paleta clara. */
+  color-scheme: light;
 }
 html.light body {
   background: #FAFAFA;
@@ -232,9 +254,24 @@ html.light .text-zinc-100 { color: #18181B !important; }
 html.light .text-zinc-200 { color: #27272A !important; }
 html.light .text-zinc-300 { color: #3F3F46 !important; }
 html.light .text-zinc-400 { color: #52525B !important; }
-html.light .text-zinc-500 { color: #71717A !important; }
-html.light .text-zinc-600 { color: #8E8E99 !important; }
-/* Acento lima como texto: ilegible sobre blanco -> lime-700 (mismo tono de marca, AA) */
+/* #71717A sobre #FAFAFA daba 4.37:1 (justo por debajo de AA). zinc-600
+   (#52525B) da 7.5:1. */
+html.light .text-zinc-500 { color: #52525B !important; }
+html.light .text-zinc-600 { color: #52525B !important; }
+
+/* --- Acento lima de la landing en modo claro ----------------------------
+   #D6FF2A tiene luminancia ~0.86: sobre blanco da ~1.15:1, es decir el
+   titular del hero y los CTA quedaban prácticamente invisibles (era el peor
+   defecto visual de la app en claro). Se remapea al mismo tono de marca
+   oscurecido (lime-700), que sí cumple AA como texto y sigue leyéndose como
+   color de marca en botones. */
+html.light .text-\[\#D6FF2A\] { color: #4D7C0F !important; }
+html.light .bg-\[\#D6FF2A\] {
+  background-color: #D6FF2A !important;
+  color: #0A0A0A !important;
+}
+html.light .border-\[\#D6FF2A\] { border-color: #4D7C0F !important; }
+
 html.light .hover\:text-white:hover { color: #0A0A0A !important; }
 
 /* --- Selección secundaria: chip blanco con borde negro (sin invertir) --- */
@@ -275,9 +312,11 @@ html.light select.bg-zinc-900 {
   border-color: #D4D4D8 !important;
   color: #18181B !important;
 }
+/* #A1A1AA sobre blanco da 2.56:1: el placeholder era casi invisible.
+   #71717A sube a 4.5:1, el mínimo AA. */
 html.light input.bg-zinc-900::placeholder,
 html.light textarea.bg-zinc-900::placeholder {
-  color: #A1A1AA !important;
+  color: #71717A !important;
 }
 html.light input.bg-zinc-900:focus,
 html.light textarea.bg-zinc-900:focus,
@@ -607,7 +646,9 @@ html.light [class*="rgba(0,0,0,0.5)"] { box-shadow: 0 8px 28px rgba(0,0,0,0.12) 
   filter: drop-shadow(0 0 10px rgba(52,211,153,0.9));
   transform: scale(1.08);
 }
-.nav-label { color: #71717a; font-weight: 600; transition: color 0.2s ease, font-weight 0.2s ease; }
+/* font-weight NO es animable: el navegador redondea a pasos discretos y en la
+   práctica solo provoca repintado de texto. Se deja fuera de la transición. */
+.nav-label { color: #A1A1AA; font-weight: 600; transition: color 0.2s ease; }
 .nav-label-active {
   color: rgb(var(--primary));
   font-weight: 800;

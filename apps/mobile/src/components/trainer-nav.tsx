@@ -18,6 +18,7 @@ import {
   Wrench,
 } from "lucide-react";
 import { useState } from "react";
+import { useDismissable } from "@/hooks/use-dismissable";
 import { NotificationsBell } from "@/components/notifications-bell";
 import { CommandPalette } from "@/components/command-palette";
 import { ThemeToggle } from "@/components/theme-toggle";
@@ -63,6 +64,7 @@ export function TrainerNav() {
   const path = usePathname();
   const r = useRouter();
   const [open, setOpen] = useState(false);
+  useDismissable(open, () => setOpen(false));
 
   async function logout() {
     await fetch("/api/auth/logout", { method: "POST" });
@@ -172,8 +174,14 @@ export function TrainerNav() {
           <div
             className="flex-1 bg-black/60 backdrop-blur-sm"
             onClick={() => setOpen(false)}
+            aria-hidden="true"
           />
-          <div className="w-[280px] bg-[#0C131A] border-l border-subtle/50 p-4 space-y-1 overflow-y-auto">
+          <div
+            role="dialog"
+            aria-modal="true"
+            aria-label="Menú de navegación"
+            className="w-[280px] bg-[#0C131A] border-l border-subtle/50 p-4 space-y-1 overflow-y-auto"
+          >
             <div className="flex items-center justify-between mb-5">
               <span className="font-display font-bold text-white">Menú</span>
               <button
@@ -181,12 +189,14 @@ export function TrainerNav() {
                 className="w-8 h-8 rounded-lg bg-white/[0.06] border border-subtle/50 flex items-center justify-center text-zinc-400 hover:text-white transition"
                 aria-label="Cerrar menú"
               >
-                <X size={15} />
+                <X size={15} aria-hidden="true" />
               </button>
             </div>
             {navGroups.map((g) => (
               <div key={g.label} className="pb-2">
-                <p className="text-[10px] uppercase font-bold tracking-[0.16em] text-zinc-600 px-3 pt-2 pb-1">
+                {/* text-zinc-600 sobre #080D11 daba 2.58:1 (ilegible).
+                    zinc-400 sube a ~7.8:1. */}
+                <p className="text-[10px] uppercase font-bold tracking-[0.16em] text-zinc-400 px-3 pt-2 pb-1">
                   {g.label}
                 </p>
                 {g.links.map((l) => {
@@ -229,6 +239,7 @@ export function TrainerBottomNav() {
   const path = usePathname();
   const r = useRouter();
   const [open, setOpen] = useState(false);
+  useDismissable(open, () => setOpen(false));
 
   async function logout() {
     await fetch("/api/auth/logout", { method: "POST" });
@@ -367,8 +378,14 @@ export function TrainerBottomNav() {
           <div
             className="absolute inset-0 bg-black/60 backdrop-blur-sm"
             onClick={() => setOpen(false)}
+            aria-hidden="true"
           />
-          <div className="relative w-full max-w-[640px] bg-[#0C131A] border-t border-subtle/50 rounded-t-3xl p-4 pb-[calc(1rem+env(safe-area-inset-bottom))] space-y-3 animate-in slide-in-from-bottom">
+          <div
+            role="dialog"
+            aria-modal="true"
+            aria-label="Más opciones"
+            className="relative w-full max-w-[640px] bg-[#0C131A] border-t border-subtle/50 rounded-t-3xl p-4 pb-[calc(1rem+env(safe-area-inset-bottom))] space-y-3 animate-in slide-in-from-bottom"
+          >
             <div className="flex justify-between items-center">
               <p className="font-display font-bold text-white">Más opciones</p>
               <button
@@ -376,7 +393,7 @@ export function TrainerBottomNav() {
                 aria-label="Cerrar"
                 className="w-9 h-9 rounded-full bg-white/[0.06] border border-subtle/50 flex items-center justify-center text-zinc-400 hover:text-white transition"
               >
-                <X size={16} />
+                <X size={16} aria-hidden="true" />
               </button>
             </div>
             <div className="grid grid-cols-2 gap-2">

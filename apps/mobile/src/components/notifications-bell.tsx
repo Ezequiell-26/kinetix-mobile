@@ -4,6 +4,7 @@ import { Bell } from "lucide-react";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import Link from "next/link";
+import { useDismissable } from "@/hooks/use-dismissable";
 
 type Notif = {
   id: string;
@@ -66,11 +67,15 @@ export function NotificationsBell(){
       <button
         onClick={() => setOpen(!open)}
         className="relative p-2.5 rounded-xl bg-zinc-900 border border-zinc-800 hover:border-zinc-700 transition"
-        aria-label="Notificaciones"
+        // aria-expanded/haspopup: el disparador no anunciaba si el panel estaba
+        // abierto ni de qué tipo era el contenido que desplegaba.
+        aria-expanded={open}
+        aria-haspopup="dialog"
+        aria-label={unread > 0 ? `Notificaciones, ${unread} sin leer` : "Notificaciones"}
       >
-        <Bell size={18} className="text-zinc-300" />
+        <Bell size={18} className="text-zinc-300" aria-hidden="true" />
         {unread > 0 && (
-          <span className="absolute -top-1 -right-1 w-5 h-5 bg-primary text-black text-[11px] font-black rounded-full flex items-center justify-center animate-pulse">
+          <span className="absolute -top-1 -right-1 w-5 h-5 bg-primary text-black text-[11px] font-black rounded-full flex items-center justify-center animate-pulse" aria-hidden="true">
             {unread}
           </span>
         )}
@@ -78,8 +83,13 @@ export function NotificationsBell(){
 
       {open && (
         <>
-          <div className="fixed inset-0 z-30" onClick={() => setOpen(false)} />
-          <Card className="absolute right-0 top-12 w-[340px] max-w-[90vw] z-40 shadow-2xl border-zinc-800 bg-zinc-950 max-h-[70vh] overflow-hidden flex flex-col">
+          <div className="fixed inset-0 z-30" onClick={() => setOpen(false)} aria-hidden="true" />
+          <Card
+            role="dialog"
+            aria-modal="true"
+            aria-label="Notificaciones"
+            className="absolute right-0 top-12 w-[340px] max-w-[90vw] z-40 shadow-2xl border-zinc-800 bg-zinc-950 max-h-[70vh] overflow-hidden flex flex-col"
+          >
             <div className="p-3.5 border-b border-zinc-800 flex justify-between items-center bg-zinc-900/50">
               <p className="font-bold text-sm text-white">Notificaciones</p>
               {unread > 0 && (
@@ -91,26 +101,21 @@ export function NotificationsBell(){
 
             <div className="overflow-y-auto flex-1 divide-y divide-zinc-900">
               {notifs.length === 0 ? (
-                <p className="text-xs text-zinc-500 p-8 text-center">No hay notificaciones todavía</p>
+                <p className="text-xs text-zinc-400 p-8 text-center">No hay notificaciones todavía</p>
               ) : (
                 notifs.map(n => {
-                  const content = (
-                    <div
-                      key={n.id}
-                      className={`p-3 flex gap-3 hover:bg-zinc-900/60 transition ${
-                        !n.read ? "bg-primary/[0.04]" : ""
-                      }`}
-                      onClick={() => setOpen(false)}
-                    >
+                  const inner = (
+                    <>
                       <div
                         className={`w-2 h-2 rounded-full mt-1.5 shrink-0 ${
                           !n.read ? "bg-primary" : "bg-transparent"
                         }`}
+                        aria-hidden="true"
                       />
                       <div className="flex-1 min-w-0 text-xs">
                         <p className="font-bold text-white truncate">{n.title}</p>
                         <p className="text-zinc-400 truncate mt-0.5">{n.body}</p>
-                        <div className="flex items-center justify-between mt-1.5 text-[10px] text-zinc-500">
+                        <div className="flex items-center justify-between mt-1.5 text-[10px] text-zinc-400">
                           <span>
                             {new Date(n.createdAt).toLocaleDateString("es-AR", { day: "numeric", month: "short" })}
                           </span>
@@ -119,15 +124,24 @@ export function NotificationsBell(){
                           </Badge>
                         </div>
                       </div>
-                    </div>
+                    </>
                   );
 
+                  const rowClass = `w-full text-left p-3 flex gap-3 hover:bg-zinc-900/60 transition ${
+                    !n.read ? "bg-primary/[0.04]" : ""
+                  }`;
+
+                  // Con link: el <Link> es el elemento interactivo. Sin link:
+                  // un <button> real — antes era un <div onClick>, que no se
+                  // podía alcanzar con el teclado ni activar con Enter.
                   return n.link ? (
-                    <Link key={n.id} href={n.link}>
-                      {content}
+                    <Link key={n.id} href={n.link} className={rowClass} onClick={() => setOpen(false)}>
+                      {inner}
                     </Link>
                   ) : (
-                    content
+                    <button key={n.id} type="button" className={rowClass} onClick={() => setOpen(false)}>
+                      {inner}
+                    </button>
                   );
                 })
               )}

@@ -23,7 +23,9 @@ export function ThemeToggle({ className = "" }: { className?: string }) {
         className="relative w-10 h-10 rounded-full border border-zinc-800 bg-zinc-900/60 backdrop-blur-sm flex items-center justify-center hover:bg-zinc-800 transition-colors"
         whileHover={{ scale: 1.05 }}
         whileTap={{ scale: 0.95 }}
-        aria-label="Toggle theme"
+        aria-expanded={isOpen}
+        aria-haspopup="menu"
+        aria-label="Cambiar tema de la interfaz"
       >
         <AnimatePresence mode="wait">
           {resolvedTheme === "dark" ? (
@@ -61,6 +63,7 @@ export function ThemeToggle({ className = "" }: { className?: string }) {
               exit={{ opacity: 0 }}
               className="fixed inset-0 z-40"
               onClick={() => setIsOpen(false)}
+              aria-hidden="true"
             />
 
             {/* Menu */}
@@ -121,7 +124,7 @@ export function ThemeToggleCompact({ className = "" }: { className?: string }) {
       className={`w-10 h-10 rounded-full border border-zinc-800 bg-zinc-900/60 backdrop-blur-sm flex items-center justify-center hover:bg-zinc-800 transition-colors ${className}`}
       whileHover={{ scale: 1.05 }}
       whileTap={{ scale: 0.95 }}
-      aria-label="Toggle theme"
+      aria-label="Cambiar tema de la interfaz"
     >
       <AnimatePresence mode="wait">
         {resolvedTheme === "dark" ? (

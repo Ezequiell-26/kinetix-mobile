@@ -6,10 +6,13 @@ import { Home, Dumbbell, TrendingUp, MessageCircle, User, LogOut, Apple, Clipboa
 import { ThemeToggle } from "@/components/theme-toggle";
 import { NotificationsBell } from "@/components/notifications-bell";
 import { CommandPalettePro } from "@/components/command-palette-pro";
+import { useDismissable } from "@/hooks/use-dismissable";
 
 export function ClientBottomNav(){
   const path = usePathname();
   const [showMore,setShowMore]=useState(false);
+  // Escape cierra el drawer y bloquea el scroll del fondo.
+  useDismissable(showMore, () => setShowMore(false));
   const items = [
     { href: "/client/dashboard", icon: Home, label: "Inicio" },
     { href: "/client/workout", icon: Dumbbell, label: "Entrenar" },
@@ -75,11 +78,18 @@ export function ClientBottomNav(){
       {/* Más drawer - mobile */}
       {showMore && (
         <div className="fixed inset-0 z-50 flex items-end justify-center">
-          <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={()=>setShowMore(false)} />
-          <div className="relative w-full max-w-[640px] bg-[#0D1319] border-t border-subtle rounded-t-3xl p-4 pb-[calc(1rem+env(safe-area-inset-bottom))] space-y-3 animate-in slide-in-from-bottom">
+          <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={()=>setShowMore(false)} aria-hidden="true" />
+          {/* role/aria-modal: sin ellos el drawer era un div más y el lector de
+              pantalla seguía leyendo el contenido de atrás. */}
+          <div
+            role="dialog"
+            aria-modal="true"
+            aria-label="Más opciones"
+            className="relative w-full max-w-[640px] bg-[#0D1319] border-t border-subtle rounded-t-3xl p-4 pb-[calc(1rem+env(safe-area-inset-bottom))] space-y-3 animate-in slide-in-from-bottom"
+          >
             <div className="flex justify-between items-center">
               <p className="font-bold text-white">Más opciones</p>
-              <button onClick={()=>setShowMore(false)} aria-label="Cerrar menú" className="w-9 h-9 rounded-full bg-zinc-900 border border-zinc-800 flex items-center justify-center text-zinc-400"><X size={16}/></button>
+              <button onClick={()=>setShowMore(false)} aria-label="Cerrar menú" className="w-9 h-9 rounded-full bg-zinc-900 border border-zinc-800 flex items-center justify-center text-zinc-400"><X size={16} aria-hidden="true"/></button>
             </div>
             <div className="grid grid-cols-2 gap-2">
               {moreItems.map(i=>{
@@ -154,7 +164,12 @@ export function ClientTopBar({ name }: { name?: string }){
         <div className="flex items-center gap-1.5 sm:gap-2">
           <CommandPalettePro role="client" />
           <div className="hidden sm:flex items-center gap-2 pl-2 ml-1 border-l border-subtle">
-            <div className="w-8 h-8 rounded-full bg-zinc-800 border border-subtle flex items-center justify-center text-[11px] font-black text-primary">
+            {/* La inicial es decorativa: el nombre completo está al lado, así
+                que se oculta a los lectores de pantalla para no duplicar. */}
+            <div
+              aria-hidden="true"
+              className="w-8 h-8 rounded-full bg-zinc-800 border border-subtle flex items-center justify-center text-[11px] font-black text-primary"
+            >
               {(name || "A").charAt(0).toUpperCase()}
             </div>
             <span className="text-xs font-semibold text-zinc-300 max-w-[110px] truncate">{name}</span>

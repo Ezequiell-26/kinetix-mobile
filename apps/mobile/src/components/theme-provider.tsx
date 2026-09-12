@@ -61,12 +61,14 @@ export function ThemeProvider({
     root.classList.add(resolved);
     setResolvedTheme(resolved);
 
-    // Update meta theme-color for mobile browsers
+    // Update meta theme-color for mobile browsers. Los valores coinciden con
+    // --background de globals.css (#080808 / #FAFAFA); antes se seteaba
+    // #000000/#ffffff, que no es el fondo real de ninguna pantalla.
     const metaThemeColor = document.querySelector('meta[name="theme-color"]');
     if (metaThemeColor) {
       metaThemeColor.setAttribute(
         "content",
-        resolved === "dark" ? "#000000" : "#ffffff"
+        resolved === "dark" ? "#080808" : "#FAFAFA"
       );
     }
 

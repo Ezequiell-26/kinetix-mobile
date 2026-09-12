@@ -39,6 +39,12 @@ const config: Config = {
         info: "rgb(var(--info) / <alpha-value>)",
         ai: "rgb(var(--ai) / <alpha-value>)",
         premium: "rgb(var(--premium) / <alpha-value>)",
+        // Tokens que faltaban: text-muted-foreground y bg-muted se usaban 17+
+        // veces en el codigo pero no estaban definidos, asi que Tailwind no
+        // generaba la clase y el texto caia al color heredado (blanco sobre
+        // blanco en modo claro). OJO: `brand.muted` es otra cosa (text-brand-muted).
+        muted: "rgb(var(--muted) / <alpha-value>)",
+        "muted-foreground": "rgb(var(--muted-foreground) / <alpha-value>)",
       },
       fontFamily: { 
         sans: ["var(--font-inter)","system-ui","sans-serif"], 
