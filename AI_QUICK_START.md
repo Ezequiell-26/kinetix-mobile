@@ -11,12 +11,24 @@ Welcome! This guide will get any **AI (Qwen, Claude, GPT, etc.)** up to speed in
 - **apps/web/** - Trainer dashboard
 - Both apps work independently but share infrastructure
 
+### ⚠️ Key Context: Recently Unified
+- `apps/mobile/` was originally separate repo (kinetix-mobile)
+- `apps/web/` was originally separate repo (kinetix-web)  
+- **NOW**: Both in ONE repo = opportunity to consolidate duplicated code!
+
 ### Your Mission
-Make consistent improvements to the codebase that benefit both apps. Think of it as refactoring, optimizing, and polishing.
+Make consistent improvements to the codebase that benefit both apps. Think of it as refactoring, optimizing, polishing, AND consolidating duplicate code to `packages/shared/`.
 
 ---
 
 ## 📖 Read These First (in order)
+
+**⚠️ IMPORTANT FIRST**: [AI_TWO_REPOS_UNIFIED.md](./AI_TWO_REPOS_UNIFIED.md) (5 min)
+- Understand this is 2 repos unified into 1
+- How to identify and consolidate duplicated code
+- Why this matters for improvements
+
+Then read in order:
 
 1. **[AI_CONTRIBUTION_GUIDE.md](./AI_CONTRIBUTION_GUIDE.md)** (15 min)
    - How to work without breaking things

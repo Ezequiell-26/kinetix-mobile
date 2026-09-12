@@ -101,13 +101,26 @@ See individual app READMEs:
 - [Mobile App README](./apps/mobile/README.md)
 - [Web Dashboard README](./apps/web/README.md)
 
+## � Important: Two Repos Unified Into One
+
+**Background**: 
+- `apps/mobile/` = Originally `kinetix-mobile` repository
+- `apps/web/` = Originally `kinetix-web` repository  
+- **NOW**: Both are in single `kinetix-mobile` monorepo
+
+**This means**:
+- Changes to either app affect this single repository
+- Both apps share `package.json` (root) via npm workspaces
+- Opportunity to consolidate duplicated code into `packages/shared/`
+
 ## 🔄 Workflow
 
 1. **Feature Development**: Create branch from `develop`
 2. **Testing**: Test both apps before merging
-3. **Monorepo**: Ensure changes don't break other apps
-4. **PR**: Create PR with both apps tested
-5. **Merge**: Merge to `develop`, then to `main` for releases
+3. **Consolidation**: Look for duplicate code to move to `packages/shared/`
+4. **Monorepo Awareness**: Ensure changes don't break other app
+5. **PR**: Create PR with both apps tested
+6. **Merge**: Merge to `develop`, then to `main` for releases
 
 ## 📝 Scripts
 
