@@ -1,6 +1,8 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
 import { getSession } from "@/lib/auth";
+import { assertTrainerOwnsClient } from "@/lib/authorization";
+
 export async function POST(req: Request){
   const s = await getSession();
   if(!s) return NextResponse.json({error:"No auth"},{status:401});
@@ -14,7 +16,12 @@ export async function POST(req: Request){
     const client = await prisma.client.findFirst({where:{OR:[{userId:s.id},{email:s.email}]}});
     clientId = client?.id || null;
     assignedProgramId = client?.assignedProgramId || null;
-  } else if(body.clientId){
+  } else if(body.clientId && s.role === "TRAINER"){
+    // P0 Security: TRAINER solo puede crear logs para sus propios clientes
+    const ownsClient = await assertTrainerOwnsClient(s.id, body.clientId);
+    if(!ownsClient){
+      return NextResponse.json({error:"Cliente no encontrado"}, {status:404});
+    }
     clientId = body.clientId;
   }
 
@@ -118,6 +125,11 @@ export async function GET(req: Request){
 
   // Trainer
   if(targetClientId){
+    // P0 Security: TRAINER solo puede ver logs de sus propios clientes
+    const ownsClient = await assertTrainerOwnsClient(s.id, targetClientId);
+    if(!ownsClient){
+      return NextResponse.json({error:"Cliente no encontrado"}, {status:404});
+    }
     const logs = await prisma.workoutLog.findMany({
       where: { clientId: targetClientId },
       include: { sets: true, workout: true },

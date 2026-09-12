@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
 import { getSession } from "@/lib/auth";
+import { assertTrainerOwnsClient } from "@/lib/authorization";
 
 export async function GET(req: Request){
   const s = await getSession();
@@ -26,6 +27,11 @@ export async function GET(req: Request){
 
   // Trainer
   if(clientId){
+    // P0 Security: TRAINER solo puede ver fotos de sus propios clientes
+    const ownsClient = await assertTrainerOwnsClient(s.id, clientId);
+    if(!ownsClient){
+      return NextResponse.json({error:"Cliente no encontrado"}, {status:404});
+    }
     const photos = await prisma.progressPhoto.findMany({where:{clientId}, orderBy:{date:"desc"}, take:50});
     return NextResponse.json(photos);
   }

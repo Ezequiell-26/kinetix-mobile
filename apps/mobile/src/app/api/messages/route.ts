@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
 import { getSession } from "@/lib/auth";
+import { assertTrainerOwnsClient } from "@/lib/authorization";
 
 export async function GET(req: Request){
   const s = await getSession();
@@ -26,6 +27,17 @@ export async function GET(req: Request){
   }
   // Trainer - if with param, get conversation with that client user
   if(withUserId){
+    // P0 Security: TRAINER solo puede ver mensajes con sus propios clientes
+    const clientUser = await prisma.client.findFirst({
+      where: { userId: withUserId },
+      select: { id: true }
+    });
+    if(clientUser){
+      const ownsClient = await assertTrainerOwnsClient(s.id, clientUser.id);
+      if(!ownsClient){
+        return NextResponse.json({error:"Cliente no encontrado"}, {status:404});
+      }
+    }
     const msgs = await prisma.message.findMany({
       where:{
         OR:[
