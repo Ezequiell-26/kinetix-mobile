@@ -8,4 +8,13 @@ export { Card } from './card';
 export { Input } from './input';
 export { Badge } from './badge';
 export { Skeleton } from './skeleton';
+export {
+  SkeletonCard,
+  SkeletonMetricCard,
+  SkeletonClientRow,
+  SkeletonToolCard,
+  SkeletonHeroCard,
+  SkeletonList,
+  SkeletonGrid,
+} from './skeleton';
 export { EmptyState } from './empty-state';

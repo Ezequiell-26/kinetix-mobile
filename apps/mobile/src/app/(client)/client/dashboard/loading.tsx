@@ -1,4 +1,4 @@
-import { SkeletonHeroCard, SkeletonMetricCard } from "@kinetix/shared";
+import { SkeletonHeroCard, SkeletonMetricCard } from "@kinetix/shared/components";
 
 export default function DashboardLoading() {
   return (

@@ -1,6 +1,6 @@
 "use client";
 
-import { SkeletonCard, SkeletonMetricCard } from "@kinetix/shared";
+import { SkeletonCard, SkeletonMetricCard } from "@kinetix/shared/components";
 
 export default function ProgressLoading() {
   return (
