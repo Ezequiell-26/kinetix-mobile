@@ -1,0 +1,110 @@
+# KinetixFitt - Docker Compose para Desarrollo y Producción
+# Incluye: Next.js, PostgreSQL, Redis, Rust WASM Runner
+
+version: '3.8'
+
+services:
+  # Base de datos principal
+  postgres:
+    image: postgres:15-alpine
+    container_name: kinetix-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: kinetix
+      POSTGRES_PASSWORD: ${DB_PASSWORD:-kinetix_secure_pass_2024}
+      POSTGRES_DB: kinetixdb
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./scripts/init-db.sql:/docker-entrypoint-initdb.d/init.sql
+    ports:
+      - "5432:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U kinetix"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # Cache y sesiones
+  redis:
+    image: redis:7-alpine
+    container_name: kinetix-redis
+    restart: unless-stopped
+    command: redis-server --appendonly yes
+    volumes:
+      - redis_data:/data
+    ports:
+      - "6379:6379"
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # Aplicación Web (Next.js)
+  web:
+    build:
+      context: .
+      dockerfile: Dockerfile.web
+      args:
+        - NEXT_PUBLIC_APP_URL=${NEXT_PUBLIC_APP_URL:-http://localhost:3000}
+    container_name: kinetix-web
+    restart: unless-stopped
+    environment:
+      DATABASE_URL: postgresql://kinetix:${DB_PASSWORD:-kinetix_secure_pass_2024}@postgres:5432/kinetixdb
+      REDIS_URL: redis://redis:6379
+      JWT_SECRET: ${JWT_SECRET:-your_jwt_secret_change_in_production}
+      NODE_ENV: production
+    ports:
+      - "3000:3000"
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    volumes:
+      - ./apps/web:/app/apps/web
+      - ./packages:/app/packages
+    command: sh -c "npm run db:migrate && npm run build && npm run start"
+
+  # API Server con Rust Core
+  api:
+    build:
+      context: .
+      dockerfile: Dockerfile.api
+    container_name: kinetix-api
+    restart: unless-stopped
+    environment:
+      DATABASE_URL: postgresql://kinetix:${DB_PASSWORD:-kinetix_secure_pass_2024}@postgres:5432/kinetixdb
+      RUST_LOG: info
+    ports:
+      - "8080:8080"
+    depends_on:
+      - postgres
+    volumes:
+      - ./packages/core/rust:/rust
+
+  # Worker para tareas en segundo plano
+  worker:
+    build:
+      context: .
+      dockerfile: Dockerfile.worker
+    container_name: kinetix-worker
+    restart: unless-stopped
+    environment:
+      DATABASE_URL: postgresql://kinetix:${DB_PASSWORD:-kinetix_secure_pass_2024}@postgres:5432/kinetixdb
+      REDIS_URL: redis://redis:6379
+    depends_on:
+      - postgres
+      - redis
+    command: npm run worker
+
+volumes:
+  postgres_data:
+    driver: local
+  redis_data:
+    driver: local
+
+networks:
+  default:
+    name: kinetix-network
+    driver: bridge
