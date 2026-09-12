@@ -31,7 +31,7 @@ export function Stronk531(){
 
   return (
     <Card className="border-violet-500/20">
-      <CardHeader><CardTitle className="flex items-center gap-2"><Dumbbell size={16} className="text-violet-400"/> Stronk 5/3/1 <Badge variant="muted">Stronk MIT</Badge></CardTitle><p className="text-xs text-zinc-500">Jim Wendler 5/3/1 — 3 semanas + deload, sobre TM 90% 1RM</p></CardHeader>
+      <CardHeader><CardTitle className="flex items-center gap-2"><Dumbbell size={16} className="text-violet-400"/> Stronk 5/3/1</CardTitle><p className="text-xs text-zinc-500">Jim Wendler 5/3/1 — 3 semanas + deload, sobre TM 90% 1RM</p></CardHeader>
       <CardContent className="space-y-4">
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
           <div><Label>Sentadilla 1RM</Label><Input type="number" value={squat} onChange={e=>setSquat(Number(e.target.value))} /></div>
@@ -55,7 +55,6 @@ export function Stronk531(){
             </div>
           ))}
         </div>
-        <p className="text-[11px] text-zinc-600 text-center">Stronk MIT (Go/Svelte) — 5/3/1 Wendler • TM = 90% 1RM</p>
       </CardContent>
     </Card>
   );

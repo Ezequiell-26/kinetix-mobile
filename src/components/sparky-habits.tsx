@@ -16,16 +16,16 @@ export function SparkyHabits(){
   const [aiTip,setAiTip]=useState("¡Vas bien! Sumá 500ml más de agua para llegar al 100%.");
 
   useEffect(()=>{
-    if(water < 2) setAiTip("💧 Tu hidratación está baja. Tomá 1 vaso ahora y sumá +0.25L");
-    else if(sleep < 7) setAiTip("😴 Dormiste poco. Priorizá 30min más hoy para recuperar.");
-    else if(protein < 140) setAiTip("🍗 Te faltan ~30g de proteína. Sumá un yogur o 100g de pollo.");
-    else if(steps < 8000) setAiTip("👟 Te faltan 1.2k pasos. Una caminata de 15min te lleva al 100%.");
-    else setAiTip("🔥 ¡Todo en verde! Mantené la racha mañana.");
+    if(water < 2) setAiTip("Tu hidratación está baja. Tomá 1 vaso ahora y sumá +0.25L");
+    else if(sleep < 7) setAiTip("Dormiste poco. Priorizá 30min más hoy para recuperar.");
+    else if(protein < 140) setAiTip("Te faltan ~30g de proteína. Sumá un yogur o 100g de pollo.");
+    else if(steps < 8000) setAiTip("Te faltan 1.2k pasos. Una caminata de 15min te lleva al 100%.");
+    else setAiTip("¡Todo en verde! Mantené la racha mañana.");
   },[water,sleep,steps,protein]);
 
   return (
     <Card className="border-sky-500/20 bg-gradient-to-br from-sky-500/5 via-zinc-900 to-zinc-900">
-      <CardHeader><CardTitle className="flex items-center gap-2"><Droplets size={18} className="text-sky-400"/> Hábitos IA <Badge variant="muted">SparkyFitness MIT</Badge></CardTitle><p className="text-xs text-zinc-500">Agua + sueño + pasos + proteína con IA local</p></CardHeader>
+      <CardHeader><CardTitle className="flex items-center gap-2"><Droplets size={18} className="text-sky-400"/> Hábitos IA</CardTitle><p className="text-xs text-zinc-500">Agua + sueño + pasos + proteína con IA local</p></CardHeader>
       <CardContent className="space-y-4">
         <div className="grid grid-cols-2 gap-3">
           <button onClick={()=>setWater(v=>Math.min(3.5, +(v+0.25).toFixed(2)))} className="bg-zinc-900 border border-zinc-800 rounded-2xl p-3 text-left hover:border-sky-500/30 transition">
@@ -51,10 +51,9 @@ export function SparkyHabits(){
           </button>
         </div>
         <div className="bg-zinc-800 border border-zinc-700 rounded-xl p-3 flex gap-2 items-start">
-          <Sparkles size={16} className="text-[#D6FF2A] shrink-0 mt-0.5"/>
-          <div><p className="text-xs font-bold text-[#D6FF2A]">IA SparkyFitness</p><p className="text-xs text-zinc-300 mt-1">{aiTip}</p></div>
+          <Sparkles size={16} className="text-primary shrink-0 mt-0.5"/>
+          <div><p className="text-xs font-bold text-primary">IA SparkyFitness</p><p className="text-xs text-zinc-300 mt-1">{aiTip}</p></div>
         </div>
-        <p className="text-[11px] text-zinc-600 text-center">SparkyFitness MIT — agua, sueño, pasos, proteína + IA local</p>
       </CardContent>
     </Card>
   );

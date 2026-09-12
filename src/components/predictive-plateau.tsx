@@ -42,7 +42,7 @@ export function PredictivePlateau({ logs }:{ logs: Log[] }){
 
   return (
     <Card className="border-amber-500/20">
-      <CardHeader><CardTitle className="flex items-center gap-2"><Activity size={16} className="text-amber-400"/> Predicción Inteligente <Badge variant="warn">OptiLifts + TF.js MIT</Badge></CardTitle><p className="text-xs text-zinc-500">Detecta mesetas, progreso y fatiga con regresión local</p></CardHeader>
+      <CardHeader><CardTitle className="flex items-center gap-2"><Activity size={16} className="text-amber-400"/> Predicción Inteligente</CardTitle><p className="text-xs text-zinc-500">Detecta mesetas, progreso y fatiga con regresión local</p></CardHeader>
       <CardContent className="space-y-2">
         {insights.map(i=>(
           <div key={i.exercise} className={`p-3 rounded-xl border flex gap-3 ${i.color==="amber"?"bg-amber-500/10 border-amber-500/20": i.color==="emerald"?"bg-emerald-500/10 border-emerald-500/20":"bg-red-500/10 border-red-500/20"}`}>
@@ -55,7 +55,6 @@ export function PredictivePlateau({ logs }:{ logs: Log[] }){
             </div>
           </div>
         ))}
-        <p className="text-[11px] text-zinc-600 text-center">OptiLifts + LiftShift + TensorFlow.js MIT — predicción local sin cloud</p>
       </CardContent>
     </Card>
   );

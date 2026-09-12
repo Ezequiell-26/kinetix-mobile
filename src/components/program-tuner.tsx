@@ -9,8 +9,8 @@ import { Wrench, TrendingUp, RefreshCw } from "lucide-react";
 export function ProgramTuner(){
   const [applied,setApplied]=useState(false);
   return (
-    <Card className="border-[#D6FF2A]/20">
-      <CardHeader><CardTitle className="flex items-center gap-2"><Wrench size={16} className="text-[#D6FF2A]"/> Auto-Tuner Programa <Badge variant="accent">OptiLifts MIT</Badge></CardTitle><p className="text-xs text-zinc-500">IA revisa check-ins + RIR + volumen y propone cambios a tu programa</p></CardHeader>
+    <Card className="border-primary/20">
+      <CardHeader><CardTitle className="flex items-center gap-2"><Wrench size={16} className="text-primary"/> Auto-Tuner Programa</CardTitle><p className="text-xs text-zinc-500">IA revisa check-ins + RIR + volumen y propone cambios a tu programa</p></CardHeader>
       <CardContent className="space-y-3">
         <div className="bg-zinc-900 border border-zinc-800 rounded-xl p-3 space-y-2">
           <p className="font-bold text-sm">Propuesta para Lucas — Hipertrofia 12 Semanas</p>
@@ -21,9 +21,8 @@ export function ProgramTuner(){
           </div>
           <p className="text-[11px] text-zinc-500">Basado en: RIR 0.8 + check-in “molestia rodilla” + 78% adherencia</p>
         </div>
-        <Button variant="accent" className="w-full" onClick={()=>setApplied(true)} disabled={applied}>{applied?"Aplicado ✓":"Aplicar cambios al programa →"}</Button>
+        <Button variant="accent" className="w-full" onClick={()=>setApplied(true)} disabled={applied}>{applied?"Aplicado":"Aplicar cambios al programa →"}</Button>
         {applied && <p className="text-xs text-center text-emerald-400">Programa actualizado. Lucas verá los cambios en su app.</p>}
-        <p className="text-[11px] text-zinc-600 text-center">OptiLifts + Jacked GPT MIT — tuner local, sin cloud</p>
       </CardContent>
     </Card>
   );

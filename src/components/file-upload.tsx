@@ -1,4 +1,5 @@
 "use client";
+import { Paperclip, Check } from "lucide-react";
 import { useState, useRef } from "react";
 import { Button } from "@/components/ui/button";
 
@@ -36,7 +37,7 @@ export function FileUpload({ type="progress", onUploaded, accept="image/*", labe
           <div className="space-y-2">
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img src={preview} alt="preview" className="w-24 h-24 object-cover rounded-xl mx-auto border border-zinc-800" />
-            <p className="text-xs text-emerald-400">✓ Subido</p>
+            <p className="text-xs text-emerald-400"><Check size={11} className="inline mr-0.5 -mt-0.5" />Subido</p>
           </div>
         ) : (
           <>
@@ -67,7 +68,7 @@ export function MessageFileButton({ onFile }:{onFile:(url:string, type:string)=>
   return (
     <>
       <button onClick={()=>inputRef.current?.click()} className="p-2.5 rounded-xl bg-zinc-900 border border-zinc-800 hover:border-zinc-700 text-zinc-400">
-        📎
+        <Paperclip size={16} />
       </button>
       <input ref={inputRef} type="file" accept="image/*,video/*,application/pdf" className="hidden" onChange={handle} />
     </>

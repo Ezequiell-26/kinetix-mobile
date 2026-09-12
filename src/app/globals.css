@@ -5,40 +5,106 @@
 /* Fuentes via next/font (variables --font-inter/--font-display en <body>) */
 
 :root {
-  /* ===== Tokens FitSync (canales RGB para alpha de Tailwind) ===== */
+  /* ===== DARK MODE (default) ===== */
   --primary: 52 211 153;        /* emerald-400 */
   --primary-hover: 110 231 183; /* emerald-300 */
-  --surface: 24 24 27;          /* zinc-900 */
-  --surface-elevated: 9 9 11;   /* zinc-950 */
-  --subtle: 39 39 42;           /* zinc-800 */
+  --surface: 14 22 32;          /* obsidian slate */
+  --surface-elevated: 19 30 44;   /* elevated slate */
+  --subtle: 30 45 62;           /* subtle slate border */
   --success: 52 211 153;
   --warning: 251 191 36;        /* amber-400 */
   --danger: 248 113 113;        /* red-400 */
   --info: 56 189 248;           /* sky-400 */
   --ai: 167 139 250;            /* violet-400 */
   --premium: 167 139 250;
-  --background: 0 0% 3.5%;
+  --background: 206 33% 5%;
   --foreground: 0 0% 98%;
-  --card: 0 0% 7%;
+  --card: 208 39% 9%;
   --card-foreground: 0 0% 98%;
-  --border: 0 0% 14%;
-  --accent: 68 100% 52%;
+  --border: 208 35% 18%;
+  --accent: 160 84% 39%;
   --safe-top: env(safe-area-inset-top);
   --safe-bottom: env(safe-area-inset-bottom);
 }
+
+/* ===== LIGHT MODE ===== */
+.light {
+  --primary: 16 185 129;        /* emerald-500 */
+  --primary-hover: 5 150 105;   /* emerald-600 */
+  --surface: 255 255 255;       /* white */
+  --surface-elevated: 249 250 251; /* gray-50 */
+  --subtle: 229 231 235;        /* gray-200 */
+  --success: 16 185 129;
+  --warning: 245 158 11;        /* amber-500 */
+  --danger: 239 68 68;          /* red-500 */
+  --info: 14 165 233;           /* sky-500 */
+  --ai: 139 92 246;             /* violet-500 */
+  --premium: 139 92 246;
+  --background: 0 0% 100%;
+  --foreground: 0 0% 3.9%;
+  --card: 0 0% 100%;
+  --card-foreground: 0 0% 3.9%;
+  --border: 0 0% 89.8%;
+  --accent: 160 84% 39%;
+}
+
+.light body {
+  background: #FFFFFF;
+  color: #0F0F0F;
+}
+
+.light .bg-zinc-950 {
+  background-color: #F9FAFB;
+}
+
+.light .bg-zinc-900 {
+  background-color: #FFFFFF;
+}
+
+.light .bg-zinc-800 {
+  background-color: #F3F4F6;
+}
+
+.light .text-white {
+  color: #0F0F0F;
+}
+
+.light .text-zinc-400 {
+  color: #6B7280;
+}
+
+.light .text-zinc-500 {
+  color: #6B7280;
+}
+
+.light .border-zinc-800 {
+  border-color: #E5E7EB;
+}
+
+.light .bg-surface {
+  background-color: rgb(var(--surface));
+}
+
+.light .bg-surface\/40 {
+  background-color: rgba(var(--surface), 0.4);
+}
+
+.light .border-subtle {
+  border-color: rgb(var(--subtle));
+}
 * { border-color: hsl(var(--border)); }
 html { scroll-behavior: smooth; -webkit-text-size-adjust: 100%; transition: background-color 0.3s ease; }
-/* ===== TEMA OSCURO FITSYNC: azul-negro premium ===== */
-html:not(.light) body { background: #0A0F14; }
-html:not(.light) .bg-\[\#080808\] { background-color: #0A0F14; }
-html:not(.light) .bg-\[\#080808\]\/80 { background-color: rgba(10,15,20,0.85); }
-html:not(.light) .bg-\[\#0F0F0F\] { background-color: #0D1319; }
-html:not(.light) .bg-\[\#111111\] { background-color: #0F151B; }
-html:not(.light) * { scrollbar-color: #2b3a42 #0A0F14; }
-html:not(.light) ::-webkit-scrollbar-track { background: #0A0F14; }
-html:not(.light) ::-webkit-scrollbar-thumb { background: #2b3a42; }
+/* ===== TEMA OSCURO FITSYNC: azul-negro obsidiana premium ===== */
+html:not(.light) body { background: #080D11; }
+html:not(.light) .bg-\[\#080808\] { background-color: #080D11; }
+html:not(.light) .bg-\[\#080808\]\/80 { background-color: rgba(8,13,17,0.85); }
+html:not(.light) .bg-\[\#0F0F0F\] { background-color: #0C131A; }
+html:not(.light) .bg-\[\#111111\] { background-color: #0E1620; }
+html:not(.light) * { scrollbar-color: #1e2d3d #080D11; }
+html:not(.light) ::-webkit-scrollbar-track { background: #080D11; }
+html:not(.light) ::-webkit-scrollbar-thumb { background: #1e2d3d; }
 body {
-  background: #080808;
+  background: #080D11;
   color: #FAFAFA;
   font-family: var(--font-inter), system-ui, sans-serif;
   -webkit-font-smoothing: antialiased;
@@ -48,7 +114,7 @@ body {
   transition: background-color 0.3s ease, color 0.3s ease;
   position: relative;
 }
-/* ===== Textura premium de fondo: viñeta + grano sutil (look "estudio fotográfico") ===== */
+/* ===== Textura premium de fondo: viñeta obsidiana + grano sutil ===== */
 body::before {
   content: '';
   position: fixed;
@@ -56,9 +122,10 @@ body::before {
   z-index: 0;
   pointer-events: none;
   background:
-    radial-gradient(ellipse 80% 60% at 15% -10%, rgba(52,211,153,0.06), transparent 60%),
-    radial-gradient(ellipse 70% 50% at 100% 110%, rgba(52,211,153,0.04), transparent 60%),
-    radial-gradient(ellipse 120% 80% at 50% 0%, rgba(0,0,0,0), rgba(0,0,0,0.5) 100%);
+    radial-gradient(ellipse 80% 60% at 15% -10%, rgba(52,211,153,0.07), transparent 55%),
+    radial-gradient(ellipse 60% 40% at 85% 110%, rgba(52,211,153,0.04), transparent 55%),
+    radial-gradient(ellipse 100% 70% at 50% -5%, rgba(14,22,32,0.8), transparent 50%),
+    radial-gradient(ellipse 120% 80% at 50% 0%, rgba(0,0,0,0), rgba(0,0,0,0.45) 100%);
 }
 body::after {
   content: '';
@@ -75,7 +142,7 @@ html.light body::after { opacity: 0.015; }
 #__next, body > div, main { position: relative; z-index: 1; }
 h1,h2,h3 { font-family: var(--font-display), 'Space Grotesk', sans-serif; letter-spacing: -0.02em; }
 ::-webkit-scrollbar { width: 6px; height: 6px; }
-::-webkit-scrollbar-thumb { background: #27272A; border-radius: 999px; transition: background 0.2s; }
+::-webkit-scrollbar-thumb { background: #1e2d3d; border-radius: 999px; transition: background 0.2s; }
 ::-webkit-scrollbar-track { background: transparent; }
 /* Premium selection */
 ::selection { background: var(--primary); color: #000; }
@@ -85,7 +152,7 @@ html.light ::selection { background: #0A0A0A; color: #fff; }
 html.light *:focus-visible { outline-color: #0A0A0A; }
 /* PWA standalone */
 @media (display-mode: standalone) {
-  body { background: #0A0F14; }
+  body { background: #080D11; }
 }
 @media (display-mode: standalone) {
   html.light body { background: #FAFAFA; }
@@ -115,6 +182,8 @@ html.light {
   --card: 0 0% 98%;
   --card-foreground: 0 0% 3.5%;
   --border: 0 0% 90%;
+  /* El offset del anillo de foco debe ser claro: en oscuro es #080808 */
+  --tw-ring-offset-color: #FAFAFA;
 }
 html.light body {
   background: #FAFAFA;
@@ -198,6 +267,134 @@ html.light .shadow-lg { box-shadow: 0 4px 16px rgba(0,0,0,0.06) !important; }
 html.light .card-premium:hover { box-shadow: 0 8px 24px rgba(0,0,0,0.08), 0 0 0 1px rgba(228,228,231,0.9); }
 html.light .shimmer::after { background: linear-gradient(90deg, transparent, rgba(0,0,0,0.04), transparent); }
 
+/* --- Inputs: fondos y bordes en modo claro --- */
+html.light input.bg-zinc-900,
+html.light textarea.bg-zinc-900,
+html.light select.bg-zinc-900 {
+  background-color: #FFFFFF !important;
+  border-color: #D4D4D8 !important;
+  color: #18181B !important;
+}
+html.light input.bg-zinc-900::placeholder,
+html.light textarea.bg-zinc-900::placeholder {
+  color: #A1A1AA !important;
+}
+html.light input.bg-zinc-900:focus,
+html.light textarea.bg-zinc-900:focus,
+html.light select.bg-zinc-900:focus {
+  border-color: rgb(var(--primary)) !important;
+  box-shadow: 0 0 0 3px rgba(5,150,105,0.12) !important;
+}
+
+/* --- Badges: adaptables al modo claro --- */
+html.light .bg-zinc-900.text-zinc-300.border-zinc-800 {
+  background-color: #F4F4F5 !important;
+  color: #3F3F46 !important;
+  border-color: #E4E4E7 !important;
+}
+html.light .bg-zinc-800.text-zinc-400.border-zinc-700 {
+  background-color: #E4E4E7 !important;
+  color: #52525B !important;
+  border-color: #D4D4D8 !important;
+}
+html.light .bg-emerald-500\/10.text-emerald-400.border-emerald-500\/20 {
+  background-color: rgba(5,150,105,0.08) !important;
+  color: #047857 !important;
+  border-color: rgba(5,150,105,0.2) !important;
+}
+html.light .bg-amber-500\/10.text-amber-400.border-amber-500\/20 {
+  background-color: rgba(217,119,6,0.08) !important;
+  color: #B45309 !important;
+  border-color: rgba(217,119,6,0.2) !important;
+}
+
+/* --- Progress bars: track en modo claro --- */
+html.light .bg-zinc-800 {
+  background-color: #E4E4E7 !important;
+}
+
+/* --- Pills/chips interiores: fondos oscuros dentro de cards --- */
+html.light .bg-zinc-950\/60 {
+  background-color: rgba(244,244,245,0.8) !important;
+}
+html.light .bg-zinc-950 {
+  background-color: #F4F4F5 !important;
+}
+
+/* --- Botones: modo claro --- */
+html.light .bg-zinc-900.text-white.hover\:bg-zinc-800 {
+  background-color: #F4F4F5 !important;
+  color: #18181B !important;
+  border-color: #E4E4E7 !important;
+}
+html.light .bg-zinc-900.text-white.hover\:bg-zinc-800:hover {
+  background-color: #E4E4E7 !important;
+}
+html.light .border-zinc-700.text-zinc-100.hover\:bg-zinc-900 {
+  border-color: #D4D4D8 !important;
+  color: #18181B !important;
+}
+html.light .border-zinc-700.text-zinc-100.hover\:bg-zinc-900:hover {
+  background-color: #F4F4F5 !important;
+  border-color: #A1A1AA !important;
+}
+html.light .bg-transparent.text-zinc-400.hover\:text-white:hover {
+  color: #18181B !important;
+  background-color: #F4F4F5 !important;
+}
+
+/* --- Botones demo en login: claros --- */
+html.light .bg-zinc-900\/80 {
+  background-color: #F4F4F5 !important;
+}
+html.light .border-zinc-800 {
+  border-color: #E4E4E7 !important;
+}
+
+/* --- Textos en modo claro: asegurar contraste --- */
+html.light .text-zinc-300 {
+  color: #3F3F46 !important;
+}
+html.light .text-zinc-200 {
+  color: #27272A !important;
+}
+
+/* --- Dividers y separadores --- */
+html.light .divide-zinc-800 > * + * {
+  border-color: #E4E4E7 !important;
+}
+html.light .divide-subtle > * + * {
+  border-color: #E4E4E7 !important;
+}
+
+/* --- Focus ring offset en modo claro (debe ser claro sobre fondo claro) --- */
+html.light .focus-visible\:ring-offset-\[\#080808\]:focus-visible {
+  --tw-ring-offset-color: #FAFAFA !important;
+}
+
+/* --- Scrollbars en modo claro --- */
+html.light * {
+  scrollbar-color: #D4D4D8 #FAFAFA;
+}
+html.light ::-webkit-scrollbar-thumb {
+  background: #D4D4D8 !important;
+}
+html.light ::-webkit-scrollbar-track {
+  background: transparent !important;
+}
+
+/* --- Nav iconos y labels en modo claro --- */
+html.light .nav-icon { color: #71717A; }
+html.light .nav-icon-active { color: rgb(var(--primary)); filter: drop-shadow(0 0 6px rgba(5,150,105,0.25)); }
+html.light .nav-label { color: #71717A; }
+html.light .nav-label-active { color: rgb(var(--primary)); filter: none; font-weight: 800; }
+
+/* --- Topbar / header fondos en modo claro --- */
+html.light .bg-\[\#0A0F14\]\/85 { background-color: rgba(255,255,255,0.92) !important; }
+html.light .bg-\[\#0D1319\]\/90 { background-color: rgba(255,255,255,0.95) !important; }
+html.light .bg-\[\#0C131A\] { background-color: #FFFFFF !important; }
+html.light .bg-\[\#0C131A\]\/92 { background-color: rgba(255,255,255,0.95) !important; }
+
 /* VIP Polish — EZEQUIEL COACHING alto nivel */
 * {
   scrollbar-width: thin;
@@ -227,10 +424,10 @@ html.light .shimmer::after { background: linear-gradient(90deg, transparent, rgb
 }
 /* Glassmorphism utility */
 .glass {
-  background: rgba(17, 17, 17, 0.8);
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
-  border: 1px solid rgba(39, 39, 42, 0.5);
+  background: rgba(14, 22, 32, 0.85);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid rgba(30, 45, 62, 0.5);
 }
 /* Shimmer animation */
 @keyframes shimmer {
@@ -254,7 +451,19 @@ html.light .shimmer::after { background: linear-gradient(90deg, transparent, rgb
 }
 .card-premium:hover {
   transform: translateY(-2px);
-  box-shadow: 0 8px 32px rgba(0,0,0,0.4), 0 0 0 1px rgba(39,39,42,0.5);
+  box-shadow: 0 12px 40px rgba(0,0,0,0.45), 0 0 0 1px rgba(30,45,62,0.6), inset 0 1px 0 rgba(255,255,255,0.06);
+}
+/* Sombra de tarjeta theme-aware: hairline superior iluminado en oscuro,
+   sombra suave y limpia en claro (evita el bloque negro pesado). */
+.surface-card {
+  background-color: #0E1620;
+  border: 1px solid rgba(30,45,62,0.35);
+  box-shadow: inset 0 1px 0 rgba(255,255,255,0.05), 0 10px 38px rgba(0,0,0,0.22), 0 0 0 1px rgba(30,45,62,0.25);
+}
+html.light .surface-card {
+  background-color: #FFFFFF;
+  border: 1px solid rgba(228,228,231,0.7);
+  box-shadow: 0 6px 22px rgba(0,0,0,0.07), 0 0 0 1px rgba(228,228,231,0.7);
 }
 
 /* ===== Sistema visual EZEQUIEL COACHING — cross-platform (Windows/Mac/Android/iOS) ===== */
@@ -273,7 +482,7 @@ html.light .shimmer::after { background: linear-gradient(90deg, transparent, rgb
   position: sticky;
   bottom: calc(84px + env(safe-area-inset-bottom));
   z-index: 30;
-  background: linear-gradient(to top, #080808 55%, transparent);
+  background: linear-gradient(to top, #080D11 55%, transparent);
   padding: 12px 0 calc(8px + env(safe-area-inset-bottom));
 }
 @media (min-width: 1024px) {
@@ -331,6 +540,35 @@ h1, h2 { text-wrap: balance; }
 .urgent {
   animation: urgent-pulse 1s ease-in-out infinite;
 }
+
+/* ===== Celebración (recompensa tras completar) — confeti sin dependencias =====
+   Refuerzo positivo inmediato → hábito y retención. Se desactiva con
+   prefers-reduced-motion (accesibilidad vestibular). */
+@keyframes confetti-fall {
+  0% { transform: translate3d(0, 0, 0) rotate(0deg); opacity: 1; }
+  85% { opacity: 1; }
+  100% { transform: translate3d(var(--dx, 0px), 105vh, 0) rotate(var(--rot, 540deg)); opacity: 0; }
+}
+.confetti-piece { animation-name: confetti-fall; animation-timing-function: cubic-bezier(0.25, 0.6, 0.4, 1); animation-fill-mode: forwards; }
+/* Anillo que se expande al confirmar (achievement) */
+@keyframes ring-burst {
+  0% { transform: scale(0.7); opacity: 0.7; }
+  100% { transform: scale(1.9); opacity: 0; }
+}
+.ring-burst { animation: ring-burst 900ms var(--motion-ease) both; }
+
+/* ===== Transición de página (App Router template.tsx) =====
+   Cada navegación entra con un fade + leve desplazamiento → la app se siente
+   fluida y "nativa" (iOS/Android/Windows/Mac). Se desactiva con reduced-motion. */
+@keyframes page-enter {
+  from { opacity: 0; transform: translateY(8px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+.page-enter { animation: page-enter 280ms var(--motion-ease) both; }
+@media (prefers-reduced-motion: reduce) { .page-enter { animation: none; } }
+@media (prefers-reduced-motion: reduce) {
+  .confetti-piece, .ring-burst { display: none; }
+}
 @media (prefers-reduced-motion: reduce) {
   .animate-in, .fade-in, .slide-in-from-bottom, .pop, .urgent {
     animation: none;
@@ -382,14 +620,19 @@ html.light .nav-icon-active { filter: drop-shadow(0 0 6px rgba(5,150,105,0.35));
 html.light .nav-label-active { filter: none; }
 html.light .nav-dot { box-shadow: 0 0 4px rgba(5,150,105,0.6); }
 
-/* Pill activa (sidebar trainer, badges de día): clara en oscuro, oscura en claro */
-.pill-active { background-color: #FFFFFF; color: #000000; }
-html.light .pill-active { background-color: #0A0A0A !important; color: #FFFFFF !important; }
+/* Pill activa (sidebar trainer, badges de día): emerald en oscuro, negra en claro */
+.pill-active {
+  background: linear-gradient(135deg, rgba(52,211,153,0.15), rgba(52,211,153,0.08));
+  color: rgb(var(--primary));
+  border: 1px solid rgba(52,211,153,0.25);
+  font-weight: 700;
+}
+html.light .pill-active { background: #0A0A0A !important; color: #FFFFFF !important; border-color: transparent !important; }
 html.light .group:hover .group-hover\:bg-primary { color: #FFFFFF !important; }
 /* Chat premium: textura sutil + entrada de mensajes */
 .chat-canvas {
-  background-color: #080808;
-  background-image: radial-gradient(rgba(255,255,255,0.045) 1px, transparent 1px);
+  background-color: #080D11;
+  background-image: radial-gradient(rgba(255,255,255,0.03) 1px, transparent 1px);
   background-size: 22px 22px;
 }
 @keyframes msg-in {

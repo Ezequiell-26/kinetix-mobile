@@ -90,7 +90,9 @@ export async function PATCH(
     const body = await req.json();
     const updateData: Record<string, unknown> = {};
 
-    if (body.assignedProgramId !== undefined) updateData.assignedProgramId = body.assignedProgramId || null;
+    // La asignación de programas es decisión del trainer: un CLIENT no puede
+    // asignarse planes a sí mismo desde la API.
+    if (body.assignedProgramId !== undefined && s.role === "TRAINER") updateData.assignedProgramId = body.assignedProgramId || null;
     if (body.status !== undefined && s.role === "TRAINER") updateData.status = body.status;
     if (body.plan !== undefined && s.role === "TRAINER") updateData.plan = body.plan;
     if (body.notes !== undefined) updateData.notes = body.notes;

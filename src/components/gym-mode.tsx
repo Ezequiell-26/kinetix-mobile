@@ -14,7 +14,7 @@ export function GymMode({
   onFinish,
   onExit,
 }:{
-  exercises: Array<{id:string; name:string; sets:number; reps:string; restSec:number; image:string|null; instructions:string|null; muscleGroup:string}>;
+  exercises: Array<{id:string; name:string; sets:number; reps:string; restSec:number; image:string|null; video?:string|null; instructions:string|null; muscleGroup:string}>;
   onFinish: ()=>void;
   onExit: ()=>void;
 }){
@@ -76,7 +76,7 @@ export function GymMode({
 
       {/* Rest Timer Banner */}
       {rest>0 && (
-        <div className="bg-[#D6FF2A] text-black p-4 flex items-center justify-between">
+        <div className="bg-primary text-black p-4 flex items-center justify-between">
           <div className="flex items-center gap-3">
             <Timer size={24} />
             <div>
@@ -94,7 +94,7 @@ export function GymMode({
       {/* Main Exercise */}
       <div className="flex-1 overflow-auto p-4 space-y-4">
         <div className="aspect-[16/9] rounded-2xl overflow-hidden bg-zinc-900 border border-zinc-800">
-          <ExerciseImage src={ex.image} alt={ex.name} muscleGroup={ex.muscleGroup} name={ex.name} className="w-full h-full" />
+          <ExerciseImage src={ex.image} videoSrc={ex.video} alt={ex.name} muscleGroup={ex.muscleGroup} name={ex.name} className="w-full h-full" />
         </div>
         <Card className="bg-zinc-900 border-zinc-800">
           <CardContent className="pt-4">
@@ -106,7 +106,7 @@ export function GymMode({
             <p className="text-sm text-zinc-400 mt-3">{ex.instructions || "Controla la técnica, respira, core firme."}</p>
             <div className="grid grid-cols-3 gap-2 mt-4">
               {Array.from({length: ex.sets}).map((_,i)=>(
-                <div key={i} className={`h-2 rounded-full ${completed[`${ex.id}-${i+1}`] ? "bg-[#D6FF2A]" : i+1===setNum ? "bg-white" : "bg-zinc-800"}`} />
+                <div key={i} className={`h-2 rounded-full ${completed[`${ex.id}-${i+1}`] ? "bg-primary" : i+1===setNum ? "bg-white" : "bg-zinc-800"}`} />
               ))}
             </div>
           </CardContent>
@@ -116,7 +116,7 @@ export function GymMode({
       {/* Controls */}
       <div className="p-4 border-t border-zinc-800 bg-zinc-950 space-y-3">
         <Button variant="accent" className="w-full h-14 text-lg font-black" onClick={completeSet}>
-          ✓ COMPLETAR SERIE {setNum}
+          COMPLETAR SERIE {setNum}
         </Button>
         <div className="flex gap-2">
           <Button variant="outline" className="flex-1" disabled={idx===0 && setNum===1} onClick={()=>{

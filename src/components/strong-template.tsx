@@ -55,7 +55,7 @@ const MOCK_TEMPLATES: WorkoutTemplate[] = [
     id: "push",
     name: "Push — Pecho/Hombro/Tríceps",
     folder: "Fuerza",
-    color: "#D6FF2A",
+    color: "var(--primary)",
     lastUsed: "Hace 2 días",
     exercises: [
       { id: "e1", name: "Press Banca", muscleGroup: "chest", sets: 4, reps: "6-8", weight: 80, restSec: 120 },
@@ -267,7 +267,7 @@ export function StrongTemplate() {
       <Card className="border-zinc-800 bg-zinc-900 overflow-hidden">
         <div className="bg-gradient-to-r from-zinc-950 to-zinc-900 border-b border-zinc-800 p-4 flex items-center justify-between">
           <div>
-            <p className="text-[10px] font-black tracking-widest text-[#D6FF2A] uppercase flex items-center gap-1.5">
+            <p className="text-[10px] font-black tracking-widest text-primary uppercase flex items-center gap-1.5">
               <Zap size={12} /> Strong Template • En curso
             </p>
             <p className="font-black text-white leading-tight">{activeTpl.name}</p>
@@ -277,16 +277,16 @@ export function StrongTemplate() {
           </div>
           <div className="text-right">
             <p className="text-[11px] text-zinc-500 font-bold uppercase">Progreso</p>
-            <p className="font-black text-[#D6FF2A]">{progress}%</p>
+            <p className="font-black text-primary">{progress}%</p>
             <p className="text-[11px] text-zinc-500">{doneSets}/{totalSets} series</p>
           </div>
         </div>
         <Progress value={progress} className="h-1 rounded-none" />
         {/* Rest Timer */}
         {isResting && (
-          <div className="bg-[#D6FF2A] text-black px-4 py-3 flex items-center justify-between">
+          <div className="bg-primary text-black px-4 py-3 flex items-center justify-between">
             <div className="flex items-center gap-3">
-              <div className="w-12 h-12 rounded-full bg-black text-[#D6FF2A] flex items-center justify-center font-black text-base">
+              <div className="w-12 h-12 rounded-full bg-black text-primary flex items-center justify-center font-black text-base">
                 {String(Math.floor(restRem / 60)).padStart(2, "0")}:{String(restRem % 60).padStart(2, "0")}
               </div>
               <div>
@@ -310,7 +310,7 @@ export function StrongTemplate() {
 
         {/* PR Banner */}
         {showPrAnim && lastPr && (
-          <div className="bg-gradient-to-r from-amber-400 to-[#D6FF2A] text-black px-4 py-3 flex items-center gap-3 animate-pulse">
+          <div className="bg-gradient-to-r from-amber-400 to-primary text-black px-4 py-3 flex items-center gap-3 animate-pulse">
             <Trophy size={20} />
             <div>
               <p className="font-black text-sm leading-none">¡Nuevo PR! {lastPr.exerciseName}</p>
@@ -318,7 +318,7 @@ export function StrongTemplate() {
                 {lastPr.weight}kg × {lastPr.reps} • 1RM {Math.round(lastPr.oneRM)}kg (Epley)
               </p>
             </div>
-            <Badge className="ml-auto bg-black text-[#D6FF2A]">PR</Badge>
+            <Badge className="ml-auto bg-black text-primary">PR</Badge>
           </div>
         )}
 
@@ -336,7 +336,7 @@ export function StrongTemplate() {
               <Button variant="outline" onClick={() => setActiveId(null)} className="border-zinc-700">
                 Volver a plantillas
               </Button>
-              <Button onClick={() => startWorkout(activeTpl.id)} className="bg-[#D6FF2A] text-black hover:bg-[#c8f000] font-black">
+              <Button onClick={() => startWorkout(activeTpl.id)} className="bg-primary text-black hover:bg-primary-hover font-black">
                 Repetir
               </Button>
             </div>
@@ -344,11 +344,11 @@ export function StrongTemplate() {
         ) : (
           <CardContent className="p-4 space-y-4">
             <div className="flex items-center gap-3 bg-zinc-950 border border-zinc-800 rounded-2xl p-3">
-              <div className="w-10 h-10 rounded-xl bg-[#D6FF2A] text-black flex items-center justify-center font-black">{currentExIdx + 1}</div>
+              <div className="w-10 h-10 rounded-xl bg-primary text-black flex items-center justify-center font-black">{currentExIdx + 1}</div>
               <div className="flex-1 min-w-0">
                 <p className="font-bold text-sm leading-none">{activeEx.name}</p>
                 <p className="text-xs text-zinc-500">
-                  {activeEx.sets}×{activeEx.reps} • descanso {activeEx.restSec}s {activeEx.superset && <span className="text-[#D6FF2A]">• Superset</span>}
+                  {activeEx.sets}×{activeEx.reps} • descanso {activeEx.restSec}s {activeEx.superset && <span className="text-primary">• Superset</span>}
                 </p>
                 {activeEx.note && <p className="text-[11px] text-amber-300">{activeEx.note}</p>}
               </div>
@@ -388,7 +388,7 @@ export function StrongTemplate() {
               <Button variant="outline" className="border-zinc-800 h-12" onClick={() => { setPaused(false); setIsResting(false); setRestRem(0); }}>
                 <RotateCcw size={16} className="mr-2" /> Saltar descanso
               </Button>
-              <Button onClick={logSet} className="bg-[#D6FF2A] text-black hover:bg-[#c8f000] font-black h-12">
+              <Button onClick={logSet} className="bg-primary text-black hover:bg-primary-hover font-black h-12">
                 <Check size={18} className="mr-2" /> Registrar serie
               </Button>
             </div>
@@ -399,7 +399,7 @@ export function StrongTemplate() {
               </Button>
               <div className="flex gap-1">
                 {activeTpl.exercises.map((_, i) => (
-                  <div key={i} className={`h-1.5 rounded-full transition-all ${i < currentExIdx ? "w-6 bg-emerald-500" : i === currentExIdx ? "w-8 bg-[#D6FF2A]" : "w-4 bg-zinc-800"}`} />
+                  <div key={i} className={`h-1.5 rounded-full transition-all ${i < currentExIdx ? "w-6 bg-emerald-500" : i === currentExIdx ? "w-8 bg-primary" : "w-4 bg-zinc-800"}`} />
                 ))}
               </div>
               <span className="text-xs text-zinc-600 font-bold">{doneSets}/{totalSets}</span>
@@ -416,11 +416,9 @@ export function StrongTemplate() {
         <div className="flex items-start justify-between gap-3">
           <div>
             <CardTitle className="flex items-center gap-2 text-base">
-              <Dumbbell size={18} className="text-[#D6FF2A]" /> Plantillas Strong
-              <Badge variant="accent" className="text-[10px]">MIT 75</Badge>
+              <Dumbbell size={18} className="text-primary" /> Plantillas Strong
               <Badge variant="muted" className="text-[10px] border-zinc-700">Template + Timer + PR</Badge>
             </CardTitle>
-            <p className="text-xs text-zinc-500 mt-1">Inspirado en Strong App MIT — templates por carpeta, duplicate, rest timer, PR Epley</p>
           </div>
           {bestPr && (
             <div className="hidden sm:flex items-center gap-2 bg-amber-400/10 border border-amber-400/20 rounded-xl px-3 py-2">
@@ -434,7 +432,7 @@ export function StrongTemplate() {
         </div>
         <div className="flex gap-1.5 mt-3 flex-wrap">
           {folders.map((f) => (
-            <Button key={f} size="sm" variant={folder === f ? "default" : "outline"} className={folder === f ? "bg-[#D6FF2A] text-black font-black h-7 text-xs" : "border-zinc-800 h-7 text-xs"} onClick={() => setFolder(f)}>
+            <Button key={f} size="sm" variant={folder === f ? "default" : "outline"} className={folder === f ? "bg-primary text-black font-black h-7 text-xs" : "border-zinc-800 h-7 text-xs"} onClick={() => setFolder(f)}>
               <Folder size={12} className="mr-1" /> {f}
             </Button>
           ))}
@@ -466,7 +464,7 @@ export function StrongTemplate() {
                   <div key={ex.id} className="flex items-center gap-3 bg-zinc-900 border border-zinc-800 rounded-xl p-3">
                     <div className="w-8 h-8 rounded-lg bg-white text-black flex items-center justify-center font-black text-xs shrink-0">{idx + 1}</div>
                     <div className="flex-1 min-w-0">
-                      <p className="font-bold text-sm leading-none">{ex.name} {ex.superset && <span className="text-[#D6FF2A] text-[10px]">SUPERSET</span>}</p>
+                      <p className="font-bold text-sm leading-none">{ex.name} {ex.superset && <span className="text-primary text-[10px]">SUPERSET</span>}</p>
                       <p className="text-xs text-zinc-500">{ex.sets}×{ex.reps} @ {ex.weight || "BW"}kg • ⏱ {ex.restSec}s</p>
                     </div>
                     <Badge variant="muted" className="border-zinc-700 text-zinc-400 text-[10px]">{ex.muscleGroup}</Badge>
@@ -477,7 +475,7 @@ export function StrongTemplate() {
                 <Button variant="outline" className="border-zinc-700" onClick={() => duplicateTpl(selected.id)}>
                   <Copy size={14} className="mr-2" /> Duplicar
                 </Button>
-                <Button onClick={() => startWorkout(selected.id)} className="bg-[#D6FF2A] text-black hover:bg-[#c8f000] font-black">
+                <Button onClick={() => startWorkout(selected.id)} className="bg-primary text-black hover:bg-primary-hover font-black">
                   <Play size={16} className="mr-2" /> Empezar
                 </Button>
               </div>
@@ -493,9 +491,9 @@ export function StrongTemplate() {
                 <div className="flex items-start justify-between gap-2">
                   <div className="flex items-center gap-2">
                     <span className="w-2.5 h-2.5 rounded-full shrink-0" style={{ background: tpl.color }} />
-                    <p className="font-bold text-sm leading-tight group-hover:text-[#D6FF2A] transition">{tpl.name}</p>
+                    <p className="font-bold text-sm leading-tight group-hover:text-primary transition">{tpl.name}</p>
                   </div>
-                  <ChevronRight size={14} className="text-zinc-600 group-hover:text-[#D6FF2A] shrink-0 mt-1" />
+                  <ChevronRight size={14} className="text-zinc-600 group-hover:text-primary shrink-0 mt-1" />
                 </div>
                 <p className="text-xs text-zinc-500 mt-1 flex items-center gap-1.5">
                   <Folder size={12} /> {tpl.folder} • {tpl.lastUsed}
@@ -513,7 +511,7 @@ export function StrongTemplate() {
                 <div className="mt-3 flex items-center gap-1.5">
                   <Badge variant="muted" className="border-zinc-800 text-zinc-400 text-[10px]">{tpl.exercises.length} ej</Badge>
                   <Badge variant="muted" className="border-zinc-800 text-zinc-400 text-[10px]"><Clock size={10} className="mr-1" />{tpl.exercises.reduce((a, e) => a + e.restSec, 0) / 60}m</Badge>
-                  <Button size="sm" variant="ghost" className="ml-auto h-7 text-xs font-bold text-[#D6FF2A] hover:bg-[#D6FF2A]/10" onClick={(e) => { e.stopPropagation(); duplicateTpl(tpl.id); }}>
+                  <Button size="sm" variant="ghost" className="ml-auto h-7 text-xs font-bold text-primary hover:bg-primary/10" onClick={(e) => { e.stopPropagation(); duplicateTpl(tpl.id); }}>
                     <Copy size={12} className="mr-1" /> Duplicar
                   </Button>
                 </div>
@@ -526,11 +524,10 @@ export function StrongTemplate() {
         )}
 
         <div className="bg-zinc-950 border border-zinc-800 rounded-xl p-3 flex items-start gap-2.5">
-          <div className="w-8 h-8 rounded-lg bg-[#D6FF2A]/15 border border-[#D6FF2A]/20 flex items-center justify-center text-[#D6FF2A] shrink-0">
+          <div className="w-8 h-8 rounded-lg bg-primary/15 border border-primary/20 flex items-center justify-center text-primary shrink-0">
             <Zap size={14} />
           </div>
           <div className="flex-1">
-            <p className="text-xs font-bold">Strong MIT: template + rest timer + PR</p>
             <p className="text-[11px] text-zinc-500 leading-snug">Toca una plantilla → ve detalle → Empezar registra series con peso/reps, inicia descanso circular auto (90-180s), detecta PR con Epley 1RM y celebra. Duplica para progresión semanal +2.5%.</p>
             <div className="flex gap-1.5 mt-2 flex-wrap">
               <Badge variant="muted" className="border-zinc-800 text-zinc-500 text-[10px]"><Timer size={10} className="mr-1" /> Rest 30-180s</Badge>

@@ -3,40 +3,44 @@ import { useState, useMemo } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Input, Label } from "@/components/ui/input";
-import { Clock, Utensils, Target } from "lucide-react";
+import { Sunrise, Sun, Apple, Moon, Zap, Dumbbell, Clock, Utensils, Target } from "lucide-react";
 
 // Inspirado en wger (MIT datasets + nutrition logic) + Cronometer MIT
 // wger: https://github.com/wger-project/wger — nutrition plans con distribución por comida
 // Cronometer: timing de macros por ventana horaria — adaptado a 4-5 comidas con % distribución
 // No copia AGPL de wger servidor — solo lógica pública de distribución de macros por comida y timing
 
-type Meal = { id: string; label: string; time: string; pct: number; icon: string };
+type Meal = { id: string; label: string; time: string; pct: number; icon: keyof typeof MEAL_ICONS };
+
+const MEAL_ICONS = {
+  sunrise: Sunrise, sun: Sun, apple: Apple, moon: Moon, zap: Zap, dumbbell: Dumbbell,
+} as const;
 
 const PRESETS: Record<string, { meals: Meal[]; tip: string }> = {
   "4comidas": {
     meals: [
-      { id: "des", label: "Desayuno", time: "07:30", pct: 25, icon: "🌅" },
-      { id: "alm", label: "Almuerzo", time: "13:00", pct: 35, icon: "☀️" },
-      { id: "mer", label: "Merienda", time: "17:00", pct: 15, icon: "🍎" },
-      { id: "cen", label: "Cena", time: "20:30", pct: 25, icon: "🌙" },
+      { id: "des", label: "Desayuno", time: "07:30", pct: 25, icon: "sunrise" },
+      { id: "alm", label: "Almuerzo", time: "13:00", pct: 35, icon: "sun" },
+      { id: "mer", label: "Merienda", time: "17:00", pct: 15, icon: "apple" },
+      { id: "cen", label: "Cena", time: "20:30", pct: 25, icon: "moon" },
     ],
     tip: "Clásico 4 comidas — ideal mantenimiento. Proteína distribuida 25-35g por comida.",
   },
   "5peri": {
     meals: [
-      { id: "des", label: "Desayuno", time: "07:30", pct: 20, icon: "🌅" },
-      { id: "alm", label: "Almuerzo", time: "13:00", pct: 30, icon: "☀️" },
-      { id: "pre", label: "Pre-entreno", time: "16:30", pct: 15, icon: "⚡" },
-      { id: "post", label: "Post-entreno", time: "19:00", pct: 15, icon: "💪" },
-      { id: "cen", label: "Cena", time: "21:00", pct: 20, icon: "🌙" },
+      { id: "des", label: "Desayuno", time: "07:30", pct: 20, icon: "sunrise" },
+      { id: "alm", label: "Almuerzo", time: "13:00", pct: 30, icon: "sun" },
+      { id: "pre", label: "Pre-entreno", time: "16:30", pct: 15, icon: "zap" },
+      { id: "post", label: "Post-entreno", time: "19:00", pct: 15, icon: "dumbbell" },
+      { id: "cen", label: "Cena", time: "21:00", pct: 20, icon: "moon" },
     ],
-    tip: "Peri-entreno — 30% carbs alrededor del entreno. wger timing para volumen.",
+    tip: "Peri-entreno — 30% carbs alrededor del entreno..",
   },
   "3comidas": {
     meals: [
-      { id: "des", label: "Desayuno", time: "08:00", pct: 30, icon: "🌅" },
-      { id: "alm", label: "Almuerzo", time: "13:30", pct: 40, icon: "☀️" },
-      { id: "cen", label: "Cena", time: "20:00", pct: 30, icon: "🌙" },
+      { id: "des", label: "Desayuno", time: "08:00", pct: 30, icon: "sunrise" },
+      { id: "alm", label: "Almuerzo", time: "13:30", pct: 40, icon: "sun" },
+      { id: "cen", label: "Cena", time: "20:00", pct: 30, icon: "moon" },
     ],
     tip: "3 comidas — intermitentefriendly. Proteína 40g+ por comida para síntesis.",
   },
@@ -80,9 +84,8 @@ export function MacroTiming() {
     <Card className="border-amber-500/20">
       <CardHeader>
         <CardTitle className="flex items-center gap-2">
-          <Clock size={16} className="text-amber-400" /> Timing de Macros <Badge variant="muted">wger + Cronometer MIT</Badge>
+          <Clock size={16} className="text-amber-400" /> Timing de Macros
         </CardTitle>
-        <p className="text-xs text-zinc-500">Distribuí tus macros por comida — timing inspirado en wger nutrition + Cronometer</p>
       </CardHeader>
       <CardContent className="space-y-4">
         {/* Objetivo + preset */}
@@ -91,7 +94,7 @@ export function MacroTiming() {
             <button
               key={g}
               onClick={() => setGoal(g)}
-              className={`px-3 py-1.5 rounded-full text-xs font-bold border capitalize ${goal === g ? "bg-[#D6FF2A] text-black border-[#D6FF2A]" : "bg-zinc-900 text-zinc-400 border-zinc-800"}`}
+              className={`px-3 py-1.5 rounded-full text-xs font-bold border capitalize ${goal === g ? "bg-primary text-black border-primary" : "bg-zinc-900 text-zinc-400 border-zinc-800"}`}
             >
               {g}
             </button>
@@ -134,7 +137,7 @@ export function MacroTiming() {
           {perMeal.map((m) => (
             <div key={m.id} className="bg-zinc-900 border border-zinc-800 rounded-xl p-3 flex gap-3 items-center">
               <div className="w-9 h-9 rounded-xl bg-zinc-800 border border-zinc-700 flex items-center justify-center text-sm shrink-0">
-                {m.icon}
+                {(() => { const I = MEAL_ICONS[m.icon]; return <I size={20} className="text-primary" />; })()}
               </div>
               <div className="flex-1 min-w-0">
                 <div className="flex items-center gap-2">
@@ -159,7 +162,7 @@ export function MacroTiming() {
                   <span className="text-xs text-zinc-500 font-bold self-center">{m.mkcal} kcal</span>
                 </div>
                 <div className="h-1 bg-zinc-800 rounded-full overflow-hidden mt-2">
-                  <div className="h-full bg-[#D6FF2A]" style={{ width: `${m.pct}%` }} />
+                  <div className="h-full bg-primary" style={{ width: `${m.pct}%` }} />
                 </div>
               </div>
             </div>
@@ -171,14 +174,12 @@ export function MacroTiming() {
             <Target size={12} /> {tip}
           </p>
           <p className="text-xs text-amber-200/70">{goalTip}</p>
-          <p className="text-[11px] text-zinc-500">Total {totalPct}% • {kcal} kcal • P{protein} C{carbs} G{fat} — wger lógica por comida</p>
         </div>
 
         <div className="flex items-center gap-2 text-[11px] text-zinc-600">
-          <Utensils size={12} /> <span>Cronometer tip: fibra y micros se trackean por comida, no solo día.</span>
+          <Utensils size={12} /> <span>Tip: la fibra y los micros se trackean por comida, no solo por día.</span>
         </div>
 
-        <p className="text-[11px] text-zinc-600 text-center">wger + Cronometer MIT — distribución por comida, no solo macros diarios • fórmulas públicas</p>
       </CardContent>
     </Card>
   );

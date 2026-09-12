@@ -2,7 +2,7 @@
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { useState } from "react";
-import { Home, Dumbbell, TrendingUp, MessageCircle, User, LogOut, Apple, ClipboardCheck, Settings, MoreHorizontal, X, Timer, LayoutGrid, Clock, BookOpen, type LucideIcon } from "lucide-react";
+import { Home, Dumbbell, TrendingUp, MessageCircle, User, LogOut, Apple, ClipboardCheck, Settings, MoreHorizontal, X, Timer, LayoutGrid, Clock, BookOpen, Trophy, type LucideIcon } from "lucide-react";
 import { ThemeToggle } from "@/components/theme-toggle";
 import { NotificationsBell } from "@/components/notifications-bell";
 import { CommandPalettePro } from "@/components/command-palette-pro";
@@ -18,11 +18,12 @@ export function ClientBottomNav(){
   ];
 
   const moreItems: { href: string; icon: LucideIcon; label: string; desc: string; badge?: string }[] = [
+    { href: "/client/achievements", icon: Trophy, label: "Logros & XP", desc: "Nivel, medallas y desafíos", badge: "NUEVO" },
     { href: "/client/messages", icon: MessageCircle, label: "Mensajes", desc: "Chat directo con Ezequiel" },
     { href: "/client/checkins", icon: ClipboardCheck, label: "Check-ins", desc: "Tu reporte semanal" },
     { href: "/client/timers", icon: Timer, label: "Cronómetros", desc: "Tabata, EMOM e HIIT", badge: "PRO" },
     { href: "/client/history", icon: Clock, label: "Historial", desc: "Todas tus sesiones" },
-    { href: "/client/tools", icon: LayoutGrid, label: "Herramientas", desc: "Juegos, salud, datos y más", badge: "NUEVO" },
+    { href: "/client/tools", icon: LayoutGrid, label: "Herramientas", desc: "Juegos, salud, datos y más" },
     { href: "/client/resources", icon: BookOpen, label: "Recursos VIP", desc: "Videos y guías exclusivas" },
     { href: "/client/profile", icon: User, label: "Mi perfil", desc: "Tus datos y objetivos" },
     { href: "/client/settings", icon: Settings, label: "Ajustes", desc: "App y notificaciones" },

@@ -2,7 +2,7 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Sparkles, AlertTriangle, TrendingUp, CheckCircle, Camera } from "lucide-react";
+import { AlertOctagon, AlertTriangle, CheckCircle2, Sparkles, TrendingUp, CheckCircle, Camera } from "lucide-react";
 
 // Inspirado en VitaFlex-AI + OptiLifts + Strive — IA analiza check-in semanal
 export function CheckinAI({ checkin }:{ checkin: {energia:number; sueno:number; estres:number; entrenos:number; rendimiento:number; molestias:string; alimentacion:number; progreso:number} }){
@@ -24,12 +24,11 @@ export function CheckinAI({ checkin }:{ checkin: {energia:number; sueno:number; 
             <div key={m.label} className="bg-zinc-900 border border-zinc-800 rounded-xl p-2"><p className="text-[11px] text-zinc-500">{m.label}</p><p className={`font-black ${m.v>=7?"text-emerald-400": m.v>=4?"text-amber-400":"text-red-400"}`}>{m.v}/10</p></div>
           ))}
         </div>
-        {checkin.molestias && <p className="text-xs bg-amber-500/10 border border-amber-500/20 rounded-lg p-2">⚠️ Molestias: {checkin.molestias}</p>}
+        {checkin.molestias && <p className="text-xs bg-amber-500/10 border border-amber-500/20 rounded-lg p-2"><AlertTriangle size={12} className="inline mr-1 -mt-0.5 text-amber-400" />Molestias: {checkin.molestias}</p>}
         <div className={`p-3 rounded-xl flex gap-2 ${status==="riesgo"?"bg-red-500/10 border border-red-500/20": status==="atención"?"bg-amber-500/10 border border-amber-500/20":"bg-emerald-500/10 border border-emerald-500/20"}`}>
-          <span className="text-lg">{status==="riesgo"?"🚨": status==="atención"?"⚡":"✅"}</span>
+          <span className="text-lg shrink-0">{status==="riesgo" ? <AlertOctagon size={20} className="text-red-400" /> : status==="atención" ? <AlertTriangle size={20} className="text-amber-400" /> : <CheckCircle2 size={20} className="text-emerald-400" />}</span>
           <div><p className="font-bold text-sm">{status==="riesgo"?"Cliente en riesgo — actuar hoy": status==="atención"?"Atención — ajustar hábitos":"Óptimo — progresar"}</p><p className="text-xs text-zinc-400">{tip}</p></div>
         </div>
-        <p className="text-[11px] text-zinc-600 text-center">VitaFlex AI + OptiLifts MIT — análisis local sin subir fotos a cloud</p>
       </CardContent>
     </Card>
   );

@@ -30,14 +30,14 @@ export function PaymentsPro({ onSelect }:{ onSelect?: (plan:string)=>void }){
   }
 
   return (
-    <Card className="border-[#D6FF2A]/20">
-      <CardHeader><CardTitle className="flex items-center gap-2"><CreditCard size={18} className="text-[#D6FF2A]"/> Pagos PRO <Badge variant="accent">Stripe + MP</Badge></CardTitle><p className="text-xs text-zinc-500">Suscripciones reales — solo falta STRIPE_SECRET_KEY y MP_ACCESS_TOKEN en .env</p></CardHeader>
+    <Card className="border-primary/20">
+      <CardHeader><CardTitle className="flex items-center gap-2"><CreditCard size={18} className="text-primary"/> Pagos PRO <Badge variant="accent">Stripe + MP</Badge></CardTitle><p className="text-xs text-zinc-500">Suscripciones reales — solo falta STRIPE_SECRET_KEY y MP_ACCESS_TOKEN en .env</p></CardHeader>
       <CardContent className="space-y-4">
         <div className="grid gap-2">
           {PLANS.map(p=>{
             const isSel=selected===p.id;
             return (
-              <button key={p.id} onClick={()=>setSelected(p.id)} className={`text-left p-3 rounded-xl border flex justify-between items-center ${isSel?"bg-[#D6FF2A] text-black border-[#D6FF2A]":"bg-zinc-900 border-zinc-800 hover:border-zinc-700"}`}>
+              <button key={p.id} onClick={()=>setSelected(p.id)} className={`text-left p-3 rounded-xl border flex justify-between items-center ${isSel?"bg-primary text-black border-primary":"bg-zinc-900 border-zinc-800 hover:border-zinc-700"}`}>
                 <div>
                   <p className={`font-bold text-sm ${isSel?"text-black":"text-white"}`}>{p.name} {isSel && <Check size={12} className="inline ml-1"/>}</p>
                   <p className={`text-xs ${isSel?"text-black/70":"text-zinc-500"}`}>{p.features.join(" • ")}</p>

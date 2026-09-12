@@ -106,7 +106,7 @@ const CLIENTS: ClientAllInOne[] = [
     nextWorkout: "Hoy 18:00 — Full Body (45 min)",
     nutrition: { kcal: 2100, p: 135, c: 220, g: 60, meals: 3, water: 2.0 },
     habits: { water: 80, sleep: 7.8, steps: 9100, protein: 92, streak: 21 },
-    messages: { unread: 0, last: "¡21 días seguidos! 🔥", lastAt: "hace 1h" },
+    messages: { unread: 0, last: "¡21 días seguidos!", lastAt: "hace 1h" },
     progress: { weight: 58.9, delta: "-0.3kg (7d)", photos: 6, pr: "Hip Thrust 80×10 → 106kg 1RM", volumeWeek: "12.7t" },
     payment: { status: "al día", nextBilling: "20 oct", amount: "$12.000" },
   },
@@ -123,11 +123,9 @@ export function TrainerizeAllInOne() {
         <div className="flex flex-wrap items-start justify-between gap-3">
           <div>
             <CardTitle className="flex items-center gap-2 text-base">
-              <LayoutDashboard size={18} className="text-[#D6FF2A]" /> Trainerize All-in-One
-              <Badge variant="accent" className="text-[10px]">MIT 76</Badge>
+              <LayoutDashboard size={18} className="text-primary" /> Trainerize All-in-One
               <Badge variant="muted" className="text-[10px] border-zinc-700">workouts+nutrición+hábitos+mensajes+progreso+pagos</Badge>
             </CardTitle>
-            <p className="text-xs text-zinc-500 mt-1">Inspirado en Trainerize (#1 all-in-one) mejorado con MIT — 1 dashboard unificado por cliente, sin cambiar de pestaña</p>
           </div>
           <div className="flex items-center gap-2">
             <Badge variant={client.adherence >= 80 ? "success" : client.adherence >= 60 ? "warn" : "muted"} className="text-[11px]">
@@ -143,9 +141,9 @@ export function TrainerizeAllInOne() {
             <button
               key={c.id}
               onClick={() => setActiveId(c.id)}
-              className={`shrink-0 flex items-center gap-2.5 px-3.5 py-2.5 rounded-xl border text-left transition ${activeId === c.id ? "bg-[#D6FF2A] border-[#D6FF2A] text-black" : "bg-zinc-950 border-zinc-800 text-white hover:border-zinc-700"}`}
+              className={`shrink-0 flex items-center gap-2.5 px-3.5 py-2.5 rounded-xl border text-left transition ${activeId === c.id ? "bg-primary border-primary text-black" : "bg-zinc-950 border-zinc-800 text-white hover:border-zinc-700"}`}
             >
-              <span className={`w-8 h-8 rounded-lg flex items-center justify-center font-black text-xs shrink-0 ${activeId === c.id ? "bg-black text-[#D6FF2A]" : "bg-white text-black"}`}>{c.avatar}</span>
+              <span className={`w-8 h-8 rounded-lg flex items-center justify-center font-black text-xs shrink-0 ${activeId === c.id ? "bg-black text-primary" : "bg-white text-black"}`}>{c.avatar}</span>
               <span className="min-w-0">
                 <span className={`block text-xs font-bold leading-none truncate ${activeId === c.id ? "text-black" : "text-white"}`}>{c.name}</span>
                 <span className={`block text-[11px] leading-none mt-0.5 ${activeId === c.id ? "text-black/60" : "text-zinc-500"}`}>{c.plan} • {c.adherence}%</span>
@@ -171,8 +169,7 @@ export function TrainerizeAllInOne() {
           {/* Workouts */}
           <div className="bg-zinc-950 border border-zinc-800 rounded-2xl p-3.5 space-y-2.5">
             <div className="flex items-center justify-between">
-              <span className="flex items-center gap-1.5 text-xs font-black tracking-widest uppercase text-zinc-400"><Dumbbell size={13} className="text-[#D6FF2A]" /> Entrenos</span>
-              <Badge variant="muted" className="text-[10px] border-zinc-800">MIT Lyftr</Badge>
+              <span className="flex items-center gap-1.5 text-xs font-black tracking-widest uppercase text-zinc-400"><Dumbbell size={13} className="text-primary" /> Entrenos</span>
             </div>
             <div>
               <p className="text-sm font-bold leading-tight">{client.program}</p>
@@ -196,7 +193,6 @@ export function TrainerizeAllInOne() {
           <div className="bg-zinc-950 border border-zinc-800 rounded-2xl p-3.5 space-y-2.5">
             <div className="flex items-center justify-between">
               <span className="flex items-center gap-1.5 text-xs font-black tracking-widest uppercase text-zinc-400"><Utensils size={13} className="text-emerald-400" /> Nutrición</span>
-              <Badge variant="muted" className="text-[10px] border-zinc-800">MIT wger</Badge>
             </div>
             <div className="grid grid-cols-4 gap-1.5 text-center">
               <div className="bg-zinc-900 border border-zinc-800 rounded-xl p-2"><p className="text-[10px] text-zinc-500">KCAL</p><p className="font-black text-sm">{client.nutrition.kcal}</p></div>
@@ -259,9 +255,9 @@ export function TrainerizeAllInOne() {
                 value={quickNote}
                 onChange={(e) => setQuickNote(e.target.value)}
                 placeholder="Respuesta rápida..."
-                className="flex-1 h-8 px-3 bg-zinc-900 border border-zinc-800 rounded-xl text-xs text-white placeholder:text-zinc-600 focus:outline-none focus:border-[#D6FF2A]"
+                className="flex-1 h-8 px-3 bg-zinc-900 border border-zinc-800 rounded-xl text-xs text-white placeholder:text-zinc-600 focus:outline-none focus:border-primary"
               />
-              <Button size="sm" className="h-8 px-3 bg-[#D6FF2A] text-black hover:bg-[#c8f000] font-black text-xs" onClick={() => setQuickNote("")}><Send size={12} /></Button>
+              <Button size="sm" className="h-8 px-3 bg-primary text-black hover:bg-primary-hover font-black text-xs" onClick={() => setQuickNote("")}><Send size={12} /></Button>
             </div>
             <Button size="sm" variant="outline" className="w-full h-7 text-xs border-zinc-800">Abrir chat →</Button>
           </div>
@@ -270,7 +266,6 @@ export function TrainerizeAllInOne() {
           <div className="bg-zinc-950 border border-zinc-800 rounded-2xl p-3.5 space-y-2.5">
             <div className="flex items-center justify-between">
               <span className="flex items-center gap-1.5 text-xs font-black tracking-widest uppercase text-zinc-400"><TrendingUp size={13} className="text-emerald-400" /> Progreso</span>
-              <Badge variant="muted" className="text-[10px] border-zinc-800">MIT FitTrackee</Badge>
             </div>
             <div className="grid grid-cols-2 gap-1.5">
               <div className="bg-zinc-900 border border-zinc-800 rounded-xl p-2.5 text-center"><p className="text-[10px] text-zinc-500">PESO</p><p className="font-black">{client.progress.weight}kg</p><p className="text-[11px] text-emerald-400">{client.progress.delta}</p></div>
@@ -306,16 +301,14 @@ export function TrainerizeAllInOne() {
         </div>
 
         {/* Footer insight like Trainerize */}
-        <div className="bg-gradient-to-r from-[#D6FF2A]/10 via-zinc-950 to-zinc-950 border border-[#D6FF2A]/20 rounded-xl p-3 flex flex-wrap items-center gap-3">
-          <div className="w-8 h-8 rounded-lg bg-[#D6FF2A] text-black flex items-center justify-center shrink-0"><Zap size={14} /></div>
+        <div className="bg-gradient-to-r from-primary/10 via-zinc-950 to-zinc-950 border border-primary/20 rounded-xl p-3 flex flex-wrap items-center gap-3">
+          <div className="w-8 h-8 rounded-lg bg-primary text-black flex items-center justify-center shrink-0"><Zap size={14} /></div>
           <div className="flex-1 min-w-[200px]">
             <p className="text-xs font-black">Trainerize All-in-One — todo en 1 vista</p>
             <p className="text-[11px] text-zinc-500 leading-snug">Entrenos + nutrición + hábitos + mensajes + progreso + pagos sin salir del dashboard. Cambiá de cliente arriba y gestioná sin pestañas. Mejor que Trainerize: 100% local, sin comisión, con auto-progresión y pagos MP/Stripe.</p>
           </div>
-          <Badge variant="muted" className="border-zinc-700 text-zinc-500 text-[10px]">Trainerize #1 — ABC Trainerize MIT + Lyftr/Simple/Strive</Badge>
         </div>
 
-        <p className="text-[11px] text-zinc-600 text-center">Trainerize All-in-One MIT 76 — 6 dominios unificados con switcher + quick actions — atribución docs/MIT_ATTRIBUTION.md #76</p>
       </CardContent>
     </Card>
   );

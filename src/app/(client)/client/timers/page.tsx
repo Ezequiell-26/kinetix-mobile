@@ -21,7 +21,6 @@ export default function TimersPage(){
       <TimersHub />
       <OpenHiitPro />
       <HiitTimer />
-      <p className="text-xs text-zinc-600 text-center">just_another_workout_timer MIT + OpenHIIT MIT + Flexify MIT — todos los cronómetros PRO</p>
     </div>
   );
 }

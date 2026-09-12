@@ -17,9 +17,9 @@ export function PhotoAiCompare(){
       <CardContent className="space-y-3">
         <div className="relative h-64 rounded-xl overflow-hidden bg-zinc-900 border border-zinc-800 select-none">
           <div className="absolute inset-0 bg-gradient-to-br from-zinc-800 to-zinc-900 flex items-center justify-center text-zinc-500 text-xs">Foto Inicio — Semana 1</div>
-          <div className="absolute inset-0 bg-gradient-to-br from-[#D6FF2A]/20 to-zinc-900 flex items-center justify-center text-zinc-300 text-xs" style={{clipPath:`inset(0 ${100-slider}% 0 0)`}}>Foto Actual — Semana 8</div>
+          <div className="absolute inset-0 bg-gradient-to-br from-primary/20 to-zinc-900 flex items-center justify-center text-zinc-300 text-xs" style={{clipPath:`inset(0 ${100-slider}% 0 0)`}}>Foto Actual — Semana 8</div>
           <div className="absolute top-0 bottom-0 w-0.5 bg-white" style={{left:`${slider}%`}} />
-          <input type="range" min={0} max={100} value={slider} onChange={e=>setSlider(Number(e.target.value))} className="absolute bottom-3 left-3 right-3 accent-[#D6FF2A]" />
+          <input type="range" min={0} max={100} value={slider} onChange={e=>setSlider(Number(e.target.value))} className="absolute bottom-3 left-3 right-3 accent-primary" />
           <div className="absolute top-2 left-2 flex gap-1"><Badge variant="muted">Antes</Badge><Badge variant="accent">Después</Badge></div>
         </div>
         <Button size="sm" variant={measure?"accent":"outline"} className="w-full" onClick={()=>setMeasure(!measure)}><Ruler size={14} className="mr-2"/>{measure?"Ocultar medidas IA":"Mostrar medidas IA"}</Button>
@@ -30,7 +30,6 @@ export function PhotoAiCompare(){
             <div className="bg-zinc-900 border border-zinc-800 rounded-xl p-2"><p className="text-[11px] text-zinc-500">Pecho</p><p className="font-black text-sm">102 → 104 cm</p><p className="text-[11px] text-emerald-400">+2cm</p></div>
           </div>
         )}
-        <p className="text-[11px] text-zinc-600 text-center">PhotoCompare + MediaPipe MIT — slider + IA medidas (privado, on-device)</p>
       </CardContent>
     </Card>
   );

@@ -37,7 +37,7 @@ export function FoodDatabase({ onAdd }:{ onAdd?: (food:{name:string; kcal:number
 
   return (
     <Card>
-      <CardHeader><CardTitle className="flex items-center gap-2"><Search size={16}/> Base de alimentos offline <Badge variant="muted">7k CORGIS • MIT FitBook</Badge></CardTitle><p className="text-xs text-zinc-500">Sin internet • agregá a tu registro diario</p></CardHeader>
+      <CardHeader><CardTitle className="flex items-center gap-2"><Search size={16}/> Base de alimentos offline</CardTitle><p className="text-xs text-zinc-500">Sin internet • agregá a tu registro diario</p></CardHeader>
       <CardContent className="space-y-3">
         <Input placeholder="Buscar alimento (ej: pollo, arroz, huevo)" value={q} onChange={e=>setQ(e.target.value)} />
         <div className="grid gap-2">
@@ -52,7 +52,6 @@ export function FoodDatabase({ onAdd }:{ onAdd?: (food:{name:string; kcal:number
           ))}
           {filtered.length===0 && <p className="text-sm text-zinc-500 text-center py-4">Sin resultados para &ldquo;{q}&rdquo;</p>}
         </div>
-        <p className="text-[11px] text-zinc-600 text-center">Datos offline inspirados en <a href="https://github.com/brandonp2412/FitBook" target="_blank" className="underline">FitBook (MIT)</a> • CORGIS Food Dataset</p>
       </CardContent>
     </Card>
   );

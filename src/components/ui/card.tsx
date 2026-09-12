@@ -2,15 +2,18 @@ import * as React from "react";
 import { cn } from "@/lib/utils";
 
 /**
- * Card system — radio 20px consistente, borde sutil, jerarquía por elevación.
- * En móvil: padding 16px (p-4). En desktop: 20px (sm:p-5).
+ * Card system — radio 20px consistente, theme-aware, jerarquía por elevación.
+ * Usa clases CSS semánticas (.surface-card) que adaptan colores y sombras
+ * automáticamente al modo claro/oscuro via globals.css.
+ * En modo oscuro: bg-obsidiana + hairline iluminado superior.
+ * En modo claro: bg-white + sombra suave + borde sutil.
  */
 export function Card({ className, ...p }: React.HTMLAttributes<HTMLDivElement>) {
   return (
     <div
       className={cn(
-        "bg-[#111111] border border-zinc-800/80 rounded-[20px] overflow-hidden",
-        "shadow-[0_8px_32px_rgba(0,0,0,0.18)]",
+        "surface-card rounded-[20px] overflow-hidden",
+        "transition-all duration-200",
         className
       )}
       {...p}
@@ -26,7 +29,7 @@ export function CardContent({ className, ...p }: React.HTMLAttributes<HTMLDivEle
 export function CardTitle({ className, ...p }: React.HTMLAttributes<HTMLHeadingElement>) {
   return (
     <h3
-      className={cn("font-display font-semibold text-white text-[15px] text-balance", className)}
+      className={cn("font-display font-semibold text-zinc-100 text-[15px] text-balance", className)}
       {...p}
     />
   );

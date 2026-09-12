@@ -2,7 +2,7 @@
 import { useState, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { ChevronLeft, ChevronRight, Calendar as CalendarIcon } from "lucide-react";
+import { Check, ChevronLeft, ChevronRight, Calendar as CalendarIcon } from "lucide-react";
 
 const dayLabels = ["Lun", "Mar", "Mié", "Jue", "Vie", "Sáb", "Dom"];
 
@@ -64,7 +64,7 @@ export function PremiumCalendar({
     <Card className="border-zinc-800 bg-zinc-900/90">
       <CardHeader className="flex flex-row items-center justify-between pb-2">
         <CardTitle className="text-base flex items-center gap-2 text-white">
-          <CalendarIcon size={16} className="text-[#D6FF2A]" /> Calendario de Entrenamiento
+          <CalendarIcon size={16} className="text-primary" /> Calendario de Entrenamiento
         </CardTitle>
         <div className="flex items-center gap-1.5">
           <Button variant="outline" size="sm" onClick={prevMonth} className="h-8 w-8 p-0" aria-label="Mes anterior">
@@ -105,7 +105,7 @@ export function PremiumCalendar({
                 key={`day-${dayNum}`}
                 className={`aspect-square rounded-xl border p-1 flex flex-col items-center justify-between text-xs transition ${
                   isToday
-                    ? "bg-[#D6FF2A] border-[#D6FF2A] text-black font-black shadow-[0_0_10px_rgba(214,255,42,0.3)]"
+                    ? "bg-primary border-primary text-black font-black shadow-[0_0_10px_rgba(214,255,42,0.3)]"
                     : hasWorkout
                     ? "bg-emerald-500/15 border-emerald-500/40 text-emerald-400 font-bold"
                     : "bg-zinc-950 border-zinc-850 text-zinc-400 hover:border-zinc-700"
@@ -113,7 +113,7 @@ export function PremiumCalendar({
               >
                 <span className="text-[11px]">{dayNum}</span>
                 {hasWorkout ? (
-                  <span className="text-[9px] font-bold">✓</span>
+                  <Check size={9} strokeWidth={3} />
                 ) : isToday ? (
                   <span className="text-[8px] uppercase tracking-tighter">Hoy</span>
                 ) : (
@@ -127,7 +127,7 @@ export function PremiumCalendar({
         {/* Legend */}
         <div className="flex items-center justify-center gap-4 pt-2 text-[11px] text-zinc-400">
           <span className="flex items-center gap-1.5">
-            <span className="w-2.5 h-2.5 bg-[#D6FF2A] rounded-full" /> Hoy
+            <span className="w-2.5 h-2.5 bg-primary rounded-full" /> Hoy
           </span>
           <span className="flex items-center gap-1.5">
             <span className="w-2.5 h-2.5 bg-emerald-400 rounded-full" /> Entreno completado

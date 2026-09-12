@@ -308,7 +308,7 @@ export function EverfitUxBuilder() {
                   </div>
                   <button
                     onClick={() => addExerciseToDay(0, 0, lib)}
-                    className="w-7 h-7 rounded-lg bg-primary text-black flex items-center justify-center hover:bg-[#c8f000] shrink-0"
+                    className="w-7 h-7 rounded-lg bg-primary text-black flex items-center justify-center hover:bg-primary-hover shrink-0"
                   >
                     <Plus size={14} />
                   </button>

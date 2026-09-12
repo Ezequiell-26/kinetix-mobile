@@ -1,5 +1,6 @@
 "use client";
 import { LineChart, Line, AreaChart, Area, BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, Cell } from "recharts";
+import { CHART_GRID, chartAxisTick, chartTooltipStyle, chartTooltipItemStyle } from "@/lib/chart-theme";
 
 const adherenceData = [
   {name:"Sem 1", adherence:78, volumen:12},
@@ -14,8 +15,8 @@ const revenueData = [
   {name:"Abr", value: 480000},
 ];
 const checkinData = [
-  {name:"Completados", value: 24, color:"#D6FF2A"},
-  {name:"Pendientes", value: 5, color:"#27272A"},
+  {name:"Completados", value: 24, color:"var(--primary)"},
+  {name:"Pendientes", value: 5, color:"rgb(var(--subtle))"},
   {name:"Atrasados", value: 2, color:"#f59e0b"},
 ];
 
@@ -24,10 +25,10 @@ export function AdherenceChart(){
     <div className="h-[180px]">
       <ResponsiveContainer width="100%" height="100%">
         <AreaChart data={adherenceData}>
-          <XAxis dataKey="name" tick={{fill:"#71717a", fontSize:11}} axisLine={false} tickLine={false} />
+          <XAxis dataKey="name" tick={chartAxisTick} axisLine={false} tickLine={false} />
           <YAxis hide domain={[60,100]} />
-          <Tooltip contentStyle={{background:"#111111", border:"1px solid #27272A", borderRadius:12, color:"#fff"}} />
-          <Area type="monotone" dataKey="adherence" stroke="#D6FF2A" fill="#D6FF2A" fillOpacity={0.12} strokeWidth={2.5} dot={{fill:"#D6FF2A", r:3}} />
+          <Tooltip contentStyle={chartTooltipStyle} itemStyle={chartTooltipItemStyle} cursor={{ stroke: CHART_GRID }} />
+          <Area type="monotone" dataKey="adherence" stroke="var(--primary)" fill="var(--primary)" fillOpacity={0.12} strokeWidth={2.5} dot={{fill:"var(--primary)", r:3}} />
         </AreaChart>
       </ResponsiveContainer>
     </div>
@@ -38,9 +39,9 @@ export function RevenueChart(){
     <div className="h-[160px]">
       <ResponsiveContainer width="100%" height="100%">
         <BarChart data={revenueData}>
-          <XAxis dataKey="name" tick={{fill:"#71717a", fontSize:11}} axisLine={false} tickLine={false} />
-          <Tooltip contentStyle={{background:"#111111", border:"1px solid #27272A", borderRadius:12}} formatter={(v:number)=>[`$${v.toLocaleString("es-AR")}`,"Ingresos"]} />
-          <Bar dataKey="value" radius={[8,8,0,0]} fill="#D6FF2A" />
+          <XAxis dataKey="name" tick={chartAxisTick} axisLine={false} tickLine={false} />
+          <Tooltip contentStyle={chartTooltipStyle} itemStyle={chartTooltipItemStyle} cursor={{ fill: "rgba(255,255,255,0.04)" }} formatter={(v:number)=>[`$${v.toLocaleString("es-AR")}`,"Ingresos"]} />
+          <Bar dataKey="value" radius={[8,8,0,0]} fill="var(--primary)" />
         </BarChart>
       </ResponsiveContainer>
     </div>
@@ -51,8 +52,8 @@ export function CheckinDonut(){
     <div className="h-[160px] flex items-center justify-center gap-6">
       <div className="relative w-28 h-28">
         <svg viewBox="0 0 100 100" className="w-full h-full -rotate-90">
-          <circle cx="50" cy="50" r="40" fill="none" stroke="#27272A" strokeWidth="12" />
-          <circle cx="50" cy="50" r="40" fill="none" stroke="#D6FF2A" strokeWidth="12" strokeDasharray={`${(24/31)*251} 251`} strokeLinecap="round" />
+          <circle cx="50" cy="50" r="40" fill="none" stroke="rgb(var(--subtle))" strokeWidth="12" />
+          <circle cx="50" cy="50" r="40" fill="none" stroke="var(--primary)" strokeWidth="12" strokeDasharray={`${(24/31)*251} 251`} strokeLinecap="round" />
           <circle cx="50" cy="50" r="40" fill="none" stroke="#f59e0b" strokeWidth="12" strokeDasharray={`${(2/31)*251} 251`} strokeDashoffset={`-${(24/31)*251}`} strokeLinecap="round" />
         </svg>
         <div className="absolute inset-0 flex flex-col items-center justify-center">

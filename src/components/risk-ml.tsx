@@ -13,7 +13,7 @@ export function RiskMl(){
   ];
   return (
     <Card className="border-red-500/20">
-      <CardHeader><CardTitle className="flex items-center gap-2"><Brain size={16} className="text-red-400"/> Risk ML <Badge variant="warn">TF.js MIT</Badge></CardTitle><p className="text-xs text-zinc-500">ML local predice churn 7 días antes — 4 features, sin cloud</p></CardHeader>
+      <CardHeader><CardTitle className="flex items-center gap-2"><Brain size={16} className="text-red-400"/> Risk ML</CardTitle><p className="text-xs text-zinc-500">Detecta atletas con riesgo de abandono antes de que pase</p></CardHeader>
       <CardContent className="space-y-2">
         {clients.map(c=>(
           <div key={c.name} className={`p-3 rounded-xl border flex gap-3 items-center ${c.risk>0.7?"bg-red-500/10 border-red-500/20": c.risk>0.4?"bg-amber-500/10 border-amber-500/20":"bg-emerald-500/10 border-emerald-500/20"}`}>
@@ -25,7 +25,6 @@ export function RiskMl(){
             <Badge variant={c.risk>0.7?"warn": c.risk>0.4?"muted":"accent"}>{c.action}</Badge>
           </div>
         ))}
-        <p className="text-[11px] text-zinc-600 text-center">TensorFlow.js MIT — regresión logística local, 4 features, 7d lookahead</p>
       </CardContent>
     </Card>
   );

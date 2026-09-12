@@ -95,7 +95,7 @@ export default async function ClientDetailPage({
         <CardContent className="p-6">
           <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
             <div className="flex items-center gap-4">
-              <div className="w-16 h-16 rounded-2xl bg-[#D6FF2A] text-black flex items-center justify-center font-black text-2xl shrink-0">
+              <div className="w-16 h-16 rounded-2xl bg-primary text-black flex items-center justify-center font-black text-2xl shrink-0">
                 {client.name?.[0]?.toUpperCase() || "C"}
               </div>
               <div>
@@ -138,7 +138,7 @@ export default async function ClientDetailPage({
         <Card className="border-zinc-800 bg-zinc-900/60 lg:col-span-2">
           <CardHeader>
             <CardTitle className="text-base flex items-center gap-2">
-              <UserIcon size={18} className="text-[#D6FF2A]" /> Información del Cliente
+              <UserIcon size={18} className="text-primary" /> Información del Cliente
             </CardTitle>
           </CardHeader>
           <CardContent className="grid sm:grid-cols-2 gap-4 text-xs">
@@ -188,7 +188,7 @@ export default async function ClientDetailPage({
         <Card className="border-zinc-800 bg-zinc-900/60 flex flex-col justify-between">
           <CardHeader>
             <CardTitle className="text-base flex items-center gap-2">
-              <TrendingUp size={18} className="text-[#D6FF2A]" /> Estado y Progreso
+              <TrendingUp size={18} className="text-primary" /> Estado y Progreso
             </CardTitle>
           </CardHeader>
           <CardContent className="space-y-4 text-xs">
@@ -209,7 +209,7 @@ export default async function ClientDetailPage({
             <div className="bg-zinc-950 p-3.5 rounded-xl border border-zinc-800/80">
               <div className="flex justify-between items-baseline">
                 <span className="text-zinc-500 text-[11px] font-bold uppercase">Adherencia Estimada</span>
-                <span className="text-xs font-bold text-[#D6FF2A]">{adherencePercent}%</span>
+                <span className="text-xs font-bold text-primary">{adherencePercent}%</span>
               </div>
               <Progress value={adherencePercent} className="mt-2 h-2" />
               <p className="text-[11px] text-zinc-500 mt-1.5">{totalWorkoutsLogged} entrenamientos registrados en total</p>
@@ -236,9 +236,9 @@ export default async function ClientDetailPage({
         <Card className="border-zinc-800 bg-zinc-900/60">
           <CardHeader className="flex flex-row items-center justify-between pb-3">
             <CardTitle className="text-base flex items-center gap-2">
-              <Dumbbell size={18} className="text-[#D6FF2A]" /> Rutina Asignada
+              <Dumbbell size={18} className="text-primary" /> Rutina Asignada
             </CardTitle>
-            <Link href="/trainer/workouts" className="text-xs text-[#D6FF2A] hover:underline font-bold">
+            <Link href="/trainer/workouts" className="text-xs text-primary hover:underline font-bold">
               Ir al creador →
             </Link>
           </CardHeader>
@@ -276,9 +276,9 @@ export default async function ClientDetailPage({
         <Card className="border-zinc-800 bg-zinc-900/60">
           <CardHeader className="flex flex-row items-center justify-between pb-3">
             <CardTitle className="text-base flex items-center gap-2">
-              <ClipboardCheck size={18} className="text-[#D6FF2A]" /> Check-ins Recientes
+              <ClipboardCheck size={18} className="text-primary" /> Check-ins Recientes
             </CardTitle>
-            <Link href="/trainer/checkins" className="text-xs text-[#D6FF2A] hover:underline font-bold">
+            <Link href="/trainer/checkins" className="text-xs text-primary hover:underline font-bold">
               Ver todos →
             </Link>
           </CardHeader>
@@ -303,8 +303,8 @@ export default async function ClientDetailPage({
                     <p className="text-zinc-300 italic">&quot;{ch.comentario}&quot;</p>
                   )}
                   {ch.trainerReply && (
-                    <p className="text-xs bg-[#D6FF2A]/10 border border-[#D6FF2A]/20 p-2 rounded-lg text-white">
-                      <span className="font-bold text-[#D6FF2A]">Tu respuesta:</span> {ch.trainerReply}
+                    <p className="text-xs bg-primary/10 border border-primary/20 p-2 rounded-lg text-white">
+                      <span className="font-bold text-primary">Tu respuesta:</span> {ch.trainerReply}
                     </p>
                   )}
                 </div>

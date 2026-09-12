@@ -24,7 +24,7 @@ export function GpxTracker(){
 
   return (
     <Card className="border-emerald-500/20 bg-gradient-to-br from-emerald-500/5 via-zinc-900 to-zinc-900">
-      <CardHeader><CardTitle className="flex items-center gap-2"><Map size={18} className="text-emerald-400"/> GPX Tracker <Badge variant="muted">workout-tracker 1.2k★ MIT</Badge></CardTitle><p className="text-xs text-zinc-500">Subí tu GPX/TCX de Garmin, Strava o reloj — mapa + stats (Go + Leaflet)</p></CardHeader>
+      <CardHeader><CardTitle className="flex items-center gap-2"><Map size={18} className="text-emerald-400"/> GPX Tracker</CardTitle><p className="text-xs text-zinc-500">Subí tu GPX/TCX de Garmin, Strava o reloj — mapa + stats (Go + Leaflet)</p></CardHeader>
       <CardContent className="space-y-4">
         <label className="flex flex-col items-center justify-center gap-2 p-6 rounded-xl border-2 border-dashed border-zinc-800 bg-zinc-900 hover:border-emerald-500/30 cursor-pointer transition">
           <Upload size={20} className="text-zinc-400"/>
@@ -40,9 +40,8 @@ export function GpxTracker(){
           </div>
         )}
         <div className="h-32 rounded-xl bg-zinc-800 border border-zinc-700 flex items-center justify-center text-zinc-500 text-xs">
-          {fileName ? "🗺️ Mapa Leaflet — ruta GPX cargada" : "Mapa Leaflet aparecerá aquí al subir un GPX"}
+          {fileName ? "Mapa Leaflet — ruta GPX cargada" : "Mapa Leaflet aparecerá aquí al subir un GPX"}
         </div>
-        <p className="text-[11px] text-zinc-600 text-center">workout-tracker MIT (1.2k★, Go + Leaflet) — GPX self-hosted • <a href="https://github.com/jovandeginste/workout-tracker" target="_blank" className="underline">Ver repo</a></p>
       </CardContent>
     </Card>
   );

@@ -20,11 +20,13 @@ export async function POST(req: Request){
   const buffer = Buffer.from(bytes);
   const ext = file.name.split(".").pop() || "jpg";
   const filename = `${type}-${Date.now()}-${randomUUID().slice(0,6)}.${ext}`;
-  const uploadDir = join(process.cwd(), "public", "uploads", type);
+  // Fuera de public/: el archivo NO se sirve estático. Se entrega solo por
+  // /api/uploads/[...path], que exige sesión y verifica la propiedad.
+  const uploadDir = join(process.cwd(), "uploads", type);
   await mkdir(uploadDir, { recursive: true });
   const filepath = join(uploadDir, filename);
   await writeFile(filepath, buffer);
-  const url = `/uploads/${type}/${filename}`;
+  const url = `/api/uploads/${type}/${filename}`;
 
   // Si es foto de progreso, guardarla en DB
   if(type==="progress"){

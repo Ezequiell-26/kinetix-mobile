@@ -4,6 +4,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input, Label, Textarea } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
+import { EmptyState } from "@/components/ui/empty-state";
 import { FileUpload } from "@/components/file-upload";
 import { CheckinVoice } from "@/components/narrator-cues";
 import { ClipboardCheck, Sparkles, Clock, CheckCircle2, MessageSquare } from "lucide-react";
@@ -152,12 +153,16 @@ export default function ClientCheckinsPage(){
               {loadingHistory ? (
                 <p className="text-xs text-zinc-500 text-center py-6">Cargando historial...</p>
               ) : history.length === 0 ? (
-                <div className="text-center py-10 space-y-2">
-                  <p className="font-bold text-sm text-zinc-300">No hay check-ins todavía</p>
-                  <p className="text-xs text-zinc-500 max-w-xs mx-auto">
-                    Tus check-ins completados y las respuestas del entrenador aparecerán en este historial.
-                  </p>
-                </div>
+                <EmptyState
+                  icon={ClipboardCheck}
+                  title="Todavía no hay check-ins"
+                  description="Tus check-ins completados y las respuestas de Ezequiel aparecerán en este historial."
+                  action={
+                    <Button variant="accent" size="sm" onClick={() => setShowForm(true)}>
+                      Hacer mi primer check-in →
+                    </Button>
+                  }
+                />
               ) : (
                 history.map(c => (
                   <div key={c.id} className="p-3.5 rounded-xl bg-zinc-950 border border-zinc-800 text-xs space-y-2.5">

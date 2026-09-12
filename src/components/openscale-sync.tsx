@@ -12,7 +12,7 @@ export function OpenScaleSync(){
   const [weight,setWeight]=useState(81.2);
   return (
     <Card className="border-blue-500/20">
-      <CardHeader><CardTitle className="flex items-center gap-2"><Scale size={16} className="text-blue-400"/> OpenScale Sync <Badge variant="muted">OpenScale MIT</Badge></CardTitle><p className="text-xs text-zinc-500">Balanza Bluetooth — peso, grasa, músculo, agua, hueso auto-sync</p></CardHeader>
+      <CardHeader><CardTitle className="flex items-center gap-2"><Scale size={16} className="text-blue-400"/> OpenScale Sync</CardTitle><p className="text-xs text-zinc-500">Balanza Bluetooth — peso, grasa, músculo, agua, hueso auto-sync</p></CardHeader>
       <CardContent className="space-y-3">
         <div className="flex items-center justify-between bg-zinc-900 border border-zinc-800 rounded-xl p-3">
           <div className="flex items-center gap-3">
@@ -28,7 +28,6 @@ export function OpenScaleSync(){
             <div className="bg-zinc-900 border border-zinc-800 rounded-xl p-2 text-center"><Scale size={14} className="mx-auto text-emerald-400"/><p className="font-black">46.1%</p><p className="text-[11px] text-zinc-500">Músculo</p></div>
           </div>
         )}
-        <p className="text-[11px] text-zinc-600 text-center">OpenScale MIT — Bluetooth scale, body composition, sin cloud</p>
       </CardContent>
     </Card>
   );

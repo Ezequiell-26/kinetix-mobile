@@ -1,49 +1,115 @@
 "use client";
+
 import { createContext, useContext, useEffect, useState } from "react";
-import { MotionConfig } from "framer-motion";
 
-type Theme = "dark" | "light";
-const Ctx = createContext<{ theme: Theme; toggle: () => void; setTheme: (t: Theme) => void }>({
-  theme: "dark",
-  toggle: () => {},
-  setTheme: () => {},
-});
+type Theme = "light" | "dark" | "system";
 
-export function useTheme() {
-  return useContext(Ctx);
+interface ThemeProviderProps {
+  children: React.ReactNode;
+  defaultTheme?: Theme;
+  storageKey?: string;
 }
 
-export function ThemeProvider({ children }: { children: React.ReactNode }) {
-  const [theme, setThemeState] = useState<Theme>("dark");
+interface ThemeContextValue {
+  theme: Theme;
+  setTheme: (theme: Theme) => void;
+  resolvedTheme: "light" | "dark";
+}
+
+const ThemeContext = createContext<ThemeContextValue | undefined>(undefined);
+
+export function ThemeProvider({
+  children,
+  defaultTheme = "system",
+  storageKey = "ezequiel-coaching-theme",
+}: ThemeProviderProps) {
+  const [theme, setThemeState] = useState<Theme>(defaultTheme);
+  const [resolvedTheme, setResolvedTheme] = useState<"light" | "dark">("dark");
   const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
-    const saved = (localStorage.getItem("ec-theme") as Theme) || "dark";
-    setThemeState(saved);
-    document.documentElement.classList.remove("light", "dark");
-    document.documentElement.classList.add(saved);
-    document.documentElement.setAttribute("data-theme", saved);
     setMounted(true);
-  }, []);
+    // Load theme from localStorage
+    const stored = localStorage.getItem(storageKey) as Theme | null;
+    if (stored) {
+      setThemeState(stored);
+    }
+  }, [storageKey]);
 
-  function setTheme(t: Theme) {
-    setThemeState(t);
-    localStorage.setItem("ec-theme", t);
-    document.documentElement.classList.remove("light", "dark");
-    document.documentElement.classList.add(t);
-    document.documentElement.setAttribute("data-theme", t);
+  useEffect(() => {
+    if (!mounted) return;
+
+    const root = window.document.documentElement;
+    
+    // Remove previous theme classes
+    root.classList.remove("light", "dark");
+
+    // Determine resolved theme
+    let resolved: "light" | "dark" = "dark";
+    
+    if (theme === "system") {
+      const systemTheme = window.matchMedia("(prefers-color-scheme: dark)").matches
+        ? "dark"
+        : "light";
+      resolved = systemTheme;
+    } else {
+      resolved = theme;
+    }
+
+    // Apply theme with smooth transition
+    root.style.setProperty("transition", "background-color 0.3s ease, color 0.3s ease");
+    root.classList.add(resolved);
+    setResolvedTheme(resolved);
+
+    // Update meta theme-color for mobile browsers
+    const metaThemeColor = document.querySelector('meta[name="theme-color"]');
+    if (metaThemeColor) {
+      metaThemeColor.setAttribute(
+        "content",
+        resolved === "dark" ? "#000000" : "#ffffff"
+      );
+    }
+
+    // Remove transition after applying
+    setTimeout(() => {
+      root.style.removeProperty("transition");
+    }, 300);
+  }, [theme, mounted]);
+
+  const setTheme = (newTheme: Theme) => {
+    setThemeState(newTheme);
+    localStorage.setItem(storageKey, newTheme);
+  };
+
+  // Listen for system theme changes
+  useEffect(() => {
+    if (!mounted || theme !== "system") return;
+
+    const mediaQuery = window.matchMedia("(prefers-color-scheme: dark)");
+    const handleChange = () => {
+      setResolvedTheme(mediaQuery.matches ? "dark" : "light");
+    };
+
+    mediaQuery.addEventListener("change", handleChange);
+    return () => mediaQuery.removeEventListener("change", handleChange);
+  }, [theme, mounted]);
+
+  // Prevent flash of wrong theme
+  if (!mounted) {
+    return <>{children}</>;
   }
-  function toggle() {
-    setTheme(theme === "dark" ? "light" : "dark");
-  }
 
-  // Avoid flash: render light/dark after mount
-  if (!mounted) return <>{children}</>;
-
-  // Todo framer-motion respeta la preferencia del SO (reduced motion).
   return (
-    <MotionConfig reducedMotion="user">
-      <Ctx.Provider value={{ theme, toggle, setTheme }}>{children}</Ctx.Provider>
-    </MotionConfig>
+    <ThemeContext.Provider value={{ theme, setTheme, resolvedTheme }}>
+      {children}
+    </ThemeContext.Provider>
   );
+}
+
+export function useTheme() {
+  const context = useContext(ThemeContext);
+  if (context === undefined) {
+    throw new Error("useTheme must be used within a ThemeProvider");
+  }
+  return context;
 }

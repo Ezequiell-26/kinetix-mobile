@@ -8,7 +8,7 @@ import { DollarSign, Users, TrendingUp, AlertTriangle } from "lucide-react";
 export function TrainerRevenuePro(){
   return (
     <Card className="border-emerald-500/20 bg-gradient-to-br from-emerald-500/5 via-zinc-900 to-zinc-900">
-      <CardHeader><CardTitle className="flex items-center gap-2"><DollarSign size={16} className="text-emerald-400"/> Revenue PRO <Badge variant="accent">Baremetrics MIT</Badge></CardTitle><p className="text-xs text-zinc-500">MRR, ARPU, churn, LTV, expansion — tu negocio</p></CardHeader>
+      <CardHeader><CardTitle className="flex items-center gap-2"><DollarSign size={16} className="text-emerald-400"/> Revenue PRO</CardTitle><p className="text-xs text-zinc-500">MRR, ARPU, churn, LTV, expansion — tu negocio</p></CardHeader>
       <CardContent className="space-y-3">
         <div className="grid grid-cols-2 gap-2">
           <div className="bg-emerald-500/10 border border-emerald-500/20 rounded-xl p-3 text-center"><p className="text-[11px] text-zinc-500">MRR</p><p className="font-black text-emerald-400 text-lg">$480k</p><p className="text-[11px] text-emerald-400">+12% vs mes pasado</p></div>
@@ -21,7 +21,6 @@ export function TrainerRevenuePro(){
           <p className="text-xs text-zinc-500">3 upsells Personalizado → Premium (+$21k MRR) • 2 renovaciones anticipadas</p>
           <div className="h-1 bg-zinc-800 rounded-full overflow-hidden mt-2"><div className="h-full bg-emerald-400" style={{width:"68%"}} /></div>
         </div>
-        <p className="text-[11px] text-zinc-600 text-center">Baremetrics MIT — MRR, churn, LTV sin Stripe Sigma</p>
       </CardContent>
     </Card>
   );

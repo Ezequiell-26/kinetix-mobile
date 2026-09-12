@@ -32,7 +32,7 @@ export function PrTracker({ sets }:{ sets: SetRecord[] }){
 
   return (
     <Card>
-      <CardHeader><CardTitle className="flex items-center gap-2"><Trophy size={18} className="text-[#D6FF2A]"/> Récords Personales <Badge variant="accent">PR</Badge></CardTitle><p className="text-xs text-zinc-500">1RM estimado (Epley) • Inspirado en Lyftr + Flexify MIT</p></CardHeader>
+      <CardHeader><CardTitle className="flex items-center gap-2"><Trophy size={18} className="text-primary"/> Récords Personales <Badge variant="accent">PR</Badge></CardTitle></CardHeader>
       <CardContent className="grid sm:grid-cols-2 gap-3">
         {prs.map(p=>(
           <div key={p.name} className="bg-zinc-900 border border-zinc-800 rounded-2xl p-4">
@@ -43,7 +43,7 @@ export function PrTracker({ sets }:{ sets: SetRecord[] }){
               {p.history.slice(-8).map((h,i)=>{
                 const h1rm = (h.weight||0)*(1+(h.reps||0)/30);
                 const pct = Math.max(10, Math.min(100, (h1rm / p.best1RM)*100));
-                return <div key={i} className="flex-1 bg-zinc-800 rounded-full h-1.5 overflow-hidden"><div className="h-full bg-[#D6FF2A]" style={{width:`${pct}%`}} /></div>;
+                return <div key={i} className="flex-1 bg-zinc-800 rounded-full h-1.5 overflow-hidden"><div className="h-full bg-primary" style={{width:`${pct}%`}} /></div>;
               })}
             </div>
           </div>

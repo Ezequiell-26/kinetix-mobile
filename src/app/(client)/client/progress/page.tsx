@@ -7,6 +7,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input, Label } from "@/components/ui/input";
 import { Tabs } from "@/components/ui/tabs";
+import { CollapsibleSection } from "@/components/ui/accordion";
 import { PhotoCompare } from "@/components/photo-compare";
 import { PrTracker } from "@/components/pr-tracker";
 import { OptiLiftsProgression } from "@/components/optilifts-progression";
@@ -32,17 +33,21 @@ import { LiftShiftAnalytics } from "@/components/liftshift-analytics";
 import { MuscleMap } from "@/components/muscle-map";
 import { FileUpload } from "@/components/file-upload";
 import { ExportActions } from "@/components/export-actions";
-import { 
-  TrendingUp, 
-  Dumbbell, 
-  Scale, 
-  Camera, 
-  Calendar, 
-  Plus, 
-  Check, 
-  ArrowDown, 
-  ArrowUp, 
-  Activity 
+import { computeStreak, countPRs, weeklyAnalytics, type WeeklyPoint } from "@/lib/stats";
+import { Tilt3DSubtle } from "@/components/tilt-3d";
+import {
+  TrendingUp,
+  Dumbbell,
+  Scale,
+  Camera,
+  Plus,
+  ArrowDown,
+  ArrowUp,
+  Activity,
+  Trophy,
+  Users,
+  Flame,
+  HeartPulse,
 } from "lucide-react";
 
 type Measurement = {
@@ -68,7 +73,8 @@ type WorkoutLogItem = {
   id: string;
   date: string;
   durationMin: number | null;
-  workout: { name: string };
+  workout: { name: string } | null;
+  workoutName?: string | null;
   sets: Array<{
     id: string;
     exerciseName: string;
@@ -79,15 +85,27 @@ type WorkoutLogItem = {
   }>;
 };
 
-export default function ProgressPage(){
-  const [tab, setTab] = useState<"peso" | "cargas" | "medidas" | "fotos">("peso");
+/** Agregados exactos (sobre todos los logs) que devuelve /api/workout-logs/summary. */
+type Summary = {
+  totalWorkouts: number;
+  streak: number;
+  prs: number;
+  adherence: number;
+  frequency: number;
+  weekly: WeeklyPoint[];
+};
 
+export default function ProgressPage(){
   const [measurements, setMeasurements] = useState<Measurement[]>([]);
   const [photos, setPhotos] = useState<ProgressPhotoItem[]>([]);
   const [workoutLogs, setWorkoutLogs] = useState<WorkoutLogItem[]>([]);
+  const [checkinsCount, setCheckinsCount] = useState(0);
+  const [summary, setSummary] = useState<Summary | null>(null);
   const [loading, setLoading] = useState(true);
+  const [programFrequency, setProgramFrequency] = useState<number | null>(null);
+  const [muscleByName, setMuscleByName] = useState<Record<string, string>>({});
 
-  // New measurement form modal/state
+  // New measurement form
   const [showMeasureForm, setShowMeasureForm] = useState(false);
   const [formWeight, setFormWeight] = useState("");
   const [formWaist, setFormWaist] = useState("");
@@ -98,10 +116,14 @@ export default function ProgressPage(){
   async function loadData(){
     setLoading(true);
     try {
-      const [mRes, pRes, wRes] = await Promise.all([
+      const [mRes, pRes, wRes, cRes, progRes, exRes, sRes] = await Promise.all([
         fetch("/api/measurements"),
         fetch("/api/progress-photos"),
-        fetch("/api/workout-logs")
+        fetch("/api/workout-logs"),
+        fetch("/api/checkins"),
+        fetch("/api/programs"),
+        fetch("/api/exercises"),
+        fetch("/api/workout-logs/summary")
       ]);
       if (mRes.ok) {
         const m = await mRes.json();
@@ -115,11 +137,57 @@ export default function ProgressPage(){
         const w = await wRes.json();
         if (Array.isArray(w)) setWorkoutLogs(w);
       }
+      if (cRes.ok) {
+        const c = await cRes.json();
+        if (Array.isArray(c)) setCheckinsCount(c.length);
+      }
+      if (progRes.ok) {
+        const progs = await progRes.json();
+        const mine = Array.isArray(progs) ? progs[0] : null;
+        if (mine?.frequency) setProgramFrequency(Number(mine.frequency) || null);
+      }
+      if (exRes.ok) {
+        const exs = await exRes.json();
+        if (Array.isArray(exs)) {
+          const map: Record<string, string> = {};
+          for (const e of exs) map[e.name.toLowerCase()] = e.muscleGroup;
+          setMuscleByName(map);
+        }
+      }
+      if (sRes.ok) {
+        const sm = await sRes.json();
+        if (sm && typeof sm.totalWorkouts === "number") setSummary(sm as Summary);
+      }
     } catch {}
     setLoading(false);
   }
 
-  const volumeByMuscle: Record<string,number> = (()=>{ const m: Record<string,number>={}; for(const log of workoutLogs) for(const s of log.sets) { const k=(s.exerciseName.split(" ")[0]||"General"); m[k]=(m[k]||0)+1; } return m; })();
+  // Volumen por grupo muscular
+  const volumeByMuscle: Record<string, number> = (() => {
+    const m: Record<string, number> = {};
+    for (const log of workoutLogs) {
+      for (const s of log.sets) {
+        const group = muscleByName[s.exerciseName.toLowerCase()] ?? "Otros";
+        m[group] = (m[group] || 0) + 1;
+      }
+    }
+    return m;
+  })();
+
+  const weeklyFrequency = summary?.frequency ?? programFrequency ?? 4;
+  const totalWorkouts = summary?.totalWorkouts ?? workoutLogs.length;
+  const streak = summary?.streak ?? computeStreak(workoutLogs.map(l => l.date));
+  const prs = summary?.prs ?? countPRs(
+    workoutLogs.flatMap(l =>
+      l.sets.map(s => ({ exerciseName: s.exerciseName, weight: s.weight, date: l.date }))
+    )
+  );
+  const sessionsLast30Days = workoutLogs.filter(
+    l => new Date(l.date).getTime() >= Date.now() - 30 * 24 * 60 * 60 * 1000
+  ).length;
+  const adherence = summary?.adherence
+    ?? Math.min(100, Math.round((sessionsLast30Days / (weeklyFrequency * 4)) * 100));
+  const weeklyData = summary?.weekly ?? weeklyAnalytics(workoutLogs, measurements, weeklyFrequency);
 
   useEffect(() => {
     loadData();
@@ -159,12 +227,12 @@ export default function ProgressPage(){
     ? Number((latestWeight - initialWeight).toFixed(1))
     : null;
 
-  // Photos: Before (oldest), Current (newest), History (all)
+  // Photos
   const sortedPhotosAsc = [...photos].sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
   const beforePhoto = sortedPhotosAsc[0] || null;
   const currentPhoto = sortedPhotosAsc.length > 1 ? sortedPhotosAsc[sortedPhotosAsc.length - 1] : null;
 
-  // Best lifts progress from workoutLogs sets
+  // Best lifts
   const exerciseMaxes: Record<string, { maxWeight: number; reps: number; date: string }> = {};
   workoutLogs.forEach(log => {
     (log.sets || []).forEach(st => {
@@ -183,11 +251,11 @@ export default function ProgressPage(){
 
   return (
     <div className="space-y-5">
-      {/* Header */}
+      {/* ── Header ───────────────────────────────────────────── */}
       <div className="flex flex-col sm:flex-row justify-between sm:items-center gap-3">
         <div>
           <h1 className="text-2xl font-display font-bold">Mi Progreso</h1>
-          <p className="text-sm text-zinc-500">Métricas reales • Privado entre vos y Ezequiel</p>
+          <p className="text-sm text-zinc-500">Métricas reales — Privado entre vos y Ezequiel</p>
         </div>
         <Button
           variant="outline"
@@ -199,12 +267,12 @@ export default function ProgressPage(){
         </Button>
       </div>
 
-      {/* Record Measurement Modal / Card */}
+      {/* ── Record Measurement Modal ─────────────────────────── */}
       {showMeasureForm && (
-        <Card className="border-[#D6FF2A]/30 bg-zinc-950 animate-in fade-in">
+        <Card className="border-primary/30 animate-in fade-in">
           <CardHeader>
             <CardTitle className="text-base flex items-center gap-2">
-              <Scale size={18} className="text-[#D6FF2A]" /> Nuevo Registro de Medidas
+              <Scale size={18} className="text-primary" /> Nuevo Registro de Medidas
             </CardTitle>
           </CardHeader>
           <CardContent>
@@ -212,52 +280,25 @@ export default function ProgressPage(){
               <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
                 <div className="space-y-1.5">
                   <Label className="text-xs">Peso (kg)</Label>
-                  <Input
-                    type="number"
-                    step="0.1"
-                    value={formWeight}
-                    onChange={e => setFormWeight(e.target.value)}
-                    placeholder="Ej: 84.5"
-                    required
-                  />
+                  <Input type="number" step="0.1" value={formWeight} onChange={e => setFormWeight(e.target.value)} placeholder="Ej: 84.5" required />
                 </div>
                 <div className="space-y-1.5">
                   <Label className="text-xs">Cintura (cm)</Label>
-                  <Input
-                    type="number"
-                    step="0.5"
-                    value={formWaist}
-                    onChange={e => setFormWaist(e.target.value)}
-                    placeholder="Ej: 86"
-                  />
+                  <Input type="number" step="0.5" value={formWaist} onChange={e => setFormWaist(e.target.value)} placeholder="Ej: 86" />
                 </div>
                 <div className="space-y-1.5">
                   <Label className="text-xs">Pecho (cm)</Label>
-                  <Input
-                    type="number"
-                    step="0.5"
-                    value={formChest}
-                    onChange={e => setFormChest(e.target.value)}
-                    placeholder="Ej: 102"
-                  />
+                  <Input type="number" step="0.5" value={formChest} onChange={e => setFormChest(e.target.value)} placeholder="Ej: 102" />
                 </div>
                 <div className="space-y-1.5">
                   <Label className="text-xs">Brazo (cm)</Label>
-                  <Input
-                    type="number"
-                    step="0.5"
-                    value={formArm}
-                    onChange={e => setFormArm(e.target.value)}
-                    placeholder="Ej: 36"
-                  />
+                  <Input type="number" step="0.5" value={formArm} onChange={e => setFormArm(e.target.value)} placeholder="Ej: 36" />
                 </div>
               </div>
               <div className="flex gap-2">
-                <Button type="button" variant="outline" size="sm" onClick={() => setShowMeasureForm(false)}>
-                  Cancelar
-                </Button>
+                <Button type="button" variant="outline" size="sm" onClick={() => setShowMeasureForm(false)}>Cancelar</Button>
                 <Button type="submit" variant="accent" size="sm" disabled={savingMeasure} className="font-bold">
-                  {savingMeasure ? "Guardando..." : "Guardar Registro ✓"}
+                  {savingMeasure ? "Guardando..." : "Guardar Registro"}
                 </Button>
               </div>
             </form>
@@ -265,14 +306,13 @@ export default function ProgressPage(){
         </Card>
       )}
 
-      {/* Top 3 Metric KPI Cards */}
-      <div className="grid grid-cols-3 gap-2.5">
-        <Card className="border-zinc-800 bg-zinc-900/80">
+      {/* ── KPI Strip ────────────────────────────────────────── */}
+      <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5">
+        <Tilt3DSubtle><Card className="shadow-[0_8px_24px_rgba(0,0,0,0.25)] h-full">
           <CardContent className="p-3.5 text-center">
-            <span className="text-[11px] text-zinc-500 uppercase font-bold block">Peso Actual</span>
-            <p className="text-xl font-black text-white mt-0.5">
-              {latestWeight !== null ? `${latestWeight} kg` : "--"}
-            </p>
+            <Scale size={15} className="mx-auto text-primary mb-1" />
+            <span className="text-[10px] text-zinc-500 uppercase font-bold block">Peso</span>
+            <p className="text-xl font-black text-white mt-0.5">{latestWeight !== null ? `${latestWeight} kg` : "--"}</p>
             {weightChange !== null && (
               <p className={`text-[11px] font-bold mt-0.5 flex items-center justify-center gap-0.5 ${weightChange <= 0 ? "text-emerald-400" : "text-amber-400"}`}>
                 {weightChange <= 0 ? <ArrowDown size={12} /> : <ArrowUp size={12} />}
@@ -280,288 +320,315 @@ export default function ProgressPage(){
               </p>
             )}
           </CardContent>
-        </Card>
-
-        <Card className="border-zinc-800 bg-zinc-900/80">
+        </Card></Tilt3DSubtle>
+        <Tilt3DSubtle><Card className="shadow-[0_8px_24px_rgba(0,0,0,0.25)] h-full">
           <CardContent className="p-3.5 text-center">
-            <span className="text-[11px] text-zinc-500 uppercase font-bold block">Entrenos</span>
-            <p className="text-xl font-black text-white mt-0.5">{workoutLogs.length}</p>
+            <Dumbbell size={15} className="mx-auto text-primary mb-1" />
+            <span className="text-[10px] text-zinc-500 uppercase font-bold block">Entrenos</span>
+            <p className="text-xl font-black text-white mt-0.5">{totalWorkouts}</p>
             <p className="text-[11px] text-zinc-400 mt-0.5">completados</p>
           </CardContent>
-        </Card>
-
-        <Card className="border-[#D6FF2A]/20 bg-[#D6FF2A]/[0.03]">
+        </Card></Tilt3DSubtle>
+        <Tilt3DSubtle><Card className="shadow-[0_8px_24px_rgba(0,0,0,0.25)] h-full">
           <CardContent className="p-3.5 text-center">
-            <span className="text-[11px] text-zinc-500 uppercase font-bold block">Fotos</span>
-            <p className="text-xl font-black text-[#D6FF2A] mt-0.5">{photos.length}</p>
+            <Flame size={15} className="mx-auto text-primary mb-1" />
+            <span className="text-[10px] text-zinc-500 uppercase font-bold block">Racha</span>
+            <p className="text-xl font-black text-primary mt-0.5">{streak > 0 ? `${streak} d` : "--"}</p>
+            <p className="text-[11px] text-zinc-400 mt-0.5">{streak > 0 ? "consecutivos" : "empezá hoy"}</p>
+          </CardContent>
+        </Card></Tilt3DSubtle>
+        <Tilt3DSubtle><Card className="border-primary/20 shadow-[0_8px_24px_rgba(0,0,0,0.25)] h-full">
+          <CardContent className="p-3.5 text-center">
+            <Camera size={15} className="mx-auto text-primary mb-1" />
+            <span className="text-[10px] text-zinc-500 uppercase font-bold block">Fotos</span>
+            <p className="text-xl font-black text-white mt-0.5">{photos.length}</p>
             <p className="text-[11px] text-zinc-400 mt-0.5">privadas</p>
           </CardContent>
-        </Card>
+        </Card></Tilt3DSubtle>
       </div>
 
-      {/* Tabs */}
-      <div className="flex gap-2 overflow-x-auto pb-1 scrollbar-none">
-        {[
-          { id: "peso", label: "Peso Corporal", icon: Scale },
-          { id: "cargas", label: "Fuerza y Cargas", icon: Dumbbell },
-          { id: "medidas", label: "Medidas", icon: Activity },
-          { id: "fotos", label: "Fotos de Progreso", icon: Camera },
-        ].map(t => {
-          const isActive = tab === t.id;
-          const Icon = t.icon;
-          return (
-            <button
-              key={t.id}
-              onClick={() => setTab(t.id as typeof tab)}
-              className={`px-4 py-2.5 rounded-xl text-xs font-bold border transition shrink-0 flex items-center gap-1.5 ${
-                isActive
-                  ? "bg-white text-black border-white"
-                  : "bg-zinc-900 text-zinc-400 border-zinc-800 hover:border-zinc-700"
-              }`}
-            >
-              <Icon size={14} />
-              <span>{t.label}</span>
-            </button>
-          );
-        })}
-      </div>
-
-      {/* Tab 1: Peso Corporal */}
-      {tab === "peso" && (
-        <div className="space-y-4">
-          <Card className="border-zinc-800 bg-zinc-900/90">
-            <CardHeader className="flex flex-row items-center justify-between pb-2">
-              <CardTitle className="text-base">Evolución de Peso</CardTitle>
-              <Badge variant="accent">Historial Real</Badge>
-            </CardHeader>
-            <CardContent className="space-y-3">
-              {measurements.length === 0 ? (
-                <div className="py-10 text-center text-xs text-zinc-500">
-                  No hay datos todavía. Registrá tu primer peso arriba para empezar a ver tu evolución.
-                </div>
-              ) : (
-                <div className="space-y-2">
-                  {measurements.map((m, idx) => (
-                    <div
-                      key={m.id}
-                      className="flex justify-between items-center p-3 rounded-xl bg-zinc-950 border border-zinc-800 text-xs"
-                    >
-                      <div>
-                        <span className="font-bold text-white text-sm">{m.weight ? `${m.weight} kg` : "--"}</span>
-                        <p className="text-[11px] text-zinc-500 mt-0.5">
-                          {new Date(m.date).toLocaleDateString("es-AR", { day: "numeric", month: "long", year: "numeric" })}
-                        </p>
-                      </div>
-                      {idx === 0 && <Badge variant="accent">Último</Badge>}
-                    </div>
-                  ))}
-                </div>
-              )}
-            </CardContent>
-          </Card>
-        </div>
-      )}
-
-      {/* Tab 2: Fuerza y Cargas */}
-      {tab === "cargas" && (
-        <div className="space-y-4">
-          <Card className="border-zinc-800 bg-zinc-900/90">
-            <CardHeader className="flex flex-row items-center justify-between pb-2">
-              <CardTitle className="text-base">¿Estoy levantando más peso?</CardTitle>
-              <Badge variant="accent">Mejores Marcas</Badge>
-            </CardHeader>
-            <CardContent className="space-y-3">
-              {Object.keys(exerciseMaxes).length === 0 ? (
-                <div className="py-10 text-center text-xs text-zinc-500">
-                  No hay datos todavía. Completá entrenamientos registrando tus series para ver tus cargas máximas.
-                </div>
-              ) : (
-                <div className="space-y-2">
-                  {Object.entries(exerciseMaxes).map(([name, data]) => (
-                    <div
-                      key={name}
-                      className="flex justify-between items-center p-3 rounded-xl bg-zinc-950 border border-zinc-800 text-xs"
-                    >
-                      <div>
-                        <p className="font-bold text-white text-sm">{name}</p>
-                        <p className="text-[11px] text-zinc-500 mt-0.5">Registrado el {data.date}</p>
-                      </div>
-                      <div className="text-right">
-                        <span className="text-base font-black text-[#D6FF2A]">{data.maxWeight} kg</span>
-                        <p className="text-[10px] text-zinc-400">× {data.reps} reps</p>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              )}
-            </CardContent>
-          </Card>
-        </div>
-      )}
-
-      {/* Tab 3: Medidas */}
-      {tab === "medidas" && (
-        <div className="space-y-4">
-          <Card className="border-zinc-800 bg-zinc-900/90">
-            <CardHeader className="flex flex-row items-center justify-between pb-2">
-              <CardTitle className="text-base">Medidas Corporales (cm)</CardTitle>
-              <Badge variant="muted">Historial</Badge>
-            </CardHeader>
-            <CardContent className="space-y-3">
-              {measurements.filter(m => m.waist || m.chest || m.arm || m.leg).length === 0 ? (
-                <div className="py-10 text-center text-xs text-zinc-500">
-                  No hay medidas registradas todavía. Presioná &quot;Registrar Medidas&quot; para cargar tu perímetro de cintura, pecho y brazos.
-                </div>
-              ) : (
-                <div className="space-y-2.5">
-                  {measurements
-                    .filter(m => m.waist || m.chest || m.arm || m.leg)
-                    .map(m => (
-                      <div key={m.id} className="p-3.5 rounded-xl bg-zinc-950 border border-zinc-800 text-xs space-y-2">
-                        <span className="font-bold text-zinc-400 text-[11px] block">
-                          {new Date(m.date).toLocaleDateString("es-AR", { day: "numeric", month: "short", year: "numeric" })}
-                        </span>
-                        <div className="grid grid-cols-4 gap-2 text-center">
-                          <div className="bg-zinc-900 p-2 rounded-lg">
-                            <span className="text-[10px] text-zinc-500 block">Cintura</span>
-                            <span className="font-bold text-white text-sm">{m.waist ? `${m.waist} cm` : "—"}</span>
-                          </div>
-                          <div className="bg-zinc-900 p-2 rounded-lg">
-                            <span className="text-[10px] text-zinc-500 block">Pecho</span>
-                            <span className="font-bold text-white text-sm">{m.chest ? `${m.chest} cm` : "—"}</span>
-                          </div>
-                          <div className="bg-zinc-900 p-2 rounded-lg">
-                            <span className="text-[10px] text-zinc-500 block">Brazo</span>
-                            <span className="font-bold text-white text-sm">{m.arm ? `${m.arm} cm` : "—"}</span>
-                          </div>
-                          <div className="bg-zinc-900 p-2 rounded-lg">
-                            <span className="text-[10px] text-zinc-500 block">Pierna</span>
-                            <span className="font-bold text-white text-sm">{m.leg ? `${m.leg} cm` : "—"}</span>
-                          </div>
-                        </div>
-                      </div>
-                    ))}
-                </div>
-              )}
-            </CardContent>
-          </Card>
-        </div>
-      )}
-
-      {/* Tab 4: Fotos de Progreso */}
-      {tab === "fotos" && (
-        <div className="space-y-5">
-          {/* Compare slider */}
-          <Card className="border-zinc-800 bg-zinc-900/90 overflow-hidden">
-            <CardHeader className="flex flex-row items-center justify-between pb-2">
-              <CardTitle className="text-base flex items-center gap-2">
-                <Camera size={18} className="text-[#D6FF2A]" /> Comparador Antes vs Actual
-              </CardTitle>
-              <Badge variant="muted">Privado</Badge>
-            </CardHeader>
-            <CardContent className="p-4 space-y-4">
-              <PhotoAiCompare />
-      <PhotoCompare
-                beforeUrl={beforePhoto?.url}
-                afterUrl={currentPhoto?.url || beforePhoto?.url}
-                beforeLabel={beforePhoto ? `Inicio (${new Date(beforePhoto.date).toLocaleDateString("es-AR", { day: "numeric", month: "short" })})` : "Antes"}
-                afterLabel={currentPhoto ? `Actual (${new Date(currentPhoto.date).toLocaleDateString("es-AR", { day: "numeric", month: "short" })})` : "Actual"}
-              />
-
-              {/* Upload photo */}
-              <div className="pt-2">
-                <FileUpload
-                  type="progress"
-                  onUploaded={() => loadData()}
-                  label="Subir nueva foto de progreso (privada)"
-                />
-                <p className="text-[11px] text-zinc-500 text-center mt-2">
-                  🔒 Tus fotos son estrictamente confidenciales. Solo vos y Ezequiel tienen acceso a ellas.
-                </p>
-              </div>
-            </CardContent>
-          </Card>
-
-          {/* Chronological Photo Gallery */}
-          <Card className="border-zinc-800 bg-zinc-900/90">
-            <CardHeader>
-              <CardTitle className="text-base">Historial de Fotos</CardTitle>
-            </CardHeader>
-            <CardContent>
-              {photos.length === 0 ? (
-                <p className="text-xs text-zinc-500 text-center py-8">
-                  No hay fotos de progreso cargadas todavía. Subí tu primera foto arriba.
-                </p>
-              ) : (
-                <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
-                  {photos.map(p => (
-                    <div key={p.id} className="space-y-1.5 group">
-                      <div className="aspect-[3/4] bg-zinc-950 rounded-xl border border-zinc-800 overflow-hidden relative">
-                        <img src={p.url} alt="Progreso" className="w-full h-full object-cover group-hover:scale-105 transition" />
-                        <span className="absolute top-2 right-2 bg-black/70 backdrop-blur px-2 py-0.5 rounded text-[10px] text-zinc-300">
-                          🔒 Privada
-                        </span>
-                      </div>
-                      <p className="text-xs text-center font-semibold text-white">
-                        {new Date(p.date).toLocaleDateString("es-AR", { day: "numeric", month: "short", year: "numeric" })}
-                      </p>
-                      {p.note && <p className="text-[11px] text-center text-zinc-400 truncate">{p.note}</p>}
-                    </div>
-                  ))}
-                </div>
-              )}
-            </CardContent>
-          </Card>
-        </div>
-      )}
-
-      {/* Super Clean MIT Features — 4 tabs, nada de scroll infinito */}
+      {/* ══════════════════════════════════════════════════════
+          UNIFIED 4-TAB SYSTEM
+          ══════════════════════════════════════════════════════ */}
       <Tabs
         tabs={[
-          {id:"resumen", label:"Resumen"},
-          {id:"graficos", label:"Gráficos"},
-          {id:"wearables", label:"Wearables"},
-          {id:"import", label:"Import"},
+          { id: "metricas", label: "Métricas & Tendencias", icon: TrendingUp },
+          { id: "fuerza", label: "Fuerza & Récords", icon: Dumbbell },
+          { id: "cuerpo", label: "Cuerpo & Fotos", icon: Camera },
+          { id: "salud", label: "Músculos & Salud", icon: HeartPulse },
         ]}
-        defaultId="resumen"
+        defaultId="metricas"
       >
-        {(active: string)=> (
+        {(active: string) => (
           <>
-            {active==="resumen" && (
+            {/* ── Tab 1: Métricas & Tendencias ──────────────── */}
+            {active === "metricas" && (
               <div className="space-y-4">
+                {/* Weight evolution */}
+                <Card>
+                  <CardHeader className="flex flex-row items-center justify-between pb-2">
+                    <CardTitle className="text-base">Evolución de Peso</CardTitle>
+                    <Badge variant="accent">Historial Real</Badge>
+                  </CardHeader>
+                  <CardContent className="space-y-3">
+                    {measurements.length === 0 ? (
+                      <div className="py-10 text-center text-xs text-zinc-500">
+                        No hay datos todavía. Registrá tu primer peso arriba para empezar a ver tu evolución.
+                      </div>
+                    ) : (
+                      <div className="space-y-2">
+                        {measurements.map((m, idx) => (
+                          <div key={m.id} className="flex justify-between items-center p-3 rounded-xl bg-surface-elevated/50 border border-subtle/40 text-xs">
+                            <div>
+                              <span className="font-bold text-white text-sm">{m.weight ? `${m.weight} kg` : "--"}</span>
+                              <p className="text-[11px] text-zinc-500 mt-0.5">
+                                {new Date(m.date).toLocaleDateString("es-AR", { day: "numeric", month: "long", year: "numeric" })}
+                              </p>
+                            </div>
+                            {idx === 0 && <Badge variant="accent">Último</Badge>}
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                  </CardContent>
+                </Card>
+
+                {/* Analytics charts */}
+                <LiftShiftAnalytics data={weeklyData} />
+
+                {/* Streak & Adherence */}
+                <CollapsibleSection
+                  title="Logros y constancia"
+                  subtitle="XP, racha y predicción de continuidad"
+                  icon={<Trophy size={18} />}
+                >
+                  <Achievements data={{workouts: totalWorkouts, streak, adherence, prs, checkins: checkinsCount}} />
+                  <StreakPrediction />
+                </CollapsibleSection>
+
+                {/* Community */}
+                <CollapsibleSection
+                  title="Comunidad"
+                  subtitle="Compartir avances y desafíos"
+                  icon={<Users size={18} />}
+                >
+                  <SocialShare />
+                  <Challenges />
+                </CollapsibleSection>
+              </div>
+            )}
+
+            {/* ── Tab 2: Fuerza & Récords ───────────────────── */}
+            {active === "fuerza" && (
+              <div className="space-y-4">
+                {/* Best lifts */}
+                <Card>
+                  <CardHeader className="flex flex-row items-center justify-between pb-2">
+                    <CardTitle className="text-base">Mejores Marcas</CardTitle>
+                    <Badge variant="accent">PRs</Badge>
+                  </CardHeader>
+                  <CardContent className="space-y-3">
+                    {Object.keys(exerciseMaxes).length === 0 ? (
+                      <div className="py-10 text-center text-xs text-zinc-500">
+                        No hay datos todavía. Completá entrenamientos registrando tus series para ver tus cargas máximas.
+                      </div>
+                    ) : (
+                      <div className="space-y-2">
+                        {Object.entries(exerciseMaxes).map(([name, data]) => (
+                          <div key={name} className="flex justify-between items-center p-3 rounded-xl bg-surface-elevated/50 border border-subtle/40 text-xs">
+                            <div>
+                              <p className="font-bold text-white text-sm">{name}</p>
+                              <p className="text-[11px] text-zinc-500 mt-0.5">Registrado el {data.date}</p>
+                            </div>
+                            <div className="text-right">
+                              <span className="text-base font-black text-primary">{data.maxWeight} kg</span>
+                              <p className="text-[10px] text-zinc-400">× {data.reps} reps</p>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                  </CardContent>
+                </Card>
+
+                {/* PR Tracker */}
                 <PrTracker sets={workoutLogs.flatMap(w=> w.sets.map(s=> ({exerciseName: s.exerciseName, weight: s.weight, reps: s.reps, date: w.date, rir: s.rir})))} />
+
+                {/* Progression */}
+                <CollapsibleSection
+                  title="Progresión y predicción"
+                  subtitle="Tendencias de carga y detección de mesetas"
+                  icon={<TrendingUp size={18} />}
+                >
+                  <OptiLiftsProgression logs={workoutLogs.flatMap(w=> w.sets.map(s=> ({exercise: s.exerciseName, weight: s.weight||0, reps: s.reps||0, rir: s.rir, date: w.date})))} />
+                  <PredictivePlateau logs={workoutLogs.flatMap(w=> w.sets.map(s=> ({exercise: s.exerciseName, weight: s.weight||0, reps: s.reps||0, rir: s.rir, date: w.date})))} />
+                </CollapsibleSection>
+
+                {/* Body composition */}
+                <CollapsibleSection
+                  title="Composición corporal"
+                  subtitle="Evolución de peso y composición"
+                  icon={<Scale size={18} />}
+                >
+                  <AkiloTracker />
+                </CollapsibleSection>
+
+                {/* Timeline */}
+                <CollapsibleSection
+                  title="Historial de sesiones"
+                  subtitle="Línea de tiempo de tus entrenamientos"
+                  icon={<Activity size={18} />}
+                >
+                  <WorkoutTimeline items={workoutLogs.map(w=>({id:w.id, date:w.date, name:w.workout?.name || w.workoutName || "Sesión", durationMin:w.durationMin, sets:w.sets.length, volume: w.sets.reduce((a,s)=>a+((s.weight||0)*(s.reps||0)),0), completed:true}))} />
+                </CollapsibleSection>
+              </div>
+            )}
+
+            {/* ── Tab 3: Cuerpo & Fotos ──────────────────────── */}
+            {active === "cuerpo" && (
+              <div className="space-y-5">
+                {/* Body measurements */}
+                <Card>
+                  <CardHeader className="flex flex-row items-center justify-between pb-2">
+                    <CardTitle className="text-base">Medidas Corporales (cm)</CardTitle>
+                    <Badge variant="muted">Historial</Badge>
+                  </CardHeader>
+                  <CardContent className="space-y-3">
+                    {measurements.filter(m => m.waist || m.chest || m.arm || m.leg).length === 0 ? (
+                      <div className="py-10 text-center text-xs text-zinc-500">
+                        No hay medidas registradas todavía. Presioná &quot;Registrar Medidas&quot; para cargar tus perímetros.
+                      </div>
+                    ) : (
+                      <div className="space-y-2.5">
+                        {measurements
+                          .filter(m => m.waist || m.chest || m.arm || m.leg)
+                          .map(m => (
+                            <div key={m.id} className="p-3.5 rounded-xl bg-surface-elevated/50 border border-subtle/40 text-xs space-y-2">
+                              <span className="font-bold text-zinc-400 text-[11px] block">
+                                {new Date(m.date).toLocaleDateString("es-AR", { day: "numeric", month: "short", year: "numeric" })}
+                              </span>
+                              <div className="grid grid-cols-4 gap-2 text-center">
+                                <div className="bg-surface/60 p-2 rounded-lg">
+                                  <span className="text-[10px] text-zinc-500 block">Cintura</span>
+                                  <span className="font-bold text-white text-sm">{m.waist ? `${m.waist} cm` : "—"}</span>
+                                </div>
+                                <div className="bg-surface/60 p-2 rounded-lg">
+                                  <span className="text-[10px] text-zinc-500 block">Pecho</span>
+                                  <span className="font-bold text-white text-sm">{m.chest ? `${m.chest} cm` : "—"}</span>
+                                </div>
+                                <div className="bg-surface/60 p-2 rounded-lg">
+                                  <span className="text-[10px] text-zinc-500 block">Brazo</span>
+                                  <span className="font-bold text-white text-sm">{m.arm ? `${m.arm} cm` : "—"}</span>
+                                </div>
+                                <div className="bg-surface/60 p-2 rounded-lg">
+                                  <span className="text-[10px] text-zinc-500 block">Pierna</span>
+                                  <span className="font-bold text-white text-sm">{m.leg ? `${m.leg} cm` : "—"}</span>
+                                </div>
+                              </div>
+                            </div>
+                          ))}
+                      </div>
+                    )}
+                  </CardContent>
+                </Card>
+
+                {/* Photo compare */}
+                <Card className="overflow-hidden">
+                  <CardHeader className="flex flex-row items-center justify-between pb-2">
+                    <CardTitle className="text-base flex items-center gap-2">
+                      <Camera size={18} className="text-primary" /> Comparador Antes vs Actual
+                    </CardTitle>
+                    <Badge variant="muted">Privado</Badge>
+                  </CardHeader>
+                  <CardContent className="p-4 space-y-4">
+                    <PhotoAiCompare />
+                    <PhotoCompare
+                      beforeUrl={beforePhoto?.url}
+                      afterUrl={currentPhoto?.url || beforePhoto?.url}
+                      beforeLabel={beforePhoto ? `Inicio (${new Date(beforePhoto.date).toLocaleDateString("es-AR", { day: "numeric", month: "short" })})` : "Antes"}
+                      afterLabel={currentPhoto ? `Actual (${new Date(currentPhoto.date).toLocaleDateString("es-AR", { day: "numeric", month: "short" })})` : "Actual"}
+                    />
+                    <div className="pt-2">
+                      <FileUpload type="progress" onUploaded={() => loadData()} label="Subir nueva foto de progreso (privada)" />
+                      <p className="text-[11px] text-zinc-500 text-center mt-2">
+                        Tus fotos son estrictamente confidenciales. Solo vos y Ezequiel tienen acceso a ellas.
+                      </p>
+                    </div>
+                  </CardContent>
+                </Card>
+
+                {/* Photo gallery */}
+                <Card>
+                  <CardHeader>
+                    <CardTitle className="text-base">Historial de Fotos</CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    {photos.length === 0 ? (
+                      <p className="text-xs text-zinc-500 text-center py-8">
+                        No hay fotos de progreso cargadas todavía. Subí tu primera foto arriba.
+                      </p>
+                    ) : (
+                      <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
+                        {photos.map(p => (
+                          <div key={p.id} className="space-y-1.5 group">
+                            <div className="aspect-[3/4] bg-surface-elevated rounded-xl border border-subtle/40 overflow-hidden relative">
+                              <img src={p.url} alt="Progreso" className="w-full h-full object-cover group-hover:scale-105 transition" />
+                              <span className="absolute top-2 right-2 bg-black/70 backdrop-blur px-2 py-0.5 rounded text-[10px] text-zinc-300">
+                                Privada
+                              </span>
+                            </div>
+                            <p className="text-xs text-center font-semibold text-white">
+                              {new Date(p.date).toLocaleDateString("es-AR", { day: "numeric", month: "short", year: "numeric" })}
+                            </p>
+                            {p.note && <p className="text-[11px] text-center text-zinc-400 truncate">{p.note}</p>}
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                  </CardContent>
+                </Card>
+              </div>
+            )}
+
+            {/* ── Tab 4: Músculos & Salud ────────────────────── */}
+            {active === "salud" && (
+              <div className="space-y-4">
+                {/* Muscle map */}
                 <MuscleMap volumeByMuscle={volumeByMuscle} />
-                <OptiLiftsProgression logs={workoutLogs.flatMap(w=> w.sets.map(s=> ({exercise: s.exerciseName, weight: s.weight||0, reps: s.reps||0, rir: s.rir, date: w.date})))} />
-                <PredictivePlateau logs={workoutLogs.flatMap(w=> w.sets.map(s=> ({exercise: s.exerciseName, weight: s.weight||0, reps: s.reps||0, rir: s.rir, date: w.date})))} />
-                <AkiloTracker />
-                <Achievements data={{workouts: workoutLogs.length, streak: 3, adherence: 85, prs: 2, checkins: 4}} />
-                <StreakPrediction />
-                <SocialShare />
-                <Challenges />
-              </div>
-            )}
-            {active==="graficos" && (
-              <div className="space-y-4">
-                <LiftShiftAnalytics data={[]} />
-                <SleepTracker />
-                <OpenScaleSync />
-                <FitTrackeePro />
-              </div>
-            )}
-            {active==="wearables" && (
-              <div className="space-y-4">
-                <WearablesHub />
-                <HealthBox />
-                <ExportCenter type="client" />
-              </div>
-            )}
-            {active==="import" && (
-              <div className="space-y-4">
-                <HevyImportPro />
-                <RunTracker />
-                <GpxTracker />
-                <WorkoutTimeline items={workoutLogs.map(w=> ({id:w.id, date:w.date, name:w.workout.name, durationMin:w.durationMin, sets:w.sets.length, volume: w.sets.reduce((a,s)=>a+((s.weight||0)*(s.reps||0)),0), completed:true}))} />
-                <GraniteOffline />
+
+                {/* Health trackers */}
+                <CollapsibleSection
+                  title="Salud y sueño"
+                  subtitle="Métricas de descanso y salud general"
+                  icon={<HeartPulse size={18} />}
+                >
+                  <SleepTracker />
+                  <HealthBox />
+                  <FitTrackeePro />
+                </CollapsibleSection>
+
+                {/* Wearables & data */}
+                <CollapsibleSection
+                  title="Wearables y dispositivos"
+                  subtitle="Sincronizá tus relojes y balanzas"
+                  icon={<Activity size={18} />}
+                >
+                  <WearablesHub />
+                  <OpenScaleSync />
+                </CollapsibleSection>
+
+                {/* Data import/export */}
+                <CollapsibleSection
+                  title="Datos e importación"
+                  subtitle="Importá historial, exportá tu progreso"
+                  icon={<TrendingUp size={18} />}
+                >
+                  <HevyImportPro />
+                  <ExportCenter type="client" />
+                  <RunTracker />
+                  <GpxTracker />
+                  <GraniteOffline />
+                </CollapsibleSection>
               </div>
             )}
           </>

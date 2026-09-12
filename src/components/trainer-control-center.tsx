@@ -40,15 +40,15 @@ export function TrainerControlCenter(){
 
   return (
     <Card className="border-violet-500/20">
-      <CardHeader><CardTitle className="flex items-center gap-2"><Users size={18} className="text-violet-400"/> Control Total Clientes <Badge variant="muted">Lyftr + OptiLifts MIT</Badge></CardTitle>
+      <CardHeader><CardTitle className="flex items-center gap-2"><Users size={18} className="text-violet-400"/> Control Total Clientes</CardTitle>
         <div className="flex gap-1.5 overflow-x-auto pb-1">
           {[
             {id:"todos", label:`Todos (${counts.todos})`},
-            {id:"riesgo", label:`🚨 Riesgo (${counts.riesgo})`},
-            {id:"estancado", label:`⚠️ Estancados (${counts.estancado})`},
-            {id:"top", label:`🔥 Top (${counts.top})`},
+            {id:"riesgo", label:`Riesgo (${counts.riesgo})`},
+            {id:"estancado", label:`Estancados (${counts.estancado})`},
+            {id:"top", label:`Top (${counts.top})`},
           ].map(f=>(
-            <button key={f.id} onClick={()=>setFilter(f.id as typeof filter)} className={`px-3 py-1.5 rounded-full text-xs font-bold border whitespace-nowrap ${filter===f.id?"bg-[#D6FF2A] text-black border-[#D6FF2A]":"bg-zinc-900 text-zinc-400 border-zinc-800"}`}>{f.label}</button>
+            <button key={f.id} onClick={()=>setFilter(f.id as typeof filter)} className={`px-3 py-1.5 rounded-full text-xs font-bold border whitespace-nowrap ${filter===f.id?"bg-primary text-black border-primary":"bg-zinc-900 text-zinc-400 border-zinc-800"}`}>{f.label}</button>
           ))}
         </div>
       </CardHeader>
@@ -74,7 +74,6 @@ export function TrainerControlCenter(){
           </div>
         ))}
         {filtered.length===0 && <p className="text-xs text-center text-zinc-500 py-6">Ningún cliente en {filter}</p>}
-        <p className="text-[11px] text-zinc-600 text-center">Lyftr + OptiLifts + Simple MIT — meseta = sin PRs + volumen bajo + RIR, riesgo = 5d sin entrenar o &lt;80% adherencia</p>
       </CardContent>
     </Card>
   );

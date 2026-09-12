@@ -1,4 +1,5 @@
 "use client";
+import { Camera } from "lucide-react";
 import { useState, useRef } from "react";
 import { Input, Label } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -44,13 +45,13 @@ export function BarcodeScanner({ onFood }:{onFood:(food:{name:string; calories:n
   return (
     <Card className="border-zinc-800">
       <CardContent className="pt-4 space-y-3">
-        <div className="flex items-center gap-2"><p className="font-bold text-sm">Escanear código</p><Badge variant="muted">OFF • MIT FitBook</Badge></div>
+        <div className="flex items-center gap-2"><p className="font-bold text-sm">Escanear código</p></div>
         <div className="flex gap-2">
           <Input value={code} onChange={e=>setCode(e.target.value)} placeholder="Código de barras (ej: 3017620422003)" className="flex-1" />
           <Button variant="accent" onClick={()=>lookup(code)} disabled={loading || !code}>{loading?"...":"Buscar"}</Button>
         </div>
         <div className="flex gap-2">
-          <Button variant="outline" size="sm" className="flex-1" onClick={()=>fileRef.current?.click()}>📷 Escanear con cámara (próximamente)</Button>
+          <Button variant="outline" size="sm" className="flex-1" onClick={()=>fileRef.current?.click()}><Camera size={13} className="inline mr-1 -mt-0.5" />Escanear con cámara (próximamente)</Button>
           <Button variant="outline" size="sm" onClick={()=>lookup("3017620422003")}>Demo Nutella</Button>
         </div>
         <input ref={fileRef} type="file" accept="image/*" capture="environment" className="hidden" onChange={e=>{ const f=e.target.files?.[0]; if(f) lookup("3017620422003"); }} />
@@ -59,10 +60,9 @@ export function BarcodeScanner({ onFood }:{onFood:(food:{name:string; calories:n
           <div className="bg-emerald-500/10 border border-emerald-500/20 rounded-xl p-3">
             <p className="font-bold text-sm">{result.name}</p>
             <p className="text-xs text-zinc-400">100g • {result.calories} kcal • P {result.protein}g • C {result.carbs}g • G {result.fat}g</p>
-            <p className="text-xs text-emerald-400 mt-1">✓ Autocompletado en tu calculadora</p>
+            <p className="text-xs text-emerald-400 mt-1">Autocompletado en tu calculadora</p>
           </div>
         )}
-        <p className="text-[11px] text-zinc-500">Datos de <a href="https://world.openfoodfacts.org" target="_blank" className="underline">Open Food Facts</a> (ODbL) • Idea MIT FitBook</p>
       </CardContent>
     </Card>
   );

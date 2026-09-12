@@ -8,7 +8,7 @@ export const badges: Badge[] = [
 ];
 
 export function getStreak(days:number){
-  if(days>=30) return {label:"Leyenda", color:"text-[#D6FF2A]"};
+  if(days>=30) return {label:"Leyenda", color:"text-[#34D399]"};
   if(days>=14) return {label:"Imparable", color:"text-emerald-400"};
   if(days>=7) return {label:"En racha", color:"text-amber-400"};
   return {label:"Comenzando", color:"text-zinc-500"};

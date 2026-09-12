@@ -33,22 +33,22 @@ export function MuscleMap({ volumeByMuscle }:{ volumeByMuscle: Record<string, nu
   if(display.length===0) display.push(...Object.entries(volumeByMuscle).slice(0,4));
   return (
     <Card>
-      <CardHeader><CardTitle>Mapa Muscular <Badge variant="muted">Volumen semanal</Badge></CardTitle><p className="text-xs text-zinc-500">Series por grupo • inspirado en Lyftr MIT</p></CardHeader>
+      <CardHeader><CardTitle>Mapa Muscular <Badge variant="muted">Volumen semanal</Badge></CardTitle></CardHeader>
       <CardContent className="space-y-3">
         {display.length===0 ? <p className="text-sm text-zinc-500 text-center py-4">Sin volumen aún — entrená para ver el mapa.</p> : display.map(([muscle, vol])=>{
           const pct = Math.round((vol/max)*100);
           return (
             <div key={muscle} className="flex items-center gap-3">
               <span className="text-xs font-bold w-24 shrink-0">{muscle}</span>
-              <div className="flex-1 h-3 bg-zinc-800 rounded-full overflow-hidden"><div className="h-full rounded-full transition-all" style={{width:`${pct}%`, background: pct>75?"#D6FF2A": pct>40?"#a3e635":"#52525b"}} /></div>
+              <div className="flex-1 h-3 bg-zinc-800 rounded-full overflow-hidden"><div className="h-full rounded-full transition-all" style={{width:`${pct}%`, background: pct>75?"rgb(var(--primary))": pct>40?"rgb(var(--primary) / 0.55)":"#3f3f46"}} /></div>
               <span className="text-xs font-mono w-10 text-right">{vol}</span>
             </div>
           );
         })}
         <div className="flex gap-2 pt-2">
           <span className="text-[10px] px-2 py-1 rounded-full bg-zinc-800 text-zinc-400">Bajo</span>
-          <span className="text-[10px] px-2 py-1 rounded-full bg-[#a3e635] text-black">Medio</span>
-          <span className="text-[10px] px-2 py-1 rounded-full bg-[#D6FF2A] text-black font-bold">Alto</span>
+          <span className="text-[10px] px-2 py-1 rounded-full bg-primary/55 text-black">Medio</span>
+          <span className="text-[10px] px-2 py-1 rounded-full bg-primary text-black font-bold">Alto</span>
         </div>
       </CardContent>
     </Card>

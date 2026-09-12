@@ -39,8 +39,10 @@ function Illustration({ muscleGroup, name }:{ muscleGroup:string; name:string })
   );
 }
 
-export function ExerciseImage({ src, alt, muscleGroup, name, className, priority }:{
+export function ExerciseImage({ src, videoSrc, alt, muscleGroup, name, className, priority }:{
   src: string | null;
+  /** Video del ejercicio (campo `video` de la DB). Opcional: si no hay, se muestra la foto. */
+  videoSrc?: string | null;
   alt: string;
   muscleGroup: string;
   name: string;
@@ -51,21 +53,23 @@ export function ExerciseImage({ src, alt, muscleGroup, name, className, priority
   const [videoFailed,setVideoFailed]=useState(false);
   const [loaded,setLoaded]=useState(false);
 
-  if(!src || failed){
+  const showVideo = !!videoSrc && !videoFailed;
+  const hasImage = !!src && !failed;
+
+  // Sin media disponible → ilustración por grupo muscular.
+  if(!showVideo && !hasImage){
     return <div className={className}><Illustration muscleGroup={muscleGroup} name={name} /></div>;
   }
 
-  // Convención: si existe un .mp4 junto a la foto, se reproduce solo (sin cambios de DB).
-  const videoSrc = /\.(jpg|jpeg|png|webp)(\?.*)?$/i.test(src)
-    ? src.replace(/\.(jpg|jpeg|png|webp)(\?.*)?$/i, ".mp4")
-    : null;
-
-  if(videoSrc && !videoFailed){
+  // El video es EXPLÍCITO (campo `video` del ejercicio). Antes se deducía un `.mp4`
+  // junto a la foto, lo que disparaba ~100 requests 404 por página porque el repo
+  // no incluye videos. Ahora solo se pide si el ejercicio realmente tiene uno.
+  if(showVideo){
     return (
       <div className={`relative overflow-hidden bg-zinc-900 ${className}`}>
         <video
-          src={videoSrc}
-          poster={src}
+          src={videoSrc as string}
+          poster={src ?? undefined}
           autoPlay
           muted
           loop
@@ -86,7 +90,7 @@ export function ExerciseImage({ src, alt, muscleGroup, name, className, priority
       {!loaded && <div className="absolute inset-0 animate-pulse bg-zinc-800" />}
       {/* eslint-disable-next-line @next/next/no-img-element */}
       <img
-        src={src}
+        src={src as string}
         alt={alt}
         loading={priority ? "eager" : "lazy"}
         onLoad={()=>setLoaded(true)}

@@ -27,6 +27,7 @@ import { Gamepad2, HeartPulse, Footprints, BarChart3, Users, Settings2 } from "l
 import { lastSessionLoads, computeStreak, computeAdherence } from "@/lib/stats";
 import { WeeklyProgress } from "@/components/weekly-progress";
 import { SmartwatchWidget } from "@/components/smartwatch-widget";
+import { Tilt3D, Tilt3DSubtle } from "@/components/tilt-3d";
 import {
   Dumbbell,
   CheckCircle2,
@@ -68,7 +69,7 @@ export default async function ClientDashboardPage() {
           <h1 className="text-4xl font-display font-black text-white tracking-tight">Hola, {firstName}</h1>
           <p className="text-sm text-zinc-400">Bienvenido a tu equipo de entrenamiento.</p>
         </header>
-        <div className="rounded-3xl border border-subtle bg-surface/60 p-10 text-center space-y-4">
+        <div className="rounded-3xl border border-subtle bg-surface/60 p-10 text-center space-y-4 surface-card">
           <div className="w-14 h-14 rounded-2xl bg-primary/10 border border-primary/20 flex items-center justify-center mx-auto text-primary">
             <Dumbbell size={26} />
           </div>
@@ -279,7 +280,7 @@ export default async function ClientDashboardPage() {
         <div className="lg:col-span-2">
           {todayWorkoutLog ? (
             /* Completado hoy */
-            <div className="relative overflow-hidden rounded-3xl h-full min-h-[320px] border border-primary/25 bg-surface">
+            <div className="relative overflow-hidden rounded-3xl h-full min-h-[320px] border border-primary/25 bg-surface surface-card">
               <div className="absolute inset-0 pointer-events-none">
                 <div className="absolute -top-24 -right-16 w-80 h-80 rounded-full bg-primary/[0.12] blur-3xl" />
                 <div className="absolute -bottom-28 -left-10 w-72 h-72 rounded-full bg-primary/[0.06] blur-3xl" />
@@ -312,7 +313,8 @@ export default async function ClientDashboardPage() {
             </div>
           ) : todayWorkout ? (
             /* Pendiente: el bloque dominante de la pantalla */
-            <div className="relative overflow-hidden rounded-3xl h-full min-h-[380px] border border-primary/20 bg-surface shadow-[0_20px_60px_rgba(0,0,0,0.45),inset_0_1px_0_rgba(255,255,255,0.05)]">
+            <Tilt3D max={4} scale={1.008} className="h-full">
+            <div className="relative overflow-hidden rounded-3xl h-full min-h-[380px] border border-primary/20 bg-surface shadow-[0_20px_60px_rgba(0,0,0,0.25)] surface-card">
               {/* Profundidad: glows radiales del acento + textura fantasma + viñeta tipo foto de estudio */}
               <div className="absolute inset-0 pointer-events-none" aria-hidden="true">
                 <div className="absolute inset-0 bg-[linear-gradient(135deg,rgba(24,24,27,0.4),rgba(9,9,11,0.9))]" />
@@ -387,9 +389,10 @@ export default async function ClientDashboardPage() {
                 </div>
               </div>
             </div>
+            </Tilt3D>
           ) : (
             /* Sin programa asignado: estado honesto */
-            <div className="relative overflow-hidden rounded-3xl h-full min-h-[320px] border border-subtle bg-surface">
+            <div className="relative overflow-hidden rounded-3xl h-full min-h-[320px] border border-subtle bg-surface surface-card">
               <div className="absolute -top-20 -right-10 w-72 h-72 rounded-full bg-primary/[0.06] blur-3xl pointer-events-none" />
               <div className="relative p-8 flex flex-col items-center justify-center text-center h-full space-y-4">
                 <div className="w-14 h-14 rounded-2xl bg-primary/10 border border-primary/20 flex items-center justify-center text-primary">
@@ -409,18 +412,21 @@ export default async function ClientDashboardPage() {
 
         {/* Rail semanal + widget estilo smartwatch */}
         <div className="flex flex-col gap-5 h-full">
-          <WeeklyProgress
-            days={weekDays}
-            weekSessions={weekSessions}
-            frequency={weeklyFrequency}
-            streak={streak}
-          />
-          <SmartwatchWidget
-            workoutName={todayWorkoutLog ? (todayWorkoutLog.workout?.name || "Sesión de hoy") : todayWorkout?.name}
-            progressPct={todayWorkoutLog ? 100 : 0}
-            calories={Math.round(sessionVolume > 0 ? sessionVolume / 8 : 0)}
-            steps={8432}
-          />
+          <Tilt3D max={5} scale={1.01} radiusClass="rounded-3xl">
+            <WeeklyProgress
+              days={weekDays}
+              weekSessions={weekSessions}
+              frequency={weeklyFrequency}
+              streak={streak}
+            />
+          </Tilt3D>
+          <Tilt3D max={10} scale={1.03} radiusClass="rounded-[38px]">
+            <SmartwatchWidget
+              workoutName={todayWorkoutLog ? (todayWorkoutLog.workout?.name || "Sesión de hoy") : todayWorkout?.name}
+              progressPct={todayWorkoutLog ? 100 : 0}
+              calories={Math.round(sessionVolume > 0 ? sessionVolume / 8 : 0)}
+            />
+          </Tilt3D>
         </div>
       </section>
 
@@ -446,7 +452,7 @@ export default async function ClientDashboardPage() {
       {/* ── 3 · MÉTRICAS: strip con divisores internos ──────────── */}
       <FadeIn delay={0.05}>
         <section
-          className="rounded-3xl border border-subtle bg-surface/60 grid grid-cols-2 lg:grid-cols-4 divide-x divide-y lg:divide-y-0 divide-subtle overflow-hidden shadow-[0_12px_40px_rgba(0,0,0,0.3),inset_0_1px_0_rgba(255,255,255,0.04)]"
+          className="rounded-3xl border border-subtle bg-surface/60 grid grid-cols-2 lg:grid-cols-4 divide-x divide-y lg:divide-y-0 divide-subtle overflow-hidden surface-card"
           aria-label="Métricas principales"
         >
           <div className="p-5 hover:bg-white/[0.02] transition-colors">
@@ -487,7 +493,7 @@ export default async function ClientDashboardPage() {
           <p className="text-[10px] font-bold tracking-[0.22em] text-zinc-500 uppercase px-1">Pendiente esta semana</p>
           <Link
             href="/client/checkins"
-            className="group flex items-center gap-4 rounded-2xl border border-subtle bg-surface/40 px-5 py-4 hover:border-primary/30 hover:bg-surface/70 transition-all"
+            className="group flex items-center gap-4 rounded-2xl border border-subtle bg-surface/40 px-5 py-4 hover:border-primary/30 hover:bg-surface/70 transition-all surface-card"
           >
             <div className={`w-11 h-11 rounded-xl flex items-center justify-center shrink-0 ${hasPendingCheckinThisWeek ? "bg-warning/10 border border-warning/25 text-warning" : "bg-zinc-800/60 border border-subtle text-zinc-400"}`}>
               <ClipboardCheck size={19} />
@@ -511,7 +517,7 @@ export default async function ClientDashboardPage() {
           {latestMessage && (
             <Link
               href="/client/messages"
-              className="group flex items-center gap-4 rounded-2xl border border-subtle bg-surface/40 px-5 py-4 hover:border-primary/30 hover:bg-surface/70 transition-all"
+              className="group flex items-center gap-4 rounded-2xl border border-subtle bg-surface/40 px-5 py-4 hover:border-primary/30 hover:bg-surface/70 transition-all surface-card"
             >
               <div className="w-11 h-11 rounded-xl bg-primary/10 border border-primary/25 flex items-center justify-center shrink-0 font-black text-primary text-sm">
                 E
@@ -555,15 +561,16 @@ export default async function ClientDashboardPage() {
               { href: "/client/tools?cat=social", label: "Social", Icon: Users },
               { href: "/client/tools?cat=sistema", label: "Sistema", Icon: Settings2 },
             ].map(c => (
+              <Tilt3DSubtle key={c.href}>
               <Link
-                key={c.href}
                 href={c.href}
-                className="group relative p-3.5 rounded-2xl bg-surface/40 border border-subtle hover:border-primary/30 hover:-translate-y-0.5 hover:shadow-[0_8px_24px_rgba(0,0,0,0.35)] transition-all text-center space-y-1.5 overflow-hidden"
+                className="group relative p-3.5 rounded-2xl bg-surface/40 border border-subtle hover:border-primary/30 hover:shadow-[0_8px_24px_rgba(0,0,0,0.15)] transition-all text-center space-y-1.5 overflow-hidden block surface-card"
               >
                 <span className="absolute inset-0 bg-gradient-to-b from-primary/0 to-primary/0 group-hover:from-primary/[0.06] group-hover:to-transparent transition-colors" />
                 <c.Icon size={17} className="relative mx-auto text-primary transition-transform duration-300 group-hover:scale-110" aria-hidden="true" />
                 <span className="relative text-[10px] font-bold text-zinc-300 block leading-tight">{c.label}</span>
               </Link>
+              </Tilt3DSubtle>
             ))}
           </div>
         </section>

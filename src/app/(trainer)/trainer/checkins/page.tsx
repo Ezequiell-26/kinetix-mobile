@@ -121,7 +121,7 @@ export default function TrainerCheckinsPage(){
             {pendingCount > 0 ? (
               <span className="text-amber-400 font-medium">{pendingCount} pendientes de responder</span>
             ) : (
-              <span className="text-emerald-400 font-medium">Todos los check-ins al día ✓</span>
+              <span className="text-emerald-400 font-medium">Todos los check-ins al día</span>
             )}
           </p>
         </div>
@@ -154,7 +154,7 @@ export default function TrainerCheckinsPage(){
           <Card className="w-full max-w-lg border-zinc-800 bg-zinc-950 shadow-2xl">
             <CardHeader className="border-b border-zinc-800 pb-3">
               <CardTitle className="text-base flex items-center gap-2">
-                <MessageSquare size={18} className="text-[#D6FF2A]" />
+                <MessageSquare size={18} className="text-primary" />
                 Responder a {replyingTo.client?.name || "Cliente"}
               </CardTitle>
               <p className="text-xs text-zinc-400">
@@ -196,7 +196,7 @@ export default function TrainerCheckinsPage(){
                     disabled={savingReply || !replyText.trim()}
                     className="font-bold"
                   >
-                    {savingReply ? "Enviando..." : "Enviar Respuesta ✓"}
+                    {savingReply ? "Enviando..." : "Enviar Respuesta"}
                   </Button>
                 </div>
               </form>
@@ -227,8 +227,8 @@ export default function TrainerCheckinsPage(){
           {filtered.map(ch => (
             <Card
               key={ch.id}
-              className={`border-zinc-800 bg-zinc-900/90 transition ${
-                !ch.reviewed ? "border-[#D6FF2A]/30 shadow-[0_0_15px_rgba(214,255,42,0.03)]" : ""
+              className={`border-zinc-800 bg-zinc-900/90 shadow-[0_10px_32px_rgba(0,0,0,0.3)] transition ${
+                !ch.reviewed ? "border-primary/30 shadow-[0_0_15px_rgba(214,255,42,0.03)]" : ""
               }`}
             >
               <CardHeader className="flex flex-row items-center justify-between pb-3 border-b border-zinc-800/80">
@@ -244,13 +244,24 @@ export default function TrainerCheckinsPage(){
                   </div>
                 </div>
                 <Badge variant={ch.reviewed ? "success" : "warn"}>
-                  {ch.reviewed ? "Revisado ✓" : "Pendiente de respuesta"}
+                  {ch.reviewed ? "Revisado" : "Pendiente de respuesta"}
                 </Badge>
               </CardHeader>
 
               <CardContent className="p-4 space-y-4">
                 {/* Metric Badges */}
-                <CheckinAI checkin={{energia:6, sueno:5, estres:7, entrenos:3, rendimiento:6, molestias:"Rodilla molesta leve", alimentacion:6, progreso:5}} />
+                {/* Análisis IA con los datos REALES de este check-in (antes mostraba siempre
+                    los mismos números de ejemplo sin importar quién respondiera). */}
+                <CheckinAI checkin={{
+                  energia: ch.energia ?? 5,
+                  sueno: ch.sueno ?? 5,
+                  estres: ch.estres ?? 5,
+                  entrenos: ch.entrenos ?? 0,
+                  rendimiento: ch.rendimiento ?? 5,
+                  molestias: ch.molestias || "",
+                  alimentacion: 5,
+                  progreso: ch.progreso ?? 5,
+                }} />
       <div className="grid grid-cols-2 sm:grid-cols-5 gap-2 text-center text-xs">
                   <div className="bg-zinc-950 p-2.5 rounded-xl border border-zinc-800/80">
                     <span className="text-[10px] text-zinc-500 uppercase font-bold block">Energía</span>
@@ -266,7 +277,7 @@ export default function TrainerCheckinsPage(){
                   </div>
                   <div className="bg-zinc-950 p-2.5 rounded-xl border border-zinc-800/80">
                     <span className="text-[10px] text-zinc-500 uppercase font-bold block">Entrenos</span>
-                    <span className="font-black text-[#D6FF2A] text-base">{ch.entrenos ?? "—"}</span>
+                    <span className="font-black text-primary text-base">{ch.entrenos ?? "—"}</span>
                   </div>
                   <div className="bg-zinc-950 p-2.5 rounded-xl border border-zinc-800/80 col-span-2 sm:col-span-1">
                     <span className="text-[10px] text-zinc-500 uppercase font-bold block">Rendimiento</span>
@@ -302,8 +313,8 @@ export default function TrainerCheckinsPage(){
 
                 {/* Trainer reply if existing */}
                 {ch.trainerReply && (
-                  <div className="bg-[#D6FF2A]/10 border border-[#D6FF2A]/20 p-3.5 rounded-xl text-xs space-y-1">
-                    <span className="font-bold text-[#D6FF2A] block">Tu respuesta enviada:</span>
+                  <div className="bg-primary/10 border border-primary/20 p-3.5 rounded-xl text-xs space-y-1">
+                    <span className="font-bold text-primary block">Tu respuesta enviada:</span>
                     <p className="text-zinc-200">{ch.trainerReply}</p>
                   </div>
                 )}
@@ -329,7 +340,7 @@ export default function TrainerCheckinsPage(){
                     className="h-10 text-xs"
                     onClick={() => handleMarkReviewed(ch.id, !ch.reviewed)}
                   >
-                    {ch.reviewed ? "Marcar Pendiente" : "Marcar Revisado ✓"}
+                    {ch.reviewed ? "Marcar Pendiente" : "Marcar Revisado"}
                   </Button>
                 </div>
               </CardContent>

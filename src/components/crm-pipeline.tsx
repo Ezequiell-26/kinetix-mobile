@@ -19,7 +19,7 @@ export function CrmPipeline(){
 
   return (
     <Card className="border-violet-500/20">
-      <CardHeader><CardTitle className="flex items-center gap-2"><Users size={16} className="text-violet-400"/> CRM Pipeline <Badge variant="muted">Twenty MIT</Badge></CardTitle><p className="text-xs text-zinc-500">Leads → Activos → Riesgo → Renovación — auto-mensajes por trigger</p></CardHeader>
+      <CardHeader><CardTitle className="flex items-center gap-2"><Users size={16} className="text-violet-400"/> CRM Pipeline</CardTitle><p className="text-xs text-zinc-500">Leads → Activos → Riesgo → Renovación — auto-mensajes por trigger</p></CardHeader>
       <CardContent className="space-y-3">
         <div className="grid grid-cols-4 gap-2">
           {STAGES.map(s=>(
@@ -37,7 +37,6 @@ export function CrmPipeline(){
           {selected==="leads" && <p className="text-xs text-zinc-400">8 leads nuevos → <Button size="sm" variant="accent" className="h-7 text-xs ml-1">Enviar onboarding</Button></p>}
           {selected==="activos" && <p className="text-xs text-zinc-400">24 activos • adherencia 88% • 0 en riesgo hoy</p>}
         </div>
-        <p className="text-[11px] text-zinc-600 text-center">Twenty CRM MIT — pipeline + auto-mensajes por inactividad</p>
       </CardContent>
     </Card>
   );

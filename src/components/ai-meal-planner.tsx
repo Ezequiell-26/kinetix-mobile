@@ -31,7 +31,7 @@ export function AiMealPlanner(){
 
   return (
     <Card className="border-orange-500/20 bg-gradient-to-br from-orange-500/5 via-zinc-900 to-zinc-900">
-      <CardHeader><CardTitle className="flex items-center gap-2"><Utensils size={18} className="text-orange-400"/> AI Meal Planner <Badge variant="muted">VitaFlex-AI MIT</Badge></CardTitle><p className="text-xs text-zinc-500">GPT-4o + Meal Planner: generá tu día de comidas según objetivo y kcal</p></CardHeader>
+      <CardHeader><CardTitle className="flex items-center gap-2"><Utensils size={18} className="text-orange-400"/> AI Meal Planner</CardTitle><p className="text-xs text-zinc-500">GPT-4o + Meal Planner: generá tu día de comidas según objetivo y kcal</p></CardHeader>
       <CardContent className="space-y-4">
         <div className="grid grid-cols-2 gap-2">
           <div><Label>Objetivo</Label><select value={goal} onChange={e=>setGoal(e.target.value as keyof typeof MEAL_TEMPLATES)} className="w-full h-11 bg-zinc-900 border border-zinc-800 rounded-xl px-3 text-sm text-white"><option value="hipertrofia">Hipertrofia</option><option value="perdida_grasa">Pérdida grasa</option><option value="mantenimiento">Mantenimiento</option></select></div>
@@ -51,7 +51,6 @@ export function AiMealPlanner(){
             ))}
           </div>
         )}
-        <p className="text-[11px] text-zinc-600 text-center">VitaFlex-AI MIT (GPT-4o) — meal planner + food scanner • <a href="https://github.com/syeda434am/VitaFlex-AI" target="_blank" className="underline">Ver repo</a></p>
       </CardContent>
     </Card>
   );

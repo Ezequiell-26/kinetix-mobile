@@ -27,7 +27,7 @@ export function HevyImportPro(){
 
   return (
     <Card className="border-emerald-500/20">
-      <CardHeader><CardTitle className="flex items-center gap-2"><FileSpreadsheet size={16} className="text-emerald-400"/> Hevy/Strong Import <Badge variant="accent">Lyftr MIT</Badge></CardTitle><p className="text-xs text-zinc-500">Importá tu CSV de Strong o Hevy → se convierte a historial</p></CardHeader>
+      <CardHeader><CardTitle className="flex items-center gap-2"><FileSpreadsheet size={16} className="text-emerald-400"/> Hevy/Strong Import</CardTitle><p className="text-xs text-zinc-500">Importá tu CSV de Strong o Hevy → se convierte a historial</p></CardHeader>
       <CardContent className="space-y-3">
         <label className="flex flex-col items-center gap-2 p-6 rounded-xl border-2 border-dashed border-zinc-800 bg-zinc-900 hover:border-emerald-500/30 cursor-pointer">
           <Upload size={20} className="text-zinc-400"/>
@@ -53,7 +53,6 @@ export function HevyImportPro(){
           const a=document.createElement("a");
           a.href=url; a.download="strong_export_ejemplo.csv"; a.click();
         }}><Download size={14} className="mr-2"/> Descargar CSV ejemplo</Button>
-        <p className="text-[11px] text-zinc-600 text-center">Lyftr MIT (Strong/Hevy CSV import) + workout-tracker CSV — 1 click import</p>
       </CardContent>
     </Card>
   );

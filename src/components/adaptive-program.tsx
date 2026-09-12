@@ -22,22 +22,21 @@ export function AdaptiveProgram({ lastWeek, onApply }:{ lastWeek: {exercise:stri
   );
 
   return (
-    <Card className="border-[#D6FF2A]/20 bg-gradient-to-br from-[#D6FF2A]/5 via-zinc-900 to-zinc-900">
-      <CardHeader><CardTitle className="flex items-center gap-2"><Sparkles size={16} className="text-[#D6FF2A]"/> Próxima Semana Adaptativa <Badge variant="accent">Jacked GPT MIT</Badge></CardTitle><p className="text-xs text-zinc-500">Auto-ajusta cargas según RIR de la semana pasada</p></CardHeader>
+    <Card className="border-primary/20 bg-gradient-to-br from-primary/5 via-zinc-900 to-zinc-900">
+      <CardHeader><CardTitle className="flex items-center gap-2"><Sparkles size={16} className="text-primary"/> Próxima Semana Adaptativa</CardTitle><p className="text-xs text-zinc-500">Auto-ajusta cargas según RIR de la semana pasada</p></CardHeader>
       <CardContent className="space-y-3">
         <div className="grid gap-2">
           {nextWeek.slice(0,5).map((n,i)=>(
             <div key={i} className="flex items-center justify-between bg-zinc-900 border border-zinc-800 rounded-xl p-3">
               <div>
                 <p className="font-bold text-sm">{n.exercise}</p>
-                <p className="text-xs text-zinc-500">{lastWeek[i].weight}kg × {n.reps} (RIR {n.rir}) → <span className="text-[#D6FF2A] font-bold">{n.weight}kg</span> • {n.note}</p>
+                <p className="text-xs text-zinc-500">{lastWeek[i].weight}kg × {n.reps} (RIR {n.rir}) → <span className="text-primary font-bold">{n.weight}kg</span> • {n.note}</p>
               </div>
               <ArrowRight size={14} className="text-zinc-500"/>
             </div>
           ))}
         </div>
         <Button variant="accent" className="w-full" onClick={()=>onApply?.(nextWeek)}><RefreshCw size={14} className="mr-2"/> Aplicar a la próxima semana</Button>
-        <p className="text-[11px] text-zinc-600 text-center">Jacked GPT Adaptive MIT — progresión inteligente local</p>
       </CardContent>
     </Card>
   );

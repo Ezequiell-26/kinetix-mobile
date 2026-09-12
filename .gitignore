@@ -5,6 +5,7 @@ node_modules
 
 # Next.js
 .next
+.next-*
 out
 dist
 build
@@ -50,6 +51,9 @@ Thumbs.db
 public/uploads/*
 !public/uploads/.gitkeep
 
+# Uploads privados: fuera de public/, servidos solo por /api/uploads (autenticado)
+uploads/
+
 # Vercel
 .vercel
 
@@ -69,3 +73,6 @@ tmp-gym/
 tmp-*/
 tmp-exercises-dataset/
 tsconfig.tsbuildinfo
+
+# DB temporal del test de regresión
+prisma/test-core.db

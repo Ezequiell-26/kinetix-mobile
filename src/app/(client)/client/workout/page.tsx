@@ -6,6 +6,7 @@ import { Badge } from "@/components/ui/badge";
 import { Dumbbell, Calendar, CheckCircle2, Clock, Timer, ArrowRight } from "lucide-react";
 import { StrongTemplate } from "@/components/strong-template";
 import { WorkoutLolGenerator } from "@/components/workoutlol-generator";
+import { Tilt3D } from "@/components/tilt-3d";
 
 export default async function WorkoutListPage(){
   const sessionData = await getClientForSession().catch(() => null);
@@ -142,9 +143,36 @@ export default async function WorkoutListPage(){
               const isNext = workout.id === nextWorkoutId;
               return (
                 <Link key={workout.id} href={`/client/workout/${workout.id}`}>
-                  <Card className={`transition group ${isDone ? "bg-zinc-900/40 opacity-80 border-zinc-800" : isNext ? "bg-zinc-900/90 border-primary/40 shadow-[0_8px_32px_rgba(52,211,153,0.15)]" : "hover:border-zinc-700 border-zinc-800 bg-zinc-900/90"}`}>
+                  {isNext && !isDone ? (
+                    <Tilt3D max={3} scale={1.006} radiusClass="rounded-2xl">
+                      <Card className="transition-colors group bg-zinc-900/90 border-primary/40 shadow-[0_8px_32px_rgba(52,211,153,0.18)]">
+                        <CardContent className="p-4 flex items-center gap-3.5">
+                          <div className="w-11 h-11 rounded-xl flex items-center justify-center font-black text-sm shrink-0 transition bg-primary text-black">
+                            {workout.dayNumber}
+                          </div>
+                          <div className="flex-1 min-w-0">
+                            <div className="flex items-center gap-2">
+                              <p className="font-semibold text-sm text-white truncate group-hover:text-primary transition">
+                                {workout.name}
+                              </p>
+                              <Badge variant="accent" className="text-[10px] py-0">Siguiente</Badge>
+                            </div>
+                            <p className="text-xs text-zinc-400 mt-0.5 flex items-center gap-2">
+                              <span className="flex items-center gap-1">
+                                <Clock size={12} className="text-zinc-500" /> {workout.estimatedMin || 60} min
+                              </span>
+                              <span>•</span>
+                              <span>{workout.exercises.length} ejercicios</span>
+                            </p>
+                          </div>
+                          <Badge variant="accent" className="text-xs font-bold shrink-0">Entrenar →</Badge>
+                        </CardContent>
+                      </Card>
+                    </Tilt3D>
+                  ) : (
+                  <Card className={`transition-all group hover:-translate-y-0.5 ${isDone ? "bg-zinc-900/40 opacity-80 border-zinc-800" : "hover:border-zinc-700 hover:shadow-[0_8px_24px_rgba(0,0,0,0.3)] border-zinc-800 bg-zinc-900/90"}`}>
                     <CardContent className="p-4 flex items-center gap-3.5">
-                      <div className={`w-11 h-11 rounded-xl flex items-center justify-center font-black text-sm shrink-0 transition ${isDone ? "bg-emerald-500/20 text-emerald-400 border border-emerald-500/30" : isNext ? "bg-primary text-black" : "pill-active group-hover:bg-primary group-hover:text-black"}`}>
+                      <div className={`w-11 h-11 rounded-xl flex items-center justify-center font-black text-sm shrink-0 transition ${isDone ? "bg-emerald-500/20 text-emerald-400 border border-emerald-500/30" : "pill-active group-hover:bg-primary group-hover:text-black"}`}>
                         {isDone ? <CheckCircle2 size={20} /> : workout.dayNumber}
                       </div>
                       <div className="flex-1 min-w-0">
@@ -153,7 +181,6 @@ export default async function WorkoutListPage(){
                             {workout.name}
                           </p>
                           {isDone && <Badge variant="success" className="text-[10px] py-0">Completado</Badge>}
-                          {!isDone && isNext && <Badge variant="accent" className="text-[10px] py-0">Siguiente</Badge>}
                         </div>
                         <p className="text-xs text-zinc-400 mt-0.5 flex items-center gap-2">
                           <span className="flex items-center gap-1">
@@ -168,6 +195,7 @@ export default async function WorkoutListPage(){
                       </Badge>
                     </CardContent>
                   </Card>
+                  )}
                 </Link>
               );
             })}

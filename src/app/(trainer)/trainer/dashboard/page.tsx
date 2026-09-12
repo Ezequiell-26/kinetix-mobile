@@ -16,6 +16,7 @@ import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { TourLauncher } from "@/components/guided-tour";
 import { TRAINER_TOUR, TRAINER_TOUR_KEY } from "@/lib/tours";
+import { Tilt3D, Tilt3DSubtle } from "@/components/tilt-3d";
 import { 
   Users, 
   Dumbbell, 
@@ -179,7 +180,8 @@ export default async function TrainerDashboard(){
       <div data-tour="kpis">
       <StaggerContainer className="grid grid-cols-2 lg:grid-cols-4 gap-3" stagger={0.08}>
         <StaggerItem>
-        <Card className="border-zinc-800 bg-zinc-900/90">
+        <Tilt3DSubtle>
+        <Card className="h-full">
           <CardContent className="p-4">
             <span className="text-[10px] font-bold tracking-widest text-zinc-500 uppercase block">
               Clientes Activos
@@ -193,10 +195,12 @@ export default async function TrainerDashboard(){
             <ProgressBar value={Math.min(100, activeClients.length * 10)} className="mt-3" />
           </CardContent>
         </Card>
+        </Tilt3DSubtle>
         </StaggerItem>
 
         <StaggerItem>
-        <Card className={`border-zinc-800 bg-zinc-900/90 ${pendingCheckins.length > 0 ? "border-primary/30 bg-primary/[0.03]" : ""}`}>
+        <Tilt3DSubtle>
+        <Card className={`h-full ${pendingCheckins.length > 0 ? "border-primary/30 bg-primary/[0.03]" : ""}`}>
           <CardContent className="p-4">
             <span className="text-[10px] font-bold tracking-widest text-zinc-500 uppercase block">
               Check-ins Pendientes
@@ -210,10 +214,12 @@ export default async function TrainerDashboard(){
             <ProgressBar value={pendingCheckins.length > 0 ? 100 : 0} color={pendingCheckins.length > 0 ? "#fbbf24" : "#4ade80"} className="mt-3" />
           </CardContent>
         </Card>
+        </Tilt3DSubtle>
         </StaggerItem>
 
         <StaggerItem>
-        <Card className="border-zinc-800 bg-zinc-900/90">
+        <Tilt3DSubtle>
+        <Card className="h-full">
           <CardContent className="p-4">
             <span className="text-[10px] font-bold tracking-widest text-zinc-500 uppercase block">
               Entrenamientos Hoy
@@ -227,10 +233,12 @@ export default async function TrainerDashboard(){
             <ProgressBar value={Math.min(100, workoutsToday.length * 25)} className="mt-3" />
           </CardContent>
         </Card>
+        </Tilt3DSubtle>
         </StaggerItem>
 
         <StaggerItem>
-        <Card className={`border-zinc-800 bg-zinc-900/90 ${unreadMessages.length > 0 ? "border-amber-500/30" : ""}`}>
+        <Tilt3DSubtle>
+        <Card className={`h-full ${unreadMessages.length > 0 ? "border-amber-500/30" : ""}`}>
           <CardContent className="p-4">
             <span className="text-[10px] font-bold tracking-widest text-zinc-500 uppercase block">
               Mensajes Sin Leer
@@ -244,6 +252,7 @@ export default async function TrainerDashboard(){
             <ProgressBar value={Math.min(100, unreadMessages.length * 20)} color="#fbbf24" className="mt-3" />
           </CardContent>
         </Card>
+        </Tilt3DSubtle>
         </StaggerItem>
       </StaggerContainer>
       </div>
@@ -251,7 +260,7 @@ export default async function TrainerDashboard(){
       {/* Main Grid: Atención Necesaria & Actividad Reciente */}
       <div className="grid lg:grid-cols-3 gap-5">
         {/* Sección: Atención necesaria */}
-        <Card className="lg:col-span-2 border-zinc-800 bg-zinc-900/90" data-tour="atencion">
+        <Card className="lg:col-span-2" data-tour="atencion">
           <CardHeader className="flex flex-row items-center justify-between pb-3">
             <CardTitle className="text-base flex items-center gap-2">
               <AlertCircle size={18} className="text-primary" /> Atención Necesaria
@@ -275,8 +284,8 @@ export default async function TrainerDashboard(){
             ) : (
               attentionItems.slice(0, 5).map(item => (
                 <Link key={item.id} href={item.link} className="block group">
-                  <div className="p-3.5 rounded-xl bg-zinc-950 border border-zinc-800 hover:border-zinc-700 transition flex items-center gap-3">
-                    <div className="w-10 h-10 rounded-xl bg-zinc-900 border border-zinc-800 flex items-center justify-center font-bold text-sm text-white shrink-0 group-hover:bg-primary group-hover:text-black transition">
+                  <div className="p-3.5 rounded-xl bg-zinc-950/50 border border-subtle/60 hover:border-primary/30 transition flex items-center gap-3">
+                    <div className="w-10 h-10 rounded-xl bg-surface-elevated border border-subtle flex items-center justify-center font-bold text-sm text-white shrink-0 group-hover:bg-primary group-hover:text-black transition">
                       {item.title?.[0]?.toUpperCase() || "C"}
                     </div>
                     <div className="min-w-0 flex-1">
@@ -301,7 +310,7 @@ export default async function TrainerDashboard(){
         </Card>
 
         {/* Actividad Reciente */}
-        <Card className="border-zinc-800 bg-zinc-900/90 flex flex-col justify-between">
+        <Card className="flex flex-col justify-between">
           <CardHeader className="pb-3">
             <CardTitle className="text-base flex items-center gap-2">
               <Clock size={18} className="text-primary" /> Actividad Reciente
@@ -319,7 +328,7 @@ export default async function TrainerDashboard(){
                   Entrenamientos de hoy:
                 </span>
                 {workoutsToday.slice(0, 4).map(w => (
-                  <div key={w.id} className="p-2.5 bg-zinc-950 rounded-xl border border-zinc-800 text-xs flex justify-between items-center">
+                  <div key={w.id} className="p-2.5 bg-zinc-950/50 rounded-xl border border-subtle/60 text-xs flex justify-between items-center">
                     <div>
                       <p className="font-bold text-white">{w.client?.name || "Cliente"}</p>
                       <p className="text-[11px] text-zinc-500">
@@ -333,7 +342,7 @@ export default async function TrainerDashboard(){
             )}
 
             {/* Quick stats: MRR */}
-            <div className="pt-3 border-t border-zinc-800 space-y-2">
+            <div className="pt-3 border-t border-subtle space-y-2">
               <div className="flex justify-between items-baseline text-xs">
                 <span className="text-zinc-400">Ingresos Activos (MRR)</span>
                 <span className="font-black text-white text-sm">
@@ -350,7 +359,7 @@ export default async function TrainerDashboard(){
       </div>
 
       {/* Clientes Activos Recientes */}
-      <Card className="border-zinc-800 bg-zinc-900/90" data-tour="clientes">
+      <Card data-tour="clientes">
         <CardHeader className="flex flex-row items-center justify-between pb-3">
           <CardTitle className="text-base flex items-center gap-2">
             <Users size={18} className="text-primary" /> Clientes Recientes
@@ -367,10 +376,10 @@ export default async function TrainerDashboard(){
           ) : (
             <div className="grid sm:grid-cols-3 gap-3">
               {allClients.slice(0, 3).map(c => (
+                <Tilt3DSubtle key={c.id}>
                 <Link
-                  key={c.id}
                   href={`/trainer/clients/${c.id}`}
-                  className="p-3.5 rounded-xl bg-zinc-950 border border-zinc-800 hover:border-zinc-700 transition group"
+                  className="block p-3.5 rounded-xl bg-zinc-950/50 border border-subtle/60 hover:border-primary/30 hover:shadow-[0_8px_24px_rgba(0,0,0,0.15)] transition-all group"
                 >
                   <div className="flex items-center gap-3">
                     <div className="w-10 h-10 rounded-xl pill-active flex items-center justify-center font-black text-sm group-hover:bg-primary transition shrink-0">
@@ -392,6 +401,7 @@ export default async function TrainerDashboard(){
                     </Badge>
                   </div>
                 </Link>
+                </Tilt3DSubtle>
               ))}
             </div>
           )}
@@ -400,13 +410,15 @@ export default async function TrainerDashboard(){
 
       {/* Herramientas avanzadas → Studio (CRM, Risk, plataformas, negocio) */}
       <Link href="/trainer/studio" className="block">
-        <div className="bg-gradient-to-br from-violet-500/10 via-zinc-900 to-zinc-950 border border-violet-500/20 rounded-2xl p-4 flex items-center gap-3 hover:border-violet-500/40 transition">
-          <div className="w-10 h-10 rounded-xl bg-violet-500 flex items-center justify-center text-white shrink-0"><Wrench size={18} /></div>
+        <Tilt3D max={4} scale={1.01} radiusClass="rounded-2xl">
+        <div className="bg-gradient-to-br from-violet-500/8 via-surface to-surface-elevated border border-violet-500/20 rounded-2xl p-4 flex items-center gap-3 hover:border-violet-500/40 hover:shadow-[0_8px_28px_rgba(139,92,246,0.12)] transition-all surface-card">
+          <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-violet-500 to-violet-600 flex items-center justify-center text-white shrink-0 shadow-[0_4px_14px_rgba(139,92,246,0.35)]"><Wrench size={18} /></div>
           <div className="flex-1">
             <p className="font-bold text-sm text-white">Studio — herramientas avanzadas →</p>
             <p className="text-xs text-zinc-500">CRM y retención, programación masiva, kits de plataformas y negocio</p>
           </div>
         </div>
+        </Tilt3D>
       </Link>
     </div>
   );

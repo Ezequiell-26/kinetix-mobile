@@ -1,6 +1,7 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { VersionBadge } from "@/components/version-badge";
+import { Sparkles, Bug } from "lucide-react";
 
 export default function ChangelogPage(){
   return (
@@ -10,10 +11,10 @@ export default function ChangelogPage(){
         <VersionBadge />
       </div>
 
-      <Card className="border-[#D6FF2A]/20">
+      <Card className="border-primary/20">
         <CardHeader><CardTitle className="flex items-center gap-2">v1.0.0 — 2026-09-09 <Badge variant="accent">Actual</Badge></CardTitle></CardHeader>
         <CardContent className="space-y-2 text-sm">
-          <p className="font-semibold">✨ Features</p>
+          <p className="font-semibold"><Sparkles size={12} className="inline mr-1 -mt-0.5 text-primary" />Features</p>
           <ul className="list-disc pl-5 space-y-1 text-zinc-300">
             <li>37 rutas, 18 modelos, 15 índices</li>
             <li>Auth TRAINER/CLIENT con RLS real</li>
@@ -24,7 +25,7 @@ export default function ChangelogPage(){
             <li>Nutrición VIP: TDEE, macros, 1RM</li>
             <li>PWA instalable + tema blanco/negro</li>
           </ul>
-          <p className="font-semibold mt-4">🐛 Fixes</p>
+          <p className="font-semibold mt-4"><Bug size={12} className="inline mr-1 -mt-0.5 text-amber-400" />Fixes</p>
           <ul className="list-disc pl-5 space-y-1 text-zinc-300">
             <li>Secure cookie en http</li>
             <li>.next corrupto 500</li>
@@ -39,7 +40,6 @@ export default function ChangelogPage(){
           <pre className="bg-zinc-900 border border-zinc-800 rounded-xl p-3 text-xs overflow-x-auto">{`git remote add origin https://github.com/ezequiel-coaching/ezequiel-coaching.git
 git push -u origin main
 # Ver en https://github.com/ezequiel-coaching/ezequiel-coaching`}</pre>
-          <p className="text-xs text-zinc-500">Repo profesional con README, LICENSE MIT, CONTRIBUTING y commits convencionales.</p>
         </CardContent>
       </Card>
     </div>

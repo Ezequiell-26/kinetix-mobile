@@ -15,7 +15,7 @@ const CHALLENGES = [
 export function Challenges(){
   return (
     <Card className="border-amber-500/20 bg-gradient-to-br from-amber-500/5 via-zinc-900 to-zinc-900">
-      <CardHeader><CardTitle className="flex items-center gap-2"><Trophy size={18} className="text-amber-400"/> Challenges <Badge variant="warn">Strive MIT</Badge></CardTitle><p className="text-xs text-zinc-500">Desafíos mensuales + leaderboard — compite sin exponer datos</p></CardHeader>
+      <CardHeader><CardTitle className="flex items-center gap-2"><Trophy size={18} className="text-amber-400"/> Challenges</CardTitle><p className="text-xs text-zinc-500">Desafíos mensuales + leaderboard — compite sin exponer datos</p></CardHeader>
       <CardContent className="space-y-3">
         {CHALLENGES.map(c=>{
           const pct=Math.round(c.progress/c.target*100);
@@ -37,11 +37,10 @@ export function Challenges(){
           <p className="text-xs font-bold flex items-center gap-1"><Crown size={12} className="text-amber-400"/> Leaderboard (anonimizado)</p>
           <div className="mt-2 space-y-1 text-xs">
             {[["#1", "Atleta G.", "92%"], ["#2", "Vos", "88%"], ["#3", "Atleta M.", "85%"]].map(([pos,name,score])=>(
-              <div key={pos} className={`flex justify-between p-1.5 rounded-lg ${name==="Vos"?"bg-[#D6FF2A] text-black font-bold":"bg-zinc-900"}`}><span>{pos} {name}</span><span>{score}</span></div>
+              <div key={pos} className={`flex justify-between p-1.5 rounded-lg ${name==="Vos"?"bg-primary text-black font-bold":"bg-zinc-900"}`}><span>{pos} {name}</span><span>{score}</span></div>
             ))}
           </div>
         </div>
-        <p className="text-[11px] text-zinc-600 text-center">Strive + FitBook MIT — challenges + leaderboard sin exponer datos privados</p>
       </CardContent>
     </Card>
   );

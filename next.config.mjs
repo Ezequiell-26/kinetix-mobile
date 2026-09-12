@@ -1,5 +1,100 @@
 /** @type {import("next").NextConfig} */
 const nextConfig = {
-  experimental: { serverActions: { allowedOrigins: ["*"] } },
+  experimental: {
+    serverActions: { allowedOrigins: ["*"] },
+    // Tree-shaking agresivo de estos paquetes: evita que Next empaquete
+    // toda la librería de íconos/animaciones cuando solo se usan algunos.
+    // Reduce el JS que baja el navegador sin cambiar ningún comportamiento.
+    optimizePackageImports: ["lucide-react", "framer-motion", "recharts", "date-fns"],
+  },
+  images: {
+    // AVIF/WebP automático + caché largo para las imágenes servidas por next/image
+    formats: ["image/avif", "image/webp"],
+    minimumCacheTTL: 60 * 60 * 24 * 30,
+  },
+  compress: true,
+  // Permite un directorio de build alternativo (p. ej. si `.next` queda bloqueado).
+  // Default: `.next`. No cambia el comportamiento normal.
+  distDir: process.env.NEXT_DIST_DIR || ".next",
+
+  /**
+   * Headers de seguridad aplicados a todas las respuestas.
+   * Basado en OWASP Secure Headers Project + mejores prácticas de Next.js.
+   * No rompen la app porque:
+   *  - CSP usa 'self' + Google Fonts + inline scripts del theme (nonce dinámico
+   *    no es viable sin middleware; el script inline es minúsculo y seguro).
+   *  - COEP se deja en modo report para no romper imágenes externas de avatars.
+   */
+  async headers() {
+    // CSP: se permite inline para el script de tema en <head> del layout root.
+    // Si se agrega un nonce en el futuro, reemplazar 'unsafe-inline'.
+    const csp = [
+      "default-src 'self'",
+      "script-src 'self' 'unsafe-inline' https://www.googletagmanager.com https://www.google-analytics.com",
+      "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
+      "img-src 'self' data: blob: https: http:",
+      "font-src 'self' https://fonts.gstatic.com",
+      "connect-src 'self' https://*.sentry.io https://www.google-analytics.com",
+      "frame-src 'self' https://www.youtube.com https://www.youtube-nocookie.com",
+      "object-src 'none'",
+      "base-uri 'self'",
+      "form-action 'self'",
+    ].join("; ");
+
+    return [
+      {
+        // Aplicar a todas las rutas excepto archivos estáticos.
+        source: "/((?!_next/static|_next/image|favicon.ico|icons|manifest.json).*)",
+        headers: [
+          {
+            key: "Content-Security-Policy",
+            value: csp,
+          },
+          {
+            // Evita clickjacking: impide que la app se embeba en iframes externos.
+            key: "X-Frame-Options",
+            value: "DENY",
+          },
+          {
+            // Evita MIME-sniffing en navegadores antiguos.
+            key: "X-Content-Type-Options",
+            value: "nosniff",
+          },
+          {
+            // Evita que el navegador infiera el referrer completo.
+            key: "Referrer-Policy",
+            value: "strict-origin-when-cross-origin",
+          },
+          {
+            // DNS prefetch: reduce latencia en fuentes externas.
+            key: "X-DNS-Prefetch-Control",
+            value: "on",
+          },
+          {
+            // HSTS: fuerza HTTPS durante 1 año (incluye subdominios).
+            // Solo efectivo cuando la app se sirve sobre HTTPS.
+            key: "Strict-Transport-Security",
+            value: "max-age=31536000; includeSubDomains; preload",
+          },
+          {
+            // Limita APIs sensibles del navegador.
+            key: "Permissions-Policy",
+            value:
+              "camera=(self), microphone=(self), geolocation=(), payment=(self), usb=()",
+          },
+          {
+            // Evita que la página sea abierta como popup desde otro sitio.
+            key: "Cross-Origin-Opener-Policy",
+            value: "same-origin",
+          },
+          {
+            // Permite cargar recursos cross-origin pero no expone bytes.
+            key: "Cross-Origin-Resource-Policy",
+            value: "same-origin",
+          },
+        ],
+      },
+    ];
+  },
 };
 export default nextConfig;

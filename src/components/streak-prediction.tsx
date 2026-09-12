@@ -47,7 +47,7 @@ export function StreakPrediction() {
     if (prob >= 0.7) {
       label = "Racha segura";
       color = "emerald";
-      tip = "Seguí así — entrená mañana para llegar a 8d. wger tip: constancia > intensidad.";
+      tip = "Seguí así — entrená mañana para llegar a 8d.";
     } else if (prob >= 0.45) {
       label = "En riesgo";
       color = "amber";
@@ -68,16 +68,16 @@ export function StreakPrediction() {
       <CardHeader>
         <CardTitle className="flex items-center gap-2">
           <Flame size={16} className={color === "emerald" ? "text-emerald-400" : color === "amber" ? "text-amber-400" : "text-red-400"} />{" "}
-          Predicción de Racha <Badge variant={color === "emerald" ? "accent" : color === "amber" ? "warn" : "muted"}>TF.js MIT</Badge>
+          Predicción de Racha
         </CardTitle>
-        <p className="text-xs text-zinc-500">¿Mantendrás tu racha 7 días más? — regresión logística local, sin cloud</p>
+        <p className="text-xs text-zinc-500">¿Mantendrás tu racha 7 días más? Tu historial dice que sí se puede.</p>
       </CardHeader>
       <CardContent className="space-y-4">
         {/* Gauge */}
         <div className="bg-zinc-900 border border-zinc-800 rounded-2xl p-4 text-center space-y-3">
-          <div className="w-28 h-28 mx-auto rounded-full border-4 flex items-center justify-center relative" style={{ borderColor: color === "emerald" ? "#10b981" : color === "amber" ? "#f59e0b" : "#ef4444", background: color === "emerald" ? "rgba(16,185,129,0.08)" : color === "amber" ? "rgba(245,158,11,0.08)" : "rgba(239,68,68,0.08)" }}>
+          <div className="w-28 h-28 mx-auto rounded-full border-4 flex items-center justify-center relative" style={{ borderColor: color === "emerald" ? "rgb(var(--success))" : color === "amber" ? "rgb(var(--warning))" : "rgb(var(--danger))", background: color === "emerald" ? "rgb(var(--success) / 0.08)" : color === "amber" ? "rgb(var(--warning) / 0.08)" : "rgb(var(--danger) / 0.08)" }}>
             <div>
-              <p className="text-3xl font-black" style={{ color: color === "emerald" ? "#10b981" : color === "amber" ? "#f59e0b" : "#ef4444" }}>{pct}%</p>
+              <p className="text-3xl font-black" style={{ color: color === "emerald" ? "rgb(var(--success))" : color === "amber" ? "rgb(var(--warning))" : "rgb(var(--danger))" }}>{pct}%</p>
               <p className="text-[11px] text-zinc-500 font-bold">prob. mantener</p>
             </div>
           </div>
@@ -112,7 +112,7 @@ export function StreakPrediction() {
           </div>
           <div>
             <label className="text-xs font-bold text-zinc-400">Adherencia %</label>
-            <input type="range" min={0} max={100} value={adherencia} onChange={(e) => setAdherencia(Number(e.target.value))} className="w-full accent-[#D6FF2A] mt-2" />
+            <input type="range" min={0} max={100} value={adherencia} onChange={(e) => setAdherencia(Number(e.target.value))} className="w-full accent-primary mt-2" />
             <p className="text-xs font-bold text-center">{adherencia}%</p>
           </div>
           <div>
@@ -137,15 +137,14 @@ export function StreakPrediction() {
             <div key={f.label} className="flex items-center gap-2 text-xs">
               <span className="w-20 text-zinc-500 font-bold">{f.label}</span>
               <div className="flex-1 h-1.5 bg-zinc-800 rounded-full overflow-hidden">
-                <div className="h-full" style={{ width: `${Math.round(f.v * 100)}%`, background: f.w > 0 ? "#D6FF2A" : "#ef4444" }} />
+                <div className="h-full" style={{ width: `${Math.round(f.v * 100)}%`, background: f.w > 0 ? "var(--primary)" : "rgb(var(--danger))" }} />
               </div>
-              <span className={`text-[11px] font-bold ${f.w > 0 ? "text-[#D6FF2A]" : "text-red-400"}`}>{f.w > 0 ? "+" : ""}{f.w}</span>
+              <span className={`text-[11px] font-bold ${f.w > 0 ? "text-primary" : "text-red-400"}`}>{f.w > 0 ? "+" : ""}{f.w}</span>
             </div>
           ))}
-          <p className="text-[11px] text-zinc-500 flex items-center gap-1"><Activity size={10} /> Sigmoid(W·x + b) • b={BIAS} — TF.js style, local sin cloud</p>
+          
         </div>
 
-        <p className="text-[11px] text-zinc-600 text-center">TensorFlow.js MIT + Habitica/Streaks MIT — regresión logística local, 4 features, 7d lookahead</p>
       </CardContent>
     </Card>
   );

@@ -16,7 +16,7 @@ const TEMPLATES = [
 export function TacticalBarbell({ onSelect }:{ onSelect?: (t: typeof TEMPLATES[0])=>void }){
   return (
     <Card className="border-violet-500/20 bg-gradient-to-br from-violet-500/5 via-zinc-900 to-zinc-900">
-      <CardHeader><CardTitle className="flex items-center gap-2"><Shield size={18} className="text-violet-400"/> Tactical Barbell <Badge variant="muted">Unbroken MIT</Badge></CardTitle><p className="text-xs text-zinc-500">Plantillas Operator/Fighter/Zulu/Grey Man — PWA offline</p></CardHeader>
+      <CardHeader><CardTitle className="flex items-center gap-2"><Shield size={18} className="text-violet-400"/> Tactical Barbell</CardTitle><p className="text-xs text-zinc-500">Plantillas Operator/Fighter/Zulu/Grey Man — PWA offline</p></CardHeader>
       <CardContent className="grid sm:grid-cols-2 gap-3">
         {TEMPLATES.map(t=>(
           <button key={t.id} onClick={()=>onSelect?.(t)} className="text-left bg-zinc-900 border border-zinc-800 rounded-xl p-3 hover:border-violet-500/30 transition">
@@ -25,7 +25,6 @@ export function TacticalBarbell({ onSelect }:{ onSelect?: (t: typeof TEMPLATES[0
             <p className="text-xs font-mono mt-2 text-violet-400">{t.sets}</p>
           </button>
         ))}
-        <p className="sm:col-span-2 text-[11px] text-zinc-600 text-center">Unbroken MIT — Tactical Barbell PWA • <a href="https://github.com/Bruno-366/Unbroken" target="_blank" className="underline">Ver repo</a></p>
       </CardContent>
     </Card>
   );

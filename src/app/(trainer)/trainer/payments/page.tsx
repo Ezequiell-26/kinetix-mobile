@@ -3,6 +3,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { PaymentsPro } from "@/components/payments-pro";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { Lock } from "lucide-react";
 
 export default async function PaymentsPage() {
   const subs = (await prisma.subscription.findMany({ include: { client: true } }).catch(() => [])) as Array<{
@@ -33,7 +34,7 @@ export default async function PaymentsPage() {
           { plan: "PERSONALIZADO", price: "$18.000 ARS", desc: "Programa a medida", featured: true },
           { plan: "PREMIUM", price: "$25.000 ARS", desc: "Coaching 1:1 + ajustes semanales" },
         ].map((p) => (
-          <Card key={p.plan} className={p.featured ? "border-[#D6FF2A]/30 bg-[#D6FF2A]/[0.04]" : ""}>
+          <Card key={p.plan} className={p.featured ? "border-primary/30 bg-primary/[0.04]" : ""}>
             <CardHeader>
               <CardTitle className="text-sm">{p.plan}</CardTitle>
               <p className="text-2xl font-black">{p.price}</p>
@@ -84,7 +85,7 @@ export default async function PaymentsPage() {
               </div>
             ))
           )}
-          <p className="text-xs text-zinc-500 text-center pt-2">🔒 No se almacenan datos de tarjeta. Integración vía backend seguro.</p>
+          <p className="text-xs text-zinc-500 text-center pt-2"><Lock size={11} className="inline mr-1 -mt-0.5" />No se almacenan datos de tarjeta. Integración vía backend seguro.</p>
         </CardContent>
       </Card>
     </div>

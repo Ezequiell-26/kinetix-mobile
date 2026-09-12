@@ -9,7 +9,7 @@ import { MessageFileButton } from "@/components/file-upload";
 import { Search, Send, MessageCircle, ArrowLeft, Check, CheckCheck, Paperclip } from "lucide-react";
 
 const quickReplies = [
-  "Excelente trabajo esta semana 💪",
+  "Excelente trabajo esta semana",
   "Subamos 2.5kg en la próxima sesión.",
   "Mantené el RIR controlado y descansá 90s.",
   "Grabate un video de la serie pesada y enviamelo.",
@@ -149,7 +149,7 @@ export default function TrainerMessagesPage(){
 
       <div className="flex-1 grid lg:grid-cols-[320px_1fr] gap-0 lg:gap-4 overflow-hidden min-h-0">
         {/* Sidebar - hidden on mobile when chat open */}
-        <Card className={`border-zinc-800 bg-zinc-950 flex flex-col overflow-hidden rounded-none lg:rounded-2xl border-x-0 lg:border ${showListOnMobile ? "flex" : "hidden lg:flex"}`}>
+        <Card className={`border-zinc-800 bg-zinc-950 flex flex-col overflow-hidden rounded-none lg:rounded-2xl border-x-0 lg:border shadow-[0_12px_40px_rgba(0,0,0,0.35)] ${showListOnMobile ? "flex" : "hidden lg:flex"}`}>
           <div className="p-3 border-b border-zinc-800 shrink-0">
             <div className="relative">
               <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-zinc-500" />
@@ -173,13 +173,13 @@ export default function TrainerMessagesPage(){
                   <button
                     key={c.id}
                     onClick={() => selectClient(c)}
-                    className={`w-full text-left p-3.5 flex items-center gap-3 transition min-h-[64px] ${isSelected ? "bg-zinc-900 border-l-4 border-l-[#D6FF2A]" : "hover:bg-zinc-900/50 active:bg-zinc-900"}`}
+                    className={`w-full text-left p-3.5 flex items-center gap-3 transition min-h-[64px] ${isSelected ? "bg-zinc-900 border-l-4 border-l-primary" : "hover:bg-zinc-900/50 active:bg-zinc-900"}`}
                   >
                     <div className="w-10 h-10 rounded-xl bg-white text-black flex items-center justify-center font-black text-sm shrink-0">
                       {c.name?.[0]?.toUpperCase() || "C"}
                     </div>
                     <div className="min-w-0 flex-1 text-left">
-                      <p className={`text-sm font-bold truncate ${isSelected ? "text-[#D6FF2A]" : "text-white"}`}>{c.name}</p>
+                      <p className={`text-sm font-bold truncate ${isSelected ? "text-primary" : "text-white"}`}>{c.name}</p>
                       <p className="text-xs text-zinc-500 truncate">{c.email}</p>
                     </div>
                     {c.unreadCount ? <Badge variant="accent" className="shrink-0 text-[11px] px-2">{c.unreadCount}</Badge> : null}
@@ -191,7 +191,7 @@ export default function TrainerMessagesPage(){
         </Card>
 
         {/* Chat Area - full mobile */}
-        <Card className={`border-zinc-800 bg-zinc-950 flex flex-col overflow-hidden rounded-none lg:rounded-2xl border-x-0 lg:border min-h-0 ${showListOnMobile ? "hidden lg:flex" : "flex"}`}>
+        <Card className={`border-zinc-800 bg-zinc-950 flex flex-col overflow-hidden rounded-none lg:rounded-2xl border-x-0 lg:border shadow-[0_12px_40px_rgba(0,0,0,0.35)] min-h-0 ${showListOnMobile ? "hidden lg:flex" : "flex"}`}>
           {activeClient ? (
             <>
               {/* Header with back on mobile */}
@@ -202,7 +202,7 @@ export default function TrainerMessagesPage(){
                 >
                   <ArrowLeft size={16}/>
                 </button>
-                <div className="w-9 h-9 rounded-xl bg-[#D6FF2A] text-black flex items-center justify-center font-black text-sm shrink-0">
+                <div className="w-9 h-9 rounded-xl bg-primary text-black flex items-center justify-center font-black text-sm shrink-0">
                   {activeClient.name?.[0]?.toUpperCase() || "C"}
                 </div>
                 <div className="flex-1 min-w-0">
@@ -227,8 +227,8 @@ export default function TrainerMessagesPage(){
                     const isMe = m.senderId === meId;
                     return (
                       <div key={m.id} className={`flex ${isMe ? "justify-end" : "justify-start"}`}>
-                        <div className={`max-w-[82%] sm:max-w-[70%] px-3.5 py-2.5 rounded-2xl text-xs shadow-sm ${isMe ? "bg-[#D6FF2A] text-black rounded-br-md font-medium" : "bg-zinc-900 text-white border border-zinc-800 rounded-bl-md"}`}>
-                          {m.content.startsWith("/uploads/") ? (
+                        <div className={`max-w-[82%] sm:max-w-[70%] px-3.5 py-2.5 rounded-2xl text-xs shadow-sm ${isMe ? "bg-primary text-black rounded-br-md font-medium" : "bg-zinc-900 text-white border border-zinc-800 rounded-bl-md"}`}>
+                          {m.content.startsWith("/uploads/") || m.content.startsWith("/api/uploads/") ? (
                             /\.(jpg|jpeg|png|webp|gif)$/i.test(m.content) ? (
                               <img src={m.content} alt="Adjunto" className="rounded-xl max-w-[220px] max-h-[220px] object-cover" />
                             ) : (

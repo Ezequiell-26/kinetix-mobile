@@ -16,7 +16,7 @@ export function CalendarSync(){
 
   return (
     <Card>
-      <CardHeader><CardTitle className="flex items-center gap-2"><Calendar size={16} className="text-blue-400"/> Calendar Sync <Badge variant="muted">Simple MIT + iCal</Badge></CardTitle><p className="text-xs text-zinc-500">Tus entrenos en Google / Apple Calendar — recordatorios automáticos</p></CardHeader>
+      <CardHeader><CardTitle className="flex items-center gap-2"><Calendar size={16} className="text-blue-400"/> Calendar Sync</CardTitle><p className="text-xs text-zinc-500">Tus entrenos en Google / Apple Calendar — recordatorios automáticos</p></CardHeader>
       <CardContent className="space-y-3">
         {[
           {id:"google", name:"Google Calendar", desc:"Sync + notificaciones push", color:"bg-blue-500"},
@@ -39,7 +39,6 @@ export function CalendarSync(){
           const a=document.createElement("a");
           a.href=url; a.download="ezequiel_entrenos.ics"; a.click();
         }}><Smartphone size={14} className="mr-2"/> Descargar .ics (todos)</Button>
-        <p className="text-[11px] text-zinc-600 text-center">Simple MIT + workout-tracker iCal — 1 click a tu calendario</p>
       </CardContent>
     </Card>
   );

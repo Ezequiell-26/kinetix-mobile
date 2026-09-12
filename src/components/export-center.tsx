@@ -32,13 +32,12 @@ export function ExportCenter({ type="client" }:{ type?: "client"|"trainer"}){
 
   return (
     <Card>
-      <CardHeader><CardTitle className="flex items-center gap-2"><Download size={16} className="text-[#D6FF2A]"/> Export Center <Badge variant="accent">workout-tracker MIT</Badge></CardTitle><p className="text-xs text-zinc-500">CSV, PDF, iCal, GPX — {type==="trainer"?"para todos tus clientes":"tu historial"}</p></CardHeader>
+      <CardHeader><CardTitle className="flex items-center gap-2"><Download size={16} className="text-primary"/> Export Center</CardTitle><p className="text-xs text-zinc-500">CSV, PDF, iCal, GPX — {type==="trainer"?"para todos tus clientes":"tu historial"}</p></CardHeader>
       <CardContent className="grid sm:grid-cols-2 gap-2">
         <Button variant="outline" className="h-14 justify-start gap-3" onClick={exportCsv}><FileSpreadsheet size={18} className="text-emerald-400"/><div className="text-left"><p className="font-bold text-xs">CSV Historial</p><p className="text-[11px] text-zinc-500">Strong/Hevy compatible</p></div></Button>
         <Button variant="outline" className="h-14 justify-start gap-3" onClick={exportIcal}><Calendar size={18} className="text-blue-400"/><div className="text-left"><p className="font-bold text-xs">iCal Calendario</p><p className="text-[11px] text-zinc-500">Google/Apple Calendar</p></div></Button>
         <Button variant="outline" className="h-14 justify-start gap-3" onClick={exportPdf}><FileText size={18} className="text-amber-400"/><div className="text-left"><p className="font-bold text-xs">PDF Reporte</p><p className="text-[11px] text-zinc-500">Progreso + fotos</p></div></Button>
         <Button variant="outline" className="h-14 justify-start gap-3" onClick={()=>download("gpx_export.zip","mock zip","application/zip")}><Share2 size={18} className="text-violet-400"/><div className="text-left"><p className="font-bold text-xs">GPX ZIP</p><p className="text-[11px] text-zinc-500">Todas las rutas</p></div></Button>
-        <p className="sm:col-span-2 text-[11px] text-zinc-600 text-center">workout-tracker MIT (export ZIP) + Simple MIT — CSV/PDF/iCal/GPX</p>
       </CardContent>
     </Card>
   );

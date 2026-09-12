@@ -17,6 +17,7 @@ import { CollapsibleSection } from "@/components/ui/accordion";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Timer, Calculator, Search } from "lucide-react";
+import { Tilt3D } from "@/components/tilt-3d";
 
 export default function NutritionPage(){
   type DayFood = { name: string; kcal: number; p: number; c: number; f: number };
@@ -58,17 +59,20 @@ export default function NutritionPage(){
         <Badge variant="accent">VIP</Badge>
       </div>
 
+      <Tilt3D max={4} scale={1.01} radiusClass="rounded-2xl">
       <a href="/client/timers" className="block">
-        <div className="bg-gradient-to-br from-primary/10 via-zinc-900 to-zinc-900 border border-primary/20 rounded-2xl p-4 flex items-center gap-3 hover:border-primary/30 transition">
-          <div className="w-10 h-10 rounded-xl bg-primary flex items-center justify-center text-black"><Timer size={18} /></div>
+        <div className="bg-gradient-to-br from-primary/10 via-zinc-900 to-zinc-900 border border-primary/20 rounded-2xl p-4 flex items-center gap-3 hover:border-primary/30 hover:shadow-[0_8px_28px_rgba(52,211,153,0.12)] transition-all">
+          <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-primary to-primary-hover flex items-center justify-center text-black shadow-[0_4px_14px_rgba(52,211,153,0.3)]"><Timer size={18} /></div>
           <div className="flex-1"><p className="font-bold text-sm">Cronómetros PRO →</p><p className="text-xs text-zinc-400">Tabata, EMOM, Pomodoro — página dedicada</p></div>
           <span className="text-xs bg-primary text-black px-2 py-1 rounded-full font-bold">PRO</span>
         </div>
       </a>
+      </Tilt3D>
 
-      <Card className="bg-gradient-to-br from-primary/10 via-[#111111] to-[#111111] border-primary/20">
+      <Tilt3D max={3} scale={1.008} radiusClass="rounded-2xl">
+      <Card className="bg-gradient-to-br from-primary/10 via-[#111111] to-[#111111] border-primary/20 shadow-[0_12px_36px_rgba(0,0,0,0.3)]">
         <CardContent className="pt-4 flex gap-3 items-center">
-          <div className="w-10 h-10 rounded-xl bg-primary flex items-center justify-center font-black text-black">E</div>
+          <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-primary to-primary-hover flex items-center justify-center font-black text-black shadow-[0_4px_14px_rgba(52,211,153,0.3)]">E</div>
           <div className="flex-1">
             <p className="text-sm font-bold">Plan de Ezequiel</p>
             <p className="text-xs text-zinc-400">Tus macros están ajustados a tu objetivo. Revisión semanal.</p>
@@ -76,6 +80,7 @@ export default function NutritionPage(){
           <Link href="/client/messages"><Button variant="outline" size="sm">Consultar</Button></Link>
         </CardContent>
       </Card>
+      </Tilt3D>
 
       <Tabs
         tabs={[
@@ -106,7 +111,7 @@ export default function NutritionPage(){
             )}
             {active==="alimentos" && (
               <div className="space-y-4">
-                <Card className="border-primary/25 bg-primary/[0.05]">
+                <Card className="border-primary/25 bg-primary/[0.05] shadow-[0_8px_28px_rgba(0,0,0,0.25)]">
                   <CardContent className="p-4 space-y-2">
                     <div className="flex items-center justify-between">
                       <p className="font-bold text-sm text-white">Mi día</p>

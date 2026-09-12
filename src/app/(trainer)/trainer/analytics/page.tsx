@@ -2,6 +2,7 @@ import { prisma } from "@/lib/db";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
+import { RevenueAnalytics } from "@/components/revenue-analytics";
 
 export default async function AnalyticsPage() {
   /* ── Real data queries ── */
@@ -95,7 +96,7 @@ export default async function AnalyticsPage() {
               <div className="space-y-3">
                 <div className="flex justify-between items-center">
                   <span className="text-sm text-zinc-400">Revisados</span>
-                  <span className="font-bold text-[#D6FF2A]">{reviewedCheckins}</span>
+                  <span className="font-bold text-primary">{reviewedCheckins}</span>
                 </div>
                 <Progress value={totalCheckins > 0 ? (reviewedCheckins / totalCheckins) * 100 : 0} className="h-2" />
                 <div className="flex justify-between items-center">
@@ -138,7 +139,7 @@ export default async function AnalyticsPage() {
           </CardHeader>
           <CardContent className="space-y-3">
             {churnClients.length === 0 ? (
-              <p className="text-sm text-emerald-400 text-center py-8">✅ Todos tus clientes están activos.</p>
+              <p className="text-sm text-emerald-400 text-center py-8">Todos tus clientes están activos.</p>
             ) : (
               churnClients.slice(0, 5).map((c) => {
                 const lastDate = c.workoutLogs[0]?.date;
@@ -159,6 +160,9 @@ export default async function AnalyticsPage() {
           </CardContent>
         </Card>
       </div>
+
+      {/* Ingresos detallados (movido desde el dashboard: su lugar natural es acá) */}
+      <RevenueAnalytics />
     </div>
   );
 }

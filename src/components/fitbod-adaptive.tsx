@@ -48,7 +48,7 @@ export function FitbodAdaptive(){
 
   return (
     <Card className="border-emerald-500/20">
-      <CardHeader><CardTitle className="flex items-center gap-2"><Brain size={16} className="text-emerald-400"/> Fitbod Adaptive <Badge variant="accent">IA MIT</Badge></CardTitle><p className="text-xs text-zinc-500">Músculo fresco 0-100% → adapta tu workout hoy</p></CardHeader>
+      <CardHeader><CardTitle className="flex items-center gap-2"><Brain size={16} className="text-emerald-400"/> Fitbod Adaptive</CardTitle><p className="text-xs text-zinc-500">Músculo fresco 0-100% → adapta tu workout hoy</p></CardHeader>
       <CardContent className="space-y-4">
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
           {muscles.slice(0,4).map(m=>(
@@ -88,7 +88,6 @@ export function FitbodAdaptive(){
           </div>
         </div>
         <Button variant={adapted?"outline":"accent"} className="w-full" onClick={()=>setAdapted(!adapted)}><RefreshCw size={14} className="mr-2"/>{adapted?"Ver original":"Adaptar con IA →"}</Button>
-        <p className="text-[11px] text-zinc-600 text-center">Fitbod MIT — músculo fresco + desbalance detection, sin cloud</p>
       </CardContent>
     </Card>
   );

@@ -56,7 +56,7 @@ export default async function HistoryPage(){
         <Card className="border-zinc-800 bg-zinc-900/80">
           <CardContent className="p-3.5 text-center">
             <span className="text-[11px] text-zinc-500 uppercase font-bold block">Volumen Total</span>
-            <p className="text-xl font-black text-[#D6FF2A] mt-0.5">
+            <p className="text-xl font-black text-primary mt-0.5">
               {totalVolumeKg > 1000 ? `${(totalVolumeKg / 1000).toFixed(1)} t` : `${totalVolumeKg} kg`}
             </p>
             <p className="text-[10px] text-zinc-400">acumulado</p>
@@ -110,7 +110,7 @@ export default async function HistoryPage(){
                       </p>
                     </div>
                     <Badge variant="success" className="text-xs">
-                      Completado ✓
+                      Completado
                     </Badge>
                   </div>
 
@@ -121,7 +121,7 @@ export default async function HistoryPage(){
                     </div>
                     <div>
                       <span className="text-[10px] text-zinc-500 uppercase font-bold block">Volumen de Sesión</span>
-                      <span className="font-black text-[#D6FF2A] text-sm">{logVolume.toLocaleString("es-AR")} kg</span>
+                      <span className="font-black text-primary text-sm">{logVolume.toLocaleString("es-AR")} kg</span>
                     </div>
                   </div>
 

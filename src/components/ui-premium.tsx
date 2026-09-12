@@ -158,7 +158,7 @@ export function PressableCard({
       className={cn(
         "rounded-[20px] border border-zinc-800 bg-[#111111] overflow-hidden cursor-pointer",
         "shadow-[0_8px_32px_rgba(0,0,0,0.12)] hover:shadow-[0_12px_40px_rgba(0,0,0,0.18)] hover:border-zinc-700 transition-colors",
-        "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#D6FF2A]/50",
+        "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/50",
         className
       )}
     >
@@ -203,9 +203,9 @@ export function AnimatedBadge({
 }) {
   const bg =
     variant === "accent"
-      ? "bg-[#D6FF2A] text-black border-[#D6FF2A]"
+      ? "bg-primary text-black border-primary"
       : variant === "success"
-      ? "bg-emerald-500 text-white border-emerald-500"
+      ? "bg-emerald-500 text-black border-emerald-500"
       : "bg-zinc-900 text-zinc-400 border-zinc-800";
   return (
     <motion.span
@@ -221,13 +221,9 @@ export function AnimatedBadge({
 
 // Quick peek strip para dashboards — muestra que ui-premium está integrado sin romper tabs
 export function UiPremiumStrip() {
-  return (
-    <div className="flex items-center gap-2 text-[11px] text-zinc-500">
-      <PulseDot color="bg-[#D6FF2A]" />
-      <span className="font-medium">UI premium activo</span>
-      <span className="hidden sm:inline">• microinteractions + skeletons • shadcn/ui + radix-ui MIT</span>
-    </div>
-  );
+  // Créditos técnicos removidos de la UI a pedido del producto.
+  // La atribución de licencias vive en docs/MIT_ATTRIBUTION.md.
+  return null;
 }
 
 // Shimmer button (shadcn + radix inspired)
@@ -241,7 +237,7 @@ export function ShimmerButton({
       whileHover={{ scale: 1.02 }}
       whileTap={{ scale: 0.97 }}
       className={cn(
-        "relative inline-flex items-center justify-center rounded-xl bg-[#D6FF2A] text-black font-bold text-sm px-4 py-2.5 overflow-hidden",
+        "relative inline-flex items-center justify-center rounded-xl bg-primary text-black font-bold text-sm px-4 py-2.5 overflow-hidden",
         "before:absolute before:inset-0 before:-translate-x-full hover:before:translate-x-0 before:transition-transform before:duration-700 before:bg-gradient-to-r before:from-transparent before:via-white/30 before:to-transparent",
         className
       )}

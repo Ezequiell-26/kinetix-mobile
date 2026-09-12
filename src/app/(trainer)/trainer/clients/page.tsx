@@ -109,12 +109,12 @@ export default async function ClientsPage({
                 <Card className="hover:border-zinc-700 transition border-zinc-800 bg-zinc-900/90 h-full flex flex-col justify-between">
                   <CardContent className="p-4 space-y-3">
                     <div className="flex gap-3 items-start">
-                      <div className="w-11 h-11 rounded-2xl bg-white text-black flex items-center justify-center font-black text-base shrink-0 group-hover:bg-[#D6FF2A] transition">
+                      <div className="w-11 h-11 rounded-2xl bg-white text-black flex items-center justify-center font-black text-base shrink-0 group-hover:bg-primary transition">
                         {c.name?.[0]?.toUpperCase() || "C"}
                       </div>
                       <div className="min-w-0 flex-1">
                         <div className="flex items-center justify-between gap-1">
-                          <p className="font-bold text-sm text-white truncate group-hover:text-[#D6FF2A] transition">
+                          <p className="font-bold text-sm text-white truncate group-hover:text-primary transition">
                             {c.name}
                           </p>
                         </div>

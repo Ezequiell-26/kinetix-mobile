@@ -13,7 +13,7 @@ export function HabiticaGamify(){
   const [gold,setGold]=useState(86);
   return (
     <Card className="border-violet-500/20 bg-gradient-to-br from-violet-500/5 via-zinc-900 to-zinc-900">
-      <CardHeader><CardTitle className="flex items-center gap-2"><Sword size={16} className="text-violet-400"/> Habitica RPG <Badge variant="muted">Habitica MIT</Badge></CardTitle><p className="text-xs text-zinc-500">Hábitos como RPG — gana XP, oro, sube nivel, pierde HP si faltas</p></CardHeader>
+      <CardHeader><CardTitle className="flex items-center gap-2"><Sword size={16} className="text-violet-400"/> Hábitos RPG</CardTitle><p className="text-xs text-zinc-500">Hábitos como RPG — gana XP, oro, sube nivel, pierde HP si faltas</p></CardHeader>
       <CardContent className="space-y-3">
         <div className="grid grid-cols-3 gap-2 text-center">
           <div className="bg-red-500/10 border border-red-500/20 rounded-xl p-2"><Heart size={14} className="mx-auto text-red-400"/><p className="font-black text-red-400">{hp}/50 HP</p><div className="h-1 bg-zinc-800 rounded-full overflow-hidden mt-1"><div className="h-full bg-red-500" style={{width:`${hp/50*100}%`}} /></div></div>
@@ -28,7 +28,6 @@ export function HabiticaGamify(){
             <span>Faltar entreno</span><span className="text-red-400 font-bold">-5 HP</span>
           </button>
         </div>
-        <p className="text-[11px] text-zinc-600 text-center">Habitica MIT (RPG) + Strive — pierde HP si faltas, gana XP si cumplís</p>
       </CardContent>
     </Card>
   );

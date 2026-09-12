@@ -1,5 +1,6 @@
 /* eslint-disable @next/next/no-img-element */
 "use client";
+import { Camera } from "lucide-react";
 import { useState } from "react";
 
 export function PhotoCompare({
@@ -19,7 +20,7 @@ export function PhotoCompare({
   if (!beforeUrl && !afterUrl) {
     return (
       <div className="aspect-[4/3] bg-zinc-950 rounded-2xl border border-zinc-800 flex flex-col items-center justify-center p-6 text-center space-y-2">
-        <span className="text-3xl">📸</span>
+        <Camera size={30} className="text-zinc-500" />
         <p className="font-bold text-sm text-white">Comparador de Fotos</p>
         <p className="text-xs text-zinc-500 max-w-xs">
           Subí al menos dos fotos de progreso para activar la comparación interactiva de tu transformación.
@@ -60,15 +61,15 @@ export function PhotoCompare({
           style={{ clipPath: `inset(0 ${100 - pos}% 0 0)` }}
         >
           <img src={imgAfter} alt={afterLabel} className="w-full h-full object-cover" />
-          <span className="absolute bottom-3 right-3 bg-[#D6FF2A] text-black px-2.5 py-1 rounded-full text-[11px] font-black z-10">
+          <span className="absolute bottom-3 right-3 bg-primary text-black px-2.5 py-1 rounded-full text-[11px] font-black z-10">
             {afterLabel}
           </span>
         </div>
 
         {/* Divider line & handle */}
-        <div className="absolute top-0 bottom-0 w-0.5 bg-[#D6FF2A] shadow-[0_0_10px_rgba(214,255,42,0.8)]" style={{ left: `${pos}%` }} />
+        <div className="absolute top-0 bottom-0 w-0.5 bg-primary shadow-[0_0_10px_rgba(214,255,42,0.8)]" style={{ left: `${pos}%` }} />
         <div
-          className="absolute top-1/2 -translate-y-1/2 w-8 h-8 bg-[#D6FF2A] text-black rounded-full flex items-center justify-center text-xs font-black -translate-x-1/2 shadow-lg cursor-ew-resize"
+          className="absolute top-1/2 -translate-y-1/2 w-8 h-8 bg-primary text-black rounded-full flex items-center justify-center text-xs font-black -translate-x-1/2 shadow-lg cursor-ew-resize"
           style={{ left: `${pos}%` }}
         >
           ↔
@@ -88,7 +89,7 @@ export function PhotoCompare({
 
       <div className="flex justify-between text-xs text-zinc-400 px-1">
         <span>Deslizá hacia los lados para comparar</span>
-        <span className="text-[#D6FF2A] font-bold">{pos}%</span>
+        <span className="text-primary font-bold">{pos}%</span>
       </div>
     </div>
   );

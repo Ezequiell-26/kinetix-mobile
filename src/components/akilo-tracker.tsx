@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Scale, Droplets, Ruler, Activity, CheckCircle2 } from "lucide-react";
 import { LineChart, Line, XAxis, YAxis, Tooltip, ResponsiveContainer } from "recharts";
+import { chartAxisTick, chartTooltipStyle, chartTooltipItemStyle } from "@/lib/chart-theme";
 
 // Inspirado en Akilo MIT (nutrición + alimentos + agua + peso + analytics) + LibreFit MIT (biblioteca + tracking)
 export function AkiloTracker({ measurements }:{ measurements?: Array<{date:string; weight:number|null; bodyFat:number|null; waist:number|null}> }){
@@ -28,9 +29,9 @@ export function AkiloTracker({ measurements }:{ measurements?: Array<{date:strin
         <div className="h-[140px]">
           <ResponsiveContainer width="100%" height="100%">
             <LineChart data={data}>
-              <XAxis dataKey="date" tick={{fill:"#71717a", fontSize:11}} axisLine={false} tickLine={false} />
-              <YAxis tick={{fill:"#71717a", fontSize:11}} axisLine={false} tickLine={false} domain={["dataMin -1", "dataMax +1"]} />
-              <Tooltip contentStyle={{background:"#111", border:"1px solid #27272A", borderRadius:12}} />
+              <XAxis dataKey="date" tick={chartAxisTick} axisLine={false} tickLine={false} />
+              <YAxis tick={chartAxisTick} axisLine={false} tickLine={false} domain={["dataMin -1", "dataMax +1"]} />
+              <Tooltip contentStyle={chartTooltipStyle} itemStyle={chartTooltipItemStyle} cursor={{ fill: "rgba(255,255,255,0.04)" }} />
               <Line type="monotone" dataKey="weight" stroke="var(--primary)" strokeWidth={2} dot={{r:3}} name="Peso" />
               <Line type="monotone" dataKey="bodyFat" stroke="#f59e0b" strokeWidth={2} dot={{r:2}} name="% Grasa" />
             </LineChart>

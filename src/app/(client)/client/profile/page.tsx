@@ -47,28 +47,25 @@ export default function ClientProfilePage(){
     try {
       const meRes = await fetch("/api/auth/me");
       const meData = await meRes.json();
-      if (meData?.user?.id) {
-        // Find client
-        const clientsRes = await fetch("/api/clients");
-        if (clientsRes.ok) {
-          const all = await clientsRes.json();
-          // Find own client or use first
-          const myClient = all.find((c: { email: string }) => c.email === meData.user.email) || all[0];
-          if (myClient) {
-            const detailRes = await fetch(`/api/clients/${myClient.id}`);
-            if (detailRes.ok) {
-              const full = await detailRes.json();
-              setProfile(full);
-              setName(full.name || "");
-              setAge(full.age ? String(full.age) : "");
-              setWeight(full.weight ? String(full.weight) : "");
-              setHeight(full.height ? String(full.height) : "");
-              setGoal(full.goal || "HIPERTROFIA");
-              setAvailability(full.availability || 4);
-              setEquipment(full.equipment || "Gimnasio completo");
-            }
-          }
+      // El atleta pide su propia ficha por clientId. Antes se usaba /api/clients,
+      // que es solo para TRAINER → devolvía 403 y el perfil quedaba vacío.
+      const myId: string | null = meData?.user?.clientId ?? null;
+      if (myId) {
+        const detailRes = await fetch(`/api/clients/${myId}`);
+        if (detailRes.ok) {
+          const full = await detailRes.json();
+          setProfile(full);
+          setName(full.name || "");
+          setAge(full.age ? String(full.age) : "");
+          setWeight(full.weight ? String(full.weight) : "");
+          setHeight(full.height ? String(full.height) : "");
+          setGoal(full.goal || "HIPERTROFIA");
+          setAvailability(full.availability || 4);
+          setEquipment(full.equipment || "Gimnasio completo");
         }
+      } else if (meData?.user?.name) {
+        // Sin ficha de cliente todavía: al menos mostramos el nombre de la cuenta.
+        setName(meData.user.name);
       }
     } catch {}
     setLoading(false);
@@ -134,7 +131,7 @@ export default function ClientProfilePage(){
       {/* Identity Card */}
       <Card className="border-zinc-800 bg-zinc-900/90">
         <CardContent className="p-5 flex items-center gap-4">
-          <div className="w-16 h-16 rounded-2xl bg-[#D6FF2A] text-black flex items-center justify-center font-black text-2xl shrink-0">
+          <div className="w-16 h-16 rounded-2xl bg-primary text-black flex items-center justify-center font-black text-2xl shrink-0">
             {name?.[0]?.toUpperCase() || "A"}
           </div>
           <div className="flex-1 min-w-0">
@@ -187,7 +184,7 @@ export default function ClientProfilePage(){
               <select
                 value={goal}
                 onChange={e => setGoal(e.target.value)}
-                className="w-full h-11 px-3 bg-zinc-950 border border-zinc-800 rounded-xl text-xs text-white focus:outline-none focus:border-[#D6FF2A]"
+                className="w-full h-11 px-3 bg-zinc-950 border border-zinc-800 rounded-xl text-xs text-white focus:outline-none focus:border-primary"
               >
                 <option value="HIPERTROFIA">Hipertrofia (Ganancia Muscular)</option>
                 <option value="PERDIDA_GRASA">Pérdida de Grasa & Definición</option>
@@ -211,7 +208,7 @@ export default function ClientProfilePage(){
                 <select
                   value={availability}
                   onChange={e => setAvailability(Number(e.target.value))}
-                  className="w-full h-11 px-3 bg-zinc-950 border border-zinc-800 rounded-xl text-xs text-white focus:outline-none focus:border-[#D6FF2A]"
+                  className="w-full h-11 px-3 bg-zinc-950 border border-zinc-800 rounded-xl text-xs text-white focus:outline-none focus:border-primary"
                 >
                   <option value={2}>2 días</option>
                   <option value={3}>3 días</option>
@@ -236,7 +233,7 @@ export default function ClientProfilePage(){
               disabled={saving}
               className="w-full h-12 font-black text-sm tracking-wide mt-2"
             >
-              {saving ? "Guardando..." : "GUARDAR CAMBIOS ✓"}
+              {saving ? "Guardando..." : "GUARDAR CAMBIOS"}
             </Button>
           </CardContent>
         </Card>
@@ -246,7 +243,7 @@ export default function ClientProfilePage(){
       <Card className="border-zinc-800 bg-zinc-900/90">
         <CardHeader className="pb-3">
           <CardTitle className="text-base flex items-center gap-2">
-            <CreditCard size={18} className="text-[#D6FF2A]" /> Suscripción de Coaching
+            <CreditCard size={18} className="text-primary" /> Suscripción de Coaching
           </CardTitle>
         </CardHeader>
         <CardContent className="space-y-3 text-xs">
@@ -276,7 +273,7 @@ export default function ClientProfilePage(){
           )}
 
           <p className="text-[11px] text-zinc-500 text-center pt-1">
-            🔒 Pagos y renovaciones gestionadas de forma segura. No se almacenan datos de tarjetas.
+            Pagos y renovaciones gestionadas de forma segura. No se almacenan datos de tarjetas.
           </p>
         </CardContent>
       </Card>

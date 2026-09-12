@@ -40,7 +40,6 @@ export function HabitStore({ xp=1240 }:{ xp?: number }){
           <span className="flex items-center gap-1"><Flame size={12} className="text-orange-400"/> Racha 7 días → +50 XP/día</span>
           <Badge variant="accent">+350 XP/sem</Badge>
         </div>
-        <p className="text-[11px] text-zinc-600 text-center">Strive MIT + FitBook — gamificación real, canje por valor tangible</p>
       </CardContent>
     </Card>
   );

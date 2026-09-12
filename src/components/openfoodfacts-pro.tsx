@@ -18,7 +18,7 @@ export function OpenFoodFactsPro(){
 
   return (
     <Card className="border-emerald-500/20">
-      <CardHeader><CardTitle className="flex items-center gap-2"><Apple size={16} className="text-emerald-400"/> OpenFoodFacts Pro <Badge variant="muted">OFF 2M MIT</Badge></CardTitle><p className="text-xs text-zinc-500">2M+ alimentos — barcode + search, open source</p></CardHeader>
+      <CardHeader><CardTitle className="flex items-center gap-2"><Apple size={16} className="text-emerald-400"/> OpenFoodFacts Pro</CardTitle><p className="text-xs text-zinc-500">2M+ alimentos — barcode + search, open source</p></CardHeader>
       <CardContent className="space-y-3">
         <div className="flex gap-2">
           <div className="relative flex-1">
@@ -37,7 +37,6 @@ export function OpenFoodFactsPro(){
           </div>
         )}
         <Button variant="outline" className="w-full" onClick={()=>search()}><Scan size={14} className="mr-2"/> Escanear barcode OFF</Button>
-        <p className="text-[11px] text-zinc-600 text-center">OpenFoodFacts MIT (OFF) — 2M+ productos, barcode, Nutri-Score</p>
       </CardContent>
     </Card>
   );

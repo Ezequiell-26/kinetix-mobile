@@ -10,7 +10,7 @@ export async function GET(
   if(!s) return NextResponse.json({error:"No auth"},{status:401});
   const { id } = await params;
 
-  let workout = await prisma.workout.findUnique({
+  const workout = await prisma.workout.findUnique({
     where: { id },
     include: {
       week: {
@@ -23,23 +23,24 @@ export async function GET(
     }
   });
 
-  // If not found by exact ID, find first workout in the database so user is never stuck
-  if (!workout) {
-    workout = await prisma.workout.findFirst({
-      include: {
-        week: {
-          include: { program: true }
-        },
-        exercises: {
-          orderBy: { order: "asc" },
-          include: { exercise: true }
-        }
-      }
-    });
-  }
-
+  // Sin fallback silencioso: si el ID no existe, 404.
+  // Antes se devolvía el primer entrenamiento de la base de datos, lo que
+  // podía mostrarle al atleta un entrenamiento de otro programa.
   if (!workout) {
     return NextResponse.json({ error: "Entrenamiento no encontrado" }, { status: 404 });
+  }
+
+  // Control de acceso: un CLIENT solo puede ver entrenamientos de su
+  // programa asignado. El trainer puede ver cualquiera.
+  if (s.role === "CLIENT") {
+    const client = await prisma.client.findFirst({
+      where: { OR: [{ userId: s.id }, { email: s.email }] },
+      select: { assignedProgramId: true },
+    });
+    if (!client || client.assignedProgramId !== workout.week.program.id) {
+      // 404 (no 403) para no revelar la existencia del recurso.
+      return NextResponse.json({ error: "Entrenamiento no encontrado" }, { status: 404 });
+    }
   }
 
   return NextResponse.json(workout);

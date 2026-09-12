@@ -7,7 +7,7 @@ import { Lightbulb, TrendingUp, AlertTriangle, CheckCircle } from "lucide-react"
 export function TrainerInsights(){
   return (
     <Card className="border-amber-500/20 bg-gradient-to-br from-amber-500/5 via-zinc-900 to-zinc-900">
-      <CardHeader><CardTitle className="flex items-center gap-2"><Lightbulb size={16} className="text-amber-400"/> Insights Automáticos <Badge variant="warn">IA MIT</Badge></CardTitle><p className="text-xs text-zinc-500">IA analiza todos tus clientes cada noche y te sugiere qué hacer</p></CardHeader>
+      <CardHeader><CardTitle className="flex items-center gap-2"><Lightbulb size={16} className="text-amber-400"/> Insights Automáticos</CardTitle><p className="text-xs text-zinc-500">IA analiza todos tus clientes cada noche y te sugiere qué hacer</p></CardHeader>
       <CardContent className="space-y-2">
         <div className="bg-red-500/10 border border-red-500/20 rounded-xl p-3 flex gap-2">
           <AlertTriangle size={16} className="text-red-400 shrink-0 mt-0.5"/>
@@ -21,7 +21,6 @@ export function TrainerInsights(){
           <CheckCircle size={16} className="text-emerald-400 shrink-0 mt-0.5"/>
           <div><p className="font-bold text-sm text-emerald-300">Martín y Valentina top — mantén</p><p className="text-xs text-zinc-400">92% y 95% adherencia, rachas 7 y 12 días. Listos para +2.5% la próxima semana.</p></div>
         </div>
-        <p className="text-[11px] text-zinc-600 text-center">VitaFlex + OptiLifts MIT — insights nocturnos automáticos, sin cloud</p>
       </CardContent>
     </Card>
   );

@@ -12,7 +12,7 @@ export function VelocityTracker(){
   const loss= vel<0.35 ? 35 : vel<0.4 ? 20 : 10;
   return (
     <Card className="border-sky-500/20">
-      <CardHeader><CardTitle className="flex items-center gap-2"><Gauge size={16} className="text-sky-400"/> Velocity Tracker <Badge variant="muted">VBT MIT</Badge></CardTitle><p className="text-xs text-zinc-500">Velocidad de barra (m/s) → RIR + pérdida → auto-regula carga</p></CardHeader>
+      <CardHeader><CardTitle className="flex items-center gap-2"><Gauge size={16} className="text-sky-400"/> Velocity Tracker</CardTitle><p className="text-xs text-zinc-500">Velocidad de barra (m/s) → RIR + pérdida → auto-regula carga</p></CardHeader>
       <CardContent className="space-y-3">
         <div className="bg-zinc-900 border border-zinc-800 rounded-2xl p-4 text-center">
           <p className="text-xs text-zinc-500">Velocidad última rep</p>
@@ -27,7 +27,6 @@ export function VelocityTracker(){
           <div className="bg-zinc-900 border border-zinc-800 rounded-xl p-2 text-center"><TrendingUp size={12} className="mx-auto text-emerald-400"/><p className="font-bold">{vel>0.45?"Subir 2.5kg": vel<0.30?"Bajar 5%":"Mantener"}</p><p className="text-zinc-500">Sugerencia</p></div>
           <div className="bg-zinc-900 border border-zinc-800 rounded-xl p-2 text-center"><Zap size={12} className="mx-auto text-amber-400"/><p className="font-bold">{loss>30?"Stop serie":"Sigue"}</p><p className="text-zinc-500">Fatiga</p></div>
         </div>
-        <p className="text-[11px] text-zinc-600 text-center">VBT MIT — velocidad → RIR, sin encoder caro (estimado por RPE)</p>
       </CardContent>
     </Card>
   );

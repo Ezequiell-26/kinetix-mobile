@@ -22,7 +22,6 @@ export function ExerciseIllustration({ muscleGroup, name }:{ muscleGroup:string;
       </svg>
       <p className="text-xs font-bold mt-2 text-center text-white">{muscleGroup}</p>
       <p className="text-[11px] text-zinc-400 text-center line-clamp-1">{name}</p>
-      <Badge variant="muted" className="mt-1 text-[10px]">Ilustración MIT</Badge>
     </div>
   );
 }

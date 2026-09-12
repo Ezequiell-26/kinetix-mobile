@@ -14,6 +14,7 @@ import { RepCounter } from "@/components/rep-counter";
 import { voiceEngine } from "@/lib/voice-engine/engine";
 import { ExerciseImage } from "@/components/exercise-image";
 import { GymMode } from "@/components/gym-mode";
+import { Celebration } from "@/components/celebration";
 import { Lightbulb, 
   ArrowLeft, 
   CheckCircle, 
@@ -46,6 +47,7 @@ type WorkoutExerciseItem = {
     name: string;
     muscleGroup: string;
     image: string | null;
+    video?: string | null;
     instructions: string | null;
     equipment: string | null;
   };
@@ -67,6 +69,8 @@ type CompletedSetRecord = {
   rir: number | null;
   rpe: number | null;
 };
+
+type ExerciseHistoryEntry = { weight: number; reps: number; date: string };
 
 export default function WorkoutExecutionPage(){
   const params = useParams();
@@ -119,6 +123,10 @@ export default function WorkoutExecutionPage(){
   const [finalComment, setFinalComment] = useState<string>("");
   const [savingLog, setSavingLog] = useState<boolean>(false);
   const [savedOffline, setSavedOffline] = useState<boolean>(false);
+  // Historial real por ejercicio (último peso x reps logrado, sea cual sea
+  // el entrenamiento en el que se hizo) — estilo "progresión automática" de
+  // apps de gym reconocidas: nunca hay que adivinar con qué peso arrancar.
+  const [exerciseHistory, setExerciseHistory] = useState<Record<string, ExerciseHistoryEntry>>({});
 
   // Narrador 3-2-1-¡vamos! sobre el final del descanso (el audio dura ~6s).
   // Disparo único por descanso: al cruzar los 6s o al arrancar un descanso corto.
@@ -193,6 +201,24 @@ export default function WorkoutExecutionPage(){
           setReps(firstEx.reps?.split("-")?.[0] || "8");
           setRir(firstEx.rir !== null ? String(firstEx.rir) : "2");
         }
+
+        // Trae el historial reciente y arma un mapa exerciseName -> último peso/reps.
+        // Silencioso: si falla, simplemente no hay precarga (no bloquea el entreno).
+        fetch("/api/workout-logs")
+          .then(r => (r.ok ? r.json() : []))
+          .then((logs: { date: string; sets: { exerciseName: string; weight: number | null; reps: number | null }[] }[]) => {
+            const history: Record<string, ExerciseHistoryEntry> = {};
+            for (const log of logs) {
+              for (const st of log.sets || []) {
+                if (!st.exerciseName || st.weight === null || st.weight === undefined) continue;
+                if (!history[st.exerciseName]) {
+                  history[st.exerciseName] = { weight: st.weight, reps: st.reps || 0, date: log.date };
+                }
+              }
+            }
+            setExerciseHistory(history);
+          })
+          .catch(() => {});
       } catch (err: unknown) {
         setError(err instanceof Error ? err.message : "Error al cargar");
       } finally {
@@ -246,13 +272,18 @@ export default function WorkoutExecutionPage(){
   const totalCompletedSets = Object.keys(loggedSets).length;
   const progressPercent = Math.min(100, Math.round((totalCompletedSets / totalTargetSets) * 100));
 
-  // Sync inputs when changing exercise
+  // Sync inputs when changing exercise — si hay historial real de ese
+  // ejercicio, precarga el último peso usado (progresión automática); si no,
+  // cae al rango objetivo que dejó el entrenador.
   useEffect(() => {
     if (currentExercise) {
-      setReps(currentExercise.reps?.split("-")?.[0] || "8");
+      const hist = exerciseHistory[currentExercise.exercise.name];
+      setReps(hist ? String(hist.reps || currentExercise.reps?.split("-")?.[0] || "8") : (currentExercise.reps?.split("-")?.[0] || "8"));
+      setWeight(hist ? String(hist.weight) : "");
       setRir(currentExercise.rir !== null && currentExercise.rir !== undefined ? String(currentExercise.rir) : "2");
     }
-  }, [currentExIdx, currentExercise]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [currentExIdx, currentExercise, exerciseHistory]);
 
   // Aviso de voz al cambiar de ejercicio (salta el montaje inicial).
   const firstExRef = useRef(true);
@@ -445,9 +476,14 @@ export default function WorkoutExecutionPage(){
 
     return (
       <div className="space-y-5 py-4 max-w-md mx-auto">
+        {/* Recompensa inmediata: refuerzo positivo tras el esfuerzo */}
+        <Celebration show={finished} />
         <div className="text-center space-y-2">
-          <div className="w-16 h-16 rounded-full bg-primary flex items-center justify-center text-black mx-auto">
-            <Check size={36} strokeWidth={3} />
+          <div className="relative w-16 h-16 mx-auto">
+            <span className="ring-burst absolute inset-0 rounded-full border-2 border-primary" aria-hidden="true" />
+            <div className="relative w-16 h-16 rounded-full bg-gradient-to-br from-primary to-primary-hover flex items-center justify-center text-black shadow-[inset_0_2px_0_rgba(255,255,255,0.4),0_10px_36px_rgba(52,211,153,0.45)]">
+              <Check size={36} strokeWidth={3} />
+            </div>
           </div>
           <h1 className="text-2xl font-display font-bold">¡Entrenamiento Completado!</h1>
           <p className="text-xs text-zinc-400">{workout.name}</p>
@@ -509,7 +545,7 @@ export default function WorkoutExecutionPage(){
   if(gymMode && workout){
     return (
       <GymMode
-        exercises={workout.exercises.map(e=>({id:e.id, name:e.exercise.name, sets:e.sets, reps:e.reps, restSec:e.restSec, image:e.exercise.image, instructions:e.exercise.instructions || e.notes, muscleGroup:e.exercise.muscleGroup}))}
+        exercises={workout.exercises.map(e=>({id:e.id, name:e.exercise.name, sets:e.sets, reps:e.reps, restSec:e.restSec, image:e.exercise.image, video:e.exercise.video, instructions:e.exercise.instructions || e.notes, muscleGroup:e.exercise.muscleGroup}))}
         onExit={()=>setGymMode(false)}
         onFinish={()=>{ setGymMode(false); setFinished(true); }}
       />
@@ -607,7 +643,7 @@ export default function WorkoutExecutionPage(){
           {/* Header image / Banner */}
           {currentExercise.exercise.image && (
             <div className="h-32 sm:h-48 w-full bg-zinc-950 relative overflow-hidden">
-              <ExerciseImage src={currentExercise.exercise.image} alt={currentExercise.exercise.name} muscleGroup={currentExercise.exercise.muscleGroup} name={currentExercise.exercise.name} className="w-full h-full object-cover opacity-80" priority />
+              <ExerciseImage src={currentExercise.exercise.image} videoSrc={currentExercise.exercise.video} alt={currentExercise.exercise.name} muscleGroup={currentExercise.exercise.muscleGroup} name={currentExercise.exercise.name} className="w-full h-full object-cover opacity-80" priority />
               <div className="absolute inset-0 bg-gradient-to-t from-zinc-950 via-zinc-950/40 to-transparent" />
               <div className="absolute bottom-3 left-4 right-4 flex justify-between items-end">
                 <div>
@@ -699,52 +735,71 @@ export default function WorkoutExecutionPage(){
                 </div>
               </div>
 
-              {/* Large touch inputs for Gym use */}
-              <div className="grid grid-cols-3 gap-3">
+              {/* Large touch inputs for Gym use — con steppers +/- estilo Symmetry:
+                  registrar una serie no debería requerir abrir el teclado del celular. */}
+              {exerciseHistory[currentExercise.exercise.name] && (
+                <p className="text-[11px] text-zinc-500 flex items-center gap-1.5 -mb-1">
+                  <Flame size={12} className="text-primary" />
+                  Última vez: <span className="text-zinc-300 font-bold">{exerciseHistory[currentExercise.exercise.name].weight}kg × {exerciseHistory[currentExercise.exercise.name].reps}</span> — precargado, ajustá si hace falta
+                </p>
+              )}
+              <div className="grid grid-cols-3 gap-2.5">
                 <div className="space-y-1">
                   <label htmlFor="set-weight" className="text-[11px] font-bold text-zinc-400 uppercase tracking-wider block text-center">
                     Peso (kg)
                   </label>
-                  <input
-                    id="set-weight"
-                    inputMode="decimal"
-                    type="number"
-                    step="0.5"
-                    value={weight}
-                    onChange={e => setWeight(e.target.value)}
-                    placeholder="0"
-                    className="w-full h-14 bg-zinc-900 border-2 border-zinc-800 focus:border-primary rounded-xl text-center font-black text-2xl text-white outline-none"
-                  />
+                  <div className="flex items-stretch gap-1">
+                    <button type="button" aria-label="Restar 2.5 kg" onClick={() => setWeight(w => String(Math.max(0, Math.round(((parseFloat(w) || 0) - 2.5) * 10) / 10)))} className="w-8 shrink-0 rounded-xl bg-zinc-900 border-2 border-zinc-800 text-zinc-400 hover:text-white hover:border-zinc-700 active:scale-90 transition flex items-center justify-center font-black text-lg">−</button>
+                    <input
+                      id="set-weight"
+                      inputMode="decimal"
+                      type="number"
+                      step="0.5"
+                      value={weight}
+                      onChange={e => setWeight(e.target.value)}
+                      placeholder="0"
+                      className="w-full h-14 bg-zinc-900 border-2 border-zinc-800 focus:border-primary rounded-xl text-center font-black text-2xl text-white outline-none min-w-0"
+                    />
+                    <button type="button" aria-label="Sumar 2.5 kg" onClick={() => setWeight(w => String(Math.round(((parseFloat(w) || 0) + 2.5) * 10) / 10))} className="w-8 shrink-0 rounded-xl bg-zinc-900 border-2 border-zinc-800 text-zinc-400 hover:text-white hover:border-zinc-700 active:scale-90 transition flex items-center justify-center font-black text-lg">+</button>
+                  </div>
                 </div>
                 <div className="space-y-1">
                   <label htmlFor="set-reps" className="text-[11px] font-bold text-zinc-400 uppercase tracking-wider block text-center">
                     Reps
                   </label>
-                  <input
-                    id="set-reps"
-                    inputMode="numeric"
-                    type="number"
-                    value={reps}
-                    onChange={e => setReps(e.target.value)}
-                    placeholder="8"
-                    className="w-full h-14 bg-zinc-900 border-2 border-zinc-800 focus:border-primary rounded-xl text-center font-black text-2xl text-white outline-none"
-                  />
+                  <div className="flex items-stretch gap-1">
+                    <button type="button" aria-label="Restar una repetición" onClick={() => setReps(r => String(Math.max(0, (parseInt(r) || 0) - 1)))} className="w-8 shrink-0 rounded-xl bg-zinc-900 border-2 border-zinc-800 text-zinc-400 hover:text-white hover:border-zinc-700 active:scale-90 transition flex items-center justify-center font-black text-lg">−</button>
+                    <input
+                      id="set-reps"
+                      inputMode="numeric"
+                      type="number"
+                      value={reps}
+                      onChange={e => setReps(e.target.value)}
+                      placeholder="8"
+                      className="w-full h-14 bg-zinc-900 border-2 border-zinc-800 focus:border-primary rounded-xl text-center font-black text-2xl text-white outline-none min-w-0"
+                    />
+                    <button type="button" aria-label="Sumar una repetición" onClick={() => setReps(r => String((parseInt(r) || 0) + 1))} className="w-8 shrink-0 rounded-xl bg-zinc-900 border-2 border-zinc-800 text-zinc-400 hover:text-white hover:border-zinc-700 active:scale-90 transition flex items-center justify-center font-black text-lg">+</button>
+                  </div>
                 </div>
                 <div className="space-y-1">
                   <label htmlFor="set-rir" className="text-[11px] font-bold text-zinc-400 uppercase tracking-wider block text-center">
                     RIR
                   </label>
-                  <input
-                    id="set-rir"
-                    inputMode="numeric"
-                    type="number"
-                    min={0}
-                    max={10}
-                    value={rir}
-                    onChange={e => setRir(e.target.value)}
-                    placeholder="2"
-                    className="w-full h-14 bg-zinc-900 border-2 border-zinc-800 focus:border-primary rounded-xl text-center font-black text-2xl text-white outline-none"
-                  />
+                  <div className="flex items-stretch gap-1">
+                    <button type="button" aria-label="Restar RIR" onClick={() => setRir(r => String(Math.max(0, (parseInt(r) || 0) - 1)))} className="w-8 shrink-0 rounded-xl bg-zinc-900 border-2 border-zinc-800 text-zinc-400 hover:text-white hover:border-zinc-700 active:scale-90 transition flex items-center justify-center font-black text-lg">−</button>
+                    <input
+                      id="set-rir"
+                      inputMode="numeric"
+                      type="number"
+                      min={0}
+                      max={10}
+                      value={rir}
+                      onChange={e => setRir(e.target.value)}
+                      placeholder="2"
+                      className="w-full h-14 bg-zinc-900 border-2 border-zinc-800 focus:border-primary rounded-xl text-center font-black text-2xl text-white outline-none min-w-0"
+                    />
+                    <button type="button" aria-label="Sumar RIR" onClick={() => setRir(r => String(Math.min(10, (parseInt(r) || 0) + 1)))} className="w-8 shrink-0 rounded-xl bg-zinc-900 border-2 border-zinc-800 text-zinc-400 hover:text-white hover:border-zinc-700 active:scale-90 transition flex items-center justify-center font-black text-lg">+</button>
+                  </div>
                 </div>
               </div>
 

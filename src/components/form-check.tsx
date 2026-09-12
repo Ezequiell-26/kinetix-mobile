@@ -3,7 +3,7 @@ import { useState, useRef } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Camera, Video, CheckCircle, AlertTriangle, Upload } from "lucide-react";
+import { Check, Lightbulb, Camera, Video, CheckCircle, AlertTriangle, Upload } from "lucide-react";
 
 // Inspirado en MediaPipe Pose + MoveNet + VitaFlex-AI food scanner (MIT/Apache)
 // Análisis de forma con video: sube tu serie, IA local da feedback
@@ -33,7 +33,7 @@ export function FormCheck(){
 
   return (
     <Card className="border-violet-500/20 bg-gradient-to-br from-violet-500/5 via-zinc-900 to-zinc-900">
-      <CardHeader><CardTitle className="flex items-center gap-2"><Camera size={18} className="text-violet-400"/> Form Check IA <Badge variant="muted">MediaPipe Pose MIT</Badge></CardTitle><p className="text-xs text-zinc-500">Subí video de tu serie — IA analiza profundidad, espalda, rodillas</p></CardHeader>
+      <CardHeader><CardTitle className="flex items-center gap-2"><Camera size={18} className="text-violet-400"/> Form Check IA</CardTitle><p className="text-xs text-zinc-500">Subí video de tu serie — IA analiza profundidad, espalda, rodillas</p></CardHeader>
       <CardContent className="space-y-4">
         <label className="flex flex-col items-center gap-2 p-6 rounded-xl border-2 border-dashed border-zinc-800 bg-zinc-900 hover:border-violet-500/30 cursor-pointer">
           <Video size={20} className="text-zinc-400"/>
@@ -46,14 +46,13 @@ export function FormCheck(){
         {result && (
           <div className="bg-zinc-950 border border-zinc-800 rounded-xl p-4 space-y-2">
             <div className="flex justify-between items-center"><span className="font-bold text-sm">Score técnica</span><Badge variant={result.score>85?"accent":"warn"}>{result.score}/100</Badge></div>
-            <div className="h-2 bg-zinc-800 rounded-full overflow-hidden"><div className="h-full bg-[#D6FF2A]" style={{width:`${result.score}%`}} /></div>
+            <div className="h-2 bg-zinc-800 rounded-full overflow-hidden"><div className="h-full bg-primary" style={{width:`${result.score}%`}} /></div>
             {result.feedback.map((f,i)=>(
-              <p key={i} className="text-xs flex gap-1.5"><span>{f.startsWith("✅")?"✅":"⚠️"}</span> {f.slice(2)}</p>
+              <p key={i} className="text-xs flex gap-1.5"><span className="shrink-0 mt-0.5">{f.startsWith("✅") ? <Check size={13} className="text-emerald-400" /> : <AlertTriangle size={13} className="text-amber-400" />}</span> <span>{f.slice(2)}</span></p>
             ))}
-            <p className="text-xs bg-violet-500/10 border border-violet-500/20 rounded-lg p-2 text-violet-300">💡 {result.tip}</p>
+            <p className="text-xs bg-violet-500/10 border border-violet-500/20 rounded-lg p-2 text-violet-300"><Lightbulb size={13} className="inline mr-1 -mt-0.5" />{result.tip}</p>
           </div>
         )}
-        <p className="text-[11px] text-zinc-600 text-center">MediaPipe Pose + MoveNet (Apache 2.0) + VitaFlex scanner MIT — 100% local, sin subir a cloud</p>
       </CardContent>
     </Card>
   );

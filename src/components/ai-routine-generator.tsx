@@ -95,10 +95,9 @@ export function AiRoutineGenerator({ onGenerate }:{ onGenerate: (program: {name:
   }
 
   return (
-    <Card className="border-[#D6FF2A]/30 bg-gradient-to-br from-[#D6FF2A]/10 via-zinc-900 to-zinc-900">
+    <Card className="border-primary/30 bg-gradient-to-br from-primary/10 via-zinc-900 to-zinc-900">
       <CardHeader>
-        <CardTitle className="flex items-center gap-2"><Sparkles size={18} className="text-[#D6FF2A]"/> Generador IA <Badge variant="accent">Jacked GPT • MIT</Badge></CardTitle>
-        <p className="text-xs text-zinc-400">1 prompt → programa 4-12 semanas con progresión automática. Local rule-based (sin API key) • inspirado en Jacked GPT + Workout AI Trainer MIT</p>
+        <CardTitle className="flex items-center gap-2"><Sparkles size={18} className="text-primary"/> Generador IA</CardTitle>
       </CardHeader>
       <CardContent className="space-y-4">
         <div>
@@ -125,7 +124,7 @@ export function AiRoutineGenerator({ onGenerate }:{ onGenerate: (program: {name:
             <div className="max-h-64 overflow-auto space-y-2">
               {preview.weeks.slice(0,2).map(w=>(
                 <div key={w.weekNumber} className="bg-zinc-900 rounded-xl p-3">
-                  <p className="text-xs font-bold text-[#D6FF2A]">{w.name}</p>
+                  <p className="text-xs font-bold text-primary">{w.name}</p>
                   {w.days.map((d,i)=>(
                     <p key={i} className="text-xs text-zinc-300 mt-1">Día {i+1} — {d.name}: {d.exercises.map(e=>e.name).join(", ")}</p>
                   ))}
@@ -139,7 +138,6 @@ export function AiRoutineGenerator({ onGenerate }:{ onGenerate: (program: {name:
             </div>
           </div>
         )}
-        <p className="text-[11px] text-zinc-600 text-center">Inspirado en <a href="https://github.com/brandonp2412/Flexify" target="_blank" className="underline">Jacked GPT / Workout AI Trainer (MIT)</a> • 100% local, sin API key necesaria. Conectable a OpenAI/Mistral vía /api/ai/generate.</p>
       </CardContent>
     </Card>
   );

@@ -69,10 +69,10 @@ export function AssignProgram({
   }
 
   return (
-    <Card className="border-[#D6FF2A]/30 bg-zinc-950">
+    <Card className="border-primary/30 bg-zinc-950">
       <CardHeader>
         <CardTitle className="flex items-center gap-2 text-base">
-          <Dumbbell size={18} className="text-[#D6FF2A]" /> Asignar Programa
+          <Dumbbell size={18} className="text-primary" /> Asignar Programa
         </CardTitle>
         <p className="text-xs text-zinc-400">
           Asigná o cambiá el plan de entrenamiento para <span className="text-white font-medium">{clientName}</span>
@@ -91,7 +91,7 @@ export function AssignProgram({
                 onClick={() => setSelected(p.id)}
                 className={`w-full text-left p-3 rounded-xl border transition flex justify-between items-center ${
                   isCurrent
-                    ? "bg-[#D6FF2A] text-black border-[#D6FF2A]"
+                    ? "bg-primary text-black border-primary"
                     : "bg-zinc-900 border-zinc-800 hover:border-zinc-700 text-white"
                 }`}
               >
@@ -103,7 +103,7 @@ export function AssignProgram({
                 </div>
                 <span
                   className={`w-5 h-5 rounded-full border-2 flex items-center justify-center ${
-                    isCurrent ? "bg-black border-black text-[#D6FF2A]" : "border-zinc-700"
+                    isCurrent ? "bg-black border-black text-primary" : "border-zinc-700"
                   }`}
                 >
                   {isCurrent && <Check size={12} strokeWidth={3} />}
@@ -119,7 +119,7 @@ export function AssignProgram({
           onClick={handleAssign}
           disabled={loading || !selected}
         >
-          {loading ? "Asignando..." : assignedSuccess ? "✓ Programa Asignado con Éxito" : "ASIGNAR PROGRAMA"}
+          {loading ? "Asignando..." : assignedSuccess ? "Programa asignado con éxito" : "ASIGNAR PROGRAMA"}
         </Button>
 
         {assignedSuccess && (

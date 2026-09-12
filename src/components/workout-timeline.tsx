@@ -15,12 +15,12 @@ export function WorkoutTimeline({ items }:{ items: TimelineItem[] }){
   ];
   return (
     <Card>
-      <CardHeader><CardTitle className="flex items-center gap-2"><Calendar size={16} className="text-[#D6FF2A]"/> Historial de Entrenos <Badge variant="muted">iTrack + My-Workouts MIT</Badge></CardTitle><p className="text-xs text-zinc-500">Timeline premium — volumen, duración, sets</p></CardHeader>
+      <CardHeader><CardTitle className="flex items-center gap-2"><Calendar size={16} className="text-primary"/> Historial de Entrenos</CardTitle><p className="text-xs text-zinc-500">Timeline premium — volumen, duración, sets</p></CardHeader>
       <CardContent className="space-y-3">
         <div className="relative pl-6 border-l border-zinc-800 space-y-4">
           {data.map(it=>(
             <div key={it.id} className="relative">
-              <div className={`absolute -left-[29px] top-1 w-3 h-3 rounded-full border-2 ${it.completed?"bg-[#D6FF2A] border-[#D6FF2A]":"bg-zinc-800 border-zinc-700"}`} />
+              <div className={`absolute -left-[29px] top-1 w-3 h-3 rounded-full border-2 ${it.completed?"bg-primary border-primary":"bg-zinc-800 border-zinc-700"}`} />
               <div className="bg-zinc-900 border border-zinc-800 rounded-xl p-3">
                 <div className="flex justify-between items-start">
                   <div>
@@ -38,7 +38,6 @@ export function WorkoutTimeline({ items }:{ items: TimelineItem[] }){
             </div>
           ))}
         </div>
-        <p className="text-[11px] text-zinc-600 text-center">iTrack + My-Workouts + FitnessApp MIT — tracking premium</p>
       </CardContent>
     </Card>
   );

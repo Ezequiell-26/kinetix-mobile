@@ -13,9 +13,9 @@ export function OnboardingFlow({ onComplete }:{ onComplete?: ()=>void }){
   const [place,setPlace]=useState("");
 
   if(step===1) return (
-    <Card className="border-[#D6FF2A]/20 bg-gradient-to-br from-[#D6FF2A]/5 via-zinc-900 to-zinc-900">
+    <Card className="border-primary/20 bg-gradient-to-br from-primary/5 via-zinc-900 to-zinc-900">
       <CardContent className="pt-6 text-center space-y-4">
-        <div className="w-16 h-16 rounded-2xl bg-[#D6FF2A] flex items-center justify-center font-black text-black text-xl mx-auto">E</div>
+        <div className="w-16 h-16 rounded-2xl bg-primary flex items-center justify-center font-black text-black text-xl mx-auto">E</div>
         <div><h2 className="text-xl font-black">Bienvenido a EZEQUIEL COACHING</h2><p className="text-xs text-zinc-500">Tu transformación empieza hoy. 5 pasos, 2 minutos.</p></div>
         <Button variant="accent" className="w-full h-12 font-black" onClick={()=>setStep(2)}>Comenzar →</Button>
       </CardContent>
@@ -23,10 +23,10 @@ export function OnboardingFlow({ onComplete }:{ onComplete?: ()=>void }){
   );
   if(step===2) return (
     <Card><CardContent className="pt-6 space-y-4">
-      <p className="font-bold flex items-center gap-2"><Target size={16} className="text-[#D6FF2A]"/> ¿Cuál es tu objetivo?</p>
+      <p className="font-bold flex items-center gap-2"><Target size={16} className="text-primary"/> ¿Cuál es tu objetivo?</p>
       <div className="grid grid-cols-2 gap-2">
         {["Pérdida de grasa","Ganancia muscular","Fuerza","Recomposición","Otro"].map(g=>(
-          <button key={g} onClick={()=>{setGoal(g); setStep(3);}} className={`p-3 rounded-xl border text-sm font-bold ${goal===g?"bg-[#D6FF2A] text-black border-[#D6FF2A]":"bg-zinc-900 border-zinc-800 text-white hover:border-zinc-700"}`}>{g}</button>
+          <button key={g} onClick={()=>{setGoal(g); setStep(3);}} className={`p-3 rounded-xl border text-sm font-bold ${goal===g?"bg-primary text-black border-primary":"bg-zinc-900 border-zinc-800 text-white hover:border-zinc-700"}`}>{g}</button>
         ))}
       </div>
       <p className="text-[11px] text-zinc-600 text-center">Paso 2/5</p>
@@ -34,10 +34,10 @@ export function OnboardingFlow({ onComplete }:{ onComplete?: ()=>void }){
   );
   if(step===3) return (
     <Card><CardContent className="pt-6 space-y-4">
-      <p className="font-bold flex items-center gap-2"><Calendar size={16} className="text-[#D6FF2A]"/> ¿Cuántos días podés entrenar?</p>
+      <p className="font-bold flex items-center gap-2"><Calendar size={16} className="text-primary"/> ¿Cuántos días podés entrenar?</p>
       <div className="grid grid-cols-4 gap-2">
         {[2,3,4,5].map(d=>(
-          <button key={d} onClick={()=>{setDays(d); setStep(4);}} className={`h-16 rounded-xl border font-black text-lg ${days===d?"bg-[#D6FF2A] text-black border-[#D6FF2A]":"bg-zinc-900 border-zinc-800 text-white hover:border-zinc-700"}`}>{d}<span className="text-xs font-normal block">{d===5?"5+":"días"}</span></button>
+          <button key={d} onClick={()=>{setDays(d); setStep(4);}} className={`h-16 rounded-xl border font-black text-lg ${days===d?"bg-primary text-black border-primary":"bg-zinc-900 border-zinc-800 text-white hover:border-zinc-700"}`}>{d}<span className="text-xs font-normal block">{d===5?"5+":"días"}</span></button>
         ))}
       </div>
       <p className="text-[11px] text-zinc-600 text-center">Paso 3/5</p>
@@ -45,10 +45,10 @@ export function OnboardingFlow({ onComplete }:{ onComplete?: ()=>void }){
   );
   if(step===4) return (
     <Card><CardContent className="pt-6 space-y-4">
-      <p className="font-bold flex items-center gap-2"><Dumbbell size={16} className="text-[#D6FF2A]"/> ¿Dónde entrenás?</p>
+      <p className="font-bold flex items-center gap-2"><Dumbbell size={16} className="text-primary"/> ¿Dónde entrenás?</p>
       <div className="grid gap-2">
         {["Gimnasio","Casa","Ambos"].map(p=>(
-          <button key={p} onClick={()=>{setPlace(p); setStep(5);}} className={`p-3 rounded-xl border text-sm font-bold ${place===p?"bg-[#D6FF2A] text-black border-[#D6FF2A]":"bg-zinc-900 border-zinc-800 text-white hover:border-zinc-700"}`}>{p}</button>
+          <button key={p} onClick={()=>{setPlace(p); setStep(5);}} className={`p-3 rounded-xl border text-sm font-bold ${place===p?"bg-primary text-black border-primary":"bg-zinc-900 border-zinc-800 text-white hover:border-zinc-700"}`}>{p}</button>
         ))}
       </div>
       <p className="text-[11px] text-zinc-600 text-center">Paso 4/5</p>

@@ -39,8 +39,8 @@ export function OptiLiftsProgression({ logs, onApply }:{ logs: LiftLog[]; onAppl
   );
 
   return (
-    <Card className="border-[#D6FF2A]/20">
-      <CardHeader><CardTitle className="flex items-center gap-2"><Zap size={18} className="text-[#D6FF2A]"/> Progresión Inteligente <Badge variant="accent">OptiLifts MIT</Badge></CardTitle><p className="text-xs text-zinc-500">IA rule-based: RIR + reps → +2.5% / deload / mantener</p></CardHeader>
+    <Card className="border-primary/20">
+      <CardHeader><CardTitle className="flex items-center gap-2"><Zap size={18} className="text-primary"/> Progresión Inteligente</CardTitle><p className="text-xs text-zinc-500">IA rule-based: RIR + reps → +2.5% / deload / mantener</p></CardHeader>
       <CardContent className="space-y-3">
         {suggestions.map(s=>(
           <div key={s.exercise} className={`flex items-center justify-between p-3 rounded-xl border ${s.trend==="up"?"bg-emerald-500/10 border-emerald-500/20": s.trend==="down"?"bg-amber-500/10 border-amber-500/20":"bg-zinc-900 border-zinc-800"}`}>
@@ -59,7 +59,6 @@ export function OptiLiftsProgression({ logs, onApply }:{ logs: LiftLog[]; onAppl
             </div>
           </div>
         ))}
-        <p className="text-[11px] text-zinc-600 text-center">OptiLifts MIT — no es consejo médico. Inspirado en <a href="https://github.com/topics/optilifts" target="_blank" className="underline">OptiLifts</a></p>
       </CardContent>
     </Card>
   );

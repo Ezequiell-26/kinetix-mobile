@@ -15,7 +15,7 @@ const KNOWLEDGE: Record<string,string> = {
   "proteina": "Para hipertrofia: 1.6-2.2g/kg/día. Si pesas 80kg → 140-175g. Distribuye en 4 comidas. Tu registro hoy: revisa SparkyHabits.",
   "progresion": "Progresión inteligente OptiLifts: si RIR ≥3 y completaste reps top del rango → +2.5% la próxima. Si RIR ≤0 → mantén o baja 10%.",
   "sueño": "Sueño <7h reduce fuerza ~10% y aumenta hambre. Objetivo 7-9h, consistente. Tu Sleep en SparkyHabits si <7h → prioriza hoy.",
-  "default": "Soy tu IA Coach local (sin API key). Puedo ayudarte con progresión, mesetas, proteína, sueño, técnica. Preguntame: '¿cómo supero mi meseta en press banca?' o '¿cuánta proteína necesito?' — Con BYOK OpenAI puedo ser aún más preciso."
+  "default": "Soy tu IA Coach. Puedo ayudarte con progresión, mesetas, proteína, sueño y técnica. Preguntame lo que quieras."
 };
 
 function answerFor(q:string){
@@ -49,12 +49,12 @@ export function AiCoachChat(){
 
   return (
     <Card className="border-violet-500/20 bg-gradient-to-br from-violet-500/5 via-zinc-900 to-zinc-900">
-      <CardHeader><CardTitle className="flex items-center gap-2"><Bot size={18} className="text-violet-400"/> IA Coach <Badge variant="muted">VitaFlex GPT-4o MIT</Badge> <Badge variant="accent" className="ml-auto text-[10px]">Local + BYOK</Badge></CardTitle><p className="text-xs text-zinc-500">Preguntá sobre mesetas, proteína, sueño, progresión — con contexto de tu programa</p></CardHeader>
+      <CardHeader><CardTitle className="flex items-center gap-2"><Bot size={18} className="text-violet-400"/> IA Coach</CardTitle><p className="text-xs text-zinc-500">Preguntá sobre mesetas, proteína, sueño, progresión — con contexto de tu programa</p></CardHeader>
       <CardContent className="space-y-3">
         <div className="h-[240px] overflow-y-auto space-y-2 bg-zinc-950 rounded-xl p-3 border border-zinc-800">
           {msgs.map((m,i)=>(
             <div key={i} className={`flex gap-2 ${m.role==="user"?"justify-end":"justify-start"}`}>
-              <div className={`max-w-[80%] px-3 py-2 rounded-2xl text-xs ${m.role==="user"?"bg-[#D6FF2A] text-black rounded-br-md":"bg-zinc-900 text-white border border-zinc-800 rounded-bl-md"}`}>
+              <div className={`max-w-[80%] px-3 py-2 rounded-2xl text-xs ${m.role==="user"?"bg-primary text-black rounded-br-md":"bg-zinc-900 text-white border border-zinc-800 rounded-bl-md"}`}>
                 <div className="flex items-center gap-1 mb-1 opacity-60">{m.role==="user"?<User size={10}/>:<Bot size={10}/>} {m.role==="user"?"Vos":"IA Coach"}</div>
                 <p className="whitespace-pre-wrap leading-relaxed">{m.content}</p>
               </div>
@@ -72,7 +72,6 @@ export function AiCoachChat(){
             <button key={q} onClick={()=>{ setInput(q); setTimeout(send,50); }} className="shrink-0 text-xs px-3 py-1.5 rounded-full bg-zinc-900 border border-zinc-800 text-zinc-300 hover:text-white whitespace-nowrap">{q}</button>
           ))}
         </div>
-        <p className="text-[11px] text-zinc-600 text-center">VitaFlex-AI MIT (GPT-4o) + local rule-based • BYOK OpenAI en /api/ai/chat</p>
       </CardContent>
     </Card>
   );

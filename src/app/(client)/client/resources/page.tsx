@@ -2,6 +2,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
+import { Star } from "lucide-react";
 
 const resources = [
   {id:"1", title:"Guía de Técnica: Sentadilla Perfecta", type:"Video", duration:"8 min", premium:true, thumb:"https://images.unsplash.com/photo-1434608519340-334ff72da56d?w=400"},
@@ -18,9 +19,9 @@ export default function ResourcesPage(){
         <Badge variant="accent">VIP</Badge>
       </div>
 
-      <Card className="bg-gradient-to-br from-[#D6FF2A]/10 to-zinc-900 border-[#D6FF2A]/20">
+      <Card className="bg-gradient-to-br from-primary/10 to-zinc-900 border-primary/20">
         <CardContent className="pt-4 flex gap-3">
-          <div className="w-12 h-12 rounded-xl bg-[#D6FF2A] flex items-center justify-center font-black text-black">★</div>
+          <div className="w-12 h-12 rounded-xl bg-primary flex items-center justify-center text-black"><Star size={20} fill="currentColor" /></div>
           <div><p className="font-bold">Acceso VIP completo</p><p className="text-xs text-zinc-500">12 recursos • nuevos cada semana • solo para clientes Premium/Personalizado</p></div>
         </CardContent>
       </Card>
@@ -34,7 +35,7 @@ export default function ResourcesPage(){
                 <img src={r.thumb} alt={r.title} className="w-full h-full object-cover group-hover:scale-105 transition" />
               </div>
               <div className="flex-1 min-w-0">
-                <div className="flex gap-2 items-center"><Badge variant={r.premium?"accent":"muted"}>{r.type}</Badge><span className="text-xs text-zinc-500">{r.duration}</span>{r.premium && <span className="text-xs text-[#D6FF2A]">• VIP</span>}</div>
+                <div className="flex gap-2 items-center"><Badge variant={r.premium?"accent":"muted"}>{r.type}</Badge><span className="text-xs text-zinc-500">{r.duration}</span>{r.premium && <span className="text-xs text-primary">• VIP</span>}</div>
                 <p className="font-semibold text-sm mt-1 line-clamp-2">{r.title}</p>
                 <div className="flex gap-2 mt-2"><Button variant="outline" size="sm" className="h-7 text-xs">Ver</Button><Button variant="ghost" size="sm" className="h-7 text-xs">Guardar</Button></div>
               </div>

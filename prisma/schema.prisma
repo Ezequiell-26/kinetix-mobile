@@ -216,8 +216,11 @@ model WorkoutLog {
   user       User? @relation(fields: [userId], references: [id], onDelete: SetNull)
   clientId   String?
   client     Client? @relation(fields: [clientId], references: [id], onDelete: SetNull)
-  workoutId  String
-  workout    Workout @relation(fields: [workoutId], references: [id])
+  // Opcional con SetNull: editar la estructura de un programa no borra el
+  // historial del atleta; workoutName preserva el nombre original de la sesión.
+  workoutId  String?
+  workout    Workout? @relation(fields: [workoutId], references: [id], onDelete: SetNull)
+  workoutName String?
   date       DateTime @default(now())
   durationMin Int?
   comment    String?
