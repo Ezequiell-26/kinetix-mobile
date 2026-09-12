@@ -1,6 +1,8 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import { getSession } from "@/lib/auth";
+import { SiteNav } from "@/components/landing/site-nav";
+import { SiteFooter } from "@/components/landing/site-footer";
 import {
   Dumbbell,
   ClipboardList,
@@ -70,34 +72,7 @@ export default async function Home() {
 
   return (
     <div className="min-h-dvh bg-[#080808] text-white">
-      {/* Nav */}
-      <header className="sticky top-0 z-50 border-b border-zinc-900 bg-[#080808]/90 backdrop-blur">
-        <div className="mx-auto max-w-5xl px-4 h-16 flex items-center justify-between">
-          <span className="font-black tracking-tight text-lg">
-            EZEQUIEL<span className="text-[#D6FF2A]">COACHING</span>
-          </span>
-          <nav className="flex items-center gap-2 sm:gap-3">
-            <Link
-              href="#planes"
-              className="hidden sm:inline text-sm text-zinc-400 hover:text-white px-3 min-h-[44px] inline-flex items-center"
-            >
-              Planes
-            </Link>
-            <Link
-              href="/install"
-              className="hidden sm:inline text-sm text-zinc-400 hover:text-white px-3 min-h-[44px] inline-flex items-center"
-            >
-              Instalar app
-            </Link>
-            <Link
-              href="/login"
-              className="min-h-[44px] inline-flex items-center px-5 rounded-full bg-[#D6FF2A] text-black text-sm font-black"
-            >
-              Ingresar
-            </Link>
-          </nav>
-        </div>
-      </header>
+      <SiteNav />
 
       {/* Hero */}
       <section className="mx-auto max-w-5xl px-4 pt-16 sm:pt-24 pb-14 text-center">
@@ -237,25 +212,7 @@ export default async function Home() {
         </div>
       </section>
 
-      <footer className="border-t border-zinc-900">
-        <div className="mx-auto max-w-5xl px-4 py-8 flex flex-col sm:flex-row gap-3 items-center justify-between text-sm text-zinc-500">
-          <span className="font-black text-white">
-            EZEQUIEL<span className="text-[#D6FF2A]">COACHING</span>
-          </span>
-          <nav className="flex gap-4">
-            <Link href="/login" className="hover:text-white min-h-[44px] inline-flex items-center">
-              Ingresar
-            </Link>
-            <Link href="/register" className="hover:text-white min-h-[44px] inline-flex items-center">
-              Crear cuenta
-            </Link>
-            <Link href="/install" className="hover:text-white min-h-[44px] inline-flex items-center">
-              Instalar app
-            </Link>
-          </nav>
-          <span>© 2026 · Tu mejor versión, cada día</span>
-        </div>
-      </footer>
+      <SiteFooter />
     </div>
   );
 }
