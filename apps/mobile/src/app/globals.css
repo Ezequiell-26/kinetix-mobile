@@ -601,20 +601,23 @@ html.light [class*="rgba(52,211,153"] { box-shadow: 0 6px 20px rgba(5,150,105,0.
 html.light [class*="rgba(0,0,0,0.5)"] { box-shadow: 0 8px 28px rgba(0,0,0,0.12) !important; }
 
 /* Iconos de navegación: brillo neón en oscuro, halo sobrio en claro */
-.nav-icon { color: #71717a; }
+.nav-icon { color: #71717a; transition: color 0.2s ease, filter 0.2s ease, transform 0.15s ease; }
 .nav-icon-active {
   color: rgb(var(--primary));
   filter: drop-shadow(0 0 10px rgba(52,211,153,0.9));
+  transform: scale(1.08);
 }
-.nav-label { color: #71717a; font-weight: 600; }
+.nav-label { color: #71717a; font-weight: 600; transition: color 0.2s ease, font-weight 0.2s ease; }
 .nav-label-active {
   color: rgb(var(--primary));
   font-weight: 800;
   filter: drop-shadow(0 0 8px rgba(52,211,153,0.7));
+  letter-spacing: 0.02em;
 }
 .nav-dot {
   background: rgb(var(--primary));
   box-shadow: 0 0 6px rgba(52,211,153,1);
+  transition: width 0.2s ease, box-shadow 0.2s ease;
 }
 html.light .nav-icon-active { filter: drop-shadow(0 0 6px rgba(5,150,105,0.35)); }
 html.light .nav-label-active { filter: none; }
@@ -626,6 +629,7 @@ html.light .nav-dot { box-shadow: 0 0 4px rgba(5,150,105,0.6); }
   color: rgb(var(--primary));
   border: 1px solid rgba(52,211,153,0.25);
   font-weight: 700;
+  transition: all 0.2s ease;
 }
 html.light .pill-active { background: #0A0A0A !important; color: #FFFFFF !important; border-color: transparent !important; }
 html.light .group:hover .group-hover\:bg-primary { color: #FFFFFF !important; }
