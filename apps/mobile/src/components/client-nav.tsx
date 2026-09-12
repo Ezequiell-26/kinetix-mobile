@@ -116,9 +116,18 @@ export function ClientTopBar({ name }: { name?: string }){
     <header className="sticky top-0 z-30 bg-[#0A0F14]/85 backdrop-blur-xl border-b border-subtle relative after:content-[''] after:absolute after:bottom-0 after:left-0 after:right-0 after:h-px after:bg-gradient-to-r after:from-transparent after:via-primary/25 after:to-transparent">
       <div className="flex items-center justify-between px-4 lg:px-8 h-[60px] max-w-[1100px] mx-auto w-full">
         <Link href="/client/dashboard" className="flex items-center gap-2.5 group">
-          <div className="relative w-9 h-9 rounded-xl bg-gradient-to-br from-primary to-primary-hover flex items-center justify-center font-black text-black text-base shadow-[0_4px_16px_rgba(52,211,153,0.35)] group-hover:shadow-[0_4px_24px_rgba(52,211,153,0.55)] transition-shadow">
+          <div className="relative w-9 h-9 rounded-xl bg-gradient-to-br from-primary to-primary-hover flex items-center justify-center font-black text-black text-base shadow-[0_4px_16px_rgba(52,211,153,0.35)] group-hover:shadow-[0_4px_24px_rgba(52,211,153,0.55)] transition-shadow overflow-hidden">
             <span className="absolute inset-0 rounded-xl bg-white/20 opacity-0 group-hover:opacity-100 transition-opacity" />
-            <span className="relative">E</span>
+            <svg width="20" height="20" viewBox="0 0 512 512" className="w-full h-full" aria-hidden="true">
+              <rect width="512" height="512" rx="100" fill="url(#bgGradClient)"/>
+              <defs>
+                <linearGradient id="bgGradClient" x1="0%" y1="0%" x2="100%" y2="100%">
+                  <stop offset="0%" stop-color="#0a0f14"/>
+                  <stop offset="100%" stop-color="#0d1319"/>
+                </linearGradient>
+              </defs>
+              <text x="50%" y="52%" dominant-baseline="middle" text-anchor="middle" font-family="Space Grotesk, Inter, sans-serif" font-weight="900" font-size="280" letter-spacing="-6" fill="#34d399">K</text>
+            </svg>
           </div>
           <div className="leading-none">
             <span className="font-display font-bold text-white text-sm tracking-tight block">KinetiX</span>
