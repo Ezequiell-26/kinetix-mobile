@@ -33,14 +33,16 @@ function ViewerFallback() {
 // Cuerpo humano simplificado para anatomía
 function HumanBody({ 
   highlightMuscles = [], 
-  opacity = 0.8 
+  opacity = 0.8,
+  autoRotate = false
 }: { 
   highlightMuscles?: string[]; 
   opacity?: number;
+  autoRotate?: boolean;
 }) {
   const groupRef = useRef<THREE.Group>(null);
   
-  // Colores de músculos principales
+  // Colores de músculos principales - KinetixFitt brand colors
   const muscleColors: Record<string, THREE.Color> = {
     chest: new THREE.Color('#ff6b6b'),
     shoulders: new THREE.Color('#ffd93d'),
@@ -55,8 +57,12 @@ function HumanBody({
   };
 
   useFrame((state) => {
-    if (groupRef.current) {
-      groupRef.current.rotation.y = Math.sin(state.clock.elapsedTime * 0.3) * 0.1;
+    if (groupRef.current && autoRotate) {
+      // Smooth auto-rotation when enabled
+      groupRef.current.rotation.y = state.clock.elapsedTime * 0.2;
+    } else if (groupRef.current && !autoRotate) {
+      // Subtle breathing effect when not rotating
+      groupRef.current.rotation.y = Math.sin(state.clock.elapsedTime * 0.3) * 0.05;
     }
   });
 
@@ -177,16 +183,18 @@ function ExerciseScene({
   exerciseName, 
   showMuscles, 
   showMovement,
-  muscleGroup 
+  muscleGroup,
+  autoRotate = false
 }: { 
   exerciseName?: string;
   showMuscles?: boolean;
   showMovement?: boolean;
   muscleGroup?: string;
+  autoRotate?: boolean;
 }) {
   const { camera } = useThree();
   
-  // Mapeo simple de ejercicios a músculos
+  // Mapeo simple de ejercicios a músculos - TODO: migrate to structured domain data
   const getMusclesForExercise = (name?: string): string[] => {
     if (!name) return [];
     
@@ -234,7 +242,7 @@ function ExerciseScene({
       <Environment preset="studio" />
       
       {/* Cuerpo humano */}
-      <HumanBody highlightMuscles={highlightedMuscles} />
+      <HumanBody highlightMuscles={highlightedMuscles} autoRotate={autoRotate} />
       
       {/* Indicador de movimiento */}
       {showMovement && exerciseName && (
@@ -270,10 +278,16 @@ export function Exercise3DViewer({
   className = '',
 }: Exercise3DViewerProps) {
   const [isClient, setIsClient] = useState(false);
+  const [rotationEnabled, setRotationEnabled] = useState(autoRotate);
 
   useEffect(() => {
     setIsClient(true);
   }, []);
+
+  // Sync autoRotate prop with internal state
+  useEffect(() => {
+    setRotationEnabled(autoRotate);
+  }, [autoRotate]);
 
   // Configuración de calidad
   const qualitySettings = useMemo(() => {
@@ -323,15 +337,20 @@ export function Exercise3DViewer({
       <div className="absolute bottom-4 right-4 z-10 flex gap-2">
         <button
           className="p-2 bg-gray-800/80 backdrop-blur-sm rounded-lg text-gray-300 hover:text-lime-400 transition-colors"
-          title="Rotar vista"
+          title={rotationEnabled ? "Pausar rotación" : "Activar rotación"}
+          onClick={() => setRotationEnabled(!rotationEnabled)}
         >
-          <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <svg className={`w-5 h-5 ${rotationEnabled ? 'text-lime-400' : ''}`} fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
           </svg>
         </button>
         <button
           className="p-2 bg-gray-800/80 backdrop-blur-sm rounded-lg text-gray-300 hover:text-lime-400 transition-colors"
           title="Resetear vista"
+          onClick={() => {
+            // Reset camera position - handled by OrbitControls
+            window.dispatchEvent(new CustomEvent('reset-camera'));
+          }}
         >
           <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 10V19a2 2 0 002 2h.5M21 10V19a2 2 0 01-2 2h-.5M7 10l5-5 5 5M7 14l5 5 5-5" />

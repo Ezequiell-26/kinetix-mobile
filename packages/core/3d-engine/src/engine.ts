@@ -1,12 +1,12 @@
 /**
  * KinetixFitt 3D Engine - High Performance Renderer
- * Hybrid WebGPU/WebGL with automatic fallback
- * Runs on offscreen canvas with worker threading
+ * WebGL-based renderer with quality tiers and automatic fallback
  */
 
 import { WebGLRenderer, Scene, PerspectiveCamera, Vector3 } from 'three';
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js';
 import { DRACOLoader } from 'three/examples/jsm/loaders/DRACOLoader.js';
+import * as THREE from 'three';
 
 export interface RenderConfig {
   targetFPS: number;
@@ -45,29 +45,12 @@ export class Kinetix3DEngine {
       1000
     );
     
-    this.initialize(config);
-  }
-
-  private async initialize(config: RenderConfig): Promise<void> {
-    try {
-      // Try WebGPU first, fallback to WebGL
-      if (navigator.gpu) {
-        await this.initWebGPU(config);
-      } else {
-        this.initWebGL(config);
-      }
-      
-      this.setupLighting();
-      this.startRenderLoop();
-    } catch (error) {
-      console.warn('3D init failed, using fallback:', error);
-      this.initFallback();
-    }
-  }
-
-  private initWebGPU(config: RenderConfig): Promise<void> {
-    // WebGPU implementation (progressive enhancement)
-    return Promise.resolve();
+    this.camera.position.set(0, 0, 5);
+    
+    // Initialize WebGL directly - WebGPU not yet implemented
+    this.initWebGL(config);
+    this.setupLighting();
+    this.startRenderLoop();
   }
 
   private initWebGL(config: RenderConfig): void {
@@ -115,10 +98,10 @@ export class Kinetix3DEngine {
       const deltaTime = time - this.lastFrameTime;
       this.lastFrameTime = time;
 
-      // FPS calculation
+      // FPS calculation - fixed: use separate time tracking
       this.frameCount++;
-      if (time - this.lastFrameTime >= 1000) {
-        this.fps = this.frameCount;
+      if (time >= 1000) {
+        this.fps = Math.round(this.frameCount * 1000 / time);
         this.frameCount = 0;
       }
 
@@ -134,6 +117,7 @@ export class Kinetix3DEngine {
     };
 
     this.isRunning = true;
+    this.lastFrameTime = performance.now();
     this.animationFrame = requestAnimationFrame(render);
   }
 
@@ -187,6 +171,19 @@ export class Kinetix3DEngine {
 
     if (this.renderer) {
       this.renderer.setSize(width, height);
+      this.renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+    }
+  }
+
+  /**
+   * Handle page visibility changes to pause/resume rendering
+   * Call this from the parent component on visibilitychange event
+   */
+  public setVisibility(isVisible: boolean): void {
+    if (isVisible && !this.isRunning) {
+      this.startRenderLoop();
+    } else if (!isVisible && this.isRunning) {
+      this.stop();
     }
   }
 
@@ -199,10 +196,30 @@ export class Kinetix3DEngine {
 
   public dispose(): void {
     this.stop();
+    
+    // Properly dispose all GPU resources
     if (this.renderer) {
       this.renderer.dispose();
       this.renderer.forceContextLoss();
       this.renderer = null;
+    }
+    
+    // Dispose scene objects
+    this.scene.traverse((object) => {
+      if (object instanceof THREE.Mesh) {
+        object.geometry?.dispose();
+        if (object.material) {
+          const materials = Array.isArray(object.material) 
+            ? object.material 
+            : [object.material];
+          materials.forEach((mat) => mat.dispose());
+        }
+      }
+    });
+    
+    // Clear scene
+    while(this.scene.children.length > 0) {
+      this.scene.remove(this.scene.children[0]);
     }
   }
 
@@ -211,19 +228,51 @@ export class Kinetix3DEngine {
   }
 }
 
-// Auto-detect device capability
+// Auto-detect device capability for quality tier selection
 export function getDeviceTier(): 'high' | 'medium' | 'low' {
-  const gpu = navigator.gpu || (navigator as any).webkitGPU;
+  if (typeof window === 'undefined') return 'low';
+  
   const devicePixelRatio = window.devicePixelRatio || 1;
   const hardwareConcurrency = navigator.hardwareConcurrency || 4;
-
-  if (gpu && devicePixelRatio >= 2 && hardwareConcurrency >= 8) {
+  const deviceMemory = (navigator as any).deviceMemory || 4;
+  
+  // High: modern devices with good GPU, 8+ cores, 4GB+ RAM
+  if (devicePixelRatio >= 2 && hardwareConcurrency >= 8 && deviceMemory >= 4) {
     return 'high';
-  } else if (devicePixelRatio >= 1.5 && hardwareConcurrency >= 4) {
+  }
+  // Medium: mid-range devices
+  if (devicePixelRatio >= 1.5 && hardwareConcurrency >= 4 && deviceMemory >= 2) {
     return 'medium';
   }
-  
+  // Low: older or low-end devices
   return 'low';
+}
+
+// Get quality settings based on device tier
+export function getQualitySettings(tier: 'high' | 'medium' | 'low'): RenderConfig {
+  switch (tier) {
+    case 'high':
+      return {
+        targetFPS: 60,
+        pixelRatio: Math.min(window.devicePixelRatio, 2),
+        antialias: true,
+        powerPreference: 'high-performance'
+      };
+    case 'medium':
+      return {
+        targetFPS: 30,
+        pixelRatio: 1,
+        antialias: true,
+        powerPreference: 'default'
+      };
+    case 'low':
+      return {
+        targetFPS: 30,
+        pixelRatio: 0.5,
+        antialias: false,
+        powerPreference: 'low-power'
+      };
+  }
 }
 
 export default Kinetix3DEngine;
