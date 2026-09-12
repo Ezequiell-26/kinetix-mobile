@@ -1,71 +1,46 @@
+```
 # Dependencies
-node_modules
-.pnp
-.pnp.js
+node_modules/
 
-# Next.js
-.next
-out
-dist
-build
+# Build outputs
+dist/
+build/
+.next/
+out/
 
-# Database
-prisma/dev.db
-prisma/dev.db-journal
-*.db
-*.db-journal
-
-# Env
+# Environment variables
 .env
 .env.local
-.env.development.local
-.env.test.local
-.env.production.local
+*.env.*
 
-# Logs
-npm-debug.log*
-yarn-debug.log*
-yarn-error.log*
-pnpm-debug.log*
-logs
-*.log
-
-# OS
-.DS_Store
-Thumbs.db
+# IDE files
+.vscode/
+.idea/
 *.swp
 *.swo
-*~
 
-# IDE
-.vscode
-.idea
-*.suo
-*.ntvs*
-*.njsproj
-*.sln
-*.sw?
+# Logs
+*.log
 
-# Uploads (keep folder but ignore content)
-public/uploads/*
-!public/uploads/.gitkeep
+# Temp files
+*.tmp
 
-# Vercel
-.vercel
+# Python cache (if present)
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
 
-# Testing
-coverage
+# Coverage
+coverage/
+htmlcov/
+.coverage
 
-# Misc
-.cache
-.parcel-cache
-*.txt
-cookies*.txt
-test*.txt
-tmp-gym
-tmp-gym/
+# Lock files
+package-lock.json
+yarn.lock
 
-# tmp datasets (local only, regenerated)
-tmp-*/
-tmp-exercises-dataset/
-tsconfig.tsbuildinfo
+# OS generated files
+.DS_Store
+Thumbs.db
+```
