@@ -76,6 +76,8 @@ Thumbs.db
 *.tar.zst
 
 # ── KinetixFitt: higiene local (2026-09-12, NO BORRAR este bloque) ──
+# Build Next (dev + prod): se regenera solo, jamás se commitea
+.next/
 # TypeScript / Next
 *.tsbuildinfo
 .next-dev*/
