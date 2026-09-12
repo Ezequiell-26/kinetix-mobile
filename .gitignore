@@ -1,109 +1,35 @@
 ```
-# Test files
-**/tests/**
-**/*.test.*
+# Database files
+*.db
+*.db-journal
 
-# TypeScript/JavaScript
+# Prisma migration files
+prisma/migrations/
+
+# Dependencies
 node_modules/
-*.tsbuildinfo
-.nyc_output/
-coverage/
+**/node_modules/
 
-# Logs and temp files
-*.log
-*.tmp
-
-# Environment
+# Environment variables
 .env
 .env.local
-*.env.*
+.env.*
 
-# Editors
+# IDE files
 .vscode/
 .idea/
 *.swp
 *.swo
 
-# Dependencies and build artifacts
+# Logs
+*.log
+
+# OS generated files
+.DS_Store
+Thumbs.db
+
+# Build outputs
 dist/
 build/
-.npm/
-.yarn/
-bower_components/
-
-# Python (if present)
-__pycache__/
-*.pyc
-*.pyo
-*.pyd
-.Python
-env/
-venv/
-.venv/
-pip-log.txt
-pip-delete-this-directory.txt
-.tox/
-.coverage
-.coverage.*
-.cache
-nosetests.xml
-coverage.xml
-*.cover
-*.log
-.git/
-.mypy_cache/
-.pytest_cache/
-.hypothesis/
-
-# Java (if present)
-*.class
-*.jar
-*.war
-*.ear
-*.nar
 target/
-.gradle/
-build/
-
-# C/C++ (if present)
-*.o
-*.ko
-*.obj
-*.elf
-*.a
-*.lib
-*.so
-*.dll
-*.dylib
-*.exe
-*.out
-*.pid
-*.seed
-*.prof
-
-# Go (if present)
-*.exe
-*.exe~
-*.dll
-*.so
-*.dylib
-
-# Ruby (if present)
-*.gem
-*.rbc
-csscacheprofile
-.rake_tasks~
-~
-.rbt_put
-_pickle_cache_/
-.minitest_cache_/
-bundle/
-vendor/bundle/
-.rbenv-vars
-.sass-cache/
-node_modules/
-/.bundle/
-/vendor/cache/
-/sass-cache/
-.capistrano/
 ```
