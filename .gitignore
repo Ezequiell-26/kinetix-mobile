@@ -1,32 +1,37 @@
 ```
-# Dependencies
+# Test files
+**/tests/**
+**/*.test.*
+
+# TypeScript/JavaScript
 node_modules/
+*.tsbuildinfo
+.nyc_output/
+coverage/
 
-# Build outputs
-dist/
-build/
-.next/
-out/
+# Logs and temp files
+*.log
+*.tmp
 
-# Environment variables
+# Environment
 .env
 .env.local
-.env.*
+*.env.*
 
-# IDE files
+# Editors
 .vscode/
 .idea/
 *.swp
 *.swo
 
-# Logs
-*.log
+# Dependencies and build artifacts
+dist/
+build/
+.npm/
+.yarn/
+bower_components/
 
-# Temporary files
-*.tmp
-*.temp
-
-# Python
+# Python (if present)
 __pycache__/
 *.pyc
 *.pyo
@@ -45,33 +50,60 @@ nosetests.xml
 coverage.xml
 *.cover
 *.log
-.git/modules/
-*.sublime-workspace
+.git/
+.mypy_cache/
+.pytest_cache/
+.hypothesis/
 
-# Node.js
-npm-debug.log*
-yarn-debug.log*
-yarn-error.log*
+# Java (if present)
+*.class
+*.jar
+*.war
+*.ear
+*.nar
+target/
+.gradle/
+build/
+
+# C/C++ (if present)
+*.o
+*.ko
+*.obj
+*.elf
+*.a
+*.lib
+*.so
+*.dll
+*.dylib
+*.exe
+*.out
+*.pid
+*.seed
+*.prof
+
+# Go (if present)
+*.exe
+*.exe~
+*.dll
+*.so
+*.dylib
+
+# Ruby (if present)
+*.gem
+*.rbc
+csscacheprofile
+.rake_tasks~
+~
+.rbt_put
+_pickle_cache_/
+.minitest_cache_/
+bundle/
+vendor/bundle/
+.rbenv-vars
+.sass-cache/
 node_modules/
-jspm_packages/
-web_modules/
-*.tsbuildinfo
-.next/
-.nuxt/
-.vuepress/dist
-.serverless/
-.ufx/
-.vercel/
-.now/
-
-# macOS
-.DS_Store
-
-# Windows
-Thumbs.db
-ehthumbs.db
-Desktop.ini
-
-# Linux
-*~
+/.bundle/
+/vendor/cache/
+/sass-cache/
+.capistrano/
 ```
