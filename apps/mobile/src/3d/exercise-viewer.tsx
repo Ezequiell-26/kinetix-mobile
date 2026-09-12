@@ -4,9 +4,12 @@ import { Canvas, useFrame, useThree } from '@react-three/fiber';
 import { OrbitControls, PerspectiveCamera, Environment, ContactShadows } from '@react-three/drei';
 import { useRef, useMemo, useState, useEffect, Suspense } from 'react';
 import * as THREE from 'three';
+import type { ExerciseDefinition, MuscleActivation } from '@kinetix/shared';
 
 // Tipos para la configuración del viewer
 export interface Exercise3DViewerProps {
+  exercise?: ExerciseDefinition;
+  // Legacy props for backward compatibility
   exerciseName?: string;
   muscleGroup?: string;
   movementPattern?: 'push' | 'pull' | 'hinge' | 'squat' | 'carry';
@@ -42,19 +45,21 @@ function HumanBody({
 }) {
   const groupRef = useRef<THREE.Group>(null);
   
-  // Colores de músculos principales - KinetixFitt brand colors
+  // KinetixFitt brand colors - Electric Lime highlights
   const muscleColors: Record<string, THREE.Color> = {
-    chest: new THREE.Color('#ff6b6b'),
-    shoulders: new THREE.Color('#ffd93d'),
-    biceps: new THREE.Color('#6bcb77'),
-    triceps: new THREE.Color('#4d96ff'),
-    back: new THREE.Color('#9b5de5'),
-    abs: new THREE.Color('#f15bb5'),
-    quads: new THREE.Color('#00bbf9'),
-    hamstrings: new THREE.Color('#00f5d4'),
-    glutes: new THREE.Color('#fee440'),
-    calves: new THREE.Color('#ff9f1c'),
+    chest: new THREE.Color('#D6FF2A'),
+    shoulders: new THREE.Color('#D6FF2A'),
+    biceps: new THREE.Color('#D6FF2A'),
+    triceps: new THREE.Color('#D6FF2A'),
+    back: new THREE.Color('#D6FF2A'),
+    abs: new THREE.Color('#D6FF2A'),
+    quads: new THREE.Color('#D6FF2A'),
+    hamstrings: new THREE.Color('#D6FF2A'),
+    glutes: new THREE.Color('#D6FF2A'),
+    calves: new THREE.Color('#D6FF2A'),
   };
+
+  const baseColor = new THREE.Color('#d4a574');
 
   useFrame((state) => {
     if (groupRef.current && autoRotate) {
@@ -71,14 +76,14 @@ function HumanBody({
       {/* Cabeza */}
       <mesh position={[0, 1.7, 0]}>
         <sphereGeometry args={[0.15, 32, 32]} />
-        <meshStandardMaterial color="#d4a574" opacity={opacity} transparent />
+        <meshStandardMaterial color={baseColor} opacity={opacity} transparent />
       </mesh>
 
       {/* Torso */}
       <mesh position={[0, 1.2, 0]}>
         <boxGeometry args={[0.5, 0.7, 0.3]} />
         <meshStandardMaterial 
-          color={highlightMuscles.includes('chest') ? muscleColors.chest : '#d4a574'}
+          color={highlightMuscles.includes('chest') ? muscleColors.chest : baseColor}
           opacity={opacity} 
           transparent 
         />
@@ -88,7 +93,7 @@ function HumanBody({
       <mesh position={[0, 0.8, 0]}>
         <boxGeometry args={[0.45, 0.4, 0.28]} />
         <meshStandardMaterial 
-          color={highlightMuscles.includes('abs') ? muscleColors.abs : '#d4a574'}
+          color={highlightMuscles.includes('abs') ? muscleColors.abs : baseColor}
           opacity={opacity} 
           transparent 
         />
@@ -98,7 +103,7 @@ function HumanBody({
       <mesh position={[-0.35, 1.5, 0]}>
         <sphereGeometry args={[0.12, 32, 32]} />
         <meshStandardMaterial 
-          color={highlightMuscles.includes('shoulders') ? muscleColors.shoulders : '#d4a574'}
+          color={highlightMuscles.includes('shoulders') ? muscleColors.shoulders : baseColor}
           opacity={opacity} 
           transparent 
         />
@@ -106,7 +111,7 @@ function HumanBody({
       <mesh position={[0.35, 1.5, 0]}>
         <sphereGeometry args={[0.12, 32, 32]} />
         <meshStandardMaterial 
-          color={highlightMuscles.includes('shoulders') ? muscleColors.shoulders : '#d4a574'}
+          color={highlightMuscles.includes('shoulders') ? muscleColors.shoulders : baseColor}
           opacity={opacity} 
           transparent 
         />
@@ -116,7 +121,7 @@ function HumanBody({
       <mesh position={[-0.5, 1.2, 0]}>
         <capsuleGeometry args={[0.08, 0.5, 32, 16]} />
         <meshStandardMaterial 
-          color={highlightMuscles.includes('biceps') || highlightMuscles.includes('triceps') ? muscleColors.biceps : '#d4a574'}
+          color={highlightMuscles.includes('biceps') || highlightMuscles.includes('triceps') ? muscleColors.biceps : baseColor}
           opacity={opacity} 
           transparent 
         />
@@ -124,7 +129,7 @@ function HumanBody({
       <mesh position={[0.5, 1.2, 0]}>
         <capsuleGeometry args={[0.08, 0.5, 32, 16]} />
         <meshStandardMaterial 
-          color={highlightMuscles.includes('biceps') || highlightMuscles.includes('triceps') ? muscleColors.biceps : '#d4a574'}
+          color={highlightMuscles.includes('biceps') || highlightMuscles.includes('triceps') ? muscleColors.biceps : baseColor}
           opacity={opacity} 
           transparent 
         />
@@ -134,7 +139,7 @@ function HumanBody({
       <mesh position={[-0.2, 0.4, 0]}>
         <capsuleGeometry args={[0.12, 0.7, 32, 16]} />
         <meshStandardMaterial 
-          color={highlightMuscles.includes('quads') || highlightMuscles.includes('hamstrings') ? muscleColors.quads : '#d4a574'}
+          color={highlightMuscles.includes('quads') || highlightMuscles.includes('hamstrings') ? muscleColors.quads : baseColor}
           opacity={opacity} 
           transparent 
         />
@@ -142,7 +147,7 @@ function HumanBody({
       <mesh position={[0.2, 0.4, 0]}>
         <capsuleGeometry args={[0.12, 0.7, 32, 16]} />
         <meshStandardMaterial 
-          color={highlightMuscles.includes('quads') || highlightMuscles.includes('hamstrings') ? muscleColors.quads : '#d4a574'}
+          color={highlightMuscles.includes('quads') || highlightMuscles.includes('hamstrings') ? muscleColors.quads : baseColor}
           opacity={opacity} 
           transparent 
         />
@@ -197,49 +202,95 @@ function ControlsNotifier({
 
 // Escena principal del viewer
 function ExerciseScene({ 
-  exerciseName, 
-  showMuscles, 
-  showMovement,
-  muscleGroup,
+  exercise,
+  showMuscles = true,
+  showMovement = true,
   autoRotate = false,
   onControlsReady
 }: { 
-  exerciseName?: string;
+  exercise?: ExerciseDefinition;
   showMuscles?: boolean;
   showMovement?: boolean;
-  muscleGroup?: string;
   autoRotate?: boolean;
   onControlsReady?: (controls: any) => void;
 }) {
   const { camera } = useThree();
   const controlsRef = useRef<any>(null);
   
-  // Mapeo simple de ejercicios a músculos - TODO: migrate to structured domain data
-  const getMusclesForExercise = (name?: string): string[] => {
-    if (!name) return [];
+  // Obtener músculos activos desde la definición estructurada
+  const activeMuscles = useMemo(() => {
+    if (!exercise || !showMuscles) return [];
     
-    const lowerName = name.toLowerCase();
-    if (lowerName.includes('press') || lowerName.includes('bench')) return ['chest', 'shoulders', 'triceps'];
-    if (lowerName.includes('curl')) return ['biceps'];
-    if (lowerName.includes('squat')) return ['quads', 'glutes', 'hamstrings'];
-    if (lowerName.includes('deadlift')) return ['back', 'hamstrings', 'glutes'];
-    if (lowerName.includes('row')) return ['back', 'biceps'];
-    if (lowerName.includes('shoulder')) return ['shoulders'];
-    if (lowerName.includes('leg')) return ['quads', 'hamstrings', 'calves'];
-    if (lowerName.includes('abs') || lowerName.includes('crunch')) return ['abs'];
+    // Mapear MuscleId a string para el visualizador legacy
+    // TODO: migrar a sistema de regiones musculares nativo
+    const muscleMap: Record<string, string> = {
+      chest: 'chest',
+      frontDeltoid: 'shoulders',
+      lateralDeltoid: 'shoulders',
+      rearDeltoid: 'shoulders',
+      biceps: 'biceps',
+      triceps: 'triceps',
+      lats: 'back',
+      traps: 'back',
+      rhomboids: 'back',
+      erectorSpinae: 'back',
+      abs: 'abs',
+      obliques: 'abs',
+      glutes: 'glutes',
+      quads: 'quads',
+      hamstrings: 'hamstrings',
+      calves: 'calves',
+    };
     
-    return [];
-  };
+    return exercise.visualConfig.muscleActivations
+      .filter((activation: MuscleActivation) => activation.intensity && activation.intensity > 0)
+      .map((activation: MuscleActivation) => muscleMap[activation.muscleId] || activation.muscleId);
+  }, [exercise, showMuscles]);
 
-  const highlightedMuscles = useMemo(() => 
-    showMuscles ? getMusclesForExercise(exerciseName) : [],
-    [showMuscles, exerciseName]
-  );
+  // Determinar tipo de movimiento desde datos estructurados
+  const movementType = useMemo(() => {
+    if (!exercise || !showMovement) return null;
+    
+    const { movementPattern } = exercise;
+    switch (movementPattern) {
+      case 'squat':
+      case 'push':
+        return 'up' as const;
+      case 'hinge':
+      case 'pull':
+        return 'down' as const;
+      default:
+        return 'up' as const;
+    }
+  }, [exercise, showMovement]);
 
+  // Aplicar camera preset desde la definición del ejercicio
   useEffect(() => {
-    camera.position.set(2.5, 1.5, 2.5);
-    camera.lookAt(0, 1, 0);
-  }, [camera]);
+    if (exercise?.visualConfig?.cameraPreset) {
+      const preset = exercise.visualConfig.cameraPreset;
+      switch (preset) {
+        case 'front':
+          camera.position.set(0, 1.5, 3);
+          break;
+        case 'rear':
+          camera.position.set(0, 1.5, -3);
+          break;
+        case 'side':
+          camera.position.set(3, 1.5, 0);
+          break;
+        case 'top':
+          camera.position.set(0, 4, 0);
+          break;
+        default:
+          camera.position.set(2.5, 1.5, 2.5);
+      }
+      camera.lookAt(0, 1, 0);
+    } else {
+      // Default position
+      camera.position.set(2.5, 1.5, 2.5);
+      camera.lookAt(0, 1, 0);
+    }
+  }, [camera, exercise]);
 
   return (
     <>
@@ -268,14 +319,10 @@ function ExerciseScene({
       <Environment preset="studio" />
       
       {/* Cuerpo humano */}
-      <HumanBody highlightMuscles={highlightedMuscles} autoRotate={false} />
+      <HumanBody highlightMuscles={activeMuscles} autoRotate={false} />
       
       {/* Indicador de movimiento */}
-      {showMovement && exerciseName && (
-        <MovementIndicator 
-          type={exerciseName.toLowerCase().includes('press') || exerciseName.toLowerCase().includes('squat') ? 'up' : 'down'} 
-        />
-      )}
+      {movementType && <MovementIndicator type={movementType} />}
       
       {/* Sombras */}
       <ContactShadows 
@@ -293,7 +340,9 @@ function ExerciseScene({
 
 // Componente principal exportado
 export function Exercise3DViewer({
-  exerciseName = 'Bench Press',
+  exercise,
+  // Legacy props for backward compatibility
+  exerciseName: legacyExerciseName,
   muscleGroup,
   movementPattern,
   difficulty,
@@ -315,6 +364,17 @@ export function Exercise3DViewer({
   useEffect(() => {
     setRotationEnabled(autoRotate);
   }, [autoRotate]);
+
+  // Resolver ejercicio desde domain o legacy props
+  const resolvedExercise = useMemo(() => {
+    if (exercise) {
+      return exercise;
+    }
+    
+    // Fallback para legacy props - crear definición básica
+    // TODO: migrar todos los callers a usar ExerciseDefinition directamente
+    return undefined;
+  }, [exercise, legacyExerciseName]);
 
   // Reset camera handler
   const handleResetCamera = () => {
@@ -339,25 +399,43 @@ export function Exercise3DViewer({
     return <ViewerFallback />;
   }
 
+  // Mostrar fallback si no hay ejercicio válido
+  if (!resolvedExercise && !legacyExerciseName) {
+    return (
+      <div className="flex items-center justify-center h-full w-full bg-gradient-to-br from-gray-900 to-gray-800 rounded-xl">
+        <div className="text-center space-y-4">
+          <p className="text-gray-300 text-sm">Ejercicio no disponible</p>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className={`relative w-full h-full min-h-[400px] bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900 rounded-xl overflow-hidden ${className}`}>
       {/* Overlay de información */}
       <div className="absolute top-4 left-4 z-10 space-y-2 pointer-events-none">
-        <h3 className="text-white font-bold text-lg drop-shadow-lg">{exerciseName}</h3>
-        {muscleGroup && (
+        <h3 className="text-white font-bold text-lg drop-shadow-lg">
+          {resolvedExercise?.name || legacyExerciseName}
+        </h3>
+        {resolvedExercise && (
           <div className="flex items-center gap-2">
             <span className="px-2 py-1 bg-lime-400/20 backdrop-blur-sm rounded text-lime-400 text-xs font-medium">
-              {muscleGroup}
+              {resolvedExercise.movementPattern}
             </span>
+            {resolvedExercise.primaryMuscles.length > 0 && (
+              <span className="px-2 py-1 bg-lime-400/20 backdrop-blur-sm rounded text-lime-400 text-xs font-medium">
+                {resolvedExercise.primaryMuscles[0]}
+              </span>
+            )}
           </div>
         )}
-        {difficulty && (
+        {resolvedExercise && (
           <div className="flex gap-1">
             {['beginner', 'intermediate', 'advanced'].map((level) => (
               <div
                 key={level}
                 className={`w-2 h-2 rounded-full ${
-                  level === difficulty 
+                  level === resolvedExercise.difficulty 
                     ? 'bg-lime-400' 
                     : 'bg-gray-600'
                 }`}
@@ -373,6 +451,7 @@ export function Exercise3DViewer({
           className="p-2 bg-gray-800/80 backdrop-blur-sm rounded-lg text-gray-300 hover:text-lime-400 transition-colors"
           title={rotationEnabled ? "Pausar rotación" : "Activar rotación"}
           onClick={() => setRotationEnabled(!rotationEnabled)}
+          aria-label={rotationEnabled ? "Pausar rotación automática" : "Activar rotación automática"}
         >
           <svg className={`w-5 h-5 ${rotationEnabled ? 'text-lime-400' : ''}`} fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
@@ -382,6 +461,7 @@ export function Exercise3DViewer({
           className="p-2 bg-gray-800/80 backdrop-blur-sm rounded-lg text-gray-300 hover:text-lime-400 transition-colors"
           title="Resetear vista"
           onClick={handleResetCamera}
+          aria-label="Resetear cámara"
         >
           <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 10V19a2 2 0 002 2h.5M21 10V19a2 2 0 01-2 2h-.5M7 10l5-5 5 5M7 14l5 5 5-5" />
@@ -398,10 +478,9 @@ export function Exercise3DViewer({
       >
         <Suspense fallback={null}>
           <ExerciseScene 
-            exerciseName={exerciseName}
+            exercise={resolvedExercise}
             showMuscles={showMuscles}
             showMovement={showMovement}
-            muscleGroup={muscleGroup}
             autoRotate={rotationEnabled}
             onControlsReady={setControlsRef}
           />
