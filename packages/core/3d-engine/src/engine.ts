@@ -16,19 +16,21 @@ export interface RenderConfig {
 }
 
 export class Kinetix3DEngine {
-  private canvas: OffscreenCanvas | HTMLCanvasElement;
+  private canvas: HTMLCanvasElement;
   private renderer: WebGLRenderer | null = null;
   private scene: Scene;
   private camera: PerspectiveCamera;
   private animationFrame: number | null = null;
-  private lastFrameTime: number = 0;
   private frameCount: number = 0;
   private fps: number = 0;
   private isRunning: boolean = false;
-  private worker: Worker | null = null;
+  
+  // FPS measurement window for accurate calculation
+  private fpsWindowStart: number = 0;
+  private framesInWindow: number = 0;
 
   constructor(
-    canvas: OffscreenCanvas | HTMLCanvasElement,
+    canvas: HTMLCanvasElement,
     config: RenderConfig = {
       targetFPS: 60,
       pixelRatio: Math.min(window.devicePixelRatio, 2),
@@ -47,15 +49,21 @@ export class Kinetix3DEngine {
     
     this.camera.position.set(0, 0, 5);
     
-    // Initialize WebGL directly - WebGPU not yet implemented
+    // Initialize WebGL renderer
     this.initWebGL(config);
     this.setupLighting();
     this.startRenderLoop();
   }
 
   private initWebGL(config: RenderConfig): void {
+    if (!(this.canvas instanceof HTMLCanvasElement)) {
+      console.warn('Kinetix3DEngine: OffscreenCanvas not supported, falling back to 2D canvas');
+      this.initFallback();
+      return;
+    }
+
     this.renderer = new WebGLRenderer({
-      canvas: this.canvas as HTMLCanvasElement,
+      canvas: this.canvas,
       antialias: config.antialias,
       alpha: true,
       powerPreference: config.powerPreference,
@@ -95,18 +103,19 @@ export class Kinetix3DEngine {
     const render = (time: number) => {
       if (!this.isRunning) return;
 
-      const deltaTime = time - this.lastFrameTime;
-      this.lastFrameTime = time;
-
-      // FPS calculation - fixed: use separate time tracking
-      this.frameCount++;
-      if (time >= 1000) {
-        this.fps = Math.round(this.frameCount * 1000 / time);
-        this.frameCount = 0;
+      // FPS calculation using independent measurement window
+      this.framesInWindow++;
+      const elapsed = time - this.fpsWindowStart;
+      
+      if (elapsed >= 1000) {
+        // Calculate FPS from frames in the last 1000ms window
+        this.fps = Math.round(this.framesInWindow / (elapsed / 1000));
+        this.framesInWindow = 0;
+        this.fpsWindowStart = time;
       }
 
       // Update animations
-      this.updateScene(deltaTime);
+      this.updateScene(elapsed);
 
       // Render
       if (this.renderer) {
@@ -117,7 +126,8 @@ export class Kinetix3DEngine {
     };
 
     this.isRunning = true;
-    this.lastFrameTime = performance.now();
+    this.fpsWindowStart = performance.now();
+    this.framesInWindow = 0;
     this.animationFrame = requestAnimationFrame(render);
   }
 

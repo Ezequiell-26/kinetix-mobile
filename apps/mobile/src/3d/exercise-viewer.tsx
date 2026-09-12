@@ -184,15 +184,18 @@ function ExerciseScene({
   showMuscles, 
   showMovement,
   muscleGroup,
-  autoRotate = false
+  autoRotate = false,
+  onControlsReady
 }: { 
   exerciseName?: string;
   showMuscles?: boolean;
   showMovement?: boolean;
   muscleGroup?: string;
   autoRotate?: boolean;
+  onControlsReady?: (controls: any) => void;
 }) {
   const { camera } = useThree();
+  const controlsRef = useRef<any>(null);
   
   // Mapeo simple de ejercicios a músculos - TODO: migrate to structured domain data
   const getMusclesForExercise = (name?: string): string[] => {
@@ -225,11 +228,18 @@ function ExerciseScene({
     <>
       <PerspectiveCamera makeDefault position={[2.5, 1.5, 2.5]} fov={50} />
       <OrbitControls 
+        ref={controlsRef}
         enablePan={false} 
         minDistance={1.5} 
         maxDistance={4}
         minPolarAngle={Math.PI / 6}
         maxPolarAngle={Math.PI / 2.5}
+        autoRotate={autoRotate}
+        autoRotateSpeed={0.5}
+        onInit={(controls) => {
+          controlsRef.current = controls;
+          onControlsReady?.(controls);
+        }}
       />
       
       {/* Iluminación */}
@@ -242,7 +252,7 @@ function ExerciseScene({
       <Environment preset="studio" />
       
       {/* Cuerpo humano */}
-      <HumanBody highlightMuscles={highlightedMuscles} autoRotate={autoRotate} />
+      <HumanBody highlightMuscles={highlightedMuscles} autoRotate={false} />
       
       {/* Indicador de movimiento */}
       {showMovement && exerciseName && (
@@ -279,6 +289,7 @@ export function Exercise3DViewer({
 }: Exercise3DViewerProps) {
   const [isClient, setIsClient] = useState(false);
   const [rotationEnabled, setRotationEnabled] = useState(autoRotate);
+  const [controlsRef, setControlsRef] = useState<any>(null);
 
   useEffect(() => {
     setIsClient(true);
@@ -288,6 +299,13 @@ export function Exercise3DViewer({
   useEffect(() => {
     setRotationEnabled(autoRotate);
   }, [autoRotate]);
+
+  // Reset camera handler
+  const handleResetCamera = () => {
+    if (controlsRef) {
+      controlsRef.reset();
+    }
+  };
 
   // Configuración de calidad
   const qualitySettings = useMemo(() => {
@@ -347,10 +365,7 @@ export function Exercise3DViewer({
         <button
           className="p-2 bg-gray-800/80 backdrop-blur-sm rounded-lg text-gray-300 hover:text-lime-400 transition-colors"
           title="Resetear vista"
-          onClick={() => {
-            // Reset camera position - handled by OrbitControls
-            window.dispatchEvent(new CustomEvent('reset-camera'));
-          }}
+          onClick={handleResetCamera}
         >
           <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 10V19a2 2 0 002 2h.5M21 10V19a2 2 0 01-2 2h-.5M7 10l5-5 5 5M7 14l5 5 5-5" />
@@ -371,6 +386,8 @@ export function Exercise3DViewer({
             showMuscles={showMuscles}
             showMovement={showMovement}
             muscleGroup={muscleGroup}
+            autoRotate={rotationEnabled}
+            onControlsReady={setControlsRef}
           />
         </Suspense>
       </Canvas>
