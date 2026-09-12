@@ -1,5 +1,10 @@
 /** @type {import("next").NextConfig} */
 const nextConfig = {
+  // Next 15 deprecó el lint integrado y este repo no tiene config plana de
+  // ESLint en apps/mobile (el build fallaba con "Definition for rule
+  // '@typescript-eslint/no-unused-vars' was not found" por el .eslintrc
+  // heredado de la raíz). El gate de calidad es tsc + tests, no este lint.
+  eslint: { ignoreDuringBuilds: true },
   experimental: {
     // OJO seguridad: NO usar ["*"] acá. Next.js valida el header Origin de
     // los Server Actions contra esta lista para prevenir CSRF; "*" apaga esa
