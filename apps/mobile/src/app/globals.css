@@ -2,29 +2,44 @@
 @tailwind components;
 @tailwind utilities;
 
-/* Fuentes via next/font (variables --font-inter/--font-display en <body>) */
+/* ===== FUENTES PREMIUM ===== */
+/* Inter para UI general, Space Grotesk para títulos display */
 
 :root {
-  /* ===== DARK MODE (default) ===== */
+  /* ===== DARK MODE (default) — Paleta Obsidiana Premium ===== */
   --primary: 52 211 153;        /* emerald-400 */
   --primary-hover: 110 231 183; /* emerald-300 */
-  --surface: 14 22 32;          /* obsidian slate */
-  --surface-elevated: 19 30 44;   /* elevated slate */
-  --subtle: 30 45 62;           /* subtle slate border */
+  --primary-glow: rgba(52, 211, 153, 0.15);
+  --surface: 14 22 32;          /* slate profundo */
+  --surface-elevated: 19 30 44;
+  --surface-overlay: rgba(14, 22, 32, 0.6);
+  --subtle: 30 45 62;
   --success: 52 211 153;
-  --warning: 251 191 36;        /* amber-400 */
-  --danger: 248 113 113;        /* red-400 */
-  --info: 56 189 248;           /* sky-400 */
-  --ai: 167 139 250;            /* violet-400 */
+  --warning: 251 191 36;
+  --danger: 248 113 113;
+  --info: 56 189 248;
+  --ai: 167 139 250;
   --premium: 167 139 250;
   --background: 206 33% 5%;
   --foreground: 0 0% 98%;
   --card: 208 39% 9%;
   --card-foreground: 0 0% 98%;
   --border: 208 35% 18%;
+  --border-subtle: 208 35% 14%;
   --accent: 160 84% 39%;
   --safe-top: env(safe-area-inset-top);
   --safe-bottom: env(safe-area-inset-bottom);
+  
+  /* Sombras premium */
+  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.3);
+  --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.4);
+  --shadow-lg: 0 8px 24px rgba(0, 0, 0, 0.5);
+  --shadow-xl: 0 12px 40px rgba(0, 0, 0, 0.6);
+  --shadow-2xl: 0 20px 60px rgba(0, 0, 0, 0.7);
+  
+  /* Gradientes decorativos */
+  --gradient-primary: linear-gradient(135deg, rgba(52,211,153,0.12) 0%, rgba(52,211,153,0.02) 100%);
+  --gradient-surface: linear-gradient(180deg, rgba(255,255,255,0.03) 0%, transparent 100%);
 }
 
 /* ===== LIGHT MODE ===== */
@@ -114,7 +129,7 @@ body {
   transition: background-color 0.3s ease, color 0.3s ease;
   position: relative;
 }
-/* ===== Textura premium de fondo: viñeta obsidiana + grano sutil ===== */
+/* ===== Textura premium de fondo: viñeta obsidiana + grano sutil + atmósfera profesional ===== */
 body::before {
   content: '';
   position: fixed;
@@ -122,10 +137,14 @@ body::before {
   z-index: 0;
   pointer-events: none;
   background:
-    radial-gradient(ellipse 80% 60% at 15% -10%, rgba(52,211,153,0.07), transparent 55%),
-    radial-gradient(ellipse 60% 40% at 85% 110%, rgba(52,211,153,0.04), transparent 55%),
-    radial-gradient(ellipse 100% 70% at 50% -5%, rgba(14,22,32,0.8), transparent 50%),
-    radial-gradient(ellipse 120% 80% at 50% 0%, rgba(0,0,0,0), rgba(0,0,0,0.45) 100%);
+    /* Glow superior izquierdo - acento primario */
+    radial-gradient(ellipse 80% 60% at 15% -10%, rgba(52,211,153,0.08), transparent 55%),
+    /* Glow inferior derecho - sutileza */
+    radial-gradient(ellipse 60% 40% at 85% 110%, rgba(52,211,153,0.05), transparent 55%),
+    /* Glow central superior - profundidad */
+    radial-gradient(ellipse 100% 70% at 50% -5%, rgba(14,22,32,0.7), transparent 50%),
+    /* Viñeta periférica - enfoque tipo foto de estudio */
+    radial-gradient(ellipse 120% 80% at 50% 0%, rgba(0,0,0,0), rgba(0,0,0,0.5) 100%);
 }
 body::after {
   content: '';
@@ -133,8 +152,9 @@ body::after {
   inset: 0;
   z-index: 0;
   pointer-events: none;
-  opacity: 0.035;
+  opacity: 0.03;
   mix-blend-mode: overlay;
+  /* Grano fotográfico sutil - textura premium */
   background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
 }
 html.light body::before { background: radial-gradient(ellipse 80% 60% at 15% -10%, rgba(5,150,105,0.05), transparent 60%); }
@@ -633,6 +653,122 @@ html.light .nav-dot { box-shadow: 0 0 4px rgba(5,150,105,0.6); }
 }
 html.light .pill-active { background: #0A0A0A !important; color: #FFFFFF !important; border-color: transparent !important; }
 html.light .group:hover .group-hover\:bg-primary { color: #FFFFFF !important; }
+
+/* ===== UTILIDADES PREMIUM ADICIONALES ===== */
+
+/* Glassmorphism elevado para overlays y modales */
+.glass-elevated {
+  background: rgba(14, 22, 32, 0.75);
+  backdrop-filter: blur(24px);
+  -webkit-backdrop-filter: blur(24px);
+  border: 1px solid rgba(52, 211, 153, 0.1);
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+}
+html.light .glass-elevated {
+  background: rgba(255, 255, 255, 0.85);
+  border: 1px solid rgba(5, 150, 105, 0.15);
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.15);
+}
+
+/* Efecto de borde brillante animado */
+.border-glow {
+  position: relative;
+}
+.border-glow::before {
+  content: '';
+  position: absolute;
+  inset: -1px;
+  border-radius: inherit;
+  padding: 1px;
+  background: linear-gradient(135deg, rgba(52,211,153,0.3), transparent 40%, rgba(52,211,153,0.2));
+  -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+  pointer-events: none;
+}
+
+/* Gradiente radial sutil para cards destacadas */
+.radial-accent {
+  background-image: radial-gradient(circle at 30% 20%, rgba(52,211,153,0.08) 0%, transparent 50%);
+}
+html.light .radial-accent {
+  background-image: radial-gradient(circle at 30% 20%, rgba(5,150,105,0.06) 0%, transparent 50%);
+}
+
+/* Animación de entrada suave para elementos de lista */
+@keyframes list-item-enter {
+  from { opacity: 0; transform: translateX(-8px); }
+  to { opacity: 1; transform: translateX(0); }
+}
+.list-item-enter {
+  animation: list-item-enter 0.3s cubic-bezier(0.4, 0, 0.2, 1) both;
+}
+
+/* Efecto hover con escala sutil y sombra dinámica */
+.hover-lift-premium {
+  transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1), 
+              box-shadow 0.3s cubic-bezier(0.4, 0, 0.2, 1),
+              border-color 0.2s ease;
+}
+.hover-lift-premium:hover {
+  transform: translateY(-3px) scale(1.01);
+  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.5), 0 0 0 1px rgba(52, 211, 153, 0.15);
+}
+html.light .hover-lift-premium:hover {
+  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.12), 0 0 0 1px rgba(5, 150, 105, 0.2);
+}
+
+/* Badge pulsante para estados activos */
+.badge-pulse {
+  position: relative;
+}
+.badge-pulse::after {
+  content: '';
+  position: absolute;
+  inset: -2px;
+  border-radius: inherit;
+  animation: pulse-ring 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+  background: radial-gradient(circle, rgba(52,211,153,0.4) 0%, transparent 70%);
+}
+@keyframes pulse-ring {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50% { opacity: 0.5; transform: scale(1.15); }
+}
+
+/* Texto con gradiente primario */
+.text-gradient-primary {
+  background: linear-gradient(135deg, rgb(52,211,153) 0%, rgb(110,231,183) 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+html.light .text-gradient-primary {
+  background: linear-gradient(135deg, rgb(5,150,105) 0%, rgb(16,185,129) 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+/* Contenedor con scroll suave y snap */
+.scroll-snap-x {
+  scroll-snap-type: x mandatory;
+  scroll-behavior: smooth;
+  -webkit-overflow-scrolling: touch;
+}
+.scroll-snap-x > * {
+  scroll-snap-align: start;
+}
+
+/* Overlay con desenfoque progresivo */
+.blur-overlay {
+  background: linear-gradient(to bottom, transparent 0%, rgba(8,13,17,0.4) 50%, rgba(8,13,17,0.9) 100%);
+  backdrop-filter: blur(4px);
+}
+html.light .blur-overlay {
+  background: linear-gradient(to bottom, transparent 0%, rgba(255,255,255,0.4) 50%, rgba(255,255,255,0.9) 100%);
+}
+
 /* Chat premium: textura sutil + entrada de mensajes */
 .chat-canvas {
   background-color: #080D11;
