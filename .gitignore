@@ -1,35 +1,4 @@
 ```
-# Database files
-*.db
-*.db-journal
-
-# Prisma migration files
-prisma/migrations/
-
-# Dependencies
-node_modules/
-**/node_modules/
-
-# Environment variables
-.env
-.env.local
-.env.*
-
-# IDE files
-.vscode/
-.idea/
-*.swp
-*.swo
-
-# Logs
-*.log
-
-# OS generated files
-.DS_Store
-Thumbs.db
-
-# Build outputs
-dist/
-build/
-target/
+# TypeScript build artifacts
+tsconfig.tsbuildinfo
 ```
