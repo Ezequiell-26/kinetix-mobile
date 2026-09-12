@@ -76,3 +76,10 @@ tsconfig.tsbuildinfo
 
 # DB temporal del test de regresión
 prisma/test-core.db
+# Monorepo
+.turbo/
+.turbopack/
+
+# Temporary clone directories
+kinetix-web-temp/
+kinetix-mobile-temp/
