@@ -16,7 +16,7 @@ import { PredictivePlateau } from "@/components/predictive-plateau";
 import { AkiloTracker } from "@/components/akilo-tracker";
 import { HealthBox } from "@/components/healthbox";
 import { FitTrackeePro } from "@/components/fittrackee-pro";
-import { SleepTracker } from "@/components/sleep-tracker";
+import { SleepTracker } from "@/components/lazy-charts";
 import { OpenScaleSync } from "@/components/openscale-sync";
 import { SocialShare } from "@/components/social-share";
 import { Challenges } from "@/components/challenges";
@@ -28,7 +28,8 @@ import { GpxTracker } from "@/components/gpx-tracker";
 import { WorkoutTimeline } from "@/components/workout-timeline";
 import { StreakPrediction } from "@/components/streak-prediction";
 import { GraniteOffline } from "@/components/granite-offline";
-import { LiftShiftAnalytics } from "@/components/liftshift-analytics";
+// Carga diferida: Recharts no entra en el bundle inicial de la ruta.
+import { LiftShiftAnalytics } from "@/components/lazy-charts";
 import { MuscleMap } from "@/components/muscle-map";
 import { FileUpload } from "@/components/file-upload";
 import { ExportActions } from "@/components/export-actions";

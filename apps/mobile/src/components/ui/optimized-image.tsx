@@ -85,7 +85,8 @@ export function OptimizedImage({
         quality={quality}
         priority={priority}
         sizes={sizes}
-        onLoadingComplete={() => setIsLoading(false)}
+        // `onLoadingComplete` fue removido en Next.js 15; el reemplazo es onLoad.
+        onLoad={() => setIsLoading(false)}
         onError={() => {
           setIsLoading(false);
           setHasError(true);

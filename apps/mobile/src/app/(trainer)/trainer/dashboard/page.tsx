@@ -1,14 +1,15 @@
 import { prisma } from "@/lib/db";
+import { getSession } from "@/lib/auth";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { TrainerControlCenter } from "@/components/trainer-control-center";
 import { TrainerInsights } from "@/components/trainer-insights";
 import { PwaInstallDesktop } from "@/components/pwa-install-desktop";
 import { LiveSession } from "@/components/live-session";
 import { ExportCenter } from "@/components/export-center";
-import { LiftShiftAnalytics } from "@/components/liftshift-analytics";
+// Carga diferida: Recharts no entra en el bundle inicial de la ruta.
+import { LiftShiftAnalytics, AdherenceChart, RevenueChart, CheckinDonut } from "@/components/lazy-charts";
 import { Badge } from "@/components/ui/badge";
 import { ChangelogNotification } from "@/components/changelog-notification";
-import { AdherenceChart, RevenueChart, CheckinDonut } from "@/components/analytics-charts";
 import { Progress } from "@/components/ui/progress";
 import { UiPremiumStrip, FadeIn, StaggerContainer, StaggerItem } from "@/components/ui-premium";
 import { CountUp, ProgressBar } from "@/components/animated-stats";
@@ -33,6 +34,11 @@ import {
 } from "lucide-react";
 
 export default async function TrainerDashboard(){
+  // Sesión + ownership: las consultas de abajo agregaban sobre TODA la base,
+  // así que un trainer veía los clientes, check-ins y mensajes de otro.
+  const s = await getSession();
+  if (!s) return null;
+
   const now = new Date();
   const startOfToday = new Date(now.getFullYear(), now.getMonth(), now.getDate());
   const sevenDaysAgo = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
@@ -47,38 +53,51 @@ export default async function TrainerDashboard(){
     activeSubscriptions
   ] = await Promise.all([
     prisma.client.findMany({
+      where: { trainerId: s.id },
+      take: 200,
       include: {
-        assignedProgram: true,
+        assignedProgram: { select: { id: true, name: true } },
         workoutLogs: {
           orderBy: { date: "desc" },
-          take: 1
+          take: 1,
+          select: { date: true }
         }
       },
       orderBy: { createdAt: "desc" }
     }).catch(() => []),
 
     prisma.checkIn.findMany({
-      where: { reviewed: false },
-      include: { client: true, user: true },
+      where: { reviewed: false, client: { trainerId: s.id } },
+      // `user: true` serializaba el User completo, incluido el hash de password.
+      include: {
+        client: { select: { id: true, name: true, email: true, avatar: true } },
+        user: { select: { id: true, name: true, email: true, avatar: true } }
+      },
       orderBy: { date: "desc" },
       take: 10
     }).catch(() => []),
 
     prisma.message.findMany({
-      where: { read: false },
-      include: { sender: true, client: true },
+      // Mensajes no leídos dirigidos a este trainer (antes: cualquiera).
+      where: { read: false, receiverId: s.id },
+      include: {
+        sender: { select: { id: true, name: true, email: true, avatar: true } },
+        client: { select: { id: true, name: true } }
+      },
       orderBy: { createdAt: "desc" },
       take: 10
     }).catch(() => []),
 
     prisma.workoutLog.findMany({
-      where: { date: { gte: startOfToday } },
-      include: { client: true, workout: true },
-      orderBy: { date: "desc" }
+      where: { date: { gte: startOfToday }, client: { trainerId: s.id } },
+      include: { client: { select: { id: true, name: true } }, workout: true },
+      orderBy: { date: "desc" },
+      take: 100
     }).catch(() => []),
 
     prisma.subscription.findMany({
-      where: { status: "ACTIVA" }
+      where: { status: "ACTIVA", client: { trainerId: s.id } },
+      take: 500
     }).catch(() => [])
   ]);
 

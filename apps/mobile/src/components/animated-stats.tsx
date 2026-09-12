@@ -82,9 +82,13 @@ export function ProgressBar({
       aria-valuemin={0}
       aria-valuemax={100}
     >
+      {/* `transform: scaleX` en vez de animar `width`: el navegador resuelve la
+          animación en el compositor (sin recalcular layout en cada frame).
+          El contenedor conserva el radio y el overflow-hidden, así que el
+          resultado visual es el mismo. */}
       <div
-        className="h-full rounded-full transition-[width] duration-1000 ease-out"
-        style={{ width: `${width}%`, background: color }}
+        className="h-full w-full rounded-full origin-left transition-transform duration-1000 ease-out"
+        style={{ transform: `scaleX(${width / 100})`, background: color }}
       />
     </div>
   );

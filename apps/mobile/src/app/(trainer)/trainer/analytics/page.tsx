@@ -2,7 +2,7 @@ import { prisma } from "@/lib/db";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
-import { RevenueAnalytics } from "@/components/revenue-analytics";
+import { RevenueAnalytics } from "@/components/lazy-charts";
 
 export default async function AnalyticsPage() {
   /* ── Real data queries ── */
@@ -65,7 +65,7 @@ export default async function AnalyticsPage() {
     <div className="space-y-4">
       <div>
         <h1 className="text-2xl font-display font-bold">Analíticas</h1>
-        <p className="text-sm text-zinc-500">Métricas reales de tu coaching</p>
+        <p className="text-sm text-zinc-400">Métricas reales de tu coaching</p>
       </div>
 
       {/* ── KPI row ── */}

@@ -144,6 +144,11 @@ model Exercise {
   substitutions String?
   createdAt     DateTime @default(now())
   workoutExercises WorkoutExercise[]
+
+  // La biblioteca se filtra por grupo muscular y se busca por nombre en cada
+  // tecla (GET /api/exercises?q=&group=). Sin índices era un full scan.
+  @@index([muscleGroup])
+  @@index([name])
 }
 
 model Program {
@@ -192,6 +197,9 @@ model Workout {
   estimatedMin  Int @default(60)
   exercises     WorkoutExercise[]
   logs          WorkoutLog[]
+
+  // Se consulta por semana (incluir programa → semanas → workouts).
+  @@index([weekId])
 }
 
 model WorkoutExercise {
@@ -236,6 +244,10 @@ model WorkoutLog {
   @@index([userId])
   @@index([clientId])
   @@index([date])
+  // Dashboard filtra por workout y agrupa por workoutId (distinct).
+  @@index([workoutId])
+  // Analytics filtra completed: true.
+  @@index([completed])
 }
 
 model ExerciseSetLog {
@@ -249,6 +261,9 @@ model ExerciseSetLog {
   rir          Int?
   rpe          Int?
   completed    Boolean @default(true)
+
+  // Toda lectura de sets se hace por logId (include: { sets: true }).
+  @@index([logId])
 }
 
 model ProgressMeasurement {
@@ -355,6 +370,9 @@ model Subscription {
   nextPayment DateTime?
   price     Float?
   createdAt DateTime @default(now())
+
+  // El dashboard de ingresos filtra por status: "ACTIVA".
+  @@index([status])
 }
 
 model Payment {
@@ -367,6 +385,12 @@ model Payment {
   method    String?
   date      DateTime @default(now())
   description String?
+
+  // Modelo sin índices: el dashboard de ingresos agrega por cliente, rango de
+  // fechas y estado.
+  @@index([clientId])
+  @@index([date])
+  @@index([status])
 }
 
 // Recuperación de contraseña persistente (reemplaza el Map en memoria, que

@@ -4,6 +4,17 @@ import { motion, useMotionValue, useSpring, useTransform } from "framer-motion";
 import { cn } from "@/lib/utils";
 
 /**
+ * Configuración de resortes a nivel de módulo.
+ *
+ * Antes se declaraba dentro del componente: cada render creaba un objeto nuevo
+ * y `useSpring` recibía una config distinta por referencia, lo que obligaba a
+ * Framer Motion a reconstruir las animaciones. Como el dashboard monta 10+
+ * instancias de Tilt3D, el costo se multiplicaba.
+ */
+const SPRING_CFG = { stiffness: 220, damping: 22, mass: 0.6 } as const;
+const GLARE_SPRING_CFG = { stiffness: 200, damping: 30 } as const;
+
+/**
  * Tilt3D — inclinación 3D real con perspectiva y física de resorte,
  * inspirado en microinteracciones tipo Apple/Stripe/Linear.
  * Sigue el mouse/dedo, hace lift (translateZ) + glare de luz.
@@ -31,13 +42,12 @@ export function Tilt3D({
 
   const x = useMotionValue(0.5);
   const y = useMotionValue(0.5);
-  const springCfg = { stiffness: 220, damping: 22, mass: 0.6 };
-  const rx = useSpring(useTransform(y, [0, 1], [max, -max]), springCfg);
-  const ry = useSpring(useTransform(x, [0, 1], [-max, max]), springCfg);
+  const rx = useSpring(useTransform(y, [0, 1], [max, -max]), SPRING_CFG);
+  const ry = useSpring(useTransform(x, [0, 1], [-max, max]), SPRING_CFG);
   const glareX = useTransform(x, [0, 1], ["0%", "100%"]);
   const glareY = useTransform(y, [0, 1], ["0%", "100%"]);
-  const glareOpacity = useSpring(0, { stiffness: 200, damping: 30 });
-  const liftScale = useSpring(1, springCfg);
+  const glareOpacity = useSpring(0, GLARE_SPRING_CFG);
+  const liftScale = useSpring(1, SPRING_CFG);
 
   if (reduced) {
     return <div className={className}>{children}</div>;
@@ -80,9 +90,12 @@ export function Tilt3D({
       className={cn("relative", className)}
       style={{ perspective: 900 }}
     >
+      {/* Sin `will-change-transform` permanente: el dashboard monta 10+ de
+          estas cards y cada `will-change` promueve una capa GPU propia (mucha
+          memoria). Framer Motion ya gestiona will-change durante la animación. */}
       <motion.div
         style={{ rotateX: rx, rotateY: ry, scale: liftScale, transformStyle: "preserve-3d" }}
-        className="relative h-full will-change-transform"
+        className="relative h-full"
       >
         {children}
         {glare && (
