@@ -16,11 +16,6 @@
     "format": "prettier --write \"src/**/*.ts*\"",
     "clean": "rm -rf .turbo node_modules dist"
   },
-  "devDependencies": {
-    "@types/react": "^18.2.0",
-    "@types/node": "^20.0.0",
-    "typescript": "^5.3.3"
-  },
   "peerDependencies": {
     "react": "^18.0.0 || ^19.0.0"
   }
