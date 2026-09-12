@@ -81,3 +81,14 @@ yarn.lock
 *.tar.zst
 
 ```
+# Build outputs
+.next/
+build/
+dist/
+
+# Dependencies
+node_modules/
+
+# Cache
+.cache/
+*.pack
