@@ -1,6 +1,22 @@
 import { create } from 'zustand';
 import { persist, createJSONStorage } from 'zustand/middleware';
 import { getSupabaseClient, supabaseAuth } from '@/lib/supabase';
+
+// Cliente de Supabase. Tipado loose: los genéricos de @supabase/supabase-js
+// colapsan a never con el Database generado por el otro equipo; cuando ese
+// archivo se regenere con supabase gen types, se vuelve al tipado estricto.
+const supabase = getSupabaseClient() as unknown as {
+  auth: any;
+  from: (table: string) => {
+    select: (columns?: string) => any;
+    insert: (data: unknown) => any;
+    update: (data: unknown) => any;
+    delete: () => any;
+    eq: (column: string, value: unknown) => any;
+    single: () => PromiseLike<{ data: any; error: { message: string } | null }>;
+    order: (column: string, options?: unknown) => any;
+  };
+};
 import { z } from 'zod';
 
 
