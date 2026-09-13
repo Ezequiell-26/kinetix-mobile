@@ -9,7 +9,7 @@ import { useState, useEffect } from 'react';
 import { useTranslation } from '@/hooks/use-translation';
 import { Bell, BellOff, Check } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Switch } from '@/components/ui/switch';
 import { Badge } from '@/components/ui/badge';
 import {
@@ -100,12 +100,12 @@ export function PushNotificationSettings() {
             )}
             <div>
               <CardTitle>Notificaciones Push</CardTitle>
-              <CardDescription>
+              <p className="text-xs text-zinc-500 mt-1">
                 Recibí recordatorios y actualizaciones en tu dispositivo
-              </CardDescription>
+              </p>
             </div>
           </div>
-          <Badge variant={isGranted ? 'default' : 'secondary'}>
+          <Badge variant={isGranted ? 'default' : 'muted'}>
             {isGranted ? 'Activadas' : isSupported ? 'Desactivadas' : 'No soportadas'}
           </Badge>
         </div>

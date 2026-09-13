@@ -8,6 +8,9 @@
 import { useState, useEffect, useCallback } from 'react';
 import { getTranslation, interpolate, Locale, defaultLocale, Translation } from '@/lib/i18n';
 
+export type { Locale } from '@/lib/i18n';
+export { defaultLocale } from '@/lib/i18n';
+
 // Clave para localStorage
 const LOCALE_STORAGE_KEY = 'ezecoech_locale';
 
@@ -53,11 +56,13 @@ export function useTranslation(initialLocale: Locale = defaultLocale) {
     }
   }, []);
 
-  // Función t() para obtener traducciones con interpolación opcional
-  const t = useCallback(<T extends keyof Translation>(
-    key: T,
+  // Función t() para obtener traducciones con interpolación opcional.
+  // Devuelve string: todos los consumidores (labels, aria-label, textos) lo
+  // esperan; una clave de objeto es un error de uso y cae al fallback.
+  const t = useCallback((
+    key: string,
     params?: Record<string, string | number>
-  ): Translation[T] | string => {
+  ): string => {
     const keys = (key as string).split('.');
     let value: any = translations;
     
@@ -76,7 +81,7 @@ export function useTranslation(initialLocale: Locale = defaultLocale) {
       return interpolate(value, params);
     }
     
-    return value;
+    return typeof value === 'string' ? value : (key as string);
   }, [translations]);
 
   // Función para obtener traducción directa sin interpolación

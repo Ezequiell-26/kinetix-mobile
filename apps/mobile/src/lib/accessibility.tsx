@@ -5,7 +5,7 @@
 
 'use client';
 
-import { useEffect, useCallback } from 'react';
+import { useEffect, useCallback, useState, useRef } from 'react';
 
 // Niveles de conformidad WCAG
 export type WCAGLevel = 'A' | 'AA' | 'AAA';
@@ -311,5 +311,3 @@ export function usePrefersReducedMotion(): boolean {
   return prefersReducedMotion;
 }
 
-// Import React hooks
-import { useState, useEffect, useCallback, useRef } from 'react';

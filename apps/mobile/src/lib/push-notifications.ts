@@ -5,7 +5,7 @@
 
 'use client';
 
-import { useEffect, useCallback } from 'react';
+import { useEffect, useCallback, useState, useRef } from 'react';
 import { toast } from 'sonner';
 
 // Tipos de notificaciones
@@ -209,15 +209,18 @@ export function setupNotificationClickHandler() {
     event.notification.close();
     
     const url = event.notification.data?.url || '/dashboard';
+    // Este archivo corre en window; el evento 'notificationclick' solo ocurre
+    // dentro del service worker, donde self expone clients.
+    const sw = self as unknown as { clients: { matchAll(o: { type: string }): Promise<Array<{ url: string; focus(): unknown }>>; openWindow?(url: string): Promise<unknown> } };
     event.waitUntil(
-      clients.matchAll({ type: 'window' }).then((clientList) => {
+      sw.clients.matchAll({ type: 'window' }).then((clientList) => {
         for (const client of clientList) {
           if (client.url === url && 'focus' in client) {
             return client.focus();
           }
         }
-        if (clients.openWindow) {
-          return clients.openWindow(url);
+        if (sw.clients.openWindow) {
+          return sw.clients.openWindow(url);
         }
       })
     );
@@ -278,4 +281,3 @@ export function sendTemplateNotification(
 }
 
 // Import React hooks
-import { useState, useEffect, useCallback } from 'react';

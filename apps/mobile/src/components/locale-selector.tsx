@@ -50,7 +50,7 @@ export function LocaleSelector({
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
-        <Button variant={variant} size={size} className="gap-2">
+        <Button variant={variant} size={size === "default" ? "md" : size} className="gap-2">
           <Globe className="h-4 w-4" />
           {showLabel && (
             <span className="hidden sm:inline-block">
