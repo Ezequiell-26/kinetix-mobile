@@ -196,13 +196,15 @@ export default async function ClientDashboardPage() {
   ]);
 
   // Entrenamiento de hoy: primer no completado del plan asignado
-  const allWorkoutsList = program?.weeks?.flatMap(w => w.workouts) || [];
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const allWorkoutsList = program?.weeks?.flatMap((w: any) => w.workouts) || [];
   const completedWorkoutIds = new Set(
     completedProgramWorkoutIds
-      .map(l => l.workoutId)
-      .filter((id): id is string => id !== null)
+      .map((l: any) => l.workoutId)
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      .filter((id: any): id is string => id !== null)
   );
-  const todayWorkout = allWorkoutsList.find(w => !completedWorkoutIds.has(w.id)) || allWorkoutsList[0];
+  const todayWorkout = allWorkoutsList.find((w: any) => !completedWorkoutIds.has(w.id)) || allWorkoutsList[0];
 
   // ── Coach IA post-entreno (solo si ya entrenó hoy) ─────────────────
   // Compara lo registrado contra lo planificado del mismo workout.
@@ -212,7 +214,7 @@ export default async function ClientDashboardPage() {
   const plannedSets = completedPlanned
     ? completedPlanned.exercises.reduce((a, e) => a + (e.sets || 0), 0)
     : 0;
-  const doneSets = todayWorkoutLog?.sets?.filter(s => s.completed).length ?? 0;
+  const doneSets = todayWorkoutLog?.sets?.filter((s: any) => s.completed).length ?? 0;
   const sessionVolume = todayWorkoutLog?.sets
     ? todayWorkoutLog.sets.reduce((a, s) => a + (s.weight || 0) * (s.reps || 0), 0)
     : 0;
@@ -223,7 +225,7 @@ export default async function ClientDashboardPage() {
   // Métricas reales. Totales exactos: NO se derivan del listado de 30.
   const weeklyFrequency = program?.frequency || 4;
   const completedCount = totalWorkouts;
-  const logDates = allLogDates.map(d => d.date);
+  const logDates = allLogDates.map((d: any) => d.date);
   // Adherencia = sesiones de las últimas 4 semanas ÷ objetivo del período.
   const adherence = computeAdherence(logDates, weeklyFrequency);
 

@@ -66,7 +66,8 @@ export async function POST(req: Request){
   if(!s) return NextResponse.json({error:"No auth"},{status:401});
   const body = await req.json().catch(() => null);
   if(!body) return NextResponse.json({error:"Cuerpo requerido"},{status:400});
-  let { receiverId, content, clientId } = body;
+  const { content } = body;
+  let { receiverId, clientId } = body;
   if(!content) return NextResponse.json({error:"Faltan datos"},{status:400});
   // Auto-resolve trainer for CLIENT if no receiverId
   if(s.role==="CLIENT" && !receiverId){
