@@ -1,81 +1,55 @@
 ```
+# TypeScript build info
+tsconfig.tsbuildinfo
+
+# ESLint cache
+.eslintcache
+*.eslintcache
+
 # Dependencies
 node_modules/
 
 # Build outputs
 dist/
 build/
-.next/
-out/
+target/
 
 # Environment variables
+.env
 .env.local
-.env.*
+*.env.*
 
-# Cache directories
-.cache/
-coverage/
-.nyc_output/
-.jest/
-
-# Logs
-*.log
-
-# OS generated files
-.DS_Store
-Thumbs.db
-
-# Editor files
+# IDE files
 .vscode/
 .idea/
 *.swp
 *.swo
-*.tmp
 
-# Python specific
+# Logs
+*.log
+
+# Coverage
+coverage/
+htmlcov/
+.coverage
+
+# Python
 __pycache__/
 *.pyc
 *.pyo
 *.pyd
 .Python
-env/
-venv/
-.venv/
-pip-log.txt
-pip-delete-this-directory.txt
-.tox/
-.coverage
-.coverage.*
-.cache
-nosetests.xml
-coverage.xml
-*.cover
-*.log
-.git/
-.mypy_cache/
-.pytest_cache/
-.hypothesis/
-
-# Node.js specific
-npm-debug.log*
-yarn-debug.log*
-yarn-error.log*
-node_modules/
-dist/
-build/
-.next/
-coverage/
-.nyc_output/
-.jest/
+*.so
+*.egg-info/
+.eggs/
 
 # Temporary files
 *.tmp
-*.temp
-*.bak
-*.swp
-*.swo
+*~
+.DS_Store
+Thumbs.db
 
-# Compression files
+# Compression
 *.zip
 *.gz
 *.tar
