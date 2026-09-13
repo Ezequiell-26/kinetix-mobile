@@ -28,6 +28,7 @@
     "desktop:build": "electron-builder -c electron/builder.json"
   },
   "dependencies": {
+    "@aws-sdk/client-s3": "^3.1131.0",
     "@capacitor/android": "^8.5.2",
     "@capacitor/core": "^8.5.2",
     "@hookform/resolvers": "^5.0.1",
@@ -50,6 +51,7 @@
     "recharts": "^2.13.0",
     "tailwind-merge": "^3.3.0",
     "three": "^0.186.0",
+    "uuid": "^14.0.2",
     "zod": "^3.24.4"
   },
   "devDependencies": {
