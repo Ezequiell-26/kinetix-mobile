@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardDesc, CardHeader, CardTitle } from "@/components/ui/card";
 import { Download, Trash2, RefreshCw, Database, AlertCircle, CheckCircle } from "lucide-react";
 import { formatDistanceToNow } from "date-fns";
 import { es } from "date-fns/locale";
@@ -120,9 +120,9 @@ export default function BackupsPage() {
       <Card className="mb-6">
         <CardHeader>
           <CardTitle>Crear Backup Manual</CardTitle>
-          <CardDescription>
+          <CardDesc>
             Genera una copia de seguridad completa de la base de datos ahora mismo.
-          </CardDescription>
+          </CardDesc>
         </CardHeader>
         <CardContent>
           <Button onClick={handleCreateBackup} disabled={creating} className="gap-2">
@@ -149,9 +149,9 @@ export default function BackupsPage() {
           <div className="flex items-center justify-between">
             <div>
               <CardTitle>Backups Existentes</CardTitle>
-              <CardDescription>
+              <CardDesc>
                 {backups.length} backup{backups.length !== 1 ? "s" : ""} disponible{backups.length !== 1 ? "s" : ""}
-              </CardDescription>
+              </CardDesc>
             </div>
             <Button variant="outline" size="sm" onClick={loadBackups} disabled={loading}>
               <RefreshCw className={`h-4 w-4 mr-2 ${loading ? "animate-spin" : ""}`} />
@@ -193,7 +193,7 @@ export default function BackupsPage() {
                       <Download className="h-4 w-4" />
                     </Button>
                     <Button
-                      variant="destructive"
+                      variant="danger"
                       size="sm"
                       onClick={() => handleDeleteBackup(backup.filename)}
                       title="Eliminar"
