@@ -35,7 +35,12 @@ export async function GET(req: Request){
     const photos = await prisma.progressPhoto.findMany({where:{clientId}, orderBy:{date:"desc"}, take:50});
     return NextResponse.json(photos);
   }
-  const photos = await prisma.progressPhoto.findMany({orderBy:{date:"desc"}, take:50});
+  // Trainer sin clientId: SOLO fotos de sus propios clientes (P0 IDOR)
+  const photos = await prisma.progressPhoto.findMany({
+    where: { client: { trainerId: s.id } },
+    orderBy: { date: "desc" },
+    take: 50,
+  });
   return NextResponse.json(photos);
 }
 
@@ -51,6 +56,12 @@ export async function POST(req: Request){
   if(s.role === "CLIENT"){
     const client = await prisma.client.findFirst({where:{OR:[{userId:s.id},{email:s.email}]}});
     targetClientId = client?.id || null;
+  } else if (targetClientId) {
+    // P1 IDOR escritura: TRAINER solo en sus propios clientes
+    const ownsClient = await assertTrainerOwnsClient(s.id, targetClientId);
+    if(!ownsClient){
+      return NextResponse.json({error:"Cliente no encontrado"},{status:404});
+    }
   }
 
   const photo = await prisma.progressPhoto.create({

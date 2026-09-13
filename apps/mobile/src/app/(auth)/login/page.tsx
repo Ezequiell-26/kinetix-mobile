@@ -10,8 +10,10 @@ import { motion } from "framer-motion";
 
 export default function LoginPage() {
   const r = useRouter();
-  const [email, setEmail] = useState("ezequiel@ezequielcoaching.com");
-  const [password, setPassword] = useState("Admin123!");
+  // P0: sin credenciales precargadas (quedaban expuestas en el HTML/JS).
+  // Los botones demo más abajo las completan a demanda.
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
   const [showPw, setShowPw] = useState(false);
   const [err, setErr] = useState("");
   const [loading, setLoading] = useState(false);

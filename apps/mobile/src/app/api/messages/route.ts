@@ -35,8 +35,11 @@ export async function GET(req: Request){
     if(clientUser){
       const ownsClient = await assertTrainerOwnsClient(s.id, clientUser.id);
       if(!ownsClient){
-        return NextResponse.json({error:"Cliente no encontrado"}, {status:404});
+        return NextResponse.json({error:"Cliente no encontrado"},{status:404});
       }
+    } else if (withUserId !== s.id) {
+      // P0 fail-closed: sin fila Client no hay ownership que verificar
+      return NextResponse.json({error:"Cliente no encontrado"},{status:404});
     }
     const msgs = await prisma.message.findMany({
       where:{

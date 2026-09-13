@@ -1,6 +1,4 @@
 import Link from "next/link";
-import { redirect } from "next/navigation";
-import { getSession } from "@/lib/auth";
 import { SiteNav } from "@/components/landing/site-nav";
 import { SiteFooter } from "@/components/landing/site-footer";
 import {
@@ -14,17 +12,10 @@ import {
   ArrowRight,
 } from "lucide-react";
 
-// La decisión landing-vs-panel depende de la cookie de sesión:
-// debe renderizarse en cada request, nunca prerenderizarse.
-export const dynamic = "force-dynamic";
-
-// Landing pública. Si ya hay sesión, va directo al panel (privado).
+// Landing pública (estática y cacheable). El redirect con sesión lo hace el
+// middleware (src/middleware.ts §2): redirect() acá competía con él y llegaba
+// serializado como error NEXT_REDIRECT en el stream RSC (página en blanco).
 export default async function Home() {
-  const s = await getSession();
-  if (s) {
-    if (s.role === "TRAINER") redirect("/trainer/dashboard");
-    redirect("/client/dashboard");
-  }
 
   const features = [
     {
