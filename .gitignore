@@ -1,3 +1,104 @@
 ```
+# Next.js build outputs
+.next/
+
+# Environment variables
+.env*
+!.env.example
+
+# Logs
+*.log
+
+# OS generated files
+.DS_Store
+Thumbs.db
+
+# Node.js dependencies
 node_modules/
+
+# IDE specific files
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Build artifacts
+dist/
+build/
+target/
+coverage/
+htmlcov/
+.mypy_cache/
+.pytest_cache/
+.gradle/
+.cargo/
+
+# Compiled files
+*.pyc
+__pycache__/
+*.class
+*.o
+*.obj
+*.exe
+*.dll
+*.so
+*.a
+*.out
+
+# Compressed files
+*.zip
+*.gz
+*.tar
+*.tgz
+*.bz2
+*.xz
+*.7z
+*.rar
+*.zst
+*.lz4
+*.lzh
+*.cab
+*.arj
+*.rpm
+*.deb
+*.Z
+*.lz
+*.lzo
+*.tar.gz
+*.tar.bz2
+*.tar.xz
+*.tar.zst
+
+# Temporary files
+*.tmp
+*.temp
+*.cache
+*.swp
+*.swo
+
+# Browser extensions
+*.crx
+*.xpi
+*.nex
+
+# Testing
+.nyc_output/
+coverage/
+
+# Runtime data
+pids/
+*.pid
+*.seed
+*.pid.lock
+
+# Coverage directory used by tools like istanbul
+lib-cov/
+
+# Debug log
+debug.log
+
+# System Files
+ehthumbs.db
+Icon?
+apidoc/
 ```
