@@ -56,7 +56,6 @@ jobs:
         working-directory: .
       - name: Capacitor Android wrapper online
         run: |
-          npx --yes @capacitor/cli init "EZEQUIEL COACHING" com.ezequielcoaching.app --web-dir=public
           npx --yes @capacitor/cli add android
       - name: Build APK debug
         run: |
