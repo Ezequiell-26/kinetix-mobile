@@ -1,0 +1,22 @@
+{
+  "extends": "./tsconfig.json",
+  "include": [
+    "src/**/*.ts",
+    "src/**/*.tsx",
+    "tests/**/*.ts",
+    "prisma/**/*.ts"
+  ],
+  "exclude": [
+    "node_modules",
+    ".next",
+    "out",
+    "public",
+    "prisma/generated",
+    "capacitor.config.ts",
+    "electron/main.js",
+    "eslint.config.mjs",
+    "next.config.mjs",
+    "postcss.config.mjs",
+    "scripts/"
+  ]
+}
