@@ -24,7 +24,7 @@ export default function ForgotPage(){
     });
     if(!res.ok){
       try{
-        const d = await res.json();
+        const d = await res.json() as { error?: string };
         setError(d.error || "No se pudo procesar");
       } catch {
         setError("No se pudo procesar");
@@ -35,6 +35,11 @@ export default function ForgotPage(){
     setLoading(false);
     setSent(true);
   }
+
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    void submit(e);
+  };
 
   return (
     <div className="min-h-[100dvh] flex items-center justify-center p-4 bg-[#080808] relative overflow-hidden">
@@ -89,7 +94,7 @@ export default function ForgotPage(){
 
           <CardContent className="pb-8 pt-4">
             {!sent ? (
-              <form onSubmit={submit} className="space-y-4">
+              <form onSubmit={handleSubmit} className="space-y-4">
                 <div className="space-y-2">
                   <Label>Email</Label>
                   <Input

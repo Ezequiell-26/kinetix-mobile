@@ -23,9 +23,9 @@ export default function RegisterPage(){
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(form)
     });
-    const j = await res.json();
-    if(!res.ok){
-      setErr(j.error);
+    const j = await res.json() as { ok?: boolean; role?: string; error?: string };
+    if(!res.ok || !j.ok){
+      setErr(j.error || "Error");
       setLoading(false);
       return;
     }
@@ -33,6 +33,11 @@ export default function RegisterPage(){
     else r.push("/client/dashboard");
     r.refresh();
   }
+
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    void submit(e);
+  };
 
   return (
     <div className="min-h-[100dvh] flex items-center justify-center p-4 bg-[#080808] relative overflow-hidden">
@@ -70,7 +75,7 @@ export default function RegisterPage(){
           </CardHeader>
 
           <CardContent className="pb-8 pt-4">
-            <form onSubmit={submit} className="space-y-4">
+            <form onSubmit={handleSubmit} className="space-y-4">
               <div className="space-y-2">
                 <Label>Nombre completo</Label>
                 <Input

@@ -8,28 +8,136 @@ build/
 .next/
 out/
 
-# Environment
+# Environment variables
 .env
 .env.local
-*.env.*
+.env.*
 
-# IDE
+# IDE specific
 .vscode/
 .idea/
+*.swp
+*.swo
 
 # Logs
 *.log
+
+# Temporary files
+*.tmp
+*.temp
 
 # Python
 __pycache__/
 *.pyc
 *.pyo
 *.pyd
+.Python
+env/
+venv/
+.venv/
+pip-log.txt
+pip-delete-this-directory.txt
+.tox/
+.coverage
+.coverage.*
+.cache
+nosetests.xml
+coverage.xml
+*.cover
+*.log
+.git/modules/
+*.sublime-workspace
 
-# Temporary files
-*.tmp
-*.swp
+# Node.js
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+node_modules/
+jspm_packages/
+typings/
+.nyc_output
+coverage/
+*.lcov
+.nyc_output/
+coverage/
+lib-cov/
+*.info
+
+# macOS
+.DS_Store
+.AppleDouble
+.LSOverride
+Icon?
+._*
+.Spotlight-V100
+.Trashes
+.VolumeIcon.icns
+.com.apple.timemachine.donotpresent
+.com.apple.FinderInfo
+.apdisk
+
+# Windows
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+$RECYCLE.BIN/
+*.cab
+*.msi
+*.msix
+*.msm
+*.msp
+
+# Linux
 *~
+*.swp
+*.swo
+*~
+
+# Compression
+*.zip
+*.tar.gz
+*.tar.bz2
+*.tar.xz
+*.gz
+*.rar
+*.7z
+*.bz2
+*.xz
+*.tgz
+*.tar
+*.Z
+*.lz
+*.lzo
+*.lz4
+*.zst
+*.cab
+*.arj
+*.rpm
+*.deb
+
+# Testing
+coverage/
+htmlcov/
+.nyc_output/
+.jest/
+jest/
+mocha/
+.tap/
+
+# Database
+*.db
+*.db-journal
+
+# Runtime data
+pids
+*.pid
+*.seed
+*.pid.lock
+
+# Debug
+*.stackdump
+
+# System
 .DS_Store
 Thumbs.db
 ```
