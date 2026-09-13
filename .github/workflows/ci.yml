@@ -26,9 +26,6 @@ jobs:
           POSTGRES_DB: postgres
         ports:
           - 5432:5432
-        options: >-
-          --health-cmd="pg_isready -U postgres"
-          --interval=5s --timeout=5s --retries=10
 
     env:
       DATABASE_URL: postgresql://postgres:postgres@localhost:5432/postgres
@@ -49,6 +46,15 @@ jobs:
 
       - name: Typecheck (0 errores)
         run: npm run typecheck -w apps/mobile
+
+      - name: Esperar Postgres efímero
+        run: |
+          for i in $(seq 1 30); do
+            if echo "SELECT 1;" | npx prisma db execute --stdin --schema apps/mobile/prisma/schema.prisma >/dev/null 2>&1; then
+              echo "Postgres listo"; break
+            fi
+            sleep 3
+          done
 
       - name: Migrate + seed (Postgres efímero de CI)
         run: |
