@@ -88,13 +88,10 @@ export function DataTable<TData, TValue>({
       columnVisibility,
       rowSelection,
       globalFilter,
+      ...(pagination ? { pagination: { pageIndex: 0, pageSize } } : {}),
     },
     enableRowSelection: true,
     enableMultiRowSelection: true,
-    pagination: pagination ? {
-      pageIndex: 0,
-      pageSize,
-    } : undefined,
   });
 
   return (
@@ -106,7 +103,7 @@ export function DataTable<TData, TValue>({
             <Input
               placeholder={searchPlaceholder}
               value={globalFilter ?? ""}
-              onChange={(value) => setGlobalFilter(value)}
+              onChange={(value) => setGlobalFilter(String(value))}
               className="max-w-sm"
             />
           )}

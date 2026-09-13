@@ -2,7 +2,7 @@
 
 import * as React from "react";
 import { Activity, TrendingUp, Zap, Award } from "lucide-react";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
 
@@ -175,7 +175,7 @@ export function WearableSync({
               <span className="text-2xl">{config.icon}</span>
               <div>
                 <CardTitle className="text-lg">{config.name}</CardTitle>
-                <CardDescription>Conecta tu dispositivo wearable</CardDescription>
+                <p className="text-xs text-zinc-500 mt-1">Conecta tu dispositivo wearable</p>
               </div>
             </div>
           </div>
@@ -204,14 +204,14 @@ export function WearableSync({
             <span className="text-2xl">{config.icon}</span>
             <div>
               <CardTitle className="text-lg">{config.name}</CardTitle>
-              <CardDescription>
+              <p className="text-xs text-zinc-500 mt-1">
                 {lastSync 
                   ? `Sincronizado: ${lastSync.toLocaleTimeString()}`
                   : 'Conectado'}
-              </CardDescription>
+              </p>
             </div>
           </div>
-          <Badge variant={isSyncing ? "secondary" : "default"}>
+          <Badge variant={isSyncing ? "muted" : "default"}>
             {isSyncing ? 'Sincronizando' : 'Conectado'}
           </Badge>
         </div>

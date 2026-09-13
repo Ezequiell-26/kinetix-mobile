@@ -418,4 +418,3 @@ export class ConsoleTransport implements LogTransport {
 }
 
 // Exportar tipos
-export type { LogTransport, LogConfig };

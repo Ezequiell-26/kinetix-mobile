@@ -23,6 +23,11 @@ interface OptimizedImageProps {
   quality?: number;
   sizes?: string;
   objectFit?: "contain" | "cover" | "fill" | "none" | "scale-down";
+  /** Soporte next/image placeholder blur (el agente de funciones lo usa así) */
+  placeholder?: "empty" | "blur";
+  blurDataURL?: string;
+  onLoad?: () => void;
+  onError?: () => void;
 }
 
 export function OptimizedImage({

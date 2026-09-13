@@ -100,7 +100,8 @@ export class PerformanceMonitor {
         const entries = entryList.getEntries();
         entries.forEach(entry => {
           if (entry.entryType === 'first-input') {
-            this.metrics.fid = entry.processingStart - entry.startTime;
+            const fi = entry as PerformanceEventTiming;
+            this.metrics.fid = fi.processingStart - fi.startTime;
           }
         });
         this.notifyReport();
@@ -117,8 +118,9 @@ export class PerformanceMonitor {
       const clsObserver = new PerformanceObserver((entryList) => {
         const entries = entryList.getEntries();
         entries.forEach(entry => {
-          if (!entry.hadRecentInput) {
-            clsValue += entry.value;
+          const ls = entry as unknown as { hadRecentInput: boolean; value: number };
+          if (!ls.hadRecentInput) {
+            clsValue += ls.value;
           }
         });
         this.metrics.cls = clsValue;
@@ -272,7 +274,7 @@ export class PerformanceMonitor {
     input: RequestInfo | URL,
     init?: RequestInit
   ): Promise<Response> {
-    const endpoint = typeof input === 'string' ? input : input.url;
+    const endpoint = typeof input === 'string' ? input : input instanceof Request ? input.url : String(input);
     const method = init?.method || 'GET';
     
     const timerId = this.startApiTimer(endpoint, method);
@@ -473,4 +475,3 @@ export function withPerformanceMonitoring<P extends object>(
 }
 
 // Exportar tipos para uso en hooks
-export type { PerformanceMetrics, MemoryInfo, LongTaskInfo };

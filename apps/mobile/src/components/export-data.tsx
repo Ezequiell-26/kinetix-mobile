@@ -19,7 +19,7 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
-import { useTranslation } from "@/lib/i18n";
+import { useTranslation } from '@/hooks/use-translation';
 
 interface ExportData {
   type: 'workouts' | 'nutrition' | 'progress' | 'measurements' | 'checkins' | 'all';
@@ -45,7 +45,7 @@ export function ExportActions({
   const [isExporting, setIsExporting] = React.useState(false);
   const [selectedType, setSelectedType] = React.useState<ExportData['type']>('all');
   const [selectedFormat, setSelectedFormat] = React.useState<ExportData['format']>('pdf');
-  const t = useTranslation();
+  const { t } = useTranslation();
 
   const handleExport = async () => {
     if (!onExport) {

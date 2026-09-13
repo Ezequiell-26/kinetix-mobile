@@ -23,6 +23,8 @@
     "clean": "npm run clean --workspaces && rm -rf node_modules .turbo"
   },
   "devDependencies": {
+    "@radix-ui/react-checkbox": "^1.3.11",
+    "@tanstack/react-table": "^8.21.3",
     "typescript": "^5.3.3"
   },
   "engines": {

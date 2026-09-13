@@ -59,6 +59,8 @@ model User {
   checkIns CheckIn[]
   workoutLogs WorkoutLog[]
   sessions Session[]
+  notificationPreference NotificationPreference?
+  pushSubscriptions      PushSubscription[]
   progressMeasurements ProgressMeasurement[]
   progressPhotos ProgressPhoto[]
 
@@ -405,4 +407,34 @@ model Session {
   @@index([userId])
   @@index([token])
   @@index([revoked])
+}
+
+model NotificationPreference {
+  id              String   @id @default(cuid())
+  userId          String   @unique
+  user            User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  enabled         Boolean  @default(true)
+  types           String[]
+  scheduleStartHour Int    @default(8)
+  scheduleEndHour   Int    @default(21)
+  timezone        String?
+  channelEmail    Boolean  @default(true)
+  channelPush     Boolean  @default(true)
+  channelSms      Boolean  @default(false)
+  channelWhatsapp Boolean  @default(false)
+  updatedAt       DateTime @updatedAt
+}
+
+model PushSubscription {
+  id        String   @id @default(cuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  endpoint  String   @unique
+  p256dh    String?
+  auth      String?
+  active    Boolean  @default(true)
+  createdAt DateTime @default(now())
+
+  @@index([userId])
+  @@index([active])
 }
