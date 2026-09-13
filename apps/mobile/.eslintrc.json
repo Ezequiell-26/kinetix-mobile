@@ -7,8 +7,24 @@
     "ecmaFeatures": {
       "jsx": true
     },
-    "project": "./tsconfig.json"
+    "project": "./tsconfig.eslint.json",
+    "tsconfigRootDir": "."
   },
+  "ignorePatterns": [
+    "node_modules/",
+    ".next/",
+    "out/",
+    "public/",
+    "prisma/generated/",
+    "*.js",
+    "*.cjs",
+    "*.mjs",
+    "capacitor.config.ts",
+    "next.config.mjs",
+    "postcss.config.mjs",
+    "eslint.config.mjs",
+    "scripts/"
+  ],
   "plugins": [
     "@typescript-eslint",
     "react",
@@ -58,15 +74,6 @@
       "version": "detect"
     }
   },
-  "ignorePatterns": [
-    "node_modules/",
-    ".next/",
-    "out/",
-    "public/",
-    "prisma/generated/",
-    "*.js",
-    "*.cjs"
-  ],
   "env": {
     "browser": true,
     "node": true,

@@ -22,20 +22,25 @@ export default function LoginPage() {
     e.preventDefault();
     setLoading(true);
     setErr("");
-    const res = await fetch("/api/auth/login", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ email, password }),
-    });
-    const j = await res.json();
-    if (!res.ok) {
-      setErr(j.error || "Error");
+    try {
+      const res = await fetch("/api/auth/login", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email, password }),
+      });
+      const j = (await res.json()) as { ok?: boolean; role?: string; error?: string };
+      if (!res.ok || !j.ok) {
+        setErr((j.error as string) || "Error");
+        setLoading(false);
+        return;
+      }
+      if (j.role === "TRAINER") r.push("/trainer/dashboard");
+      else r.push("/client/dashboard");
+      r.refresh();
+    } catch {
+      setErr("Error de conexión");
       setLoading(false);
-      return;
     }
-    if (j.role === "TRAINER") r.push("/trainer/dashboard");
-    else r.push("/client/dashboard");
-    r.refresh();
   }
 
   return (
