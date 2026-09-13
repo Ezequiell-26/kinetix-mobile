@@ -59,6 +59,7 @@ export function GradientText({
   className = '',
   as: Component = 'span',
 }: GradientTextProps) {
+  const Tag = Component as React.ComponentType<Record<string, unknown> & { children?: React.ReactNode }>;
   const variants = {
     brand: 'text-gradient',
     accent: 'text-gradient-accent',
@@ -68,9 +69,9 @@ export function GradientText({
   };
   
   return (
-    <Component className={`${variants[variant]} ${className}`}>
+    <Tag className={`${variants[variant]} ${className}`}>
       {children}
-    </Component>
+    </Tag>
   );
 }
 
@@ -95,6 +96,7 @@ export function AnimatedSection({
   className = '',
   as: Component = 'div',
 }: AnimatedSectionProps) {
+  const Tag = Component as React.ComponentType<Record<string, unknown> & { children?: React.ReactNode }>;
   const animations = {
     fadeIn: 'animate-fade-in',
     slideUp: 'animate-slide-up',
@@ -115,12 +117,12 @@ export function AnimatedSection({
   };
   
   return (
-    <Component
+    <Tag
       className={`${animations[animation]} ${className}`}
       style={style}
     >
       {children}
-    </Component>
+    </Tag>
   );
 }
 

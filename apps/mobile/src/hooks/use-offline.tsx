@@ -83,10 +83,13 @@ export function useOffline(): UseOfflineReturn {
     setQueue(prev => [...prev, newItem]);
 
     // Registrar service worker sync si está disponible
-    if ('serviceWorker' in navigator && 'sync' in window.registration) {
+    if ('serviceWorker' in navigator) {
       navigator.serviceWorker.ready.then(registration => {
-        registration.sync.register('sync-workout-logs').catch(console.error);
-      });
+        if ('sync' in registration) {
+          (registration as ServiceWorkerRegistration & { sync: { register(tag: string): Promise<void> } })
+            .sync.register('sync-workout-logs').catch(console.error);
+        }
+      }).catch(() => {});
     }
   }, []);
 

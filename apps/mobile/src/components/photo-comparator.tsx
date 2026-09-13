@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useRef, useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { X, ChevronLeft, ChevronRight } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -25,7 +25,7 @@ export function PhotoComparator({ photos, onClose }: PhotoComparatorProps) {
   const [selectedBefore, setSelectedBefore] = useState<Photo | null>(null);
   const [selectedAfter, setSelectedAfter] = useState<Photo | null>(null);
   const [containerWidth, setContainerWidth] = useState(0);
-  const containerRef = useState<HTMLDivElement | null>(null);
+  const containerRef = useRef<HTMLDivElement | null>(null);
 
   // Filtrar fotos
   const beforePhotos = photos.filter(p => p.type === 'before' || p.type === 'progress');

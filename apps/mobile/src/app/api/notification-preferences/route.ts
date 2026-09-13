@@ -107,6 +107,7 @@ export async function POST(request: NextRequest) {
 
     // Validar con Zod
     const validatedData = preferencesSchema.parse(body);
+    const vt = validatedData.types as string[] | undefined;
 
     // Upsert de preferencias
     const prefs = await prisma.notificationPreference.upsert({
@@ -117,11 +118,11 @@ export async function POST(request: NextRequest) {
         pushEnabled: validatedData.channels?.push ?? true,
         smsEnabled: validatedData.channels?.sms ?? false,
         whatsappEnabled: validatedData.channels?.whatsapp ?? false,
-        workoutReminders: validatedData.types?.includes('workout') ?? true,
-        nutritionTips: validatedData.types?.includes('nutrition') ?? true,
-        progressUpdates: validatedData.types?.includes('progress') ?? true,
-        messageNotifications: validatedData.types?.includes('message') ?? true,
-        paymentReminders: validatedData.types?.includes('payment') ?? true,
+        workoutReminders: vt?.includes('workout') ?? true,
+        nutritionTips: vt?.includes('nutrition') ?? true,
+        progressUpdates: vt?.includes('progress') ?? true,
+        messageNotifications: vt?.includes('message') ?? true,
+        paymentReminders: vt?.includes('payment') ?? true,
         timezone: validatedData.schedule?.timezone || 'America/Argentina/Buenos_Aires',
         quietStart: validatedData.schedule?.startHour ? `${validatedData.schedule.startHour}:00` : '22:00',
         quietEnd: validatedData.schedule?.endHour ? `${validatedData.schedule.endHour}:00` : '08:00',
@@ -131,11 +132,11 @@ export async function POST(request: NextRequest) {
         ...(validatedData.channels?.push !== undefined && { pushEnabled: validatedData.channels.push }),
         ...(validatedData.channels?.sms !== undefined && { smsEnabled: validatedData.channels.sms }),
         ...(validatedData.channels?.whatsapp !== undefined && { whatsappEnabled: validatedData.channels.whatsapp }),
-        ...(validatedData.types?.includes('workout') !== undefined && { workoutReminders: validatedData.types.includes('workout') }),
-        ...(validatedData.types?.includes('nutrition') !== undefined && { nutritionTips: validatedData.types.includes('nutrition') }),
-        ...(validatedData.types?.includes('progress') !== undefined && { progressUpdates: validatedData.types.includes('progress') }),
-        ...(validatedData.types?.includes('message') !== undefined && { messageNotifications: validatedData.types.includes('message') }),
-        ...(validatedData.types?.includes('payment') !== undefined && { paymentReminders: validatedData.types.includes('payment') }),
+        ...(vt?.includes('workout') !== undefined && { workoutReminders: vt.includes('workout') }),
+        ...(vt?.includes('nutrition') !== undefined && { nutritionTips: vt.includes('nutrition') }),
+        ...(vt?.includes('progress') !== undefined && { progressUpdates: vt.includes('progress') }),
+        ...(vt?.includes('message') !== undefined && { messageNotifications: vt.includes('message') }),
+        ...(vt?.includes('payment') !== undefined && { paymentReminders: vt.includes('payment') }),
         ...(validatedData.schedule?.timezone !== undefined && { timezone: validatedData.schedule.timezone }),
         ...(validatedData.schedule?.startHour !== undefined && { quietStart: `${validatedData.schedule.startHour}:00` }),
         ...(validatedData.schedule?.endHour !== undefined && { quietEnd: `${validatedData.schedule.endHour}:00` }),
