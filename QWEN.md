@@ -52,6 +52,8 @@ npm run test --workspaces --if-present
   borrar workspaces de `package.json` raíz.
 - `packages/shared`: SIN `devDependencies` (un solo `@types/react` en raíz;
   duplicarlo rompe el build con errores de `JSX element type`).
+- `npm install` con dev servers vivos falla con EPERM (la DLL de Prisma queda
+  bloqueada): parar los servers (puertos 3001/3002/3007/3127) ANTES de instalar.
 
 ## 4. Dónde van los cambios
 
