@@ -45,7 +45,7 @@ function HumanBody({
 }) {
   const groupRef = useRef<THREE.Group>(null);
   
-  // KinetixFitt brand colors - Electric Lime highlights
+  // EZEQUIEL COACHING brand colors - Electric Lime highlights
   const muscleColors: Record<string, THREE.Color> = {
     chest: new THREE.Color('#D6FF2A'),
     shoulders: new THREE.Color('#D6FF2A'),

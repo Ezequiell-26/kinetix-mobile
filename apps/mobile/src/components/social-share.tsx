@@ -10,7 +10,7 @@ import { copyText } from "@/lib/clipboard";
 export function SocialShare(){
   const [copied,setCopied]=useState(false);
   async function share(type:string){
-    const text= type==="ig" ? "Mi progreso con KinetiX: -3kg, +2cm hombros #EzequielCoaching" : "Mi progreso — KinetiX";
+    const text= type==="ig" ? "Mi progreso con EZEQUIEL COACHING: -3kg, +2cm hombros #EzequielCoaching" : "Mi progreso — EZEQUIEL COACHING";
     try{
       if(navigator.share){
         await navigator.share({title:"Mi progreso", text});
@@ -30,7 +30,7 @@ export function SocialShare(){
         <div className="aspect-[4/3] rounded-xl bg-gradient-to-br from-zinc-900 to-zinc-800 border border-zinc-800 flex flex-col items-center justify-center gap-2 p-4">
           <Award size={24} className="text-primary"/>
           <p className="font-black text-sm">-3.2kg • +3cm hombros</p>
-          <p className="text-xs text-zinc-500">8 semanas con KinetiX</p>
+          <p className="text-xs text-zinc-500">8 semanas con EZEQUIEL COACHING</p>
           <Badge variant="accent">Antes → Después</Badge>
         </div>
         <div className="grid grid-cols-3 gap-2">

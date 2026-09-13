@@ -26,6 +26,23 @@ export function SiteNav() {
               {l.label}
             </Link>
           ))}
+          {/* Menú móvil sin JS (details/summary): los links estaban hidden en móvil */}
+          <details className="sm:hidden relative">
+            <summary className="min-h-[44px] inline-flex items-center px-3 text-sm text-zinc-300 cursor-pointer list-none">
+              Menú ▾
+            </summary>
+            <div className="absolute right-0 top-full mt-1 w-44 rounded-xl border border-zinc-800 bg-[#101010] p-2 shadow-xl">
+              {links.map((l) => (
+                <Link
+                  key={l.href}
+                  href={l.href}
+                  className="block rounded-lg px-3 py-3 text-sm text-zinc-200 hover:bg-zinc-800 min-h-[44px]"
+                >
+                  {l.label}
+                </Link>
+              ))}
+            </div>
+          </details>
           <Link
             href="/login"
             className="min-h-[44px] inline-flex items-center px-5 rounded-full bg-[#D6FF2A] text-black text-sm font-black"

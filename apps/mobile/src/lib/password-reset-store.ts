@@ -1,4 +1,4 @@
-import { randomBytes } from "crypto";
+import { createHash, randomBytes } from "crypto";
 import { prisma } from "./db";
 
 const TOKEN_LENGTH = 32;
@@ -9,6 +9,14 @@ const EXPIRY_MS = 60 * 60 * 1000; // 1 hora
  */
 export function generateSecureToken(): string {
   return randomBytes(TOKEN_LENGTH).toString("hex");
+}
+
+/**
+ * En DB solo vive el HASH (sha256): si la base se filtra, los tokens no sirven.
+ * Exportado para el test de regresión (vector conocido).
+ */
+export function hashToken(token: string): string {
+  return createHash("sha256").update(token).digest("hex");
 }
 
 /**
@@ -34,7 +42,7 @@ export async function issueResetToken(email: string): Promise<string | null> {
   await prisma.passwordResetToken.create({
     data: {
       email,
-      token,
+      token: hashToken(token),
       expiresAt,
       used: false,
     },
@@ -49,7 +57,7 @@ export async function issueResetToken(email: string): Promise<string | null> {
  */
 export async function validateResetToken(token: string): Promise<string | null> {
   const record = await prisma.passwordResetToken.findUnique({
-    where: { token },
+    where: { token: hashToken(token) },
   });
 
   if (!record) return null;

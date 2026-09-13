@@ -9,13 +9,13 @@ const AiCoachChat = dynamic(() => import("@/components/ai-coach-chat").then((m) 
 const PostWorkoutCoach = dynamic(
   () => import("@/components/post-workout-coach").then((m) => m.PostWorkoutCoach),
   {
-    loading: () => null,
+    loading: () => <div className="rounded-3xl border border-subtle bg-surface/40 p-6 text-xs text-zinc-500">Cargando análisis…</div>,
   }
 );
 const AdaptiveProgram = dynamic(
   () => import("@/components/adaptive-program").then((m) => m.AdaptiveProgram),
   {
-    loading: () => null,
+    loading: () => <div className="rounded-3xl border border-subtle bg-surface/40 p-6 text-xs text-zinc-500">Cargando programa…</div>,
   }
 );
 import { FadeIn } from "@/components/ui-premium";
@@ -77,8 +77,11 @@ export default async function ClientDashboardPage() {
           <p className="text-sm text-zinc-500 max-w-sm mx-auto">
             Ezequiel está configurando tu ficha de atleta y tu primer programa de entrenamiento.
           </p>
-          <Link href="/client/messages">
-            <Button variant="accent" className="font-black h-12 px-6">Escribir a Ezequiel →</Button>
+          <Link
+            href="/client/messages"
+            className="inline-flex items-center justify-center font-black h-12 px-6 rounded-xl bg-primary text-black hover:brightness-110 transition"
+          >
+            Escribir a Ezequiel →
           </Link>
         </div>
       </div>

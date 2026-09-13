@@ -68,6 +68,25 @@ export async function middleware(req: NextRequest) {
   }
 
   // ────────────────────────────────────────────────────────────────
+  // 2b. /login y /register con sesión válida van al panel (no al formulario).
+  // ────────────────────────────────────────────────────────────────
+  if (path === "/login" || path === "/register") {
+    const token = req.cookies.get("ec_token")?.value;
+    if (token) {
+      try {
+        const { payload } = await jose.jwtVerify(token, SECRET);
+        const role = (payload as unknown as { role: string }).role;
+        return NextResponse.redirect(
+          new URL(role === "TRAINER" ? "/trainer/dashboard" : "/client/dashboard", req.url)
+        );
+      } catch {
+        return NextResponse.next();
+      }
+    }
+    return NextResponse.next();
+  }
+
+  // ────────────────────────────────────────────────────────────────
   // 3. Auth + verificación de rol para rutas protegidas.
   // ────────────────────────────────────────────────────────────────
   const isTrainer = path.startsWith("/trainer");
@@ -117,6 +136,8 @@ export const config = {
   matcher: [
     // Raíz session-aware (landing vs panel) + rutas protegidas + API.
     "/",
+    "/login",
+    "/register",
     "/trainer/:path*",
     "/client/:path*",
     "/api/:path*",

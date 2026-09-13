@@ -8,10 +8,10 @@ out/
 # ── KinetixFitt: higiene local (2026-09-12, NO BORRAR este bloque) ──
 # Build Next (dev + prod) y export estático Capacitor: se regeneran solos
 # DBs SQLite locales + backups: jamás se commitean (cada entorno tiene la suya)
-*.db
-*.db-journal
+*.db*
 # Uploads de usuarios en dev: contenido local, no código
 apps/mobile/public/uploads/
+apps/mobile/storage/
 # Directorios de otras apps del monorepo sin trackear aún
 # (quitar estas líneas cuando se integren de verdad)
 # apps/web/

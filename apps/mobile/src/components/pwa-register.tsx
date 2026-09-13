@@ -59,7 +59,7 @@ export function PwaRegister() {
         <div className="bg-[#111111] border border-zinc-800 rounded-2xl p-4 shadow-2xl flex gap-3 items-start">
           <div className="w-10 h-10 rounded-xl bg-primary flex items-center justify-center font-black text-black shrink-0">E</div>
           <div className="flex-1">
-            <p className="text-sm font-bold">Instalar KinetiX</p>
+            <p className="text-sm font-bold">Instalar EZEQUIEL COACHING</p>
             <p className="text-xs text-zinc-400 mt-1">
               En iPhone: toca <span className="text-white font-semibold">Compartir</span> ⎙{" "}
               &rarr; <span className="text-white font-semibold">Agregar al inicio</span> para usarla como app.
