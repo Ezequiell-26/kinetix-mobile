@@ -1,14 +1,18 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import { authService } from '@/lib/firebase';
-import { User } from 'firebase/auth';
+import { supabaseAuth } from '@/lib/supabase';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Loader2, Mail, Lock, Chrome } from 'lucide-react';
+
+interface User {
+  email: string;
+  id: string;
+}
 
 export default function AuthPage() {
   const [isLogin, setIsLogin] = useState(true);
@@ -20,29 +24,39 @@ export default function AuthPage() {
   const [user, setUser] = useState<User | null>(null);
 
   useEffect(() => {
-    const unsubscribe = authService.onAuthChange((currentUser) => {
-      setUser(currentUser);
-      if (currentUser) {
-        setSuccess(`¡Bienvenido ${currentUser.email}!`);
+    // Escuchar cambios de autenticación de Supabase
+    const { data: { subscription } } = supabaseAuth.onAuthStateChange((event, session) => {
+      if (session?.user) {
+        setUser({ email: session.user.email || '', id: session.user.id });
+        setSuccess(`¡Bienvenido ${session.user.email}!`);
         setError(null);
+      } else {
+        setUser(null);
       }
     });
-    return () => unsubscribe();
+    
+    return () => {
+      subscription.unsubscribe();
+    };
   }, []);
 
   const handleGoogleSignIn = async () => {
     setLoading(true);
     setError(null);
     setSuccess(null);
-    
-    const result = await authService.signInWithGoogle();
-    
-    if (result.error) {
-      setError(result.error);
-    } else {
-      setSuccess('Inicio de sesión con Google exitoso.');
+
+    try {
+      const { data, error } = await supabaseAuth.signInWithGoogle();
+      
+      if (error) throw error;
+      
+      // El usuario será redirigido a Google
+      setSuccess('Redirigiendo a Google...');
+    } catch (err: any) {
+      setError(err.message || 'Error al iniciar con Google');
+    } finally {
+      setLoading(false);
     }
-    setLoading(false);
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -57,32 +71,42 @@ export default function AuthPage() {
       return;
     }
 
-    if (isLogin) {
-      const result = await authService.signInWithEmail(email, password);
-      if (result.error) {
-        setError(result.error);
-      } else {
+    // Validar que sea @gmail.com
+    if (!email.endsWith('@gmail.com')) {
+      setError('Solo se permiten correos electrónicos @gmail.com oficiales de Google.');
+      setLoading(false);
+      return;
+    }
+
+    try {
+      if (isLogin) {
+        const { data, error } = await supabaseAuth.signInWithEmail(email, password);
+        if (error) throw error;
         setSuccess('Inicio de sesión exitoso.');
         setEmail('');
         setPassword('');
-      }
-    } else {
-      const result = await authService.signUpWithEmail(email, password);
-      if (result.error) {
-        setError(result.error);
       } else {
+        const { data, error } = await supabaseAuth.signUpWithEmail(email, password);
+        if (error) throw error;
         setSuccess('Cuenta creada exitosamente. Verifica tu correo.');
         setEmail('');
         setPassword('');
       }
+    } catch (err: any) {
+      setError(err.message || 'Error en la operación');
+    } finally {
+      setLoading(false);
     }
-    setLoading(false);
   };
 
   const handleSignOut = async () => {
-    await authService.signOut();
-    setSuccess('Sesión cerrada correctamente.');
-    setUser(null);
+    try {
+      await supabaseAuth.signOut();
+      setSuccess('Sesión cerrada correctamente.');
+      setUser(null);
+    } catch (err: any) {
+      setError('Error al cerrar sesión');
+    }
   };
 
   if (user) {
@@ -90,7 +114,7 @@ export default function AuthPage() {
       <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-purple-900 via-slate-900 to-cyan-900 p-4">
         <Card className="w-full max-w-md glass-card border-white/10">
           <CardHeader className="text-center">
-            <CardTitle className="text-2xl font-bold text-white">¡Hola, {user.email?.split('@')[0]}!</CardTitle>
+            <CardTitle className="text-2xl font-bold text-white">¡Hola, {user.email.split('@')[0]}!</CardTitle>
             <CardDescription className="text-gray-300">Has iniciado sesión correctamente</CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
@@ -98,11 +122,10 @@ export default function AuthPage() {
               <p className="text-green-400 text-sm text-center">Estado: Autenticado</p>
             </div>
             <Button 
-              onClick={handleSignOut} 
+              onClick={handleSignOut}
               className="w-full bg-red-500 hover:bg-red-600 text-white"
-              disabled={loading}
             >
-              {loading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : 'Cerrar Sesión'}
+              Cerrar Sesión
             </Button>
           </CardContent>
         </Card>
@@ -113,30 +136,18 @@ export default function AuthPage() {
   return (
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-purple-900 via-slate-900 to-cyan-900 p-4">
       <Card className="w-full max-w-md glass-card border-white/10">
-        <CardHeader className="text-center space-y-2">
-          <CardTitle className="text-3xl font-bold bg-gradient-to-r from-purple-400 to-cyan-400 bg-clip-text text-transparent">
-            EZEQUIEL COACHING
+        <CardHeader>
+          <CardTitle className="text-2xl font-bold text-white text-center">
+            {isLogin ? 'Iniciar Sesión' : 'Crear Cuenta'}
           </CardTitle>
-          <CardDescription className="text-gray-300">
-            {isLogin ? 'Inicia sesión en tu cuenta' : 'Crea una cuenta nueva'}
+          <CardDescription className="text-gray-300 text-center">
+            Solo se permiten cuentas @gmail.com
           </CardDescription>
         </CardHeader>
-        <CardContent className="space-y-4">
-          {error && (
-            <Alert variant="destructive" className="bg-red-500/10 border-red-500/20">
-              <AlertDescription className="text-red-400">{error}</AlertDescription>
-            </Alert>
-          )}
-          
-          {success && (
-            <Alert className="bg-green-500/10 border-green-500/20">
-              <AlertDescription className="text-green-400">{success}</AlertDescription>
-            </Alert>
-          )}
-
+        <CardContent>
           <form onSubmit={handleSubmit} className="space-y-4">
             <div className="space-y-2">
-              <Label htmlFor="email" className="text-gray-300">Correo Gmail</Label>
+              <Label htmlFor="email" className="text-white">Email</Label>
               <div className="relative">
                 <Mail className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
                 <Input
@@ -145,14 +156,14 @@ export default function AuthPage() {
                   placeholder="tu@gmail.com"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
-                  className="pl-10 bg-white/5 border-white/10 text-white placeholder:text-gray-500 focus:border-purple-400"
+                  className="pl-10 bg-white/10 border-white/20 text-white placeholder:text-gray-400"
                   required
                 />
               </div>
             </div>
             
             <div className="space-y-2">
-              <Label htmlFor="password" className="text-gray-300">Contraseña</Label>
+              <Label htmlFor="password" className="text-white">Contraseña</Label>
               <div className="relative">
                 <Lock className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
                 <Input
@@ -161,19 +172,31 @@ export default function AuthPage() {
                   placeholder="••••••••"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
-                  className="pl-10 bg-white/5 border-white/10 text-white placeholder:text-gray-500 focus:border-purple-400"
+                  className="pl-10 bg-white/10 border-white/20 text-white placeholder:text-gray-400"
                   required
                 />
               </div>
             </div>
 
+            {error && (
+              <Alert variant="destructive" className="bg-red-500/10 border-red-500/20">
+                <AlertDescription className="text-red-400">{error}</AlertDescription>
+              </Alert>
+            )}
+
+            {success && (
+              <Alert className="bg-green-500/10 border-green-500/20">
+                <AlertDescription className="text-green-400">{success}</AlertDescription>
+              </Alert>
+            )}
+
             <Button 
               type="submit" 
-              className="w-full bg-gradient-to-r from-purple-500 to-cyan-500 hover:from-purple-600 hover:to-cyan-600 text-white font-semibold"
+              className="w-full bg-gradient-to-r from-purple-500 to-cyan-500 hover:from-purple-600 hover:to-cyan-600 text-white"
               disabled={loading}
             >
               {loading ? (
-                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                <Loader2 className="h-4 w-4 animate-spin" />
               ) : isLogin ? (
                 'Iniciar Sesión'
               ) : (
@@ -184,7 +207,7 @@ export default function AuthPage() {
 
           <div className="relative my-6">
             <div className="absolute inset-0 flex items-center">
-              <div className="w-full border-t border-white/10"></div>
+              <div className="w-full border-t border-white/20"></div>
             </div>
             <div className="relative flex justify-center text-xs uppercase">
               <span className="bg-slate-900 px-2 text-gray-400">O continúa con</span>
@@ -192,22 +215,24 @@ export default function AuthPage() {
           </div>
 
           <Button
-            onClick={handleGoogleSignIn}
             variant="outline"
-            className="w-full bg-white hover:bg-gray-100 text-gray-900 border-0"
+            onClick={handleGoogleSignIn}
             disabled={loading}
+            className="w-full bg-white/10 border-white/20 text-white hover:bg-white/20"
           >
-            <Chrome className="mr-2 h-4 w-4" />
-            Continuar con Google
+            {loading ? (
+              <Loader2 className="h-4 w-4 animate-spin" />
+            ) : (
+              <>
+                <Chrome className="mr-2 h-4 w-4" />
+                Google
+              </>
+            )}
           </Button>
         </CardContent>
         <CardFooter className="flex justify-center">
           <button
-            onClick={() => {
-              setIsLogin(!isLogin);
-              setError(null);
-              setSuccess(null);
-            }}
+            onClick={() => setIsLogin(!isLogin)}
             className="text-sm text-gray-400 hover:text-white transition-colors"
           >
             {isLogin ? "¿No tienes cuenta? Regístrate" : "¿Ya tienes cuenta? Inicia sesión"}

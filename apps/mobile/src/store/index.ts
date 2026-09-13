@@ -1,14 +1,10 @@
 import { create } from 'zustand';
 import { persist, createJSONStorage } from 'zustand/middleware';
-import { getAuth, signInWithPopup, GoogleAuthProvider, signOut } from 'firebase/auth';
-import { getFirestore, doc, setDoc, getDoc, collection, addDoc, query, where, getDocs, deleteDoc, updateDoc } from 'firebase/firestore';
-import { app } from '../lib/firebase';
+import { getSupabaseClient, supabaseAuth } from '@/lib/supabase';
 import { z } from 'zod';
 
-// Inicializar Firebase
-const auth = getAuth(app);
-const db = getFirestore(app);
-const googleProvider = new GoogleAuthProvider();
+// Cliente de Supabase
+const supabase = getSupabaseClient();
 
 // Esquemas de validación Zod
 export const UserSchema = z.object({
@@ -97,78 +93,76 @@ export const useAuthStore = create<AuthState>()(
       user: null,
       loading: true,
       error: null,
-      
+
       loginWithGoogle: async () => {
         try {
           set({ loading: true, error: null });
-          const result = await signInWithPopup(auth, googleProvider);
-          const email = result.user.email!;
           
-          // Validar que sea @gmail.com
-          if (!email.endsWith('@gmail.com')) {
-            await signOut(auth);
-            throw new Error('Solo se permiten cuentas @gmail.com');
-          }
+          // Usar autenticación con Google de Supabase
+          const { data, error } = await supabase.auth.signInWithOAuth({
+            provider: 'google',
+            options: {
+              redirectTo: `${typeof window !== 'undefined' ? window.location.origin : ''}/auth/callback`,
+              queryParams: {
+                access_type: 'offline',
+                prompt: 'consent',
+              },
+            },
+          });
           
-          const userDoc = await getDoc(doc(db, 'users', result.user.uid));
+          if (error) throw error;
           
-          if (!userDoc.exists()) {
-            // Crear nuevo usuario
-            const newUser: User = {
-              email,
-              displayName: result.user.displayName || 'Usuario',
-              photoURL: result.user.photoURL || undefined,
-              role: 'client',
-              createdAt: Date.now(),
-              onboardingCompleted: false,
-            };
-            await setDoc(doc(db, 'users', result.user.uid), newUser);
-            set({ user: newUser, loading: false });
-          } else {
-            const userData = userDoc.data() as User;
-            set({ user: userData, loading: false });
-          }
+          // El usuario será redirigido a Google y luego de vuelta al callback
+          // El estado se actualizará automáticamente vía onAuthStateChange
         } catch (error: any) {
-          set({ 
-            error: error.message || 'Error al iniciar sesión con Google', 
-            loading: false 
+          set({
+            error: error.message || 'Error al iniciar sesión con Google',
+            loading: false
           });
         }
       },
-      
+
       logout: async () => {
         try {
-          await signOut(auth);
+          const { error } = await supabase.auth.signOut();
+          if (error) throw error;
           set({ user: null, error: null });
         } catch (error: any) {
           set({ error: error.message || 'Error al cerrar sesión' });
         }
       },
-      
+
       checkOnboarding: async () => {
         const { user } = get();
         if (!user) return false;
         
-        const userDoc = await getDoc(doc(db, 'users', user.email.replace('@gmail.com', '')));
-        if (userDoc.exists()) {
-          const userData = userDoc.data() as User;
-          set({ user: userData });
-          return userData.onboardingCompleted;
-        }
-        return false;
+        // Obtener datos del usuario desde Supabase
+        const { data, error } = await supabase
+          .from('users')
+          .select('*')
+          .eq('email', user.email)
+          .single();
+          
+        if (error || !data) return false;
+        
+        set({ user: { ...user, onboardingCompleted: data.onboarding_completed } });
+        return data.onboarding_completed;
       },
-      
+
       completeOnboarding: async () => {
         const { user } = get();
         if (!user) return;
-        
-        await updateDoc(doc(db, 'users', user.email.replace('@gmail.com', '')), {
-          onboardingCompleted: true,
-        });
+
+        const { error } = await supabase
+          .from('users')
+          .update({ onboarding_completed: true })
+          .eq('email', user.email);
+          
+        if (error) throw error;
         
         set({ user: { ...user, onboardingCompleted: true } });
       },
-      
+
       clearError: () => set({ error: null }),
     }),
     {
@@ -188,10 +182,15 @@ export const useWorkoutStore = create<WorkoutState>((set, get) => ({
   fetchWorkouts: async (userId: string) => {
     try {
       set({ loading: true, error: null });
-      const q = query(collection(db, 'workouts'), where('userId', '==', userId));
-      const snapshot = await getDocs(q);
-      const workouts: Workout[] = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Workout));
-      set({ workouts, loading: false });
+      const { data, error } = await supabase
+        .from('workouts')
+        .select('*')
+        .eq('user_id', userId)
+        .order('created_at', { ascending: false });
+      
+      if (error) throw error;
+      
+      set({ workouts: data as unknown as Workout[], loading: false });
     } catch (error: any) {
       set({ error: error.message || 'Error al obtener entrenamientos', loading: false });
     }
@@ -201,7 +200,13 @@ export const useWorkoutStore = create<WorkoutState>((set, get) => ({
     try {
       set({ loading: true, error: null });
       const validated = WorkoutSchema.parse({ ...workoutData, createdAt: Date.now() });
-      await addDoc(collection(db, 'workouts'), { ...validated, userId });
+      
+      const { error } = await supabase
+        .from('workouts')
+        .insert({ ...validated, user_id: userId });
+      
+      if (error) throw error;
+      
       await get().fetchWorkouts(userId);
     } catch (error: any) {
       if (error instanceof z.ZodError) {
@@ -215,7 +220,14 @@ export const useWorkoutStore = create<WorkoutState>((set, get) => ({
   updateWorkout: async (workoutId: string, data: Partial<Workout>) => {
     try {
       set({ loading: true, error: null });
-      await updateDoc(doc(db, 'workouts', workoutId), data);
+      
+      const { error } = await supabase
+        .from('workouts')
+        .update(data)
+        .eq('id', workoutId);
+      
+      if (error) throw error;
+      
       const { workouts } = get();
       set({ 
         workouts: workouts.map(w => w.id === workoutId ? { ...w, ...data } : w),
@@ -229,7 +241,14 @@ export const useWorkoutStore = create<WorkoutState>((set, get) => ({
   deleteWorkout: async (workoutId: string) => {
     try {
       set({ loading: true, error: null });
-      await deleteDoc(doc(db, 'workouts', workoutId));
+      
+      const { error } = await supabase
+        .from('workouts')
+        .delete()
+        .eq('id', workoutId);
+      
+      if (error) throw error;
+      
       const { workouts } = get();
       set({ 
         workouts: workouts.filter(w => w.id !== workoutId),
@@ -252,19 +271,19 @@ export const useNutritionStore = create<NutritionState>((set, get) => ({
   fetchLogs: async (userId: string, date: Date) => {
     try {
       set({ loading: true, error: null });
-      const startOfDay = new Date(date.setHours(0, 0, 0, 0)).getTime();
-      const endOfDay = new Date(date.setHours(23, 59, 59, 999)).getTime();
+      const startOfDay = new Date(date.setHours(0, 0, 0, 0)).toISOString();
+      const endOfDay = new Date(date.setHours(23, 59, 59, 999)).toISOString();
       
-      const q = query(
-        collection(db, 'nutrition_logs'),
-        where('userId', '==', userId),
-        where('timestamp', '>=', startOfDay),
-        where('timestamp', '<=', endOfDay)
-      );
+      const { data, error } = await supabase
+        .from('nutrition_logs')
+        .select('*')
+        .eq('user_id', userId)
+        .gte('date', startOfDay)
+        .lte('date', endOfDay);
       
-      const snapshot = await getDocs(q);
-      const logs: NutritionLog[] = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as NutritionLog));
-      set({ logs, loading: false });
+      if (error) throw error;
+      
+      set({ logs: data as unknown as NutritionLog[], loading: false });
     } catch (error: any) {
       set({ error: error.message || 'Error al obtener registros nutricionales', loading: false });
     }
@@ -274,7 +293,13 @@ export const useNutritionStore = create<NutritionState>((set, get) => ({
     try {
       set({ loading: true, error: null });
       const validated = NutritionLogSchema.parse({ ...logData, timestamp: Date.now() });
-      await addDoc(collection(db, 'nutrition_logs'), { ...validated, userId });
+      
+      const { error } = await supabase
+        .from('nutrition_logs')
+        .insert({ ...validated, user_id: userId });
+      
+      if (error) throw error;
+      
       await get().fetchLogs(userId, new Date());
     } catch (error: any) {
       if (error instanceof z.ZodError) {
@@ -288,7 +313,14 @@ export const useNutritionStore = create<NutritionState>((set, get) => ({
   deleteLog: async (logId: string) => {
     try {
       set({ loading: true, error: null });
-      await deleteDoc(doc(db, 'nutrition_logs', logId));
+      
+      const { error } = await supabase
+        .from('nutrition_logs')
+        .delete()
+        .eq('id', logId);
+      
+      if (error) throw error;
+      
       const { logs } = get();
       set({ 
         logs: logs.filter(l => l.id !== logId),
