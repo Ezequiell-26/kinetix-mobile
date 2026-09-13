@@ -14,7 +14,7 @@ export function SiteNav() {
           href="/"
           className="font-black tracking-tight text-lg min-h-[44px] inline-flex items-center"
         >
-          EZEQUIEL<span className="text-[#D6FF2A]">COACHING</span>
+          EZEQUIEL<span className="text-[#34D399]">COACHING</span>
         </Link>
         <nav className="flex items-center gap-1 sm:gap-2">
           {links.map((l) => (
@@ -45,7 +45,7 @@ export function SiteNav() {
           </details>
           <Link
             href="/login"
-            className="min-h-[44px] inline-flex items-center px-5 rounded-full bg-[#D6FF2A] text-black text-sm font-black"
+            className="min-h-[44px] inline-flex items-center px-5 rounded-full bg-[#34D399] text-black text-sm font-black"
           >
             Ingresar
           </Link>

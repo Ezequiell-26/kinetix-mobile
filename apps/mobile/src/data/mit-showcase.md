@@ -1,6 +1,6 @@
 # 82 MIT Recuperados — Inspiración VIP Alto Nivel
 
-**Paleta:** Negro `#080808`, Zinc 900/800, Blanco, Acento `#D6FF2A`
+**Paleta:** Negro `#080808`, Zinc 900/800, Blanco, Acento `#34D399`
 **Tipografía:** Inter Display 700 + Space Grotesk
 **Estado:** BUILD 0, PWA 1-click, Electron nativo Windows/Mac/iOS
 
@@ -45,7 +45,7 @@
 Cada repositorio representa una característica VIP que puedes replicar:
 
 - **Glassmorphism** (ej. ABC Trainerize, wger): backdrop-blur, transparencia sutil
-- **Gradients premium** (ej. Future, Granite): degradados sutiles `#080808` → `#D6FF2A`
+- **Gradients premium** (ej. Future, Granite): degradados sutiles `#080808` → `#34D399`
 - **Microinteractions** (ej. FitBudd, TrueCoach): hover/press/shimmer 400ms
 - **IA adaptativa** (ej. Fitbod, SparkyFitness): generación personalizada
 - **Offline-first** (ej. LibreFit, Granite): PWA sin conexión

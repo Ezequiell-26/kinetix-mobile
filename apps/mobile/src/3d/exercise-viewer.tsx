@@ -47,16 +47,16 @@ function HumanBody({
   
   // EZEQUIEL COACHING brand colors - Electric Lime highlights
   const muscleColors: Record<string, THREE.Color> = {
-    chest: new THREE.Color('#D6FF2A'),
-    shoulders: new THREE.Color('#D6FF2A'),
-    biceps: new THREE.Color('#D6FF2A'),
-    triceps: new THREE.Color('#D6FF2A'),
-    back: new THREE.Color('#D6FF2A'),
-    abs: new THREE.Color('#D6FF2A'),
-    quads: new THREE.Color('#D6FF2A'),
-    hamstrings: new THREE.Color('#D6FF2A'),
-    glutes: new THREE.Color('#D6FF2A'),
-    calves: new THREE.Color('#D6FF2A'),
+    chest: new THREE.Color('#34D399'),
+    shoulders: new THREE.Color('#34D399'),
+    biceps: new THREE.Color('#34D399'),
+    triceps: new THREE.Color('#34D399'),
+    back: new THREE.Color('#34D399'),
+    abs: new THREE.Color('#34D399'),
+    quads: new THREE.Color('#34D399'),
+    hamstrings: new THREE.Color('#34D399'),
+    glutes: new THREE.Color('#34D399'),
+    calves: new THREE.Color('#34D399'),
   };
 
   const baseColor = new THREE.Color('#d4a574');
@@ -173,7 +173,7 @@ function MovementIndicator({ type }: { type: 'up' | 'down' | 'push' | 'pull' }) 
     <group position={[0.8, 1.2, 0]}>
       <mesh ref={ref}>
         <coneGeometry args={[0.15, 0.4, 32]} />
-        <meshStandardMaterial color="#D6FF2A" emissive="#D6FF2A" emissiveIntensity={0.5} />
+        <meshStandardMaterial color="#34D399" emissive="#34D399" emissiveIntensity={0.5} />
       </mesh>
       <mesh rotation={[Math.PI * direction * 0.5, 0, 0]} position={[0, direction * 0.3, 0]}>
         <cylinderGeometry args={[0.02, 0.02, 0.6, 16]} />
@@ -313,7 +313,7 @@ function ExerciseScene({
       <ambientLight intensity={0.4} />
       <directionalLight position={[5, 5, 5]} intensity={1} castShadow />
       <directionalLight position={[-3, 2, -3]} intensity={0.5} />
-      <pointLight position={[0, 3, 0]} intensity={0.3} color="#D6FF2A" />
+      <pointLight position={[0, 3, 0]} intensity={0.3} color="#34D399" />
       
       {/* Ambiente */}
       <Environment preset="studio" />

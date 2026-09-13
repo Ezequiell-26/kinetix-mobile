@@ -69,7 +69,7 @@ export default function FuncionesPage() {
       <SiteNav />
       <main className="mx-auto max-w-5xl px-4 py-14">
         <h1 className="text-3xl sm:text-5xl font-black tracking-tight text-center text-balance">
-          Todo tu entreno, <span className="text-[#D6FF2A]">en un solo lugar</span>
+          Todo tu entreno, <span className="text-[#34D399]">en un solo lugar</span>
         </h1>
         <p className="mt-4 text-center text-zinc-400 max-w-xl mx-auto">
           Seis herramientas reales que usás todos los días. Tocá cada una para
@@ -81,12 +81,12 @@ export default function FuncionesPage() {
               key={g.title}
               className="rounded-2xl border border-zinc-800 bg-zinc-950 p-6 flex flex-col"
             >
-              <g.icon size={26} className="text-[#D6FF2A]" />
+              <g.icon size={26} className="text-[#34D399]" />
               <h2 className="mt-4 text-xl font-black">{g.title}</h2>
               <p className="mt-2 text-sm text-zinc-400 flex-1">{g.desc}</p>
               <Link
                 href={g.href}
-                className="mt-5 min-h-[48px] inline-flex items-center justify-center gap-2 rounded-full border border-zinc-700 text-sm font-black hover:border-[#D6FF2A]"
+                className="mt-5 min-h-[48px] inline-flex items-center justify-center gap-2 rounded-full border border-zinc-700 text-sm font-black hover:border-[#34D399]"
               >
                 {g.cta} <ArrowRight size={16} />
               </Link>
@@ -96,7 +96,7 @@ export default function FuncionesPage() {
         <div className="mt-10 text-center">
           <Link
             href="/register"
-            className="min-h-[52px] inline-flex items-center gap-2 px-8 rounded-full bg-[#D6FF2A] text-black font-black"
+            className="min-h-[52px] inline-flex items-center gap-2 px-8 rounded-full bg-[#34D399] text-black font-black"
           >
             Probarlo gratis <ArrowRight size={18} />
           </Link>

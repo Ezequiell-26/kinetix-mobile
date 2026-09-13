@@ -64,7 +64,7 @@ export default function PlanesPage() {
       <SiteNav />
       <main className="mx-auto max-w-5xl px-4 py-14">
         <h1 className="text-3xl sm:text-5xl font-black tracking-tight text-center">
-          Planes <span className="text-[#D6FF2A]">mensuales</span>
+          Planes <span className="text-[#34D399]">mensuales</span>
         </h1>
         <p className="mt-4 text-center text-sm text-zinc-500">
           Precios en pesos argentinos. Sin permanencia.
@@ -75,7 +75,7 @@ export default function PlanesPage() {
               key={p.name}
               className={`rounded-2xl border p-6 ${
                 p.highlight
-                  ? "border-[#D6FF2A] bg-[#D6FF2A]/5"
+                  ? "border-[#34D399] bg-[#34D399]/5"
                   : "border-zinc-800 bg-zinc-950"
               }`}
             >
@@ -85,7 +85,7 @@ export default function PlanesPage() {
               <ul className="mt-5 space-y-2.5 text-sm text-zinc-300">
                 {p.items.map((it) => (
                   <li key={it} className="flex gap-2">
-                    <Check size={16} className="text-[#D6FF2A] shrink-0 mt-0.5" />
+                    <Check size={16} className="text-[#34D399] shrink-0 mt-0.5" />
                     {it}
                   </li>
                 ))}
@@ -94,7 +94,7 @@ export default function PlanesPage() {
                 href="/register"
                 className={`mt-6 min-h-[48px] flex items-center justify-center rounded-full text-sm font-black ${
                   p.highlight
-                    ? "bg-[#D6FF2A] text-black"
+                    ? "bg-[#34D399] text-black"
                     : "border border-zinc-700 hover:border-zinc-500"
                 }`}
               >
@@ -124,7 +124,7 @@ export default function PlanesPage() {
         <div className="mt-10 text-center">
           <Link
             href="/register"
-            className="min-h-[52px] inline-flex items-center gap-2 px-8 rounded-full bg-[#D6FF2A] text-black font-black"
+            className="min-h-[52px] inline-flex items-center gap-2 px-8 rounded-full bg-[#34D399] text-black font-black"
           >
             Empezar ahora <ArrowRight size={18} />
           </Link>

@@ -67,13 +67,13 @@ export default async function Home() {
 
       {/* Hero */}
       <section className="mx-auto max-w-5xl px-4 pt-16 sm:pt-24 pb-14 text-center">
-        <p className="inline-block text-[11px] font-black tracking-widest text-[#D6FF2A] border border-[#D6FF2A]/30 rounded-full px-4 py-1.5 mb-6">
+        <p className="inline-block text-[11px] font-black tracking-widest text-[#34D399] border border-[#34D399]/30 rounded-full px-4 py-1.5 mb-6">
           ENTRENAMIENTO PERSONALIZADO ONLINE
         </p>
         <h1 className="text-4xl sm:text-6xl font-black tracking-tight text-balance">
           Tu mejor versión,
           <br />
-          <span className="text-[#D6FF2A]">cada día.</span>
+          <span className="text-[#34D399]">cada día.</span>
         </h1>
         <p className="mt-5 text-zinc-400 max-w-xl mx-auto text-balance">
           Programa a medida, seguimiento real y contacto directo con tu coach.
@@ -82,7 +82,7 @@ export default async function Home() {
         <div className="mt-8 flex flex-col sm:flex-row gap-3 justify-center">
           <Link
             href="/register"
-            className="min-h-[52px] inline-flex items-center justify-center gap-2 px-8 rounded-full bg-[#D6FF2A] text-black font-black"
+            className="min-h-[52px] inline-flex items-center justify-center gap-2 px-8 rounded-full bg-[#34D399] text-black font-black"
           >
             Empezar ahora <ArrowRight size={18} />
           </Link>
@@ -120,7 +120,7 @@ export default async function Home() {
               key={f.title}
               className="rounded-2xl border border-zinc-800 bg-zinc-950 p-5"
             >
-              <f.icon size={22} className="text-[#D6FF2A]" />
+              <f.icon size={22} className="text-[#34D399]" />
               <p className="mt-3 font-bold">{f.title}</p>
               <p className="mt-1 text-sm text-zinc-500">{f.desc}</p>
             </div>
@@ -141,7 +141,7 @@ export default async function Home() {
               ["3", "Entrená y progresá", "Registrá, medí y ajustamos juntos."],
             ].map(([n, t, d]) => (
               <li key={n} className="rounded-2xl border border-zinc-800 p-5">
-                <span className="inline-flex w-9 h-9 items-center justify-center rounded-full bg-[#D6FF2A] text-black font-black">
+                <span className="inline-flex w-9 h-9 items-center justify-center rounded-full bg-[#34D399] text-black font-black">
                   {n}
                 </span>
                 <p className="mt-3 font-bold">{t}</p>
@@ -166,7 +166,7 @@ export default async function Home() {
               key={p.name}
               className={`rounded-2xl border p-6 text-center ${
                 p.highlight
-                  ? "border-[#D6FF2A] bg-[#D6FF2A]/5"
+                  ? "border-[#34D399] bg-[#34D399]/5"
                   : "border-zinc-800 bg-zinc-950"
               }`}
             >
@@ -177,7 +177,7 @@ export default async function Home() {
                 href="/register"
                 className={`mt-5 min-h-[48px] flex items-center justify-center gap-1.5 rounded-full text-sm font-black ${
                   p.highlight
-                    ? "bg-[#D6FF2A] text-black"
+                    ? "bg-[#34D399] text-black"
                     : "border border-zinc-700 text-white hover:border-zinc-500"
                 }`}
               >
@@ -190,7 +190,7 @@ export default async function Home() {
 
       {/* CTA final */}
       <section className="mx-auto max-w-5xl px-4 pb-16">
-        <div className="rounded-3xl bg-[#D6FF2A] text-black p-8 sm:p-12 text-center">
+        <div className="rounded-3xl bg-[#34D399] text-black p-8 sm:p-12 text-center">
           <h2 className="text-2xl sm:text-4xl font-black tracking-tight text-balance">
             Empezá hoy. Tu yo de mañana te lo agradece.
           </h2>
