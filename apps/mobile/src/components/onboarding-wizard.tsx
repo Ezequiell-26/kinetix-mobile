@@ -191,9 +191,9 @@ export function OnboardingWizard({ onComplete }: OnboardingWizardProps) {
           </div>
         </FadeInUp>
 
-        {/* KinetixFitt branding */}
+        {/* EZEQUIEL COACHING branding */}
         <p className="text-center text-zinc-600 text-sm mt-6">
-          Powered by <span className="text-primary font-bold">KinetixFitt</span>
+          Powered by <span className="text-primary font-bold">EZEQUIEL COACHING</span>
         </p>
       </div>
     </div>

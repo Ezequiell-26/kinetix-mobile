@@ -64,7 +64,11 @@ export async function POST(req: Request){
   try {
     const form = await req.formData();
     const file = form.get("file") as File | null;
-    const type = (form.get("type") as string) || "progress";
+    const rawType = (form.get("type") as string) || "progress";
+    // P0 path traversal: type va al path storage/uploads/<type>
+    const ALLOWED_TYPES = ["progress", "avatar", "body", "general"];
+    const type = ALLOWED_TYPES.includes(rawType) ? rawType : null;
+    if (!type) return NextResponse.json({error:"Tipo no permitido"},{status:400});
     
     if(!file) return NextResponse.json({error:"Falta archivo"},{status:400});
     

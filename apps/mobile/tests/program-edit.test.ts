@@ -9,14 +9,17 @@
  * Ahora: FK opcional con SetNull + snapshot workoutName + transacción.
  * El log sobrevive a la edición con su nombre preservado.
  *
- * Corre contra una COPIA de la base de desarrollo, nunca contra la real:
+ * Corre contra Postgres (DATABASE_URL del .env o entorno). Crea fixtures
+ * `TEST — ...` y las borra al final (ver Limpieza): nunca toca datos reales.
  *   npm run test:core
- * (copia prisma/dev.db -> prisma/test-core.db, que está en .gitignore)
  */
 import { config } from "dotenv";
 config({ path: ".env" });
 
-process.env.DATABASE_URL = "file:./test-core.db";
+if (!process.env.DATABASE_URL || !process.env.DATABASE_URL.startsWith("postgresql")) {
+  console.error("ERROR FATAL: test:core requiere DATABASE_URL=postgresql (ver .env.example)");
+  process.exit(2);
+}
 
 import { PrismaClient } from "@prisma/client";
 import { replaceProgramWeeks } from "../src/lib/programs";

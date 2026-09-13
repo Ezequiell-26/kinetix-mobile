@@ -24,7 +24,7 @@ export default function Error({
       )}
       <button
         onClick={reset}
-        className="mt-2 min-h-[44px] px-6 rounded-full bg-[#D6FF2A] text-black text-sm font-black"
+        className="mt-2 min-h-[44px] px-6 rounded-full bg-[#34D399] text-black text-sm font-black"
       >
         Reintentar
       </button>

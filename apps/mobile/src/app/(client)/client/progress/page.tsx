@@ -264,7 +264,7 @@ export default function ProgressPage(){
           </p>
           <button
             onClick={() => { setLoadError(false); loadData(); }}
-            className="min-h-[44px] px-5 rounded-full bg-[#D6FF2A] text-black text-sm font-black shrink-0"
+            className="min-h-[44px] px-5 rounded-full bg-[#34D399] text-black text-sm font-black shrink-0"
           >
             Reintentar
           </button>

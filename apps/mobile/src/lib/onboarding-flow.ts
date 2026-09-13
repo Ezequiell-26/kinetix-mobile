@@ -1,5 +1,5 @@
 /**
- * KinetixFitt - Premium Onboarding System
+ * EZEQUIEL COACHING - Premium Onboarding System
  * Onboarding interactivo multi-step para capturar info del usuario
  * y personalizar su experiencia desde el día 1
  */
@@ -70,8 +70,8 @@ export interface OnboardingStep {
 export const CLIENT_ONBOARDING_STEPS: OnboardingStep[] = [
   {
     id: "role",
-    title: "Welcome to KinetixFitt",
-    titleES: "Bienvenido a KinetixFitt",
+    title: "Welcome to EZEQUIEL COACHING",
+    titleES: "Bienvenido a EZEQUIEL COACHING",
     description: "Are you here as a client or trainer?",
     descriptionES: "¿Estás aquí como cliente o entrenador?",
     icon: "👋",
@@ -133,8 +133,8 @@ export const CLIENT_ONBOARDING_STEPS: OnboardingStep[] = [
 export const TRAINER_ONBOARDING_STEPS: OnboardingStep[] = [
   {
     id: "role",
-    title: "Welcome to KinetixFitt",
-    titleES: "Bienvenido a KinetixFitt",
+    title: "Welcome to EZEQUIEL COACHING",
+    titleES: "Bienvenido a EZEQUIEL COACHING",
     description: "Are you here as a client or trainer?",
     descriptionES: "¿Estás aquí como cliente o entrenador?",
     icon: "👋",
