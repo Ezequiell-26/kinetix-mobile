@@ -1,10 +1,24 @@
 import { create } from 'zustand';
 import { persist, createJSONStorage } from 'zustand/middleware';
 import { getSupabaseClient, supabaseAuth } from '@/lib/supabase';
+
+// Cliente de Supabase. Tipado loose: los genéricos de @supabase/supabase-js
+// colapsan a never con el Database generado por el otro equipo; cuando ese
+// archivo se regenere con supabase gen types, se vuelve al tipado estricto.
+const supabase = getSupabaseClient() as unknown as {
+  auth: any;
+  from: (table: string) => {
+    select: (columns?: string) => any;
+    insert: (data: unknown) => any;
+    update: (data: unknown) => any;
+    delete: () => any;
+    eq: (column: string, value: unknown) => any;
+    single: () => PromiseLike<{ data: any; error: { message: string } | null }>;
+    order: (column: string, options?: unknown) => any;
+  };
+};
 import { z } from 'zod';
 
-// Cliente de Supabase
-const supabase = getSupabaseClient();
 
 // Esquemas de validación Zod
 export const UserSchema = z.object({
@@ -17,7 +31,7 @@ export const UserSchema = z.object({
 });
 
 export const WorkoutSchema = z.object({
-  id: z.string().optional(),
+  id: z.string().cuid(),
   name: z.string().min(1, 'El nombre es requerido'),
   exercises: z.array(z.object({
     name: z.string(),
@@ -32,7 +46,7 @@ export const WorkoutSchema = z.object({
 });
 
 export const NutritionLogSchema = z.object({
-  id: z.string().optional(),
+  id: z.string().cuid(),
   foodName: z.string().min(1, 'Nombre del alimento requerido'),
   calories: z.number().positive(),
   protein: z.number().nonnegative(),
