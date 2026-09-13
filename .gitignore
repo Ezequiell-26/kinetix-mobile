@@ -21,8 +21,6 @@ Thumbs.db
 # Editor files
 .vscode/
 .idea/
-*.swp
-*.swo
 
 # Build outputs
 dist/

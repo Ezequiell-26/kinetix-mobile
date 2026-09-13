@@ -1,0 +1,6 @@
+{
+  "name": "@kinetix/ai-models",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Kinetix AI model adapters and contracts"
+}

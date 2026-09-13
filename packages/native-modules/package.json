@@ -1,0 +1,6 @@
+{
+  "name": "@kinetix/native-modules",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Kinetix native platform bridges (iOS/Android)"
+}

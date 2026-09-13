@@ -2,6 +2,22 @@
 
 Todas las versiones notables de EZEQUIEL COACHING.
 
+## [1.0.1] - 2026-09-10 — Lote 1: persistencia de programas y asignación
+
+### Corregido
+- **Editar un programa con historial ya no falla ni borra registros**: `WorkoutLog.workoutId` pasó a opcional con `onDelete: SetNull` y se agregó `workoutName` como snapshot del nombre de la sesión. Antes, el `PUT` reventaba con error 500 por la FK Restrict cuando el programa tenía logs.
+- **Guardado de programas atómico**: `POST /api/programs` y `PUT /api/programs/[id]` corren en una sola transacción (`replaceProgramWeeks` acepta el cliente de transacción). Si algo falla a mitad del guardado, el programa queda como estaba.
+- **workout-logs ya no sustituye IDs silenciosamente**: un `workoutId` inexistente ahora devuelve 404 (antes se guardaba contra el primer workout de la base) y un atleta no puede registrar entrenamientos de un programa que no le fue asignado (403).
+- **Un atleta sin programa asignado ve el estado "Ezequiel está diseñando tu plan"** en `/client/workout`; se eliminó el fallback que le mostraba el primer programa de la base.
+- Un CLIENT ya no puede leer programas que no le fueron asignados (`GET /api/programs` y `GET /api/programs/[id]` filtran por asignación) ni autoasignarse un programa vía `PATCH /api/clients/[id]` (solo TRAINER).
+
+### Test
+- `npm run test:core`: regresión de edición de programas contra una copia de la DB (9 asserts: log sobrevive, snapshot del nombre, transacción fallida no deja estado parcial).
+
+### Notas
+- Migración `20260910143357_workoutlog_history_preserving` (no destructiva). Respaldo previo: `prisma/dev.db.backup-20260910`.
+- Reiniciar el dev server para que cargue el Prisma Client regenerado.
+
 ## [1.0.0] - 2026-09-09
 
 ### Agregado

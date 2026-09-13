@@ -1,0 +1,6 @@
+{
+  "name": "@kinetix/core",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Kinetix computational engines (3D, Rust/WASM)"
+}
