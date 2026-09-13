@@ -212,14 +212,14 @@ export default async function ClientDashboardPage() {
     ? allWorkoutsList.find(w => w.id === todayWorkoutLog.workoutId) ?? null
     : null;
   const plannedSets = completedPlanned
-    ? completedPlanned.exercises.reduce((a, e) => a + (e.sets || 0), 0)
+    ? completedPlanned.exercises.reduce((a: number, e: any) => a + (e.sets || 0), 0)
     : 0;
   const doneSets = todayWorkoutLog?.sets?.filter((s: any) => s.completed).length ?? 0;
   const sessionVolume = todayWorkoutLog?.sets
     ? todayWorkoutLog.sets.reduce((a, s) => a + (s.weight || 0) * (s.reps || 0), 0)
     : 0;
   const nextFocus = todayWorkout
-    ? Array.from(new Set(todayWorkout.exercises.map(e => e.exercise.muscleGroup))).slice(0, 3).join(" · ")
+    ? Array.from(new Set(todayWorkout.exercises.map((e: any) => e.exercise.muscleGroup))).slice(0, 3).join(" · ")
     : null;
 
   // Métricas reales. Totales exactos: NO se derivan del listado de 30.
@@ -356,7 +356,7 @@ export default async function ClientDashboardPage() {
 
                 {/* Ejercicios: monograma + nombre + músculo + series, escaneable en 1s */}
                 <div className="mt-6 space-y-2">
-                  {todayWorkout.exercises.slice(0, 3).map((ex, idx) => (
+                  {todayWorkout.exercises.slice(0, 3).map((ex: any, idx: number) => (
                     <div key={ex.id} className="flex items-center gap-3 rounded-2xl bg-zinc-950/60 border border-subtle/60 px-3.5 py-2.5 backdrop-blur-sm">
                       <span className="w-7 h-7 rounded-full bg-primary/10 border border-primary/25 text-primary text-[11px] font-black flex items-center justify-center shrink-0">
                         {idx + 1}
