@@ -26,6 +26,7 @@
     "desktop:build": "electron-builder -c electron/builder.json"
   },
   "dependencies": {
+    "@capacitor/android": "^8.5.2",
     "@capacitor/core": "^8.5.2",
     "@hookform/resolvers": "^5.0.1",
     "@prisma/client": "^6.19.3",
