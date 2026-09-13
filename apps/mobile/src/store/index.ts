@@ -3,8 +3,6 @@ import { persist, createJSONStorage } from 'zustand/middleware';
 import { getSupabaseClient, supabaseAuth } from '@/lib/supabase';
 import { z } from 'zod';
 
-// Cliente de Supabase
-const supabase = getSupabaseClient();
 
 // Esquemas de validación Zod
 export const UserSchema = z.object({
@@ -17,6 +15,8 @@ export const UserSchema = z.object({
 });
 
 export const WorkoutSchema = z.object({
+
+  id: z.string().cuid(),
   name: z.string().min(1, 'El nombre es requerido'),
   exercises: z.array(z.object({
     name: z.string(),
@@ -31,6 +31,8 @@ export const WorkoutSchema = z.object({
 });
 
 export const NutritionLogSchema = z.object({
+
+  id: z.string().cuid(),
   foodName: z.string().min(1, 'Nombre del alimento requerido'),
   calories: z.number().positive(),
   protein: z.number().nonnegative(),

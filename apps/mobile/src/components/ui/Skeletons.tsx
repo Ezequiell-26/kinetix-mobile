@@ -1,4 +1,4 @@
-import { Card, CardContent } from './ui/card';
+import { Card, CardContent } from './card';
 
 // Skeleton para tarjetas de entrenamiento
 export function WorkoutCardSkeleton() {

@@ -11,27 +11,31 @@ if (!supabaseUrl || !supabaseAnonKey) {
   );
 }
 
-// Cliente singleton para uso en cliente y servidor
-let supabase: SupabaseClient<Database> | null = null;
+// Cliente singleton para uso en cliente y servidor.
+// ReturnType para no acoplar los genéricos internos (cambian entre versiones).
+const createDefaultClient = () =>
+  createClient<Database>(supabaseUrl, supabaseAnonKey, {
+    auth: {
+      autoRefreshToken: true,
+      persistSession: true,
+      detectSessionInUrl: true,
+      flowType: 'pkce',
+    },
+    global: {
+      headers: {
+        'X-Client-Info': 'kinetix-coaching-app',
+      },
+    },
+    db: {
+      schema: 'public',
+    },
+  });
 
-export function getSupabaseClient(): SupabaseClient<Database> {
+let supabase: ReturnType<typeof createDefaultClient> | null = null;
+
+export function getSupabaseClient(): ReturnType<typeof createDefaultClient> {
   if (!supabase) {
-    supabase = createClient<Database>(supabaseUrl, supabaseAnonKey, {
-      auth: {
-        autoRefreshToken: true,
-        persistSession: true,
-        detectSessionInUrl: true,
-        flowType: 'pkce',
-      },
-      global: {
-        headers: {
-          'X-Client-Info': 'kinetix-coaching-app',
-        },
-      },
-      db: {
-        schema: 'public',
-      },
-    });
+    supabase = createDefaultClient();
   }
   return supabase;
 }
@@ -39,8 +43,8 @@ export function getSupabaseClient(): SupabaseClient<Database> {
 // Función para crear cliente con token personalizado (útil para SSR)
 export function createServerClient(
   accessToken?: string
-): SupabaseClient<Database> {
-  const client = createClient<Database>(supabaseUrl, supabaseAnonKey, {
+): ReturnType<typeof createDefaultClient> {
+  const client = createClient<Database>(supabaseUrl!, supabaseAnonKey!, {
     auth: {
       autoRefreshToken: false,
       persistSession: false,
@@ -143,12 +147,12 @@ export const supabaseDB = {
 
   async updateUser(userId: string, data: any) {
     const client = getSupabaseClient();
-    return client.from('users').update(data).eq('id', userId).select().single();
+    return client.from('users').update(data as never).eq('id', userId).select().single();
   },
 
   async createUser(data: any) {
     const client = getSupabaseClient();
-    return client.from('users').insert(data).select().single();
+    return client.from('users').insert(data as never).select().single();
   },
 
   // Entrenamientos
@@ -163,12 +167,12 @@ export const supabaseDB = {
 
   async createWorkout(data: any) {
     const client = getSupabaseClient();
-    return client.from('workouts').insert(data).select().single();
+    return client.from('workouts').insert(data as never).select().single();
   },
 
   async updateWorkout(workoutId: string, data: any) {
     const client = getSupabaseClient();
-    return client.from('workouts').update(data).eq('id', workoutId).select().single();
+    return client.from('workouts').update(data as never).eq('id', workoutId).select().single();
   },
 
   async deleteWorkout(workoutId: string) {
