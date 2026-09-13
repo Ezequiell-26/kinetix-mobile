@@ -1,1 +1,40 @@
-Nothing needs to be added to .gitignore since the changes only include source code files (.ts files) and no build artifacts, dependencies, or temporary files.
+# TypeScript/Next.js build artifacts
+*.tsbuildinfo
+.next/
+.next-dev*/
+.next-stale-*/
+out/
+
+# ── KinetixFitt: higiene local (2026-09-12, NO BORRAR este bloque) ──
+# Build Next (dev + prod) y export estático Capacitor: se regeneran solos
+# DBs SQLite locales + backups: jamás se commitean (cada entorno tiene la suya)
+*.db
+*.db-journal
+# Uploads de usuarios en dev: contenido local, no código
+apps/mobile/public/uploads/
+# Directorios de otras apps del monorepo sin trackear aún
+# (quitar estas líneas cuando se integren de verdad)
+# apps/web/
+
+# Dependencies
+node_modules/
+
+# Environment variables
+.env*
+!.env.example
+
+# Logs
+*.log
+
+# OS generated files
+.DS_Store
+Thumbs.db
+
+# Editor files
+.vscode/
+.idea/
+
+# Build outputs
+dist/
+build/
+target/
