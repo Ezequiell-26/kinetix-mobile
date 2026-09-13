@@ -88,3 +88,11 @@ export async function logoutCurrentSession(){
 export async function logoutAllSessions(userId: string){
   return revokeAllUserSessions(userId);
 }
+
+/**
+ * getCurrentUser - Helper para obtener el usuario actual desde una request de API
+ * Retorna null si no hay sesión válida
+ */
+export async function getCurrentUser() {
+  return getSession();
+}
