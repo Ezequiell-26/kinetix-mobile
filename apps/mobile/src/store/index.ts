@@ -17,6 +17,7 @@ export const UserSchema = z.object({
 });
 
 export const WorkoutSchema = z.object({
+  id: z.string().optional(),
   name: z.string().min(1, 'El nombre es requerido'),
   exercises: z.array(z.object({
     name: z.string(),
@@ -31,6 +32,7 @@ export const WorkoutSchema = z.object({
 });
 
 export const NutritionLogSchema = z.object({
+  id: z.string().optional(),
   foodName: z.string().min(1, 'Nombre del alimento requerido'),
   calories: z.number().positive(),
   protein: z.number().nonnegative(),

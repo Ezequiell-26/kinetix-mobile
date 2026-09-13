@@ -2,21 +2,15 @@ import { createClient, SupabaseClient } from '@supabase/supabase-js';
 import type { Database } from './database.types';
 
 // Configuración de Supabase desde variables de entorno
-const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
-const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
-
-if (!supabaseUrl || !supabaseAnonKey) {
-  throw new Error(
-    'Faltan las variables de entorno NEXT_PUBLIC_SUPABASE_URL o NEXT_PUBLIC_SUPABASE_ANON_KEY'
-  );
-}
+const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
+const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!;
 
 // Cliente singleton para uso en cliente y servidor
-let supabase: SupabaseClient<Database> | null = null;
+let supabase: SupabaseClient | null = null;
 
-export function getSupabaseClient(): SupabaseClient<Database> {
+export function getSupabaseClient(): SupabaseClient {
   if (!supabase) {
-    supabase = createClient<Database>(supabaseUrl, supabaseAnonKey, {
+    supabase = createClient(supabaseUrl, supabaseAnonKey, {
       auth: {
         autoRefreshToken: true,
         persistSession: true,
@@ -28,9 +22,6 @@ export function getSupabaseClient(): SupabaseClient<Database> {
           'X-Client-Info': 'kinetix-coaching-app',
         },
       },
-      db: {
-        schema: 'public',
-      },
     });
   }
   return supabase;
@@ -39,8 +30,8 @@ export function getSupabaseClient(): SupabaseClient<Database> {
 // Función para crear cliente con token personalizado (útil para SSR)
 export function createServerClient(
   accessToken?: string
-): SupabaseClient<Database> {
-  const client = createClient<Database>(supabaseUrl, supabaseAnonKey, {
+): SupabaseClient {
+  const client = createClient(supabaseUrl, supabaseAnonKey, {
     auth: {
       autoRefreshToken: false,
       persistSession: false,
