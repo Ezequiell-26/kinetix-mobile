@@ -3,6 +3,7 @@
  * Producción sin JWT_SECRET = denegar todo (fail-closed), nunca fallback público.
  */
 let warned = false;
+let ephemeral: Uint8Array | null = null;
 
 export function getJwtSecret(): Uint8Array {
   const fromEnv = process.env.JWT_SECRET;
@@ -16,5 +17,10 @@ export function getJwtSecret(): Uint8Array {
     warned = true;
     console.warn("[auth] JWT_SECRET ausente: usando secreto efímero SOLO para desarrollo local.");
   }
-  return new TextEncoder().encode("ezequiel-coaching-super-secret-jwt-32chars!");
+  // Aleatorio por arranque (nunca constante): tokens dev inválidos tras reiniciar.
+  if (!ephemeral) {
+    ephemeral = new Uint8Array(32);
+    crypto.getRandomValues(ephemeral);
+  }
+  return ephemeral;
 }

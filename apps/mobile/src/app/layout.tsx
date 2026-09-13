@@ -8,6 +8,9 @@ const inter = Inter({ subsets: ["latin"], variable: "--font-inter", display: "sw
 const grotesk = Space_Grotesk({ subsets: ["latin"], variable: "--font-display", display: "swap", weight: ["500", "600", "700"] });
 
 export const metadata: Metadata = {
+  metadataBase: new URL(
+    process.env.NEXT_PUBLIC_APP_URL || "https://kinetixfitt-world-ia.vercel.app"
+  ),
   title: "EZEQUIEL COACHING — Entrenamiento Personalizado Online",
   description:
     "Programa a medida, seguimiento real y contacto directo con tu coach. Entrenamiento, nutrición y progreso desde tu celular.",
@@ -50,7 +53,7 @@ export const viewport: Viewport = {
   themeColor: "#0A0F14",
   width: "device-width",
   initialScale: 1,
-  maximumScale: 1,
+  // Sin maximumScale: bloquear pinch-zoom rompe accesibilidad móvil.
   viewportFit: "cover",
 };
 

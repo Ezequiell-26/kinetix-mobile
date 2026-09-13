@@ -52,6 +52,8 @@ npm run test --workspaces --if-present
   borrar workspaces de `package.json` raíz.
 - `packages/shared`: SIN `devDependencies` (un solo `@types/react` en raíz;
   duplicarlo rompe el build con errores de `JSX element type`).
+- `npm install` con dev servers vivos falla con EPERM (la DLL de Prisma queda
+  bloqueada): parar los servers (puertos 3001/3002/3007/3127) ANTES de instalar.
 
 ## 4. Dónde van los cambios
 
@@ -77,9 +79,19 @@ wearables) y hubo que tirar una versión entera. `grep` primero, crear después.
 
 - Sesiones: `apps/mobile/src/lib/session-store.ts` + `password-reset-store.ts`
   ya existen y están cableados. No crear stores paralelos.
-- `prisma/schema.prisma`: cambios SIEMPRE vía `prisma migrate dev --name ...`
-  con el dev server APAGADO (puerto 3001 libre), nunca editando `dev.db` a mano.
-- Cuentas demo: existen en `prisma/seed.ts`. No inventar otras.
+- DB = Supabase Postgres (pooler 6543) desde 2026-09-13. El historial sqlite se
+  archivó; la baseline es `prisma/migrations/20260913000000_postgres_init/`.
+- FLUJO DE SCHEMA (prohibido `prisma migrate dev`: el pooler no soporta shadow
+  DB; prohibido `prisma db execute`: no commitea por pooler):
+  1. Editar `schema.prisma`.
+  2. Generar SQL offline: `prisma migrate diff --from-migrations
+     apps/mobile/prisma/migrations --to-schema-datamodel
+     apps/mobile/prisma/schema.prisma --script > apps/mobile/prisma/migrations/<TS>_<nombre>/migration.sql`
+  3. Aplicar: `node scripts/ad-hoc/pg-apply.cjs <migration.sql>` (con `POOL=`).
+  4. INSERT manual en `_prisma_migrations` + commit. Ver `.env.example`.
+- `DATABASE_URL` y `DIRECT_URL` en Vercel apuntan AMBOS al pooler. El host
+  directo `db.*:5432` es IPv6 y no llega: no usarlo en ningún lado.
+- `.env` local tiene secrets y está gitignored: jamás `git add -f` un `.env`.
 
 ---
 *Teams: si una regla de acá contradice tu default, gana esta. Si el repo te pide

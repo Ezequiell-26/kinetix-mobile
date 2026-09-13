@@ -130,7 +130,7 @@ export function ClientTopBar({ name }: { name?: string }){
             </svg>
           </div>
           <div className="leading-none">
-            <span className="font-display font-bold text-white text-sm tracking-tight block">KinetiX</span>
+            <span className="font-display font-bold text-white text-sm tracking-tight block">EZEQUIEL COACHING</span>
             <span className="text-[9px] text-zinc-500 font-bold tracking-[0.18em] uppercase hidden sm:block mt-0.5">Tu mejor versión, cada día</span>
           </div>
         </Link>

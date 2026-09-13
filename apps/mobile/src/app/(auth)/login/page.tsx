@@ -10,8 +10,10 @@ import { motion } from "framer-motion";
 
 export default function LoginPage() {
   const r = useRouter();
-  const [email, setEmail] = useState("ezequiel@ezequielcoaching.com");
-  const [password, setPassword] = useState("Admin123!");
+  // P0: sin credenciales precargadas (quedaban expuestas en el HTML/JS).
+  // Los botones demo más abajo las completan a demanda.
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
   const [showPw, setShowPw] = useState(false);
   const [err, setErr] = useState("");
   const [loading, setLoading] = useState(false);
@@ -67,7 +69,7 @@ export default function LoginPage() {
             </motion.div>
 
             <div className="space-y-1">
-              <CardTitle className="text-2xl tracking-tight">KinetiX</CardTitle>
+              <CardTitle className="text-2xl tracking-tight">EZEQUIEL COACHING</CardTitle>
               <CardDesc>Entrenamiento personalizado online</CardDesc>
             </div>
 
@@ -127,7 +129,6 @@ export default function LoginPage() {
                   type="email"
                   inputMode="email"
                   autoComplete="email"
-                  autoFocus
                   required
                   className="bg-zinc-950/50 border-zinc-800 focus:border-primary/50 focus:bg-zinc-950"
                 />
@@ -211,7 +212,7 @@ export default function LoginPage() {
 
         {/* Footer */}
         <p className="text-center text-[11px] text-zinc-600 mt-4">
-          KinetiX © 2026 · Tu mejor versión, cada día
+          EZEQUIEL COACHING © 2026 · Tu mejor versión, cada día
         </p>
       </motion.div>
     </div>

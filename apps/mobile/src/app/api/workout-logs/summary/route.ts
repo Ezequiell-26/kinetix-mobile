@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
 import { getSession } from "@/lib/auth";
+import { assertTrainerOwnsClient } from "@/lib/authorization";
 import { computeStreak, countPRs, computeAdherence, weeklyAnalytics } from "@/lib/stats";
 import type { Prisma } from "@prisma/client";
 
@@ -30,6 +31,11 @@ export async function GET(req: Request) {
     scope = { OR: [{ userId: s.id }, ...(client?.id ? [{ clientId: client.id }] : [])] };
     frequency = await frequencyFor(client?.assignedProgramId ?? null);
   } else if (targetClientId) {
+    // P0 IDOR: TRAINER solo puede consultar sus propios clientes
+    const owned = await assertTrainerOwnsClient(s.id, targetClientId);
+    if (!owned) {
+      return NextResponse.json({ error: "Cliente no encontrado" }, { status: 404 });
+    }
     scope = { clientId: targetClientId };
     const client = await prisma.client.findUnique({
       where: { id: targetClientId },
