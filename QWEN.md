@@ -61,6 +61,10 @@ npm run test --workspaces --if-present
   más `RESUMEN_*.md` / `SPRINT_*.md` en raíz: ya hay ~20 duplicados).
 - PRs siempre contra `develop`, NUNCA contra `main`. `main` solo la mueve Hermes
   con fast-forward cuando el CI de `develop` está verde.
+- PROHIBIDO mergear PRs a `main` y pushear directo a `main`: producción de
+  Vercel sale de la rama `stable`, que solo mueve Hermes tras CI verde en
+  `main`. Si mergeás a `main`, tu código llega a preview pero JAMÁS a
+  producción hasta que Hermes lo promueva. No forzar deploys a producción.
 - Commits en español, formato: `tipo(alcance): descripción` — tipos:
   `feat fix chore docs refactor test ci`. Sin `--no-verify` salvo hook roto
   documentado en el mensaje del commit.
