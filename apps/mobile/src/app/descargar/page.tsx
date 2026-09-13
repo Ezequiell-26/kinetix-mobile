@@ -19,12 +19,13 @@ export const metadata: Metadata = {
 };
 
 // Se actualizan solos con cada Release (workflow Native).
-// Mientras no haya release publicado, apuntan a la página de releases.
-const GH = "https://github.com/Ezequiell-26/kinetix-mobile/releases/latest";
+// NOTA: hasta que el primer Native verde publique artefactos, los botones
+// llevan a la página de releases (los /latest/download darían 404).
+const GH = "https://github.com/Ezequiell-26/kinetix-mobile/releases";
 const FILES = {
-  win: `${GH}/download/EZEQUIEL-COACHING-Setup-1.0.0.exe`,
-  apk: `${GH}/download/app-debug.apk`,
-  dmg: `${GH}/download/EZEQUIEL-COACHING-1.0.0.dmg`,
+  win: GH,
+  apk: GH,
+  dmg: GH,
 };
 
 const cards = [
