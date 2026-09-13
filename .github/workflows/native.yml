@@ -1,0 +1,109 @@
+name: Native
+
+# Builds nativos bajo demanda: EXE (Windows) + APK (Android) + DMG (Mac sin firmar).
+# Disparo: tag desktop-v* o manual (workflow_dispatch). Publica en el Release;
+# /descargar enlaza via /releases/latest/download/<archivo>.
+# iOS no esta aca: un .ipa instalable exige Mac + Apple Developer. En iPhone
+# se usa la PWA (Compartir, Anadir a pantalla de inicio), que ya funciona.
+
+on:
+  push:
+    tags: ["desktop-v*"]
+  workflow_dispatch:
+
+jobs:
+  windows-exe:
+    runs-on: windows-latest
+    defaults:
+      run:
+        working-directory: apps/mobile
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: package-lock.json
+      - name: Install arbol unico raiz
+        run: npm ci
+        working-directory: .
+      - name: Build EXE
+        run: npx --yes electron-builder -c electron/builder.json --win nsis --publish never
+      - name: Upload EXE
+        uses: actions/upload-artifact@v5
+        with:
+          name: windows-exe
+          path: apps/mobile/dist-electron/*.exe
+
+  android-apk:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: apps/mobile
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: package-lock.json
+      - uses: actions/setup-java@v5
+        with:
+          distribution: temurin
+          java-version: 17
+      - name: Install arbol unico raiz
+        run: npm ci
+        working-directory: .
+      - name: Capacitor Android wrapper online
+        run: |
+          npx --yes @capacitor/cli init "EZEQUIEL COACHING" com.ezequielcoaching.app --web-dir=public
+          npx --yes @capacitor/cli add android
+      - name: Build APK debug
+        run: |
+          cd android
+          chmod +x gradlew
+          ./gradlew assembleDebug --no-daemon
+      - name: Upload APK
+        uses: actions/upload-artifact@v5
+        with:
+          name: android-apk
+          path: apps/mobile/android/app/build/outputs/apk/debug/*.apk
+
+  mac-dmg:
+    runs-on: macos-latest
+    defaults:
+      run:
+        working-directory: apps/mobile
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: package-lock.json
+      - name: Install arbol unico raiz
+        run: npm ci
+        working-directory: .
+      - name: Build DMG sin firmar
+        run: npx --yes electron-builder -c electron/builder.json --mac dmg --publish never
+      - name: Upload DMG
+        uses: actions/upload-artifact@v5
+        with:
+          name: mac-dmg
+          path: apps/mobile/dist-electron/*.dmg
+
+  release:
+    needs: [windows-exe, android-apk, mac-dmg]
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/download-artifact@v5
+        with:
+          path: artifacts
+          merge-multiple: true
+      - name: Publicar Release
+        uses: softprops/action-gh-release@v2
+        with:
+          files: artifacts/*
+          generate_release_notes: true
