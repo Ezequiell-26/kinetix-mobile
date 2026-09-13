@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import type { PaymentStatus } from "@prisma/client";
 import { prisma } from "@/lib/db";
 import { getSession } from "@/lib/auth";
 import { assertTrainerOwnsClient } from "@/lib/authorization";
@@ -144,7 +145,7 @@ export async function GET(req: Request) {
         return NextResponse.json({ error: "Cliente no encontrado" }, { status: 404 });
       }
 
-      const whereClause: { clientId: string; status?: typeof status } = { clientId };
+      const whereClause: { clientId: string; status?: PaymentStatus } = { clientId };
       if (status) whereClause.status = status;
 
       payments = await prisma.payment.findMany({
@@ -165,7 +166,7 @@ export async function GET(req: Request) {
     }
 
     // Todos los pagos recientes para el trainer
-    const whereClause: { status?: typeof status } = {};
+    const whereClause: { status?: PaymentStatus } = {};
     if (status) whereClause.status = status;
 
     payments = await prisma.payment.findMany({
