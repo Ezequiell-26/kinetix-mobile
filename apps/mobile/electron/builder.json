@@ -1,1 +1,36 @@
-{"appId":"com.ezequielcoaching.app","productName":"EZEQUIEL COACHING","files":["electron/**/*","public/icons/**/*"],"directories":{"output":"dist-electron"},"win":{"target":["nsis"],"icon":"public/icons/icon-512.png"},"nsis":{"oneClick":false,"allowToChangeInstallationDirectory":true,"shortcutName":"EZEQUIEL COACHING"},"mac":{"target":["dmg"],"icon":"public/icons/icon-512.png","identity":null},"linux":{"target":["AppImage"],"icon":"public/icons/icon-512.png"}}
+{
+  "appId": "com.ezequielcoaching.app",
+  "productName": "EZEQUIEL COACHING",
+  "files": [
+    "electron/**/*",
+    "public/icons/**/*"
+  ],
+  "directories": {
+    "output": "dist-electron"
+  },
+  "win": {
+    "target": [
+      "nsis"
+    ],
+    "icon": "public/icons/icon-512.png"
+  },
+  "nsis": {
+    "oneClick": false,
+    "allowToChangeInstallationDirectory": true,
+    "shortcutName": "EZEQUIEL COACHING"
+  },
+  "mac": {
+    "target": [
+      "dmg"
+    ],
+    "icon": "public/icons/icon-512.png",
+    "identity": null
+  },
+  "linux": {
+    "target": [
+      "AppImage"
+    ],
+    "icon": "public/icons/icon-512.png"
+  },
+  "electronVersion": "44.3.0"
+}
