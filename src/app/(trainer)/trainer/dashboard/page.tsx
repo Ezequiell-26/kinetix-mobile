@@ -17,6 +17,7 @@ import { Button } from "@/components/ui/button";
 import { TourLauncher } from "@/components/guided-tour";
 import { TRAINER_TOUR, TRAINER_TOUR_KEY } from "@/lib/tours";
 import { 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
   Users, 
   Dumbbell, 
   ClipboardCheck, 

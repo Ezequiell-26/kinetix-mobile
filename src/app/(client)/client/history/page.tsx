@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import Link from "next/link";
 import { Dumbbell, Clock, Flame, Calendar, CheckCircle2 } from "lucide-react";
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 export default async function HistoryPage(){
   const sessionData = await getClientForSession().catch(() => null);
   const client = sessionData?.client;
