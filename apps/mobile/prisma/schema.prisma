@@ -60,8 +60,7 @@ model User {
   checkIns CheckIn[]
   workoutLogs WorkoutLog[]
   sessions Session[]
-  notificationPreference NotificationPreference?
-  pushSubscriptions      PushSubscription[]
+  pushSubscriptions PushSubscription[]
   progressMeasurements ProgressMeasurement[]
   progressPhotos ProgressPhoto[]
 
@@ -410,20 +409,34 @@ model Session {
   @@index([revoked])
 }
 
+// Preferencias de notificaciones del usuario
 model NotificationPreference {
-  id              String   @id @default(cuid())
-  userId          String   @unique
-  user            User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  enabled         Boolean  @default(true)
-  types           String[]
-  scheduleStartHour Int    @default(8)
-  scheduleEndHour   Int    @default(21)
-  timezone        String?
-  channelEmail    Boolean  @default(true)
-  channelPush     Boolean  @default(true)
-  channelSms      Boolean  @default(false)
-  channelWhatsapp Boolean  @default(false)
-  updatedAt       DateTime @updatedAt
+  id        String   @id @default(cuid())
+  userId    String   @unique
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  // Canales habilitados
+  emailEnabled     Boolean @default(true)
+  pushEnabled      Boolean @default(true)
+  smsEnabled       Boolean @default(false)
+  whatsappEnabled  Boolean @default(false)
+  
+  // Tipos de notificaciones
+  workoutReminders    Boolean @default(true)
+  nutritionTips       Boolean @default(true)
+  progressUpdates     Boolean @default(true)
+  messageNotifications Boolean @default(true)
+  paymentReminders    Boolean @default(true)
+  
+  // Configuración de schedule
+  timezone       String  @default("America/Argentina/Buenos_Aires")
+  quietStart     String  @default("22:00") // Hora de inicio de modo no molestar
+  quietEnd       String  @default("08:00") // Hora de fin de modo no molestar
+  
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([userId])
 }
 
 model PushSubscription {
