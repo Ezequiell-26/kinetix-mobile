@@ -3,6 +3,7 @@ import type { PaymentStatus } from "@prisma/client";
 import { prisma } from "@/lib/db";
 import { getSession } from "@/lib/auth";
 import { assertTrainerOwnsClient } from "@/lib/authorization";
+import { paymentSchema } from "@/lib/validations";
 
 /**
  * API de Pagos - Sistema completo de gestión de pagos y suscripciones.
@@ -29,26 +30,23 @@ export async function POST(req: Request) {
 
   try {
     const body = await req.json();
-    const { clientId, amount, method, description, status = "PAGADO" } = body;
-
-    // Validaciones básicas
-    if (!clientId || typeof clientId !== "string") {
-      return NextResponse.json({ error: "ID de cliente requerido" }, { status: 400 });
+    
+    // Validar con schema Zod
+    const parsed = paymentSchema.safeParse(body);
+    if (!parsed.success) {
+      return NextResponse.json({ error: parsed.error.errors[0]?.message || "Datos inválidos" }, { status: 400 });
     }
-
-    if (!amount || isNaN(Number(amount)) || Number(amount) <= 0) {
-      return NextResponse.json({ error: "Monto válido requerido" }, { status: 400 });
-    }
+    const data = parsed.data;
 
     // Verificar ownership del cliente
-    const ownsClient = await assertTrainerOwnsClient(session.id, clientId);
+    const ownsClient = await assertTrainerOwnsClient(session.id, data.clientId);
     if (!ownsClient) {
       return NextResponse.json({ error: "Cliente no encontrado" }, { status: 404 });
     }
 
     // Obtener cliente para actualizar suscripción si es necesario
     const client = await prisma.client.findUnique({
-      where: { id: clientId },
+      where: { id: data.clientId },
       include: { subscription: true }
     });
 
@@ -59,13 +57,13 @@ export async function POST(req: Request) {
     // Crear registro de pago
     const payment = await prisma.payment.create({
       data: {
-        clientId,
+        clientId: data.clientId,
         email: client.email,
-        amount: Number(amount),
+        amount: data.amount,
         currency: "ARS",
-        status: status as "PAGADO" | "PENDIENTE" | "VENCIDO",
-        method: method || "EFECTIVO",
-        description: description || `Pago de ${client.plan || "servicio"}`,
+        status: data.status,
+        method: data.method,
+        description: data.description || `Pago de ${client.plan || "servicio"}`,
       },
       include: {
         client: {
@@ -80,16 +78,16 @@ export async function POST(req: Request) {
     });
 
     // Si el pago está confirmado, actualizar suscripción
-    if (status === "PAGADO" && client.subscription) {
+    if (data.status === "PAGADO" && client.subscription) {
       const nextPayment = new Date();
       nextPayment.setDate(nextPayment.getDate() + 30); // Próximo pago en 30 días
 
       await prisma.subscription.update({
-        where: { clientId },
+        where: { clientId: data.clientId },
         data: {
           status: "ACTIVA",
           nextPayment,
-          price: Number(amount)
+          price: data.amount
         }
       });
     }

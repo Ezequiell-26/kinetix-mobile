@@ -30,7 +30,7 @@ jobs:
       - name: Build EXE
         run: npx --yes electron-builder -c electron/builder.json --win nsis --publish never
       - name: Upload EXE
-        uses: actions/upload-artifact@v5
+        uses: actions/upload-artifact@v4
         with:
           name: windows-exe
           path: apps/mobile/dist-electron/*.exe
@@ -56,7 +56,6 @@ jobs:
         working-directory: .
       - name: Capacitor Android wrapper online
         run: |
-          npx --yes @capacitor/cli init "EZEQUIEL COACHING" com.ezequielcoaching.app --web-dir=public
           npx --yes @capacitor/cli add android
       - name: Build APK debug
         run: |
@@ -64,7 +63,7 @@ jobs:
           chmod +x gradlew
           ./gradlew assembleDebug --no-daemon
       - name: Upload APK
-        uses: actions/upload-artifact@v5
+        uses: actions/upload-artifact@v4
         with:
           name: android-apk
           path: apps/mobile/android/app/build/outputs/apk/debug/*.apk
@@ -87,7 +86,7 @@ jobs:
       - name: Build DMG sin firmar
         run: npx --yes electron-builder -c electron/builder.json --mac dmg --publish never
       - name: Upload DMG
-        uses: actions/upload-artifact@v5
+        uses: actions/upload-artifact@v4
         with:
           name: mac-dmg
           path: apps/mobile/dist-electron/*.dmg
@@ -98,7 +97,7 @@ jobs:
     permissions:
       contents: write
     steps:
-      - uses: actions/download-artifact@v5
+      - uses: actions/download-artifact@v4
         with:
           path: artifacts
           merge-multiple: true

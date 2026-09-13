@@ -10,9 +10,12 @@ export async function POST(req:Request){
     const body = await req.json();
     const {email,password}= loginSchema.parse(body);
 
+    // Normalizar email a minúsculas para consistencia
+    const normalizedEmail = email.toLowerCase().trim();
+
     // Bloqueo por cuenta: independiente del rate limit por IP del middleware,
     // frena fuerza bruta distribuida (misma cuenta, muchas IPs).
-    const lock = isLoginLocked(email);
+    const lock = isLoginLocked(normalizedEmail);
     if(lock.locked){
       const retryAfterSec = Math.ceil(lock.retryAfterMs / 1000);
       return NextResponse.json(
@@ -21,11 +24,11 @@ export async function POST(req:Request){
       );
     }
 
-    const user = await prisma.user.findUnique({where:{email}});
-    if(!user){ recordFailedLogin(email); return NextResponse.json({error:"Credenciales inválidas"}, {status:401}); }
+    const user = await prisma.user.findUnique({where:{email: normalizedEmail}});
+    if(!user){ recordFailedLogin(normalizedEmail); return NextResponse.json({error:"Credenciales inválidas"}, {status:401}); }
     const ok = await verifyPassword(password, user.password);
-    if(!ok){ recordFailedLogin(email); return NextResponse.json({error:"Credenciales inválidas"}, {status:401}); }
-    clearLoginAttempts(email);
+    if(!ok){ recordFailedLogin(normalizedEmail); return NextResponse.json({error:"Credenciales inválidas"}, {status:401}); }
+    clearLoginAttempts(normalizedEmail);
 
     // Registrar sesión en DB con contexto (userAgent / IP) para revocación.
     const h = await headers();

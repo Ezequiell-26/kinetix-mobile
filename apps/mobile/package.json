@@ -2,6 +2,7 @@
   "name": "kinetixfitt",
   "version": "1.0.0",
   "private": true,
+  "main": "electron/main.js",
   "scripts": {
     "dev": "next dev -p 3001",
     "build": "next build",
@@ -11,7 +12,9 @@
     "verify": "powershell -ExecutionPolicy Bypass -File ./scripts/verify-platforms.ps1",
     "db:generate": "prisma generate",
     "db:migrate": "echo 'PROHIBIDO migrate dev (pooler sin shadow DB). Flujo en .env.example + scripts/ad-hoc/pg-apply.cjs' && exit 1",
+    "db:push": "prisma db push",
     "db:seed": "tsx prisma/seed.ts",
+    "backup": "node scripts/backup.js",
     "test:stats": "tsx tests/stats.test.ts",
     "test:voice": "tsx tests/voice-engine.test.ts",
     "test:core": "tsx tests/program-edit.test.ts",
@@ -25,6 +28,7 @@
     "desktop:build": "electron-builder -c electron/builder.json"
   },
   "dependencies": {
+    "@capacitor/android": "^8.5.2",
     "@capacitor/core": "^8.5.2",
     "@hookform/resolvers": "^5.0.1",
     "@prisma/client": "^6.19.3",
@@ -58,7 +62,7 @@
     "@types/react-dom": "^19.1.2",
     "autoprefixer": "^10.4.21",
     "cross-env": "^10.1.0",
-    "electron": "^44.3.0",
+    "electron": "44.3.0",
     "electron-builder": "^26.15.3",
     "eslint": "^9.27.0",
     "eslint-config-next": "15.5.24",
