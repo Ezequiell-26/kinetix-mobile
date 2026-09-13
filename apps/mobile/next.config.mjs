@@ -1,5 +1,7 @@
 /** @type {import("next").NextConfig} */
 const nextConfig = {
+  // Output standalone (Docker/self-host). En Vercel se ignora sin daño.
+  output: "standalone",
   // Next 15 deprecó el lint integrado y este repo no tiene config plana de
   // ESLint en apps/mobile (el build fallaba con "Definition for rule
   // '@typescript-eslint/no-unused-vars' was not found" por el .eslintrc
@@ -15,6 +17,8 @@ const nextConfig = {
       allowedOrigins: process.env.NEXT_PUBLIC_APP_URL
         ? [new URL(process.env.NEXT_PUBLIC_APP_URL).host]
         : undefined,
+      // Uploads de hasta 5MB por form: margen de sobra.
+      bodySizeLimit: "10mb",
     },
     // Tree-shaking agresivo de estos paquetes: evita que Next empaquete
     // toda la librería de íconos/animaciones cuando solo se usan algunos.
