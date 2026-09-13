@@ -33,6 +33,15 @@ const preferencesSchema = z.object({
   }).optional(),
 });
 
+// Mapeo de tipos antiguos a nuevos
+const typeMapping: Record<string, string> = {
+  'workout': 'workout_reminder',
+  'nutrition': 'meal_reminder',
+  'progress': 'achievement',
+  'message': 'coach_message',
+  'payment': 'payment_reminder',
+};
+
 // GET - Obtener preferencias del usuario
 export async function GET() {
   try {
@@ -104,25 +113,32 @@ export async function POST(request: NextRequest) {
       where: { userId: session.id },
       create: {
         userId: session.id,
-        enabled: validatedData.enabled,
-        types: validatedData.types || [],
-        scheduleStartHour: validatedData.schedule?.startHour ?? 8,
-        scheduleEndHour: validatedData.schedule?.endHour ?? 21,
-        timezone: validatedData.schedule?.timezone || Intl.DateTimeFormat().resolvedOptions().timeZone,
-        channelEmail: validatedData.channels?.email ?? true,
-        channelPush: validatedData.channels?.push ?? true,
-        channelSms: validatedData.channels?.sms ?? false,
-        channelWhatsapp: validatedData.channels?.whatsapp ?? false,
+        emailEnabled: validatedData.channels?.email ?? true,
+        pushEnabled: validatedData.channels?.push ?? true,
+        smsEnabled: validatedData.channels?.sms ?? false,
+        whatsappEnabled: validatedData.channels?.whatsapp ?? false,
+        workoutReminders: validatedData.types?.includes('workout') ?? true,
+        nutritionTips: validatedData.types?.includes('nutrition') ?? true,
+        progressUpdates: validatedData.types?.includes('progress') ?? true,
+        messageNotifications: validatedData.types?.includes('message') ?? true,
+        paymentReminders: validatedData.types?.includes('payment') ?? true,
+        timezone: validatedData.schedule?.timezone || 'America/Argentina/Buenos_Aires',
+        quietStart: validatedData.schedule?.startHour ? `${validatedData.schedule.startHour}:00` : '22:00',
+        quietEnd: validatedData.schedule?.endHour ? `${validatedData.schedule.endHour}:00` : '08:00',
       },
       update: {
-        enabled: validatedData.enabled,
-        ...(validatedData.types !== undefined && { types: validatedData.types }),
-        ...(validatedData.schedule?.startHour !== undefined && { 
-          scheduleStartHour: validatedData.schedule.startHour 
-        }),
-        ...(validatedData.schedule?.endHour !== undefined && { 
-          scheduleEndHour: validatedData.schedule.endHour 
-        }),
+        ...(validatedData.channels?.email !== undefined && { emailEnabled: validatedData.channels.email }),
+        ...(validatedData.channels?.push !== undefined && { pushEnabled: validatedData.channels.push }),
+        ...(validatedData.channels?.sms !== undefined && { smsEnabled: validatedData.channels.sms }),
+        ...(validatedData.channels?.whatsapp !== undefined && { whatsappEnabled: validatedData.channels.whatsapp }),
+        ...(validatedData.types?.includes('workout') !== undefined && { workoutReminders: validatedData.types.includes('workout') }),
+        ...(validatedData.types?.includes('nutrition') !== undefined && { nutritionTips: validatedData.types.includes('nutrition') }),
+        ...(validatedData.types?.includes('progress') !== undefined && { progressUpdates: validatedData.types.includes('progress') }),
+        ...(validatedData.types?.includes('message') !== undefined && { messageNotifications: validatedData.types.includes('message') }),
+        ...(validatedData.types?.includes('payment') !== undefined && { paymentReminders: validatedData.types.includes('payment') }),
+        ...(validatedData.schedule?.timezone !== undefined && { timezone: validatedData.schedule.timezone }),
+        ...(validatedData.schedule?.startHour !== undefined && { quietStart: `${validatedData.schedule.startHour}:00` }),
+        ...(validatedData.schedule?.endHour !== undefined && { quietEnd: `${validatedData.schedule.endHour}:00` }),
         ...(validatedData.schedule?.timezone !== undefined && { 
           timezone: validatedData.schedule.timezone 
         }),
