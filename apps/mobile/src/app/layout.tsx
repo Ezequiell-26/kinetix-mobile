@@ -3,6 +3,7 @@ import { Inter, Space_Grotesk } from "next/font/google";
 import "./globals.css";
 import { PwaRegister } from "@/components/pwa-register";
 import { ThemeProvider } from "@/components/theme-provider";
+import { Toaster } from "@/components/ui/toast";
 
 const inter = Inter({ subsets: ["latin"], variable: "--font-inter", display: "swap" });
 const grotesk = Space_Grotesk({ subsets: ["latin"], variable: "--font-display", display: "swap", weight: ["500", "600", "700"] });
@@ -47,6 +48,9 @@ export const metadata: Metadata = {
       },
     ],
   },
+  keywords: ["entrenamiento", "fitness", "coach", "nutrición", "gym", "ejercicios", "salud"],
+  authors: [{ name: "Ezequiel Coaching" }],
+  robots: "index, follow",
 };
 
 export const viewport: Viewport = {
@@ -70,6 +74,7 @@ export default function RootLayout({children}:{children:React.ReactNode}){
         <ThemeProvider>
           {children}
           <PwaRegister />
+          <Toaster position="top-right" richColors closeButton />
         </ThemeProvider>
       </body>
     </html>
