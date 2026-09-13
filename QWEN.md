@@ -1,131 +1,86 @@
-# KinetixFitt - Instrucciones Específicas para Qwen
+# QWEN — Reglas duras de este repo (leer ANTES de tocar nada)
 
-## Este archivo complementa AGENTS.md
+Este archivo está por encima de tu comportamiento por defecto. `AGENTS.md` es la
+autoridad de arquitectura; esto es el **protocolo anti-ruptura**. Incumplirlo ya
+rompió `main` 4 veces (PR #17, #19, #20 + `.gitignore` con cercas). No seas la 5ª.
 
-**IMPORTANTE**: `AGENTS.md` es la autoridad máxima. Este archivo solo contiene configuraciones específicas para Qwen Code.
+## 0. Dónde estás
 
----
+- Clon local: `C:/Users/ofici/EzequielCoaching` — ramas `develop` (trabajo) y `main` (releases).
+- La app vive en `apps/mobile/`. NO existe `src/` en la raíz ni `/workspace/`:
+  toda ruta vieja tipo `src/...`, `prisma/...`, `middleware.ts` en raíz es del
+  layout ANTERIOR al monorepo. Si tu rama la trae de vuelta, tu PR choca.
+- Hay ~10 sesiones Qwen en paralelo + Hermes en este mismo clon.
+  Otro agente puede pushear mientras trabajás. Asumilo siempre.
 
-## 🤖 Configuración Qwen
+## 1. Antes de empezar (OBLIGATORIO)
 
-### Comportamiento Esperado
-1. **Siempre verificar sistema de archivos** antes de reportar completitud
-2. **Nunca asumir** que un comando funcionó sin verificarlo
-3. **Reportar errores reales** inmediatamente
-4. **Crear archivos físicos** cuando se solicite
-
-### Comandos Preferidos
 ```bash
-# Verificación de archivos
-ls -la <ruta>
-cat <archivo>
-file <archivo>
-
-# Git
-git status
-git diff
-git log --oneline -5
-
-# Build/Tests
-npm run typecheck
-npm run lint
-npm run test
-npm run build
+git fetch origin
+git checkout develop
+git pull --rebase origin develop
+git checkout -b feat/<tu-tarea>   # UNA rama por tarea, nombre descriptivo
 ```
+
+- NUNCA trabajes directo en `develop` ni en `main`.
+- NUNCA hagas `git checkout` si `git status` muestra cambios ajenos sin commitear.
+- Si tu rama tiene >1 día: `git pull --rebase origin develop` ANTES de seguir
+  y ANTES de abrir el PR. Rama vieja = PR con conflictos = tu PR se cierra.
+
+## 2. Gate de calidad: NADA se pushea en rojo
+
+Antes de CADA push, desde la RAÍZ del repo, los 3 en orden:
+
+```bash
+npx tsc --noEmit -p apps/mobile
+npm run test --workspaces --if-present
+```
+
+- `tsc` debe terminar con CERO líneas `error TS`. Ojo con `strict: true`:
+  NADA de parámetros sin tipo en callbacks (`.map((x: any, i: number) => ...)`).
+  Los `any` explícitos con `eslint-disable` están permitidos; los IMPLÍCITOS rompen CI.
+- Si tocaste build/config: `npm run build -w apps/mobile` también.
+- Si algo falla: lo arreglás VOS en tu rama. Pushear en rojo está prohibido.
+
+## 3. Prohibido commitear (el CI y Hermes lo revierten igual)
+
+- `.gitignore`: NO TOCAR el bloque `KinetixFitt: higiene local`. Y jamás escribir
+  cercas markdown (```) dentro — ya pasó, rompió los patrones de ignorado.
+- Artefactos: `*.db*`, `*.tsbuildinfo`, `.next*/`, `out/`, `node_modules/`,
+  `apps/mobile/public/uploads/`, `.env` (solo `.env.example`).
+- `package-lock.json` de raíz: existe UNO solo. No crear segundos locks ni
+  borrar workspaces de `package.json` raíz.
+- `packages/shared`: SIN `devDependencies` (un solo `@types/react` en raíz;
+  duplicarlo rompe el build con errores de `JSX element type`).
+
+## 4. Dónde van los cambios
+
+- Código app → `apps/mobile/src/...` · Docs de sesión → `.ai/...` (NO crear
+  más `RESUMEN_*.md` / `SPRINT_*.md` en raíz: ya hay ~20 duplicados).
+- PRs siempre contra `develop`, NUNCA contra `main`. `main` solo la mueve Hermes
+  con fast-forward cuando el CI de `develop` está verde.
+- Commits en español, formato: `tipo(alcance): descripción` — tipos:
+  `feat fix chore docs refactor test ci`. Sin `--no-verify` salvo hook roto
+  documentado en el mensaje del commit.
+- Tras el push: verificar en
+  `https://github.com/Ezequiell-26/kinetix-mobile/actions` que el run de TU rama
+  termina `success`. Si falla, el fix va en TU rama, no en otra.
+
+## 5. Archivos que YA existen: reutilizar, no duplicar
+
+Antes de crear `components/X.tsx` o `lib/Y.ts`, buscar si existe algo igual en
+`apps/mobile/src/components/`, `apps/mobile/src/lib/` y `packages/shared/src/`.
+Dos sesiones ya implementaron 2 veces los mismos widgets (stats, coach,
+wearables) y hubo que tirar una versión entera. `grep` primero, crear después.
+
+## 6. Auth y DB (zona caliente)
+
+- Sesiones: `apps/mobile/src/lib/session-store.ts` + `password-reset-store.ts`
+  ya existen y están cableados. No crear stores paralelos.
+- `prisma/schema.prisma`: cambios SIEMPRE vía `prisma migrate dev --name ...`
+  con el dev server APAGADO (puerto 3001 libre), nunca editando `dev.db` a mano.
+- Cuentas demo: existen en `prisma/seed.ts`. No inventar otras.
 
 ---
-
-## 📋 Flujo de Trabajo Qwen
-
-### Al Recibir una Tarea
-1. Leer `AGENTS.md` completamente
-2. Inspeccionar repositorio actual
-3. Identificar archivos existentes relevantes
-4. Planificar implementación real
-5. Ejecutar creación/modificación de archivos
-6. Verificar físicamente los cambios
-7. Ejecutar validaciones (typecheck, lint, test, build)
-8. Reportar resultado REAL
-
-### Al Crear Archivos
-- Usar rutas absolutas (`/workspace/ruta/archivo.ts`)
-- Verificar que el directorio padre existe
-- Confirmar creación con `ls -la`
-- Mostrar contenido creado con `cat`
-
-### Al Modificar Archivos
-- Leer contenido actual primero
-- Identificar líneas exactas a cambiar
-- Preservar código no relacionado
-- Verificar cambios con `git diff`
-
----
-
-## ⚠️ Errores Comunes a Evitar
-
-1. ❌ Decir "archivo creado" sin verificar existencia física
-2. ❌ Asumir que `git commit` funcionó sin checkear `git status`
-3. ❌ Reportar "build exitoso" sin ejecutar `npm run build`
-4. ❌ Ignorar errores de TypeScript/Lint
-5. ❌ Crear sistemas duplicados sin buscar existentes
-
----
-
-## ✅ Checklist de Verificación Qwen
-
-Antes de reportar una tarea como completada:
-
-- [ ] Verifiqué físicamente los archivos creados/modificados
-- [ ] Ejecuté `npm run typecheck` y pasó
-- [ ] Ejecuté `npm run lint` y pasó
-- [ ] Ejecuté tests relevantes y pasaron
-- [ ] Ejecuté `npm run build` y fue exitoso
-- [ ] No hay errores en consola
-- [ ] El código sigue las reglas de `AGENTS.md`
-- [ ] Actualicé documentación si era necesario
-
----
-
-## 📞 Comunicación con el Usuario
-
-### Cuando Algo Sale Bien
-```
-✅ COMPLETADO: [Descripción clara]
-📁 Archivos creados: [lista real verificada]
-📝 Archivos modificados: [lista real verificada]
-✅ Tests: X/X pasaron
-✅ Build: Exitoso
-```
-
-### Cuando Algo Falla
-```
-❌ ERROR: [Descripción del error]
-📍 Ubicación: [archivo/línea]
-🔍 Causa probable: [análisis]
-🔧 Intentando solución: [qué estás haciendo]
-⏸️ Estado: BLOQUEADO/EN PROGRESO
-```
-
-### Cuando Necesitas Más Información
-```
-❓ NECESITO ACLARACIÓN:
-- [Punto específico que necesita claridad]
-- Opciones posibles: [A, B, C]
-- Recomendación: [tu sugerencia]
-```
-
----
-
-## 🎯 Prioridades Qwen
-
-1. **Seguridad**: Nunca comprometer seguridad
-2. **Integridad de datos**: Proteger base de datos y usuarios
-3. **Funcionalidad**: Que todo funcione correctamente
-4. **Performance**: Mantener o mejorar rendimiento
-5. **Código limpio**: Seguir mejores prácticas
-
----
-
-**Versión**: 1.0.0
-**Basado en**: AGENTS.md
-**Estado**: Activo
+*Teams: si una regla de acá contradice tu default, gana esta. Si el repo te pide
+algo que este archivo prohíbe, preguntale al dueño antes de hacerlo.*
