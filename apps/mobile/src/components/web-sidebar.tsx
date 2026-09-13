@@ -26,11 +26,20 @@ import {
   Trophy,
   User,
 } from "lucide-react";
+import type { LucideIcon } from "lucide-react";
 import { NotificationsBell } from "@/components/notifications-bell";
 import { ThemeToggle } from "@/components/theme-toggle";
 
+type NavLink = {
+  href: string;
+  label: string;
+  icon: LucideIcon;
+  badge?: string;
+};
+type NavGroup = { label: string; links: NavLink[] };
+
 // Navegación para CLIENTE - estilo Cloudflare sidebar
-const clientNavGroups = [
+const clientNavGroups: NavGroup[] = [
   {
     label: "Principal",
     links: [
@@ -72,7 +81,7 @@ const clientNavGroups = [
 ];
 
 // Navegación para TRAINER - estilo Cloudflare sidebar
-const trainerNavGroups = [
+const trainerNavGroups: NavGroup[] = [
   {
     label: "Operación",
     links: [

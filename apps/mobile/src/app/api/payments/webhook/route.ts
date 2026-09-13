@@ -28,7 +28,11 @@ export async function POST(req: Request) {
     
     // Verificar firma de Stripe
     if (isStripe) {
-      const stripe = require("stripe")(process.env.STRIPE_SECRET_KEY);
+      if (!process.env.STRIPE_SECRET_KEY || !process.env.STRIPE_WEBHOOK_SECRET) {
+        return NextResponse.json({ error: "Stripe no configurado" }, { status: 500 });
+      }
+      const { default: Stripe } = await import("stripe");
+      const stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
       try {
         event = stripe.webhooks.constructEvent(
           body,
