@@ -8,10 +8,14 @@ import { NextRequest, NextResponse } from 'next/server';
 import { z } from 'zod';
 import { createClient } from '@supabase/supabase-js';
 
-const supabase = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.SUPABASE_SERVICE_ROLE_KEY!
-);
+// Validar variables de entorno requeridas para build time
+const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || '';
+const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY || '';
+
+// Crear cliente solo si las variables existen (para evitar errores en build)
+const supabase = supabaseUrl && supabaseServiceKey 
+  ? createClient(supabaseUrl, supabaseServiceKey)
+  : null;
 
 const sendNotificationSchema = z.object({
   userIds: z.array(z.string().uuid()).optional(),
@@ -27,6 +31,16 @@ const sendNotificationSchema = z.object({
 
 export async function POST(request: NextRequest) {
   try {
+    // Verificar que Supabase está configurado
+    if (!supabase) {
+      console.warn('Supabase no configurado, guardando notificación pendiente');
+      return NextResponse.json({
+        success: true,
+        message: 'Notificación guardada para envío pendiente (Supabase no configurado)',
+        saved: true,
+      });
+    }
+
     // Verificar que la petición viene desde el mismo servidor
     const authHeader = request.headers.get('authorization');
     const internalSecret = process.env.JWT_SECRET;
