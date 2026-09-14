@@ -7,10 +7,14 @@ import { NextRequest, NextResponse } from 'next/server';
 import { z } from 'zod';
 import { createClient } from '@supabase/supabase-js';
 
-const supabase = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
-);
+// Validar variables de entorno requeridas para build time
+const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || '';
+const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || '';
+
+// Crear cliente solo si las variables existen (para evitar errores en build)
+const supabase = supabaseUrl && supabaseAnonKey 
+  ? createClient(supabaseUrl, supabaseAnonKey)
+  : null;
 
 const subscribeSchema = z.object({
   subscription: z.object({
@@ -25,6 +29,15 @@ const subscribeSchema = z.object({
 
 export async function POST(request: NextRequest) {
   try {
+    // Verificar que Supabase está configurado
+    if (!supabase) {
+      console.warn('Supabase no configurado');
+      return NextResponse.json(
+        { error: 'Servicio no disponible - Supabase no configurado' },
+        { status: 503 }
+      );
+    }
+
     const body = await request.json();
     const result = subscribeSchema.safeParse(body);
 
@@ -72,7 +85,8 @@ export async function POST(request: NextRequest) {
         updated_at: new Date().toISOString(),
       }, {
         onConflict: 'endpoint'
-      });
+      })
+      .select('id');
 
     if (error) {
       console.error('Error guardando suscripción push:', error);
@@ -103,6 +117,15 @@ export async function POST(request: NextRequest) {
  */
 export async function GET(request: NextRequest) {
   try {
+    // Verificar que Supabase está configurado
+    if (!supabase) {
+      console.warn('Supabase no configurado');
+      return NextResponse.json(
+        { error: 'Servicio no disponible - Supabase no configurado' },
+        { status: 503 }
+      );
+    }
+
     const authHeader = request.headers.get('authorization');
     
     if (!authHeader?.startsWith('Bearer ')) {
@@ -155,6 +178,15 @@ export async function GET(request: NextRequest) {
  */
 export async function DELETE(request: NextRequest) {
   try {
+    // Verificar que Supabase está configurado
+    if (!supabase) {
+      console.warn('Supabase no configurado');
+      return NextResponse.json(
+        { error: 'Servicio no disponible - Supabase no configurado' },
+        { status: 503 }
+      );
+    }
+
     const { searchParams } = new URL(request.url);
     const endpoint = searchParams.get('endpoint');
 

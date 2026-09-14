@@ -1,34 +1,34 @@
-```gitignore
+```
 # Dependencies
 node_modules/
-vendor/
+**/node_modules/
 
-# Build outputs
-dist/
-build/
-.next/
-.nuxt/
-public/dist/
-out/
+# Build artifacts
+tsconfig.tsbuildinfo
 
-# Environment variables
+# Environment
 .env
 .env.local
-.env.*
-!.env.example
+*.env.*
 
 # Logs
 *.log
 
-# OS generated files
-.DS_Store
-Thumbs.db
+# Temporary files
+*.tmp
+*.swp
+*.swo
 
 # IDE files
 .vscode/
 .idea/
-*.swp
-*.swo
+**/.DS_Store
+Thumbs.db
+
+# Coverage
+coverage/
+htmlcov/
+.coverage
 
 # Python
 __pycache__/
@@ -36,61 +36,202 @@ __pycache__/
 *.pyo
 *.pyd
 .Python
-*.so
+env/
+venv/
+.venv/
+pip-log.txt
+pip-delete-this-directory.txt
+.tox/
 .coverage
-htmlcov/
-.coverage.*
-.pytest_cache/
-.mypy_cache/
+.nox/
+__pypackages__/
 
 # Node.js
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
-
-# Compiled and binary files
-*.exe
-*.dll
-*.so
-*.dylib
-*.class
-*.o
-*.obj
-*.a
-*.lib
-*.out
-
-# Compressed files
-*.zip
-*.gz
-*.tar
-*.tgz
-*.bz2
-*.xz
-*.7z
-*.rar
-*.zst
-*.lz4
-*.lzh
-*.cab
-*.arj
-*.rpm
-*.deb
-*.Z
-*.lz
-*.lzo
-*.tar.gz
-*.tar.bz2
-*.tar.xz
-*.tar.zst
-
-# Coverage reports
+node_modules/
+.jscs
+.nyc_output
 coverage/
-coverage.xml
-*.lcov
-*.info
+.nyc_output/
+istanbul.yml
+.mocha.opts
+.mocha
+.mochacfg.json
+.mochawesome.json
+.mochawesome/
+.nycrc
+.nycrc.json
+.travis.yml
+appveyor.yml
+.circleci/config.yml
+.nyc_output
+coverage/
+.nyc_output/
+istanbul.yml
+.mocha.opts
+.mocha
+.mochacfg.json
+.mochawesome.json
+.mochawesome/
+.nycrc
+.nycrc.json
 
-# Testing
-test-reports/
-junit.xml
+# Compiled JavaScript
+lib-cov
+*.seed
+*.pid
+*.gz
+
+# Coverage directory used by tools like istanbul
+coverage/
+
+# Grunt intermediate storage (https://gruntjs.com/creating-plugins#storing-task-files)
+.grunt
+
+# Bower dependency directory (https://bower.io/)
+bower_components
+
+# node-waf configuration
+.lock-wscript
+
+# Compiled binary addons (https://nodejs.org/api/addons.html)
+build/Release
+
+# Dependency directories
+node_modules/
+jspm_packages/
+
+# TypeScript v1 declaration files
+typings/
+
+# Optional npm cache directory
+.npm
+
+# Optional eslint cache
+.eslintcache
+
+# Optional REPL history
+.node_repl_history
+
+# Output of 'npm pack'
+*.tgz
+
+# Yarn Integrity file
+.yarn-integrity
+
+# dotenv environment variables file
+.env.test
+
+# parcel-bundler from JavaScript
+.cache
+
+# Next.js build output
+.next
+out/
+
+# Nuxt.js build / generate output
+.nuxt
+dist/
+
+# Vue.js build output
+dist/
+
+# React Native
+node_modules/
+.ReactNative.newarchitecture
+ReactNative.newarchitecture
+
+# Electron build output
+release/
+dist/
+
+# Tessel
+.tesselinclude
+
+# Django
+*.log
+local_settings.py
+db.sqlite3
+db.sqlite3-journal
+
+# Flask
+instance/
+.webassets-cache
+
+# Scrapy
+.scrapy
+
+# Sphinx documentation
+docs/_build/
+
+# PyBuilder
+.pybuilder/
+target/
+
+# Jupyter Notebook
+.ipynb_checkpoints
+
+# IPython
+profile_default/
+ipython_config.py
+
+# pyenv
+.python-version
+
+# pipenv
+Pipfile.lock
+
+# PEP 582; used by e.g. github.com/David-OConnor/pyflow
+__pypackages__/
+
+# Celery
+celerybeat-schedule
+celerybeat.pid
+
+# SageMath parsed files
+*.sage.py
+
+# Environments
+.env
+.venv
+env/
+venv/
+ENV/
+env.bak/
+venv.bak/
+
+# Spyder project settings
+.spyderproject
+.spyproject
+
+# Rope project settings
+.ropeproject
+
+# mkdocs documentation
+/site
+
+# mypy
+.mypy_cache/
+.dmypy.json
+dmypy.json
+
+# Pyre type checker
+.pyre/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS generated files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
 ```
