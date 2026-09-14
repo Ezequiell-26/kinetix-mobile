@@ -241,6 +241,7 @@ model WorkoutLog {
   @@index([userId])
   @@index([clientId])
   @@index([date])
+  @@index([clientId, date])
 }
 
 model ExerciseSetLog {
@@ -315,6 +316,7 @@ model CheckIn {
   @@index([date])
   @@index([clientId])
   @@index([userId])
+  @@index([clientId, date])
 }
 
 model Message {
