@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Input, Label } from "@/components/ui/input";
 import { CreditCard, DollarSign, ExternalLink, Check } from "lucide-react";
+import { trackCheckoutStarted, trackCheckoutCompleted, capture } from "@/lib/posthog";
 
 // Inspirado en Stripe + Mercado Pago docs (supremacía monetización)
 // Checkout real listo para prod: solo falta STRIPE_SECRET_KEY y MP_ACCESS_TOKEN en .env
@@ -20,10 +21,16 @@ export function PaymentsPro({ onSelect }:{ onSelect?: (plan:string)=>void }){
   const [loading,setLoading]=useState<string | null>(null);
 
   function checkout(provider:"stripe"|"mp"){
+    const planData = PLANS.find(p=>p.id===selected);
+    const price = planData?.price;
+    // PostHog: tracking checkout_started (evento clave para retención/monetización)
+    trackCheckoutStarted({ plan: selected, provider, price, currency: "ARS", email: email || undefined });
+    capture("payment_started", { plan: selected, provider, price } as any);
     setLoading(provider);
     setTimeout(()=>{
       setLoading(null);
       // En prod: fetch POST /api/payments/checkout {plan, provider, email} → redirect a Stripe/MP
+      trackCheckoutCompleted({ plan: selected, provider, price, currency: "ARS" });
       alert(`Checkout ${provider.toUpperCase()} para ${selected} — en prod redirige a ${provider==="stripe"?"Stripe Checkout":"Mercado Pago Checkout"} con webhook. Email: ${email||"cliente@ejemplo.com"}`);
       onSelect?.(selected);
     }, 800);
@@ -37,7 +44,10 @@ export function PaymentsPro({ onSelect }:{ onSelect?: (plan:string)=>void }){
           {PLANS.map(p=>{
             const isSel=selected===p.id;
             return (
-              <button key={p.id} onClick={()=>setSelected(p.id)} className={`text-left p-3 rounded-xl border flex justify-between items-center ${isSel?"bg-primary text-black border-primary":"bg-zinc-900 border-zinc-800 hover:border-zinc-700"}`}>
+              <button key={p.id} onClick={()=>{
+                setSelected(p.id);
+                capture("checkout_plan_selected", { plan: p.id, price: p.price } as any);
+              }} className={`text-left p-3 rounded-xl border flex justify-between items-center ${isSel?"bg-primary text-black border-primary":"bg-zinc-900 border-zinc-800 hover:border-zinc-700"}`}>
                 <div>
                   <p className={`font-bold text-sm ${isSel?"text-black":"text-white"}`}>{p.name} {isSel && <Check size={12} className="inline ml-1"/>}</p>
                   <p className={`text-xs ${isSel?"text-black/70":"text-zinc-500"}`}>{p.features.join(" • ")}</p>

@@ -1,6 +1,7 @@
 import type { Metadata, Viewport } from 'next';
 import { Inter } from 'next/font/google';
 import './globals.css';
+import { PostHogProvider } from '../components/posthog-provider';
 
 const inter = Inter({ subsets: ['latin'] });
 
@@ -248,7 +249,7 @@ export default function RootLayout({
         <link rel="dns-prefetch" href="https://api.kinetixfitt.com" />
       </head>
       <body className={`${inter.className} antialiased`} suppressHydrationWarning>
-        {children}
+        <PostHogProvider>{children}</PostHogProvider>
 
         {/* Service Worker Registration */}
         <script

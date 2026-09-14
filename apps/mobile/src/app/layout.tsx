@@ -4,6 +4,7 @@ import "./globals.css";
 import { PwaRegister } from "@/components/pwa-register";
 import { ThemeProvider } from "@/components/theme-provider";
 import { Toaster } from "@/components/ui/toast";
+import { PostHogProvider } from "@/components/posthog-provider";
 
 const inter = Inter({ subsets: ["latin"], variable: "--font-inter", display: "swap" });
 const grotesk = Space_Grotesk({ subsets: ["latin"], variable: "--font-display", display: "swap", weight: ["500", "600", "700"] });
@@ -71,11 +72,13 @@ export default function RootLayout({children}:{children:React.ReactNode}){
         <script dangerouslySetInnerHTML={{__html: `(function(){try{var t=localStorage.getItem('ec-theme')||'dark';document.documentElement.classList.add(t);document.documentElement.setAttribute('data-theme',t);}catch(e){}})()`}} />
       </head>
       <body className={`${inter.variable} ${grotesk.variable} min-h-screen bg-[#080808] text-zinc-100 antialiased selection:bg-primary selection:text-black`}>
-        <ThemeProvider>
-          {children}
-          <PwaRegister />
-          <Toaster position="top-right" richColors closeButton />
-        </ThemeProvider>
+        <PostHogProvider>
+          <ThemeProvider>
+            {children}
+            <PwaRegister />
+            <Toaster position="top-right" richColors closeButton />
+          </ThemeProvider>
+        </PostHogProvider>
       </body>
     </html>
   );

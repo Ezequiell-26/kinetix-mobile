@@ -57,11 +57,11 @@ const nextConfig = {
     // Si se agrega un nonce en el futuro, reemplazar 'unsafe-inline'.
     const csp = [
       "default-src 'self'",
-      "script-src 'self' 'unsafe-inline' https://www.googletagmanager.com https://www.google-analytics.com",
+      "script-src 'self' 'unsafe-inline' https://www.googletagmanager.com https://www.google-analytics.com https://us.i.posthog.com https://us-assets.i.posthog.com https://eu.i.posthog.com https://app.posthog.com",
       "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://cdn.jsdelivr.net",
       "img-src 'self' data: blob: https: http:",
       "font-src 'self' https://fonts.gstatic.com",
-      "connect-src 'self' https://*.sentry.io https://www.google-analytics.com",
+      "connect-src 'self' https://*.sentry.io https://www.google-analytics.com https://us.i.posthog.com https://us.posthog.com https://eu.i.posthog.com https://app.posthog.com https://*.posthog.com",
       "frame-src 'self' https://www.youtube.com https://www.youtube-nocookie.com",
       "object-src 'none'",
       "base-uri 'self'",

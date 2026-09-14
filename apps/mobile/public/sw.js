@@ -1,222 +1,269 @@
-const CACHE = "kinetixfitt-v3-voz";
-const CORE = [
-  "/",
-  "/login",
-  "/manifest.json",
-  "/icons/icon-192.png",
-  "/icons/icon-512.png",
-  "/client/workout",
-  "/client/progress",
-  "/client/nutrition",
-  "/audio/narrador-cuenta-regresiva.mp3",
-  "/audio/narrador-arranque.mp3",
-  "/audio/narrador-siguiente.mp3",
-  "/audio/narrador-descanso.mp3",
-  "/audio/narrador-mitad.mp3",
-  "/audio/narrador-ultimo.mp3",
-  "/audio/narrador-cierre.mp3",
-  "/audio/narrador-hiit-trabaja.mp3",
-  "/audio/narrador-hiit-descansa.mp3",
-  "/audio/narrador-hiit-ultima.mp3",
-  "/audio/narrador-hiit-fin.mp3",
-  "/audio/narrador-racha.mp3",
-  "/audio/narrador-checkin.mp3",  "/public/audio/voices/kinetixfitt/connectors/con.mp3",
-  "/public/audio/voices/kinetixfitt/connectors/de.mp3",
-  "/public/audio/voices/kinetixfitt/connectors/el.mp3",
-  "/public/audio/voices/kinetixfitt/connectors/en.mp3",
-  "/public/audio/voices/kinetixfitt/connectors/la.mp3",
-  "/public/audio/voices/kinetixfitt/connectors/mas.mp3",
-  "/public/audio/voices/kinetixfitt/connectors/para.mp3",
-  "/public/audio/voices/kinetixfitt/connectors/tu.mp3",
-  "/public/audio/voices/kinetixfitt/connectors/ultimas.mp3",
-  "/public/audio/voices/kinetixfitt/connectors/una.mp3",
-  "/public/audio/voices/kinetixfitt/connectors/y.mp3",
-  "/public/audio/voices/kinetixfitt/countdown/preparate.mp3",
-  "/public/audio/voices/kinetixfitt/countdown/tiempo.mp3",
-  "/public/audio/voices/kinetixfitt/motivation/buen-trabajo.mp3",
-  "/public/audio/voices/kinetixfitt/motivation/dale.mp3",
-  "/public/audio/voices/kinetixfitt/motivation/manten-ritmo.mp3",
-  "/public/audio/voices/kinetixfitt/motivation/muy-bien.mp3",
-  "/public/audio/voices/kinetixfitt/motivation/no-aflojes.mp3",
-  "/public/audio/voices/kinetixfitt/motivation/seguimos.mp3",
-  "/public/audio/voices/kinetixfitt/motivation/ultima-vamos.mp3",
-  "/public/audio/voices/kinetixfitt/motivation/ultima.mp3",
-  "/public/audio/voices/kinetixfitt/motivation/una-mas.mp3",
-  "/public/audio/voices/kinetixfitt/motivation/vamos-fuerte.mp3",
-  "/public/audio/voices/kinetixfitt/motivation/vamos-suave.mp3",
-  "/public/audio/voices/kinetixfitt/phrases/ejercicio-completado.mp3",
-  "/public/audio/voices/kinetixfitt/phrases/record-personal.mp3",
-  "/public/audio/voices/kinetixfitt/phrases/serie-completada.mp3",
-  "/public/audio/voices/kinetixfitt/phrases/ultimas-dos.mp3",
-  "/public/audio/voices/kinetixfitt/words/descansa.mp3",
-  "/public/audio/voices/kinetixfitt/words/descanso.mp3",
-  "/public/audio/voices/kinetixfitt/words/ejercicio.mp3",
-  "/public/audio/voices/kinetixfitt/words/kilo.mp3",
-  "/public/audio/voices/kinetixfitt/words/kilos.mp3",
-  "/public/audio/voices/kinetixfitt/words/marca.mp3",
-  "/public/audio/voices/kinetixfitt/words/minuto.mp3",
-  "/public/audio/voices/kinetixfitt/words/minutos.mp3",
-  "/public/audio/voices/kinetixfitt/words/peso.mp3",
-  "/public/audio/voices/kinetixfitt/words/quedan.mp3",
-  "/public/audio/voices/kinetixfitt/words/repeticion.mp3",
-  "/public/audio/voices/kinetixfitt/words/repeticiones.mp3",
-  "/public/audio/voices/kinetixfitt/words/ronda.mp3",
-  "/public/audio/voices/kinetixfitt/words/segundo.mp3",
-  "/public/audio/voices/kinetixfitt/words/segundos.mp3",
-  "/public/audio/voices/kinetixfitt/words/serie.mp3",
-  "/public/audio/voices/kinetixfitt/words/tiempo.mp3",
-  "/public/audio/voices/kinetixfitt/words/trabajo.mp3",
-];
+/* KINETIXFITT Service Worker — Workbox offline-first */
+importScripts('https://storage.googleapis.com/workbox-cdn/releases/7.1.0/workbox-sw.js');
 
-// Background Sync queue for offline mutations
-const BG_SYNC_QUEUE = [];
+const CACHE_VERSION = 'kinetixfitt-v4-workbox';
+const OFFLINE_URL = '/offline.html';
 
-self.addEventListener("install", (e) => {
-  e.waitUntil(caches.open(CACHE).then((c) => c.addAll(CORE)).then(() => self.skipWaiting()));
-});
+// Workbox core config
+if (self.workbox) {
+  console.log('[SW] Workbox loaded — ' + CACHE_VERSION);
 
-self.addEventListener("activate", (e) => {
-  e.waitUntil(
-    caches.keys().then((keys) => Promise.all(keys.filter((k) => k !== CACHE).map((k) => caches.delete(k)))).then(() => self.clients.claim())
-  );
-});
+  workbox.core.setCacheNameDetails({
+    prefix: 'kinetixfitt',
+    suffix: CACHE_VERSION,
+    precache: 'precache',
+    runtime: 'runtime',
+  });
 
-self.addEventListener("fetch", (e) => {
-  const url = new URL(e.request.url);
-  
-  // Never cache non-GET requests, but handle them with background sync
-  if (e.request.method !== "GET") {
-    if (url.pathname.startsWith("/api/")) {
-      // Store failed requests for background sync
-      e.respondWith(
-        fetch(e.request).catch(() => {
-          BG_SYNC_QUEUE.push({
-            method: e.request.method,
-            url: e.request.url,
-            body: e.request.body ? e.request.clone().body : null,
-            timestamp: Date.now(),
-          });
-          return new Response(JSON.stringify({ offline: true, queued: true }), {
-            status: 202,
-            headers: { 'Content-Type': 'application/json' }
-          });
-        })
-      );
-      return;
-    }
-    return;
-  }
-  
-  if (url.origin !== location.origin) return;
-  
-  // Cache API GET requests for offline
-  if (url.pathname.startsWith("/api/")) {
-    e.respondWith(
-      fetch(e.request).then((res)=>{
-        const clone=res.clone();
-        caches.open(CACHE).then(c=>c.put(e.request, clone));
-        return res;
-      }).catch(()=> caches.match(e.request))
-    );
-    return;
-  }
-  
-  // Stale-while-revalidate for static assets
-  e.respondWith(
-    caches.match(e.request).then((cached) => {
-      const fetchPromise = fetch(e.request)
-        .then((res) => {
-          if (res.ok && (res.headers.get("content-type") || "").match(/text|javascript|css|image|font|json/)) {
-            const clone = res.clone();
-            caches.open(CACHE).then((c) => c.put(e.request, clone));
-          }
-          return res;
-        })
-        .catch(() => cached || caches.match("/login"));
-      return cached || fetchPromise;
+  workbox.core.skipWaiting();
+  workbox.core.clientsClaim();
+
+  // -------------------------------------------------------------
+  // 1) PRECACHE — 10 rutas críticas (offline shell)
+  // -------------------------------------------------------------
+  workbox.precaching.precacheAndRoute([
+    { url: '/', revision: 'v4' },
+    { url: '/login', revision: 'v4' },
+    { url: '/offline.html', revision: 'v4' },
+    { url: '/manifest.json', revision: 'v4' },
+    { url: '/client/dashboard', revision: 'v4' },
+    { url: '/client/workout', revision: 'v4' },
+    { url: '/client/progress', revision: 'v4' },
+    { url: '/client/nutrition', revision: 'v4' },
+    { url: '/icons/icon-192.png', revision: 'v4' },
+    { url: '/icons/icon-512.png', revision: 'v4' },
+  ]);
+
+  // Install fallback for navigation that is not precached: warm cache
+  workbox.precaching.installListener;
+
+  // Clean old precaches
+  workbox.precaching.cleanupOutdatedCaches();
+
+  // -------------------------------------------------------------
+  // 2) CacheFirst para /exercises/* — imágenes y media de ejercicios
+  //    Ideal porque son estáticos, pesados y no cambian seguido.
+  // -------------------------------------------------------------
+  workbox.routing.registerRoute(
+    ({ url }) => url.pathname.startsWith('/exercises/'),
+    new workbox.strategies.CacheFirst({
+      cacheName: 'exercises-cache-' + CACHE_VERSION,
+      plugins: [
+        new workbox.expiration.ExpirationPlugin({
+          maxEntries: 150,
+          maxAgeSeconds: 30 * 24 * 60 * 60, // 30 días
+          purgeOnQuotaError: true,
+        }),
+        new workbox.cacheableResponse.CacheableResponsePlugin({
+          statuses: [0, 200],
+        }),
+      ],
     })
   );
-});
 
-// Background Sync for offline workout logs (Granite)
-self.addEventListener("sync", (e) => {
-  if (e.tag === "sync-workout-logs") {
+  // También CacheFirst para imágenes del CDN de ejercicios y data JSON
+  workbox.routing.registerRoute(
+    ({ request, url }) =>
+      request.destination === 'image' &&
+      (url.pathname.includes('/exercises') || url.pathname.includes('/data/')),
+    new workbox.strategies.CacheFirst({
+      cacheName: 'exercises-images-' + CACHE_VERSION,
+      plugins: [
+        new workbox.expiration.ExpirationPlugin({
+          maxEntries: 100,
+          maxAgeSeconds: 30 * 24 * 60 * 60,
+        }),
+        new workbox.cacheableResponse.CacheableResponsePlugin({ statuses: [0, 200] }),
+      ],
+    })
+  );
+
+  // -------------------------------------------------------------
+  // 3) NetworkFirst para /api/* — datos dinámicos con fallback a cache
+  // -------------------------------------------------------------
+  workbox.routing.registerRoute(
+    ({ url }) => url.pathname.startsWith('/api/'),
+    new workbox.strategies.NetworkFirst({
+      cacheName: 'api-cache-' + CACHE_VERSION,
+      networkTimeoutSeconds: 3,
+      plugins: [
+        new workbox.expiration.ExpirationPlugin({
+          maxEntries: 80,
+          maxAgeSeconds: 5 * 60, // 5 minutos — fresco pero disponible offline
+        }),
+        new workbox.cacheableResponse.CacheableResponsePlugin({
+          statuses: [0, 200],
+        }),
+      ],
+    })
+  );
+
+  // -------------------------------------------------------------
+  // 4) StaleWhileRevalidate para assets estáticos (_next, css, js, fonts)
+  // -------------------------------------------------------------
+  workbox.routing.registerRoute(
+    ({ request }) =>
+      request.destination === 'style' ||
+      request.destination === 'script' ||
+      request.destination === 'font' ||
+      request.destination === 'image',
+    new workbox.strategies.StaleWhileRevalidate({
+      cacheName: 'static-assets-' + CACHE_VERSION,
+      plugins: [
+        new workbox.expiration.ExpirationPlugin({
+          maxEntries: 80,
+          maxAgeSeconds: 7 * 24 * 60 * 60,
+        }),
+      ],
+    })
+  );
+
+  // -------------------------------------------------------------
+  // 5) NetworkFirst para navegaciones (document) — fallback a offline.html
+  // -------------------------------------------------------------
+  workbox.routing.registerRoute(
+    ({ request }) => request.mode === 'navigate',
+    new workbox.strategies.NetworkFirst({
+      cacheName: 'pages-cache-' + CACHE_VERSION,
+      networkTimeoutSeconds: 3,
+      plugins: [
+        new workbox.expiration.ExpirationPlugin({
+          maxEntries: 30,
+          maxAgeSeconds: 24 * 60 * 60,
+        }),
+      ],
+    })
+  );
+
+  // Fallback global: si una navegación falla, servir offline.html precacheado
+  workbox.routing.setCatchHandler(async ({ event }) => {
+    if (event.request.destination === 'document' || event.request.mode === 'navigate') {
+      const cached = await caches.match(OFFLINE_URL);
+      if (cached) return cached;
+      // fallback a / si offline.html no está
+      return caches.match('/');
+    }
+    return Response.error();
+  });
+
+  // -------------------------------------------------------------
+  // 6) Google Fonts — CacheFirst con expiración larga
+  // -------------------------------------------------------------
+  workbox.routing.registerRoute(
+    ({ url }) => url.origin === 'https://fonts.googleapis.com' || url.origin === 'https://fonts.gstatic.com',
+    new workbox.strategies.CacheFirst({
+      cacheName: 'google-fonts-' + CACHE_VERSION,
+      plugins: [
+        new workbox.expiration.ExpirationPlugin({
+          maxEntries: 20,
+          maxAgeSeconds: 365 * 24 * 60 * 60,
+        }),
+        new workbox.cacheableResponse.CacheableResponsePlugin({ statuses: [0, 200] }),
+      ],
+    })
+  );
+
+} else {
+  console.warn('[SW] Workbox no cargó — fallback manual mínimo');
+  self.addEventListener('install', (e) => {
     e.waitUntil(
-      // Process queued requests
-      Promise.all(BG_SYNC_QUEUE.map(async (request) => {
-        try {
-          await fetch(request.url, {
-            method: request.method,
-            headers: { 'Content-Type': 'application/json' },
-            body: request.body ? JSON.stringify(request.body) : null,
-          });
-          // Remove from queue on success
-          const index = BG_SYNC_QUEUE.indexOf(request);
-          if (index > -1) BG_SYNC_QUEUE.splice(index, 1);
-        } catch (err) {
-          console.error('Background sync failed:', err);
-        }
-      }))
+      caches.open(CACHE_VERSION).then((c) => c.addAll([OFFLINE_URL, '/', '/login'])).then(() => self.skipWaiting())
+    );
+  });
+  self.addEventListener('activate', (e) => {
+    e.waitUntil(caches.keys().then((keys) => Promise.all(keys.filter((k) => k !== CACHE_VERSION).map((k) => caches.delete(k)))).then(() => self.clients.claim()));
+  });
+}
+
+// -----------------------------------------------------------------
+// Background Sync queue para mutaciones offline (/api/* POST/PUT)
+// -----------------------------------------------------------------
+const BG_SYNC_QUEUE = [];
+
+self.addEventListener('fetch', (event) => {
+  // Solo interceptar mutaciones offline cuando Workbox no pudo (fallback del else)
+  // Cuando Workbox está activo, las GET ya están manejadas arriba.
+  // Aquí solo nos ocupamos de métodos no-GET para cola offline.
+  const url = new URL(event.request.url);
+  if (event.request.method !== 'GET' && url.pathname.startsWith('/api/') && url.origin === location.origin) {
+    event.respondWith(
+      fetch(event.request.clone()).catch(() => {
+        BG_SYNC_QUEUE.push({
+          method: event.request.method,
+          url: event.request.url,
+          timestamp: Date.now(),
+        });
+        return new Response(JSON.stringify({ offline: true, queued: true }), {
+          status: 202,
+          headers: { 'Content-Type': 'application/json' },
+        });
+      })
     );
   }
 });
 
-// Push notifications
-self.addEventListener("push", (e) => {
-  const data = e.data?.json() ?? {};
+self.addEventListener('sync', (event) => {
+  if (event.tag === 'sync-workout-logs') {
+    event.waitUntil(
+      Promise.all(
+        BG_SYNC_QUEUE.map(async (req) => {
+          try {
+            await fetch(req.url, { method: req.method, headers: { 'Content-Type': 'application/json' } });
+            const idx = BG_SYNC_QUEUE.indexOf(req);
+            if (idx > -1) BG_SYNC_QUEUE.splice(idx, 1);
+          } catch (err) {
+            console.error('[SW] Background sync failed:', err);
+          }
+        })
+      )
+    );
+  }
+});
+
+// -----------------------------------------------------------------
+// Push notifications + click handler (se mantiene intacto)
+// -----------------------------------------------------------------
+self.addEventListener('push', (event) => {
+  const data = event.data?.json() ?? {};
   const title = data.title ?? 'KINETIXFITT';
   const options = {
     body: data.body ?? 'Nueva notificación',
     icon: '/icons/icon-192.png',
     badge: '/icons/icon-192.png',
     vibrate: [100, 50, 100],
-    data: {
-      url: data.url ?? '/client/dashboard',
-      timestamp: Date.now(),
-    },
+    data: { url: data.url ?? '/client/dashboard', timestamp: Date.now() },
     actions: [
       { action: 'open', title: 'Abrir' },
       { action: 'dismiss', title: 'Descartar' },
     ],
   };
-
-  e.waitUntil(self.registration.showNotification(title, options));
+  event.waitUntil(self.registration.showNotification(title, options));
 });
 
-// Notification click handler
-self.addEventListener("notificationclick", (e) => {
-  e.notification.close();
-
-  if (e.action === 'dismiss') return;
-
-  const urlToOpen = e.notification.data?.url ?? '/client/dashboard';
-
-  e.waitUntil(
+self.addEventListener('notificationclick', (event) => {
+  event.notification.close();
+  if (event.action === 'dismiss') return;
+  const urlToOpen = event.notification.data?.url ?? '/client/dashboard';
+  event.waitUntil(
     self.clients.matchAll({ type: 'window' }).then((clients) => {
       for (const client of clients) {
-        if (client.url.includes(urlToOpen) && 'focus' in client) {
-          return client.focus();
-        }
+        if (client.url.includes(urlToOpen) && 'focus' in client) return client.focus();
       }
       return self.clients.openWindow(urlToOpen);
     })
   );
 });
 
-// Message handler for skip waiting and other commands
-self.addEventListener("message", (e) => {
-  if (e.data && e.data.type === 'SKIP_WAITING') {
+self.addEventListener('message', (event) => {
+  if (event.data && event.data.type === 'SKIP_WAITING') {
     self.skipWaiting();
   }
-  
-  if (e.data && e.data.type === 'NOTIFICATION_CLICKED') {
-    const urlToOpen = e.data.url || '/client/dashboard';
-    e.waitUntil(
+  if (event.data && event.data.type === 'NOTIFICATION_CLICKED') {
+    const urlToOpen = event.data.url || '/client/dashboard';
+    event.waitUntil(
       self.clients.matchAll({ type: 'window' }).then((clients) => {
         for (const client of clients) {
-          if (client.url.includes(urlToOpen) && 'focus' in client) {
-            return client.focus();
-          }
+          if (client.url.includes(urlToOpen) && 'focus' in client) return client.focus();
         }
         return self.clients.openWindow(urlToOpen);
       })

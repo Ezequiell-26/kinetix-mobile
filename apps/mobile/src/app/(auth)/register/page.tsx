@@ -30,7 +30,7 @@ export default function RegisterPage(){
       return;
     }
     if(j.role === "TRAINER") r.push("/trainer/dashboard");
-    else r.push("/client/dashboard");
+    else r.push("/client/onboarding");
     r.refresh();
   }
 

@@ -7,6 +7,7 @@ import {
   ChevronDown, Shield, Timer, Gift, Lock
 } from 'lucide-react';
 import Link from 'next/link';
+import { capture, trackCtaClicked, trackCheckoutStarted, trackOnboardingStarted } from '../lib/posthog';
 
 const APP_URL = 'https://kinetixfitt-world-ia.vercel.app';
 const APP_LOGIN = `${APP_URL}/login`;
@@ -80,8 +81,8 @@ const Navbar = () => {
           <a href="#pricing" className="hover:text-white transition">Planes</a>
           <a href="#faq" className="hover:text-white transition">FAQ</a>
           <a href={`${APP_URL}/client/tools`} className="hover:text-white transition">Herramientas</a>
-          <a href={APP_LOGIN} className="ml-2 text-white hover:text-[#D6FF2A]">Ingresar</a>
-          <a href={APP_REGISTER} className="ml-1 inline-flex items-center justify-center px-5 py-2.5 rounded-xl bg-white text-black font-black text-sm hover:bg-zinc-100">Empezar gratis</a>
+          <a href={APP_LOGIN} onClick={()=>trackCtaClicked("navbar_login", "navbar")} className="ml-2 text-white hover:text-[#D6FF2A]">Ingresar</a>
+          <a href={APP_REGISTER} onClick={()=>{trackCtaClicked("navbar_empezar_gratis", "navbar"); trackOnboardingStarted({ source: "navbar", cta: "empezar_gratis" }); capture("onboarding_started", { source: "navbar" } as any);}} className="ml-1 inline-flex items-center justify-center px-5 py-2.5 rounded-xl bg-white text-black font-black text-sm hover:bg-zinc-100">Empezar gratis</a>
           <span className="hidden xl:inline-flex items-center gap-2 text-xs font-bold text-zinc-500"><Monitor size={14}/> Web + <Smartphone size={14}/> App</span>
         </div>
         <button onClick={() => setOpen(!open)} className="lg:hidden w-9 h-9 rounded-xl bg-zinc-900 border border-zinc-800 flex items-center justify-center text-zinc-300">{open ? <X size={18}/> : <Menu size={18} />}</button>
@@ -96,9 +97,9 @@ const Navbar = () => {
               <a href="#faq" onClick={() => setOpen(false)} className="block text-white font-bold">FAQ</a>
               <div className="grid grid-cols-2 gap-3 pt-4">
                 <a href={APP_LOGIN} className="py-3 rounded-xl bg-zinc-900 border border-zinc-800 text-center font-black text-white">Ingresar</a>
-                <a href={APP_REGISTER} className="py-3 rounded-xl bg-[#D6FF2A] text-center font-black text-black">Empezar</a>
+                <a href={APP_REGISTER} onClick={()=>{trackCtaClicked("mobile_nav_empezar", "mobile_nav"); trackOnboardingStarted({ source: "mobile_nav" });}} className="py-3 rounded-xl bg-[#D6FF2A] text-center font-black text-black">Empezar</a>
               </div>
-              <a href={APP_URL} className="flex items-center justify-center gap-2 text-xs font-bold text-[#D6FF2A]">→ Abrir app en navegador</a>
+              <a href={APP_URL} onClick={()=>trackCtaClicked("mobile_nav_abrir_app", "mobile_nav")} className="flex items-center justify-center gap-2 text-xs font-bold text-[#D6FF2A]">→ Abrir app en navegador</a>
             </div>
           </motion.div>
         )}
@@ -150,17 +151,17 @@ export default function LandingPage() {
             </p>
 
             <div className="mt-8 flex flex-col sm:flex-row items-center justify-center gap-3">
-              <a href={APP_REGISTER} className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-8 py-4 rounded-2xl bg-[#D6FF2A] text-black font-black text-[15px] hover:bg-[#E0FF5A] shadow-[0_10px_30px_rgba(214,255,42,0.25)] transition">
+              <a href={APP_REGISTER} onClick={()=>{trackCtaClicked("hero_comenzar_transformacion", "hero"); trackOnboardingStarted({ source: "hero", cta: "comenzar_transformacion" });}} className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-8 py-4 rounded-2xl bg-[#D6FF2A] text-black font-black text-[15px] hover:bg-[#E0FF5A] shadow-[0_10px_30px_rgba(214,255,42,0.25)] transition">
                 Comenzar mi transformación <ArrowRight size={18} />
               </a>
-              <a href={APP_URL} className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-8 py-4 rounded-2xl bg-zinc-900 border border-zinc-800 text-white font-black text-[15px] hover:bg-zinc-800 transition">
+              <a href={APP_URL} onClick={()=>trackCtaClicked("hero_usar_en_web", "hero")} className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-8 py-4 rounded-2xl bg-zinc-900 border border-zinc-800 text-white font-black text-[15px] hover:bg-zinc-800 transition">
                 <Monitor size={18}/> Usar en web <span className="text-zinc-500 font-bold">· sin instalar</span>
               </a>
             </div>
 
             <div className="mt-4 flex flex-wrap items-center justify-center gap-3">
-              <a href={APP_REGISTER} className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white text-black text-xs font-black">● App Store</a>
-              <a href={APP_REGISTER} className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white text-black text-xs font-black">▶ Google Play</a>
+              <a href={APP_REGISTER} onClick={()=>trackCtaClicked("hero_appstore", "hero")} className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white text-black text-xs font-black">● App Store</a>
+              <a href={APP_REGISTER} onClick={()=>trackCtaClicked("hero_googleplay", "hero")} className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white text-black text-xs font-black">▶ Google Play</a>
               <span className="text-xs text-zinc-500 font-bold">Descarga gratuita · Cancela cuando quieras</span>
             </div>
 
@@ -373,7 +374,11 @@ export default function LandingPage() {
                     <li key={f} className={`flex items-center gap-2 text-sm font-bold ${p.featured ? 'text-black' : 'text-zinc-300'}`}><CheckCircle2 size={16} className={p.featured ? 'text-black' : 'text-[#D6FF2A]'} /> {f}</li>
                   ))}
                 </ul>
-                <a href={APP_REGISTER} className={`mt-7 inline-flex justify-center py-3 rounded-xl font-black ${p.featured ? 'bg-black text-white hover:bg-zinc-900' : 'bg-[#D6FF2A] text-black hover:bg-[#E0FF5A]'}`}>{p.cta}</a>
+                <a href={APP_REGISTER} onClick={()=>{
+                  const priceMap: Record<string, number> = { "Básico": 0, "Pro Athlete": 19, "Elite Coach": 49 };
+                  trackCheckoutStarted({ plan: p.name, provider: "stripe", price: priceMap[p.name] || 0, currency: "USD", location: "pricing" });
+                  trackCtaClicked(`pricing_${p.name.toLowerCase().replace(/\s+/g, "_")}`, "pricing");
+                }} className={`mt-7 inline-flex justify-center py-3 rounded-xl font-black ${p.featured ? 'bg-black text-white hover:bg-zinc-900' : 'bg-[#D6FF2A] text-black hover:bg-[#E0FF5A]'}`}>{p.cta}</a>
                 {p.featured && <div className="mt-3 text-center text-xs font-bold text-zinc-500">7 días gratis, luego $19/mes</div>}
               </div>
             ))}
@@ -394,8 +399,8 @@ export default function LandingPage() {
           <h3 className="text-2xl font-black text-white">Tu transformación comienza hoy</h3>
           <p className="mt-2 text-zinc-400">Usalo en web sin instalar, o descargá la app. Tu progreso vive en ambos.</p>
           <div className="mt-6 flex flex-col sm:flex-row justify-center gap-3">
-            <a href={APP_URL} className="inline-flex items-center justify-center gap-2 px-7 py-4 rounded-2xl bg-[#D6FF2A] text-black font-black hover:bg-[#E0FF5A]"><Monitor size={18} /> Abrir en navegador</a>
-            <a href={APP_REGISTER} className="inline-flex items-center justify-center gap-2 px-7 py-4 rounded-2xl bg-white text-black font-black"><Zap size={18} /> Crear cuenta gratis</a>
+            <a href={APP_URL} onClick={()=>trackCtaClicked("final_abrir_navegador", "final_cta")} className="inline-flex items-center justify-center gap-2 px-7 py-4 rounded-2xl bg-[#D6FF2A] text-black font-black hover:bg-[#E0FF5A]"><Monitor size={18} /> Abrir en navegador</a>
+            <a href={APP_REGISTER} onClick={()=>{trackCtaClicked("final_crear_cuenta", "final_cta"); trackOnboardingStarted({ source: "final_cta" });}} className="inline-flex items-center justify-center gap-2 px-7 py-4 rounded-2xl bg-white text-black font-black"><Zap size={18} /> Crear cuenta gratis</a>
           </div>
           <div className="mt-6 p-4 rounded-2xl bg-zinc-900 border border-zinc-800 text-left max-w-xl mx-auto">
             <div className="text-xs font-black tracking-widest text-zinc-400 uppercase">¿TikTok no te deja abrir la tienda?</div>

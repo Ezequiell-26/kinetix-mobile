@@ -69,18 +69,22 @@ model User {
 }
 
 model Profile {
-  id          String @id @default(cuid())
-  userId      String @unique
-  user        User   @relation(fields: [userId], references: [id], onDelete: Cascade)
-  age         Int?
-  goal        Goal?
-  experience  String?
-  availability Int?
-  equipment   String?
-  notes       String?
-  weight      Float?
-  height      Float?
-  bio         String?
+  id                  String  @id @default(cuid())
+  userId              String  @unique
+  user                User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  age                 Int?
+  goal                Goal?
+  experience          String?
+  availability        Int?
+  equipment           String?
+  notes               String?
+  weight              Float?
+  height              Float?
+  bio                 String?
+  onboardingCompleted Boolean @default(false)
+  onboardingStep      Int     @default(0)
+  xp                  Int     @default(0)
+  photoUrl            String?
 }
 
 model TrainerProfile {

@@ -34,8 +34,29 @@ export default function LoginPage() {
         setLoading(false);
         return;
       }
-      if (j.role === "TRAINER") r.push("/trainer/dashboard");
-      else r.push("/client/dashboard");
+      if (j.role === "TRAINER") {
+        r.push("/trainer/dashboard");
+      } else {
+        // FTUE: si onboarding incompleto, va al wizard; si no, dashboard.
+        try {
+          const ob = await fetch("/api/onboarding");
+          if (ob.ok) {
+            const oj = (await ob.json()) as { profile?: { onboardingCompleted?: boolean } };
+            if (oj?.profile && oj.profile.onboardingCompleted === false) {
+              r.push("/client/onboarding");
+            } else if (oj?.profile && oj.profile.onboardingCompleted === true) {
+              r.push("/client/dashboard");
+            } else {
+              // perfil nuevo sin onboarding -> iniciar FTUE
+              r.push("/client/onboarding");
+            }
+          } else {
+            r.push("/client/onboarding");
+          }
+        } catch {
+          r.push("/client/dashboard");
+        }
+      }
       r.refresh();
     } catch {
       setErr("Error de conexión");
