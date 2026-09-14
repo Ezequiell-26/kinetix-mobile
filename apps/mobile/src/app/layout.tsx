@@ -5,6 +5,7 @@ import { PwaRegister } from "@/components/pwa-register";
 import { ThemeProvider } from "@/components/theme-provider";
 import { Toaster } from "@/components/ui/toast";
 import { PostHogProvider } from "@/components/posthog-provider";
+import { OfflineIndicator } from "@/components/offline-indicator";
 
 const inter = Inter({ subsets: ["latin"], variable: "--font-inter", display: "swap" });
 const grotesk = Space_Grotesk({ subsets: ["latin"], variable: "--font-display", display: "swap", weight: ["500", "600", "700"] });
@@ -74,6 +75,7 @@ export default function RootLayout({children}:{children:React.ReactNode}){
       <body className={`${inter.variable} ${grotesk.variable} min-h-screen bg-[#080808] text-zinc-100 antialiased selection:bg-primary selection:text-black`}>
         <PostHogProvider>
           <ThemeProvider>
+            <OfflineIndicator />
             {children}
             <PwaRegister />
             <Toaster position="top-right" richColors closeButton />
