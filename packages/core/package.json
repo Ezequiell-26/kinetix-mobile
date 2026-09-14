@@ -2,5 +2,18 @@
   "name": "@kinetix/core",
   "version": "1.0.0",
   "private": true,
-  "description": "Kinetix computational engines (3D, Rust/WASM)"
+  "description": "Kinetix computational engines (3D, Rust/WASM) — híbrido WASM+JS fallback",
+  "type": "module",
+  "main": "./src/index.ts",
+  "types": "./src/index.ts",
+  "files": ["src", "pkg", "rust"],
+  "sideEffects": false,
+  "scripts": {
+    "build:wasm": "wasm-pack build --target bundler --out-dir pkg",
+    "build:wasm:web": "wasm-pack build --target web --out-dir pkg-web",
+    "test:rust": "cargo test --manifest-path rust/Cargo.toml",
+    "test:wasm": "wasm-pack test --node --manifest-path rust/Cargo.toml",
+    "clean": "rimraf pkg pkg-web rust/target"
+  },
+  "dependencies": {}
 }
