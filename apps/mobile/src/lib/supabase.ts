@@ -2,13 +2,27 @@ import { createClient, SupabaseClient } from '@supabase/supabase-js';
 import type { Database } from './database.types';
 
 // Configuración de Supabase desde variables de entorno
-const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
-const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!;
+// Fallback: Vercel integration crea vars con prefijo kinetixfitt_ (ej. NEXT_PUBLIC_kinetixfitt_SUPABASE_URL)
+// y el código histórico espera sin prefijo. Soporta ambas + placeholder durante build.
+const supabaseUrl =
+  process.env.NEXT_PUBLIC_SUPABASE_URL ||
+  process.env.NEXT_PUBLIC_kinetixfitt_SUPABASE_URL ||
+  (process.env.NEXT_PHASE === 'phase-production-build' ? 'https://placeholder.supabase.co' : undefined) as string | undefined;
+const supabaseAnonKey =
+  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY ||
+  process.env.NEXT_PUBLIC_kinetixfitt_SUPABASE_ANON_KEY ||
+  process.env.NEXT_PUBLIC_kinetixfitt_SUPABASE_PUBLISHABLE_KEY ||
+  (process.env.NEXT_PHASE === 'phase-production-build' ? 'placeholder-anon-key-for-build' : undefined) as string | undefined;
 
 // Cliente singleton para uso en cliente y servidor.
 // ReturnType para no acoplar los genéricos internos (cambian entre versiones).
-const createDefaultClient = () =>
-  createClient<Database>(supabaseUrl, supabaseAnonKey, {
+const createDefaultClient = () => {
+  const url = supabaseUrl || (process.env.NEXT_PHASE === 'phase-production-build' ? 'https://placeholder.supabase.co' : undefined);
+  const key = supabaseAnonKey || (process.env.NEXT_PHASE === 'phase-production-build' ? 'placeholder-anon-key-for-build' : undefined);
+  if (!url || !key) {
+    throw new Error('Supabase env faltante: NEXT_PUBLIC_SUPABASE_URL / NEXT_PUBLIC_SUPABASE_ANON_KEY (o NEXT_PUBLIC_kinetixfitt_*) no configuradas');
+  }
+  return createClient<Database>(url, key, {
     auth: {
       autoRefreshToken: true,
       persistSession: true,
@@ -24,6 +38,7 @@ const createDefaultClient = () =>
       schema: 'public',
     },
   });
+};
 
 let supabase: ReturnType<typeof createDefaultClient> | null = null;
 
@@ -38,7 +53,10 @@ export function getSupabaseClient(): ReturnType<typeof createDefaultClient> {
 export function createServerClient(
   accessToken?: string
 ): ReturnType<typeof createDefaultClient> {
-  const client = createClient<Database>(supabaseUrl!, supabaseAnonKey!, {
+  const url = supabaseUrl || process.env.NEXT_PUBLIC_kinetixfitt_SUPABASE_URL || (process.env.NEXT_PHASE === 'phase-production-build' ? 'https://placeholder.supabase.co' : undefined);
+  const key = supabaseAnonKey || process.env.NEXT_PUBLIC_kinetixfitt_SUPABASE_ANON_KEY || (process.env.NEXT_PHASE === 'phase-production-build' ? 'placeholder-anon-key-for-build' : undefined);
+  if (!url || !key) throw new Error('Supabase env faltante para SSR');
+  const client = createClient<Database>(url, key, {
     auth: {
       autoRefreshToken: false,
       persistSession: false,

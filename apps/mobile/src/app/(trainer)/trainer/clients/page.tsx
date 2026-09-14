@@ -6,6 +6,10 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Users, Plus, Search, Dumbbell } from "lucide-react";
 
+export const dynamic = 'force-dynamic';
+export const revalidate = 0;
+
+
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export default async function ClientsPage({
   searchParams

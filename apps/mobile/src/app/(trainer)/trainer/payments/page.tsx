@@ -5,6 +5,10 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Lock } from "lucide-react";
 
+export const dynamic = 'force-dynamic';
+export const revalidate = 0;
+
+
 export default async function PaymentsPage() {
   const subs = (await prisma.subscription.findMany({ include: { client: true } }).catch(() => [])) as Array<{
     id: string; client: { name: string } | null; plan: string; status: string; price: number | null; nextPayment: Date;

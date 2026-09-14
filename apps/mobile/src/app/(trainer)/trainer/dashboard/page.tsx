@@ -33,6 +33,10 @@ import {
   Wrench
 } from "lucide-react";
 
+export const dynamic = 'force-dynamic';
+export const revalidate = 0;
+
+
 export default async function TrainerDashboard(){
   const now = new Date();
   const startOfToday = new Date(now.getFullYear(), now.getMonth(), now.getDate());

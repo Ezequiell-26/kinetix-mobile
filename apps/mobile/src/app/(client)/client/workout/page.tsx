@@ -8,6 +8,10 @@ import { StrongTemplate } from "@/components/strong-template";
 import { WorkoutLolGenerator } from "@/components/workoutlol-generator";
 import { Tilt3D } from "@/components/tilt-3d";
 
+export const dynamic = 'force-dynamic';
+export const revalidate = 0;
+
+
 export default async function WorkoutListPage(){
   const sessionData = await getClientForSession().catch(() => null);
   const client = sessionData?.client;
