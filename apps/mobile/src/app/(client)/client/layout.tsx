@@ -1,6 +1,7 @@
 import { WebSidebar } from "@/components/web-sidebar";
 import { getSession } from "@/lib/auth";
 import { redirect } from "next/navigation";
+import { OfflineIndicator } from "@/components/offline-indicator";
 
 export default async function ClientLayout({children}:{children:React.ReactNode}){
   const s = await getSession();
@@ -9,6 +10,7 @@ export default async function ClientLayout({children}:{children:React.ReactNode}
   return (
     <div className="min-h-screen bg-[#080808]">
       <WebSidebar role="CLIENT" userName={s.name} />
+      <OfflineIndicator />
       <div className="lg:ml-0">
         <main className="max-w-[1600px] mx-auto w-full px-4 lg:px-8 py-6">
           {children}
