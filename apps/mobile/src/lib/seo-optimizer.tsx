@@ -7,7 +7,7 @@ import type { Metadata } from 'next';
 
 // Configuración base para metadatos
 export const seoConfig = {
-  title: 'EZEQUIEL COACHING | Entrenamiento Personalizado Online',
+  title: 'KINETIXFITT | Entrenamiento Personalizado Online',
   description: 'Programa de entrenamiento personalizado, seguimiento real y contacto directo con tu coach. Todo desde tu celular, sin vueltas.',
   keywords: [
     'entrenamiento personalizado',
@@ -21,24 +21,24 @@ export const seoConfig = {
     'app fitness',
     'seguimiento deportivo',
   ],
-  author: 'Ezequiel Coaching',
+  author: 'KinetixFitt',
   openGraph: {
     type: 'website',
     locale: 'es_AR',
-    url: 'https://ezequielcoaching.com',
-    siteName: 'EZEQUIEL COACHING',
+    url: 'https://kinetixfitt.com',
+    siteName: 'KINETIXFITT',
     images: [
       {
         url: '/og-image.jpg',
         width: 1200,
         height: 630,
-        alt: 'EZEQUIEL COACHING - Tu mejor versión, cada día',
+        alt: 'KINETIXFITT - Tu mejor versión, cada día',
       },
     ],
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'EZEQUIEL COACHING | Entrenamiento Personalizado Online',
+    title: 'KINETIXFITT | Entrenamiento Personalizado Online',
     description: 'Programa de entrenamiento personalizado, seguimiento real y contacto directo con tu coach.',
     images: ['/og-image.jpg'],
   },
@@ -65,7 +65,7 @@ export function generatePageMetadata(options: {
 }): Metadata {
   return {
     title: options.title 
-      ? `${options.title} | EZEQUIEL COACHING` 
+      ? `${options.title} | KINETIXFITT` 
       : seoConfig.title,
     description: options.description || seoConfig.description,
     keywords: options.keywords 
@@ -79,7 +79,7 @@ export function generatePageMetadata(options: {
       address: false,
       telephone: false,
     },
-    metadataBase: new URL('https://ezequielcoaching.com'),
+    metadataBase: new URL('https://kinetixfitt.com'),
     alternates: {
       canonical: options.canonical,
       languages: {
@@ -97,7 +97,7 @@ export function generatePageMetadata(options: {
           url: options.image,
           width: 1200,
           height: 630,
-          alt: options.title || 'EZEQUIEL COACHING',
+          alt: options.title || 'KINETIXFITT',
         }],
       }),
     },
@@ -125,13 +125,13 @@ export function generateStructuredData(type: 'Organization' | 'WebSite' | 'Produ
   switch (type) {
     case 'Organization':
       structuredData['@type'] = 'Organization';
-      structuredData.name = 'EZEQUIEL COACHING';
-      structuredData.url = 'https://ezequielcoaching.com';
-      structuredData.logo = 'https://ezequielcoaching.com/logo.png';
+      structuredData.name = 'KINETIXFITT';
+      structuredData.url = 'https://kinetixfitt.com';
+      structuredData.logo = 'https://kinetixfitt.com/logo.png';
       structuredData.sameAs = [
-        'https://instagram.com/ezequielcoaching',
-        'https://facebook.com/ezequielcoaching',
-        'https://youtube.com/ezequielcoaching',
+        'https://instagram.com/kinetixfitt',
+        'https://facebook.com/kinetixfitt',
+        'https://youtube.com/kinetixfitt',
       ];
       structuredData.contactPoint = {
         '@type': 'ContactPoint',
@@ -142,11 +142,11 @@ export function generateStructuredData(type: 'Organization' | 'WebSite' | 'Produ
 
     case 'WebSite':
       structuredData['@type'] = 'WebSite';
-      structuredData.name = 'EZEQUIEL COACHING';
-      structuredData.url = 'https://ezequielcoaching.com';
+      structuredData.name = 'KINETIXFITT';
+      structuredData.url = 'https://kinetixfitt.com';
       structuredData.potentialAction = {
         '@type': 'SearchAction',
-        target: 'https://ezequielcoaching.com/search?q={search_term_string}',
+        target: 'https://kinetixfitt.com/search?q={search_term_string}',
         'query-input': 'required name=search_term_string',
       };
       break;
@@ -158,17 +158,17 @@ export function generateStructuredData(type: 'Organization' | 'WebSite' | 'Produ
       structuredData.image = data.image || '/og-image.jpg';
       structuredData.brand = {
         '@type': 'Brand',
-        name: 'EZEQUIEL COACHING',
+        name: 'KINETIXFITT',
       };
       structuredData.offers = {
         '@type': 'Offer',
-        url: 'https://ezequielcoaching.com/planes',
+        url: 'https://kinetixfitt.com/planes',
         priceCurrency: 'ARS',
         price: data.price || '12000',
         availability: 'https://schema.org/InStock',
         seller: {
           '@type': 'Organization',
-          name: 'EZEQUIEL COACHING',
+          name: 'KINETIXFITT',
         },
       };
       structuredData.aggregateRating = {
@@ -185,15 +185,15 @@ export function generateStructuredData(type: 'Organization' | 'WebSite' | 'Produ
       structuredData.image = data.image;
       structuredData.author = {
         '@type': 'Person',
-        name: 'Ezequiel',
-        url: 'https://ezequielcoaching.com',
+        name: 'KinetixFitt',
+        url: 'https://kinetixfitt.com',
       };
       structuredData.publisher = {
         '@type': 'Organization',
-        name: 'EZEQUIEL COACHING',
+        name: 'KINETIXFITT',
         logo: {
           '@type': 'ImageObject',
-          url: 'https://ezequielcoaching.com/logo.png',
+          url: 'https://kinetixfitt.com/logo.png',
         },
       };
       structuredData.datePublished = data.datePublished;
@@ -258,7 +258,7 @@ export const performanceConfig = {
 
 // Generar sitemap.xml dinámico
 export function generateSitemap(pages: string[]): string {
-  const baseUrl = 'https://ezequielcoaching.com';
+  const baseUrl = 'https://kinetixfitt.com';
   const today = new Date().toISOString().split('T')[0];
   
   let sitemap = '<?xml version="1.0" encoding="UTF-8"?>\n';
@@ -286,7 +286,7 @@ Disallow: /client/
 Disallow: /trainer/
 Disallow: /admin/
 
-Sitemap: https://ezequielcoaching.com/sitemap.xml
+Sitemap: https://kinetixfitt.com/sitemap.xml
 
 # Google-specific
 User-agent: Googlebot
@@ -343,8 +343,8 @@ export function reportWebVitals(metric: any) {
 export const externalPreconnects = [
   'https://fonts.googleapis.com',
   'https://fonts.gstatic.com',
-  'https://api.ezequielcoaching.com',
-  'https://storage.ezequielcoaching.com',
+  'https://api.kinetixfitt.com',
+  'https://storage.kinetixfitt.com',
 ];
 
 // DNS Prefetch para dominios de terceros

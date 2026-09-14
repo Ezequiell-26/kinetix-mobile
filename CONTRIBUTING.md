@@ -1,4 +1,4 @@
-# Contribuir a EZEQUIEL COACHING
+# Contribuir a KINETIXFITT
 
 Gracias por querer mejorar la plataforma.
 

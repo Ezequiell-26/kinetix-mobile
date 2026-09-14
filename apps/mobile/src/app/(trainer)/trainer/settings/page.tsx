@@ -25,8 +25,8 @@ export default function TrainerSettings(){
       </Card>
       <Card><CardHeader><CardTitle>Perfil de entrenador</CardTitle></CardHeader>
         <CardContent className="space-y-4">
-          <div className="space-y-2"><Label>Nombre</Label><Input defaultValue="Ezequiel" /></div>
-          <div className="space-y-2"><Label>Email</Label><Input defaultValue="ezequiel@ezequielcoaching.com" /></div>
+          <div className="space-y-2"><Label>Nombre</Label><Input defaultValue="KinetixFitt" /></div>
+          <div className="space-y-2"><Label>Email</Label><Input defaultValue="ezequiel@kinetixfitt.com" /></div>
           <div className="space-y-2"><Label>Biografía</Label><Input defaultValue="Coach certificado • 8 años transformando físicos" /></div>
           <Button variant="accent">Guardar cambios</Button>
         </CardContent>

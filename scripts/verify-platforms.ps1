@@ -40,7 +40,7 @@ function Add-Result {
     }
 }
 
-Write-Host "`n=== VERIFICACIÓN MULTIPLATAFORMA EZEQUIEL COACHING ===" -ForegroundColor Cyan
+Write-Host "`n=== VERIFICACIÓN MULTIPLATAFORMA KINETIXFITT ===" -ForegroundColor Cyan
 Write-Host "Plataforma: $Platform`n" -ForegroundColor Cyan
 
 # 1. Verificar Node.js y dependencias

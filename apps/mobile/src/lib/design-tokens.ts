@@ -1,5 +1,5 @@
 /**
- * Sistema de Diseño Unificado - EZEQUIEL COACHING
+ * Sistema de Diseño Unificado - KINETIXFITT
  * Define variables CSS para temas, espaciado, tipografía, sombras y animaciones.
  */
 

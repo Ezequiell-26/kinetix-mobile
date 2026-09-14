@@ -51,4 +51,4 @@ Cada repositorio representa una característica VIP que puedes replicar:
 - **Offline-first** (ej. LibreFit, Granite): PWA sin conexión
 - **PWA 1-click** (ej. OpenFit, workout.cool): instalar sin App Store
 
-*Generated from 82 MIT repos — EZEQUIEL COACHING premium fitness platform*
+*Generated from 82 MIT repos — KINETIXFITT premium fitness platform*

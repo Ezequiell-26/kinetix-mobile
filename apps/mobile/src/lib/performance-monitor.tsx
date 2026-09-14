@@ -1,5 +1,5 @@
 /**
- * Sistema de Monitoreo de Performance para EZEQUIEL COACHING
+ * Sistema de Monitoreo de Performance para KINETIXFITT
  * Web Vitals, timing de operaciones y detección de cuellos de botella
  */
 

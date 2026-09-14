@@ -12,7 +12,8 @@ interface BeforeInstallPromptEvent extends Event {
 
 declare global {
   interface Window {
-    ezequiel?: { isElectron?: boolean };
+    kinetixfitt?: { isElectron?: boolean };
+    ezequiel?: { isElectron?: boolean }; // alias histórico
   }
 }
 
@@ -24,7 +25,7 @@ export function PwaInstallDesktop(){
   const [isWindows,setIsWindows]=useState(false);
 
   useEffect(()=>{
-    if(window.ezequiel?.isElectron) setIsElectron(true);
+    if(window.kinetixfitt?.isElectron || window.ezequiel?.isElectron) setIsElectron(true);
     const nav = window.navigator as Navigator & { standalone?: boolean };
     if(window.matchMedia("(display-mode: standalone)").matches || nav.standalone === true) setIsInstalled(true);
     const ua=navigator.userAgent;
@@ -58,7 +59,7 @@ export function PwaInstallDesktop(){
           <div className="bg-zinc-900 border border-zinc-800 rounded-xl p-3 space-y-2">
             <div className="flex gap-2 items-center text-xs"><span className="w-6 h-6 rounded-full bg-white text-black flex items-center justify-center font-black text-xs">1</span><Share size={14} className="text-primary"/> Toca <span className="font-bold">Compartir</span> <Share size={14} className="inline text-blue-500"/> abajo en Safari</div>
             <div className="flex gap-2 items-center text-xs"><span className="w-6 h-6 rounded-full bg-white text-black flex items-center justify-center font-black text-xs">2</span><PlusSquare size={14} className="text-zinc-400"/> Elige <span className="font-bold">Añadir a pantalla de inicio</span> → Añadir</div>
-            <div className="flex gap-2 items-center text-xs text-emerald-400"><Check size={14}/> ¡Listo! Ícono EZEQUIEL COACHING en tu inicio, abre como app nativa</div>
+            <div className="flex gap-2 items-center text-xs text-emerald-400"><Check size={14}/> ¡Listo! Ícono KINETIXFITT en tu inicio, abre como app nativa</div>
           </div>
           <p className="text-[11px] text-zinc-600 text-center">iOS Safari • PWA 100% nativa • push + offline • sin App Store</p>
         </CardContent>
@@ -100,7 +101,7 @@ export function PwaInstallDesktop(){
         ) : (
           <div className="bg-zinc-900 border border-zinc-800 rounded-xl p-3 text-xs space-y-1">
             <p className="font-bold">¿No ves el botón?</p>
-            <p className="text-zinc-500">Chrome/Edge → menú <span className="font-bold text-white">⋮ → Instalar EZEQUIEL COACHING</span> o ícono <Download size={12} className="inline"/> en la barra de direcciones.</p>
+            <p className="text-zinc-500">Chrome/Edge → menú <span className="font-bold text-white">⋮ → Instalar KINETIXFITT</span> o ícono <Download size={12} className="inline"/> en la barra de direcciones.</p>
           </div>
         )}
         <p className="text-[11px] text-zinc-600 text-center">PWA Windows/Mac/Linux + Electron nativo (Tray, offline) • 1 click</p>

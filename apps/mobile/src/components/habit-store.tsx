@@ -11,7 +11,7 @@ const REWARDS = [
   {id:"plan", name:"Plan Nutrición", cost:500, icon:Gift, desc:"PDF personalizado"},
   {id:"video", name:"Video Análisis", cost:300, icon:Star, desc:"Form check 1:1"},
   {id:"descuento", name:"10% Off", cost:1000, icon:Trophy, desc:"Próximo mes"},
-  {id:"merch", name:"Remera EZEQUIEL COACHING", cost:2000, icon:ShoppingBag, desc:"Edición limitada"},
+  {id:"merch", name:"Remera KINETIXFITT", cost:2000, icon:ShoppingBag, desc:"Edición limitada"},
 ];
 
 export function HabitStore({ xp=1240 }:{ xp?: number }){

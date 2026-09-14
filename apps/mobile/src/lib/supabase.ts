@@ -84,12 +84,12 @@ export const supabaseAuth = {
   async signUpWithEmail(email: string, password: string) {
     const client = getSupabaseClient();
     
-    // Validar que sea correo @gmail.com
-    if (!email.endsWith('@gmail.com')) {
+    // Validar que sea correo @gmail.com o @kinetixfitt.com
+    if (!email.endsWith('@gmail.com') && !email.endsWith('@kinetixfitt.com')) {
       return {
         data: null,
         error: {
-          message: 'Solo se permiten correos electrónicos @gmail.com oficiales de Google.',
+          message: 'Solo se permiten correos electrónicos @gmail.com o @kinetixfitt.com.',
           status: 400,
         },
       };

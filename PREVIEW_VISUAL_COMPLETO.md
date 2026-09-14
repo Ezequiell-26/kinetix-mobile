@@ -1,4 +1,4 @@
-# 📱 PREVIEW VISUAL COMPLETO — EZEQUIEL COACHING
+# 📱 PREVIEW VISUAL COMPLETO — KINETIXFITT
 
 **Fecha:** 12 de septiembre de 2026  
 **Versión:** 1.0 Pre-launch  
@@ -22,7 +22,7 @@
 
 ```
 ┌──────────────────────────────────────┐
-│ ⚡ EZEQUIEL COACHING        [@] [⚙] │ ← Header con marca
+│ ⚡ KINETIXFITT        [@] [⚙] │ ← Header con marca
 ├──────────────────────────────────────┤
 │                                      │
 │  Lunes 12 de septiembre · Objetivo: │
@@ -111,11 +111,11 @@
 
 ```
 ┌────────────────────────────────────────────────────────────────────────────┐
-│  EZEQUIEL COACHING                              [🔔3] [Profile ▼] [Salir] │
+│  KINETIXFITT                              [🔔3] [Profile ▼] [Salir] │
 ├────────────────────────────────────────────────────────────────────────────┤
 │ ┌──────────────┐                                                           │
 │ │ 🏠 Panel      │  PANEL DEL ENTRENADOR                                    │
-│ │              │  Resumen en tiempo real · Marca: EZEQUIEL COACHING       │
+│ │              │  Resumen en tiempo real · Marca: KINETIXFITT       │
 │ │ OPERACIÓN    │                                                           │
 │ │ · Clientes   │  [+ Nuevo Cliente]  [📝 Crear Rutina]  [📊 Analytics]   │
 │ │ · Check-ins  │                                                           │
@@ -444,7 +444,7 @@ Textura: Siluetas de montañas
 
 ### Cómo suena con cada marca:
 
-**ACTUAL (Ezequiel Coaching):**
+**ACTUAL (KinetixFitt):**
 ```
 "Hola Juan, comenzamos tu entrenamiento."
 "Serie completada. Muy bien."
@@ -627,7 +627,7 @@ export const BRAND = {
 };
 
 // 2. Buscar y reemplazar en toda la app
-// "Ezequiel Coaching" → BRAND.name
+// "KinetixFitt" → BRAND.name
 // "COMENZAR ENTRENAMIENTO" → BRAND.cta.startWorkout
 // "Coach IA" → BRAND.coach.name
 
@@ -675,7 +675,7 @@ Si decidís cambiar de marca:
 
 ### Código
 - [ ] Crear `src/lib/brand.ts` con constantes
-- [ ] Buscar/reemplazar "Ezequiel Coaching" en todo el código
+- [ ] Buscar/reemplazar "KinetixFitt" en todo el código
 - [ ] Actualizar `tailwind.config.ts` (colores)
 - [ ] Actualizar `src/app/layout.tsx` (metadata)
 - [ ] Actualizar `public/manifest.json` (PWA)
@@ -711,7 +711,7 @@ Si decidís cambiar de marca:
 ✅ **UX excelente (9.5/10)**
 
 ### Opciones:
-1. **Mantener "Ezequiel Coaching"** → OK si es marca personal fuerte
+1. **Mantener "KinetixFitt"** → OK si es marca personal fuerte
 2. **Evolucionar a "Ezequiel PRO"** → Escalable manteniendo tu nombre
 3. **Rebrandear a empresa (FORGE/APEX/ELEVATE)** → Máxima escalabilidad
 

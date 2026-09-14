@@ -20,7 +20,7 @@ export function SiteNav() {
           className="font-black tracking-tight text-lg min-h-[44px] inline-flex items-center"
           aria-label={t('common.brandName')}
         >
-          EZEQUIEL<span className="text-[#34D399]">COACHING</span>
+          KINETIX<span className="text-[#34D399]">FITT</span>
         </Link>
         <nav className="flex items-center gap-1 sm:gap-2">
           {links.map((l) => (

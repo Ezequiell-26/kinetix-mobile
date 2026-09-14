@@ -35,7 +35,7 @@ function createWindow() {
   // Tray (Windows/Mac)
   const icon = nativeImage.createFromPath(path.join(__dirname, '../public/icons/icon-192.png'));
   tray = new Tray(icon.resize({ width: 16, height: 16 }));
-  tray.setToolTip('EZEQUIEL COACHING');
+  tray.setToolTip('KINETIXFITT');
   tray.setContextMenu(Menu.buildFromTemplate([
     { label: 'Mostrar', click: () => mainWindow.show() },
     { label: 'Recargar', click: () => mainWindow.reload() },

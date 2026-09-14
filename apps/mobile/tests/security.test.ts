@@ -4,7 +4,7 @@
  * Reemplaza la versión con tokens mock (que pasaba por 401 en vez de por
  * ownership real) y el beforeAll que BORRABA users/clientes de la DB.
  * Acá: fixtures aisladas `sectest-*@test.com`, login REAL por API y
- * limpieza solo de lo creado. Los demos (Ezequiel/Martín/Lucas/Sofía)
+ * limpieza solo de lo creado. Los demos (KinetixFitt/Martín/Lucas/Sofía)
  * deben seguir intactos al final.
  *
  *   Servidor:  http://localhost:3001 (o BASE_URL)
@@ -98,21 +98,21 @@ async function main() {
 
   const cookieB = await login(`sectest-tb-${TAG}@test.com`, "password123");
   const cookieEze = await login(
-    "ezequiel@ezequielcoaching.com",
+    "ezequiel@kinetixfitt.com",
     "Admin123!"
   );
   const cookieMartin = await login("martin@demo.com", "cliente123");
   check("login real trainerB", !!cookieB);
-  check("login real Ezequiel", !!cookieEze);
+  check("login real KinetixFitt", !!cookieEze);
   check("login real Martín", !!cookieMartin);
   if (!cookieB || !cookieEze || !cookieMartin) throw new Error("sin sesión");
 
-  // Víctima: ficha de Martín (dueño Ezequiel)
+  // Víctima: ficha de Martín (dueño KinetixFitt)
   const martinList = (await (
     await get("/api/clients", cookieEze)
   ).json()) as Array<{ email: string; id: string }>;
   const martinRec = martinList.find((c) => c.email === "martin@demo.com");
-  check("Martín existe y es de Ezequiel", !!martinRec);
+  check("Martín existe y es de KinetixFitt", !!martinRec);
   if (!martinRec) throw new Error("sin fixture víctima");
 
   // 0. Control positivo: el token de B SÍ ve lo propio (mata tests vacuos:
@@ -120,7 +120,7 @@ async function main() {
   const own = await get(`/api/clients/${cB.id}`, cookieB);
   check("control: trainerB ve a su cliente (200)", own.status === 200, own.status);
 
-  // 1. Trainer B NO ve cliente de Ezequiel → 404 (no revela existencia)
+  // 1. Trainer B NO ve cliente de KinetixFitt → 404 (no revela existencia)
   const r1 = await get(`/api/clients/${martinRec.id}`, cookieB);
   check("trainerB bloqueado en cliente ajeno (404)", r1.status === 404, r1.status);
 
@@ -173,7 +173,7 @@ async function main() {
     (await assertTrainerOwnsClient(tB.id, cB.id)) === true
   );
   check(
-    "assertTrainerOwnsClient(B, cliente de Ezequiel) → false",
+    "assertTrainerOwnsClient(B, cliente de KinetixFitt) → false",
     (await assertTrainerOwnsClient(tB.id, martinRec.id)) === false
   );
   check(
@@ -223,7 +223,7 @@ async function main() {
     where: {
       email: {
         in: [
-          "ezequiel@ezequielcoaching.com",
+          "ezequiel@kinetixfitt.com",
           "martin@demo.com",
           "lucas@demo.com",
           "sofia@demo.com",

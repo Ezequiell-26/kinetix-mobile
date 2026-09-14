@@ -22,7 +22,7 @@ const groups = [
   {
     icon: ClipboardList,
     title: "Programa personalizado",
-    desc: "Tu plan armado por Ezequiel según tu objetivo, días disponibles y lugar de entreno: casa o gimnasio.",
+    desc: "Tu plan armado por KinetixFitt según tu objetivo, días disponibles y lugar de entreno: casa o gimnasio.",
     href: "/client/workout",
     cta: "Ver mi entreno",
     features: ["Adaptativo", "Sin conexión", "Actualizable"],
@@ -58,7 +58,7 @@ const groups = [
   {
     icon: MessagesSquare,
     title: "Contacto directo con tu coach",
-    desc: "Mensajes privados y check-ins semanales con respuesta real de Ezequiel. Nada de bots.",
+    desc: "Mensajes privados y check-ins semanales con respuesta real de tu coach. Nada de bots.",
     href: "/client/messages",
     cta: "Abrir mensajes",
     features: ["Respuesta rápida", "Check-ins semanales", "Soporte 24/7"],
@@ -86,7 +86,7 @@ const testimonials = [
   {
     name: "Sofía R.",
     role: "Cliente desde 2023",
-    content: "El seguimiento nutricional y las calculadoras me ayudaron a alcanzar mis objetivos. La comunicación con Ezequiel es excelente.",
+    content: "El seguimiento nutricional y las calculadoras me ayudaron a alcanzar mis objetivos. La comunicación con tu coach es excelente.",
     rating: 5,
     image: "/testimonials/sofia-r.jpg",
   },
@@ -263,7 +263,7 @@ export default function FuncionesView() {
                 a: "No. La mayoría de las funciones funcionan sin conexión, incluyendo tu programa de ejercicios y los cronómetros. Solo necesitas internet para sincronizar tu progreso y recibir actualizaciones.",
               },
               {
-                q: "¿Cuánto tiempo tarda Ezequiel en responder los mensajes?",
+                q: "¿Cuánto tiempo tarda tu coach en responder los mensajes?",
                 a: "Generalmente responde dentro de las 24 horas hábiles. Para consultas urgentes, podés usar el chat en vivo durante el horario de atención.",
               },
               {
@@ -310,7 +310,7 @@ export default function FuncionesView() {
               ¿Listo para empezar tu transformación?
             </h2>
             <p className="text-zinc-400 mb-8 max-w-xl mx-auto">
-              Unite a miles de clientes que ya alcanzaron sus objetivos con Ezequiel Coaching.
+              Unite a miles de clientes que ya alcanzaron sus objetivos con KinetixFitt.
             </p>
             <div className="flex flex-wrap justify-center gap-4">
               <Link

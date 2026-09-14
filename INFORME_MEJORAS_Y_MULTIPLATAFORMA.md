@@ -1,7 +1,7 @@
 # INFORME COMPLETO DE MEJORAS Y ESTADO MULTIPLATAFORMA
 
 **Fecha:** 12 de septiembre de 2026  
-**Proyecto:** EZEQUIEL COACHING v1.0.1  
+**Proyecto:** KINETIXFITT v1.0.1  
 **Autor:** Revisión Técnica Completa
 
 ---
@@ -40,7 +40,7 @@
   npm run build:all        # Build ambas plataformas
   ```
 - **Configuración:**
-  - AppId: `com.ezequielcoaching.desktop`
+  - AppId: `com.kinetixfitt.desktop`
   - Electron 33.0.0 + electron-builder 25.0.0
   - Iconos nativos (icon-512.png)
   - NSIS installer con opción de directorio
@@ -147,7 +147,7 @@
 # Instalación
 npm install @capacitor/core @capacitor/cli
 npm install @capacitor/ios @capacitor/android
-npx cap init "EZEQUIEL COACHING" "com.ezequielcoaching.app"
+npx cap init "KINETIXFITT" "com.kinetixfitt.app"
 
 # Configurar
 npx cap add ios
@@ -440,13 +440,13 @@ npm run db:seed                # Seed con datos demo
 # Testear service worker
 # 1. npm run build && npm start
 # 2. Abrir DevTools → Application → Service Workers
-# 3. Verificar "ezequiel-v3-voz" activo
+# 3. Verificar "kinetixfitt-v3-voz" activo
 # 4. Network → Offline → recargar → debe funcionar
 ```
 
 ### Capacitor (si se instala)
 ```bash
-npx cap init "EZEQUIEL COACHING" "com.ezequielcoaching.app"
+npx cap init "KINETIXFITT" "com.kinetixfitt.app"
 npx cap add ios
 npx cap add android
 npm run build && npx cap copy && npx cap sync

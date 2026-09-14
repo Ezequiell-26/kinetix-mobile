@@ -239,7 +239,7 @@ export const notificationTemplates: Record<NotificationType, { title: string; bo
   },
   'coach-message': {
     title: '💬 Nuevo mensaje de tu coach',
-    body: 'Ezequiel te ha enviado un mensaje. ¡Revisalo!',
+    body: 'Tu coach te ha enviado un mensaje. ¡Revisalo!',
   },
   'achievement-unlocked': {
     title: '🏆 ¡Logro desbloqueado!',

@@ -1,4 +1,4 @@
-# ÍNDICE DE DOCUMENTACIÓN — EZEQUIEL COACHING
+# ÍNDICE DE DOCUMENTACIÓN — KINETIXFITT
 
 **Fecha de generación:** 12 de septiembre de 2026  
 **Versión de la app:** 1.0.1
@@ -286,5 +286,5 @@ Para nuevos desarrolladores:
 ---
 
 **Generado automáticamente:** 12 septiembre 2026  
-**Mantenido por:** Equipo Ezequiel Coaching  
+**Mantenido por:** Equipo KinetixFitt  
 **Última actualización:** 12 septiembre 2026

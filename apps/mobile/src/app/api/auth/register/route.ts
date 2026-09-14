@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
-import { hashPassword, createToken, setAuthCookie } from "@/lib/auth";
+import { hashPassword, createAuthSession, setAuthCookie } from "@/lib/auth";
+import { headers } from "next/headers";
 import { registerSchema } from "@/lib/validations";
 
 export async function POST(req: Request){
@@ -38,7 +39,16 @@ export async function POST(req: Request){
       await prisma.client.create({data:{name:data.name.trim(), email:normalizedEmail, userId:user.id, goal:"HIPERTROFIA", status:"ACTIVO", plan:"PERSONALIZADO"}});
     }
     
-    const token = await createToken({id:user.id, email:user.email, role:user.role as "TRAINER"|"CLIENT", name:user.name});
+    // Sesión persistida en DB (createAuthSession) — igual que login, para permitir revocación
+    const h = await headers();
+    const userAgent = h.get("user-agent") || undefined;
+    const forwarded = h.get("x-forwarded-for");
+    const ipAddress = forwarded ? forwarded.split(",")[0].trim() : "127.0.0.1";
+    const token = await createAuthSession(
+      {id:user.id, email:user.email, role:user.role as "TRAINER"|"CLIENT", name:user.name},
+      userAgent,
+      ipAddress
+    );
     await setAuthCookie(token);
     return NextResponse.json({ok:true, role:user.role});
   }catch(e:unknown){

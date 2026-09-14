@@ -1,5 +1,5 @@
 /**
- * Sistema de Logs de Auditoría para EZEQUIEL COACHING
+ * Sistema de Logs de Auditoría para KINETIXFITT
  * Registra todas las acciones importantes de usuarios y sistema para seguridad y compliance
  */
 

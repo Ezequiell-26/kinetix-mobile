@@ -1,4 +1,4 @@
-# 📊 RESUMEN COMPLETO — EZEQUIEL COACHING
+# 📊 RESUMEN COMPLETO — KINETIXFITT
 
 **Fecha:** 12 de septiembre de 2026  
 **Sprint:** Auditoría UX + Mejoras + Sistema de Voces  
@@ -8,7 +8,7 @@
 
 ## 🎯 OBJETIVO PRINCIPAL
 
-Llevar **EZEQUIEL COACHING** de buena app (9.2/10) a **excelente app lista para producción** (9.5/10) con:
+Llevar **KINETIXFITT** de buena app (9.2/10) a **excelente app lista para producción** (9.5/10) con:
 - ✅ UX optimizada
 - ✅ Sistema de voces natural (eliminando TTS robótico)
 - ✅ Multiplataforma perfecta (móvil/tablet/desktop/PWA)
@@ -57,7 +57,7 @@ Llevar **EZEQUIEL COACHING** de buena app (9.2/10) a **excelente app lista para 
 - **Código actualizado** en `src/lib/voice-engine/voices.ts`
 - Manifiesto con 39 números agregados
 - Listo para usar cuando grabes los MP3
-- Guardar en: `public/audio/voices/ezequiel/numbers/`
+- Guardar en: `public/audio/voices/kinetixfitt/numbers/`
 
 **Documentos generados:**
 - `GUIA_VOCES_EZEQUIEL.md` (guía completa con script de grabación)
@@ -302,7 +302,7 @@ src/components/ui/
 
 ### 1. **CRÍTICO — Sistema de Voces** (1-2 horas)
 - [ ] Grabar 39 números (script en GUIA_VOCES_EZEQUIEL.md)
-- [ ] Guardar MP3 en `public/audio/voices/ezequiel/numbers/`
+- [ ] Guardar MP3 en `public/audio/voices/kinetixfitt/numbers/`
 - [ ] Testing: entrenar y verificar que números ya no suenan robóticos
 - [ ] Opcional: actualizar `public/sw.js` con rutas de números (para cache offline)
 
@@ -336,7 +336,7 @@ src/components/ui/
 ### 6. **BAJA — Top 10 Ejercicios con Voz** (2-3 horas)
 - [ ] Identificar ejercicios más usados
 - [ ] Grabar nombres completos
-- [ ] Guardar en `public/audio/voices/ezequiel/exercises/`
+- [ ] Guardar en `public/audio/voices/kinetixfitt/exercises/`
 - [ ] Actualizar manifiesto
 - [ ] Testing
 
@@ -476,7 +476,7 @@ Si quieres **maximizar la experiencia**:
 - ❌ Estructura de rutas (ya es lógica)
 
 ### Conclusión
-**EZEQUIEL COACHING está lista para producción.** Solo falta:
+**KINETIXFITT está lista para producción.** Solo falta:
 1. Grabar números para voz 100% natural
 2. Testing final
 3. Deploy 🚀

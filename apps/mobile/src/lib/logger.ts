@@ -1,5 +1,5 @@
 /**
- * Sistema de Logging Estructurado para EZEQUIEL COACHING
+ * Sistema de Logging Estructurado para KINETIXFITT
  * Logs con niveles, contexto, formato JSON y envío a servicios externos
  */
 

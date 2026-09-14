@@ -12,7 +12,7 @@ export const CLIENT_TOUR: TourStep[] = [
   {
     title: "Bienvenido a tu equipo",
     text: "Soy tu coach de voz. Te muestro tu app en 30 segundos. Puedes saltar el tour cuando quieras.",
-    tts: "Bienvenido a Ezequiel Coaching. Soy tu coach de voz. Te muestro tu app en treinta segundos. Puedes saltar cuando quieras.",
+    tts: "Bienvenido a KinetixFitt. Soy tu coach de voz. Te muestro tu app en treinta segundos. Puedes saltar cuando quieras.",
   },
   {
     target: '[data-tour="entreno-hoy"]',
@@ -29,8 +29,8 @@ export const CLIENT_TOUR: TourStep[] = [
   {
     target: 'nav[aria-label="Navegación principal"] a[href="/client/progress"]',
     title: "Tu progreso",
-    text: "Peso, marcas, fotos y racha. Todo lo que subas lo ve Ezequiel.",
-    tts: "En progreso ves tu peso, tus marcas y tus fotos. Todo lo que subas, Ezequiel lo ve.",
+    text: "Peso, marcas, fotos y racha. Todo lo que subas lo ve tu coach.",
+    tts: "En progreso ves tu peso, tus marcas y tus fotos. Todo lo que subas, tu coach lo ve.",
   },
   {
     target: 'a[href="/client/checkins"]',
@@ -40,9 +40,9 @@ export const CLIENT_TOUR: TourStep[] = [
   },
   {
     target: 'a[href="/client/messages"]',
-    title: "Hablá con Ezequiel",
+    title: "Hablá con tu coach",
     text: "Mensaje directo con tu entrenador. Responde cada check-in personalmente.",
-    tts: "Habla con Ezequiel cuando quieras. Y mi voz te guía en cada entreno.",
+    tts: "Habla con tu coach cuando quieras. Y mi voz te guía en cada entreno.",
   },
   {
     title: "Listo, a entrenar",

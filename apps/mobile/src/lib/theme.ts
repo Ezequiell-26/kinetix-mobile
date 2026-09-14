@@ -1,5 +1,5 @@
 /**
- * Sistema de Temas Completo para EZEQUIEL COACHING
+ * Sistema de Temas Completo para KINETIXFITT
  * Soporte para modo claro, oscuro y automático
  * Con persistencia en localStorage y detección del sistema
  */

@@ -2,7 +2,7 @@ import * as React from "react";
 import { cn } from "@/lib/utils";
 
 /**
- * Sistema de botones EZEQUIEL COACHING — jerarquía por psicología.
+ * Sistema de botones KINETIXFITT — jerarquía por psicología.
  *
  * - 1 solo primario (accent) por viewport → efecto Von Restorff: lo distinto se recuerda y se toca.
  * - Ley de Fitts: el CTA principal mide 52–56px (xl/lg), zona pulgar en móvil.

@@ -1,4 +1,4 @@
-# Guía de Deploy a Producción - Ezequiel Coaching
+# Guía de Deploy a Producción - KinetixFitt
 
 ## Prerrequisitos
 
@@ -47,7 +47,7 @@ SMTP_HOST=smtp.gmail.com
 SMTP_PORT=587
 SMTP_USER=tucorreo@gmail.com
 SMTP_PASS=tu_app_password
-EMAIL_FROM="EZEQUIEL COACHING <noreply@tu-dominio.com>"
+EMAIL_FROM="KINETIXFITT <noreply@tu-dominio.com>"
 
 # AWS S3 para Backups
 BACKUP_ENABLED=true

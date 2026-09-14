@@ -163,7 +163,7 @@ export default async function TrainerDashboard(){
             Panel del Entrenador
           </h1>
           <p className="text-sm text-zinc-400">
-            Resumen en tiempo real • Marca: <span className="text-primary font-bold">EZEQUIEL COACHING</span>
+            Resumen en tiempo real • Marca: <span className="text-primary font-bold">KINETIXFITT</span>
           </p>
         </div>
 

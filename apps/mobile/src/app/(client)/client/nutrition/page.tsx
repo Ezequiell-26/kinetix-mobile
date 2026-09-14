@@ -79,7 +79,7 @@ export default function NutritionPage(){
         <CardContent className="pt-4 flex gap-3 items-center">
           <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-primary to-primary-hover flex items-center justify-center font-black text-black shadow-[0_4px_14px_rgba(52,211,153,0.3)]">E</div>
           <div className="flex-1">
-            <p className="text-sm font-bold">Plan de Ezequiel</p>
+            <p className="text-sm font-bold">Plan de tu coach</p>
             <p className="text-xs text-zinc-400">Tus macros están ajustados a tu objetivo. Revisión semanal.</p>
           </div>
           <Link href="/client/messages"><Button variant="outline" size="sm">Consultar</Button></Link>

@@ -12,15 +12,15 @@ export const metadata: Metadata = {
   metadataBase: new URL(
     process.env.NEXT_PUBLIC_APP_URL || "https://kinetixfitt-world-ia.vercel.app"
   ),
-  title: "EZEQUIEL COACHING — Entrenamiento Personalizado Online",
+  title: "KINETIXFITT — Entrenamiento Personalizado Online",
   description:
     "Programa a medida, seguimiento real y contacto directo con tu coach. Entrenamiento, nutrición y progreso desde tu celular.",
-  applicationName: "EZEQUIEL COACHING",
+  applicationName: "KINETIXFITT",
   manifest: "/manifest.json",
   appleWebApp: {
     capable: true,
     statusBarStyle: "black-translucent",
-    title: "EZEQUIEL COACHING",
+    title: "KINETIXFITT",
   },
   formatDetection: { telephone: false },
   icons: {
@@ -35,7 +35,7 @@ export const metadata: Metadata = {
     ],
   },
   openGraph: {
-    title: "EZEQUIEL COACHING — Tu mejor versión, cada día",
+    title: "KINETIXFITT — Tu mejor versión, cada día",
     description: "Entrenamiento personalizado online con seguimiento real.",
     type: "website",
     locale: "es_AR",
@@ -44,12 +44,12 @@ export const metadata: Metadata = {
         url: "/og-image.jpg",
         width: 1200,
         height: 630,
-        alt: "EZEQUIEL COACHING — Tu mejor versión, cada día",
+        alt: "KINETIXFITT — Tu mejor versión, cada día",
       },
     ],
   },
   keywords: ["entrenamiento", "fitness", "coach", "nutrición", "gym", "ejercicios", "salud"],
-  authors: [{ name: "Ezequiel Coaching" }],
+  authors: [{ name: "KinetixFitt" }],
   robots: "index, follow",
 };
 

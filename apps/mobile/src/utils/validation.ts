@@ -3,7 +3,7 @@ import { z } from 'zod';
 // Esquemas de validación para toda la aplicación
 export const emailSchema = z.string()
   .email('Email inválido')
-  .refine(email => email.endsWith('@gmail.com'), 'Solo se permiten correos @gmail.com');
+  .refine(email => email.endsWith('@gmail.com') || email.endsWith('@kinetixfitt.com'), 'Solo se permiten correos @gmail.com o @kinetixfitt.com');
 
 export const passwordSchema = z.string()
   .min(8, 'La contraseña debe tener al menos 8 caracteres')

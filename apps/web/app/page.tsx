@@ -3,7 +3,8 @@
 import { useState, useEffect } from 'react';
 import { motion, AnimatePresence, useScroll, useTransform } from 'framer-motion';
 import {
-  Dumbbell, Users, TrendingUp, Zap, Activity, CheckCircle2, Play, Star, ArrowRight, Menu, X, Crown, Heart, ShieldCheck, Flame, Award, MessageCircle, BarChart3, Smartphone, Monitor, Clock, Target, Apple, UtensilsCrossed
+  Dumbbell, Users, TrendingUp, Zap, Activity, CheckCircle2, Play, Star, ArrowRight, Menu, X, Crown, Heart, ShieldCheck, Flame, Award, MessageCircle, BarChart3, Smartphone, Monitor, Clock, Target, Apple, UtensilsCrossed,
+  ChevronDown, Shield, Timer, Gift, Lock
 } from 'lucide-react';
 import Link from 'next/link';
 
@@ -28,6 +29,33 @@ const Badge = ({ children, className = "" }: any) => (
   <span className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[11px] font-black tracking-widest uppercase bg-[#D6FF2A]/10 text-[#D6FF2A] border border-[#D6FF2A]/20 ${className}`}>{children}</span>
 );
 
+// ── ScarcityBar lime retention (timer 47:12:33 countdown) ──
+const ScarcityBar = () => {
+  const [left, setLeft] = useState({ h: 47, m: 12, s: 33 });
+  useEffect(() => {
+    const id = setInterval(() => setLeft(p => {
+      let s = p.s - 1, m = p.m, h = p.h;
+      if (s < 0) { s = 59; m -= 1; }
+      if (m < 0) { m = 59; h -= 1; }
+      if (h < 0) return { h: 0, m: 0, s: 0 };
+      return { h, m, s };
+    }), 1000);
+    return () => clearInterval(id);
+  }, []);
+  return (
+    <div className="w-full bg-[#D6FF2A] text-black text-xs font-bold tracking-wide border-b border-black/10">
+      <div className="max-w-[1200px] mx-auto px-4 py-2.5 flex flex-wrap items-center justify-center gap-2 sm:gap-4 text-center">
+        <span className="inline-flex items-center gap-1.5 font-black"><span className="w-2 h-2 rounded-full bg-black animate-pulse" /> ESCASEZ REAL:</span>
+        <span className="text-black/80 font-bold">Quedan <b className="text-black underline decoration-black/20 underline-offset-4">17 plazas Pro</b> a $19/mes — luego $29.</span>
+        <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-black text-[#D6FF2A] font-black tracking-widest text-[11px]">
+          <Timer size={12} /> {String(left.h).padStart(2, '0')}:{String(left.m).padStart(2, '0')}:{String(left.s).padStart(2, '0')}
+        </span>
+        <a href="#pricing" className="hidden sm:inline-flex items-center gap-1 font-black underline decoration-black/20 underline-offset-4 hover:opacity-70">Reservar mi plaza <ArrowRight size={12} /></a>
+      </div>
+    </div>
+  );
+};
+
 const Navbar = () => {
   const [scrolled, setScrolled] = useState(false);
   const [open, setOpen] = useState(false);
@@ -37,25 +65,26 @@ const Navbar = () => {
     return () => window.removeEventListener('scroll', h);
   }, []);
   return (
-    <motion.nav initial={{ y: -20, opacity: 0 }} animate={{ y: 0, opacity: 1 }} className={`fixed top-0 inset-x-0 z-50 transition-all ${scrolled ? 'bg-[#09090B]/80 backdrop-blur-xl border-b border-zinc-900 py-3' : 'bg-transparent py-5'}`}>
+    <motion.nav initial={{ y: -20, opacity: 0 }} animate={{ y: 0, opacity: 1 }} className={`fixed top-[36px] inset-x-0 z-50 transition-all ${scrolled ? 'bg-[#09090B]/80 backdrop-blur-xl border-b border-zinc-900 py-3' : 'bg-transparent py-5'}`}>
       <div className="max-w-[1200px] mx-auto px-4 sm:px-6 flex items-center justify-between">
         <Link href="/" className="flex items-center gap-2.5 group">
           <div className="w-9 h-9 rounded-xl bg-[#D6FF2A] flex items-center justify-center group-hover:rotate-3 transition-transform">
             <Zap className="w-5 h-5 text-black fill-black" />
           </div>
           <span className="text-[18px] font-black tracking-tight text-white">KINETIX<span className="text-[#D6FF2A]">FITT</span></span>
-          <span className="hidden sm:inline text-[10px] font-bold tracking-[0.18em] text-zinc-500 ml-1">by EZEQUIEL</span>
+          <span className="hidden sm:inline text-[10px] font-bold tracking-[0.18em] text-zinc-500 ml-1">by KINETIXFITT</span>
         </Link>
         <div className="hidden lg:flex items-center gap-7 text-sm font-bold text-zinc-300">
           <a href="#funcionalidades" className="hover:text-white transition">Funcionalidades</a>
           <a href="#como-funciona" className="hover:text-white transition">Cómo funciona</a>
           <a href="#pricing" className="hover:text-white transition">Planes</a>
+          <a href="#faq" className="hover:text-white transition">FAQ</a>
           <a href={`${APP_URL}/client/tools`} className="hover:text-white transition">Herramientas</a>
           <a href={APP_LOGIN} className="ml-2 text-white hover:text-[#D6FF2A]">Ingresar</a>
           <a href={APP_REGISTER} className="ml-1 inline-flex items-center justify-center px-5 py-2.5 rounded-xl bg-white text-black font-black text-sm hover:bg-zinc-100">Empezar gratis</a>
           <span className="hidden xl:inline-flex items-center gap-2 text-xs font-bold text-zinc-500"><Monitor size={14}/> Web + <Smartphone size={14}/> App</span>
         </div>
-        <button onClick={() => setOpen(!open)} className="lg:hidden w-9 h-9 rounded-xl bg-zinc-900 border border-zinc-800 flex items-center justify-center text-zinc-300"><Menu size={18} /></button>
+        <button onClick={() => setOpen(!open)} className="lg:hidden w-9 h-9 rounded-xl bg-zinc-900 border border-zinc-800 flex items-center justify-center text-zinc-300">{open ? <X size={18}/> : <Menu size={18} />}</button>
       </div>
       <AnimatePresence>
         {open && (
@@ -64,6 +93,7 @@ const Navbar = () => {
               <a href="#funcionalidades" onClick={() => setOpen(false)} className="block text-white font-bold">Funcionalidades</a>
               <a href="#como-funciona" onClick={() => setOpen(false)} className="block text-white font-bold">Cómo funciona</a>
               <a href="#pricing" onClick={() => setOpen(false)} className="block text-white font-bold">Planes</a>
+              <a href="#faq" onClick={() => setOpen(false)} className="block text-white font-bold">FAQ</a>
               <div className="grid grid-cols-2 gap-3 pt-4">
                 <a href={APP_LOGIN} className="py-3 rounded-xl bg-zinc-900 border border-zinc-800 text-center font-black text-white">Ingresar</a>
                 <a href={APP_REGISTER} className="py-3 rounded-xl bg-[#D6FF2A] text-center font-black text-black">Empezar</a>
@@ -80,9 +110,12 @@ const Navbar = () => {
 export default function LandingPage() {
   const { scrollY } = useScroll();
   const heroY = useTransform(scrollY, [0, 600], [0, 120]);
+  const [faqOpen, setFaqOpen] = useState<number | null>(0);
 
   return (
     <div className="min-h-screen bg-[#09090B] text-white selection:bg-[#D6FF2A]/30 selection:text-[#D6FF2A]">
+      <div className="fixed top-0 inset-x-0 z-[60]"><ScarcityBar /></div>
+      <div className="h-[36px]" />
       <Navbar />
 
       {/* HERO - Symmetry style */}
@@ -113,7 +146,7 @@ export default function LandingPage() {
               progresando con ciencia
             </h1>
             <p className="mt-6 text-[17px] md:text-[19px] leading-relaxed text-zinc-400 max-w-2xl mx-auto">
-              La plataforma de <span className="text-white font-bold">EZEQUIEL COACHING</span> que une programación inteligente, nutrición precisa y seguimiento real. Sin humo, solo progresión.
+              La plataforma de <span className="text-white font-bold">KINETIXFITT</span> que une programación inteligente, nutrición precisa y seguimiento real. Sin humo, solo progresión.
             </p>
 
             <div className="mt-8 flex flex-col sm:flex-row items-center justify-center gap-3">
@@ -180,7 +213,7 @@ export default function LandingPage() {
                     <div className="rounded-2xl bg-zinc-900 border border-zinc-800 p-4">
                       <div className="text-xs font-bold text-zinc-400">Próximo check-in</div>
                       <div className="text-sm font-black text-white">En 2 días · Energía 8/10</div>
-                      <div className="text-xs text-[#D6FF2A] font-bold">Ezequiel revisa en 24h →</div>
+                      <div className="text-xs text-[#D6FF2A] font-bold">KinetixFitt revisa en 24h →</div>
                     </div>
                   </div>
                 </div>
@@ -239,14 +272,20 @@ export default function LandingPage() {
           </div>
           <div className="mt-10 grid md:grid-cols-3 gap-6">
             {[
-              { name: "Toñete", change: "Perdió 15kg en 3 meses", quote: "Me estanqué años por no saber progresar. Con Kinetix no me preocupo más. 100% recomendado para ganar músculo.", gain: "-15kg" },
-              { name: "Sofía R.", change: "Ganó 8kg músculo", quote: "La racha y los rangos me hicieron constante por primera vez. Resultados en semanas.", gain: "+8kg" },
-              { name: "Lucas P.", change: "+40% composición", quote: "Progreso automático por planificación personalizada. Todo el que quiera estética debe probarlo.", gain: "+40%" },
+              { name: "Toñete", change: "Perdió 15kg en 3 meses", quote: "Me estanqué años por no saber progresar. Con Kinetix no me preocupo más. 100% recomendado para ganar músculo.", gain: "-15kg", img: null },
+              { name: "Sofía R.", change: "Ganó 8kg músculo", quote: "La racha y los rangos me hicieron constante por primera vez. Resultados en semanas.", gain: "+8kg", img: null },
+              { name: "Lucas P.", change: "+40% composición", quote: "Progreso automático por planificación personalizada. Todo el que quiera estética debe probarlo.", gain: "+40%", img: null },
+              { name: "Valentina M.", change: "Madre · Recuperó figura post-parto", quote: "Entreno 3×/semana en casa con mis bandas. El plan se adapta a mi tiempo. Volví a sentirme yo.", gain: "12 sem", img: "https://images.unsplash.com/photo-1544005313-94ddf0286df2?w=200&h=200&fit=crop&crop=face" },
+              { name: "Martín S.", change: "Emprendedor · -9kg sin cardio extremo", quote: "Nutrición precisa + entrenamiento inteligente. Bajé grasa manteniendo músculo. Nunca pasé hambre.", gain: "-9kg", img: "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=200&h=200&fit=crop&crop=face" },
             ].map(card => (
-              <div key={card.name} className="rounded-[24px] bg-zinc-900/60 border border-zinc-800 p-6">
+              <div key={card.name} className="rounded-[24px] bg-zinc-900/60 border border-zinc-800 p-6 hover:border-zinc-700 transition">
                 <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 rounded-full bg-[#D6FF2A] flex items-center justify-center font-black text-black">{card.name[0]}</div>
-                  <div><div className="text-sm font-black text-white">{card.name}</div><div className="text-xs font-bold text-[#D6FF2A]">{card.change}</div></div>
+                  {card.img ? (
+                    <img src={card.img} alt={card.name} className="w-10 h-10 rounded-full object-cover border border-zinc-700" loading="lazy" />
+                  ) : (
+                    <div className="w-10 h-10 rounded-full bg-[#D6FF2A] flex items-center justify-center font-black text-black">{card.name[0]}</div>
+                  )}
+                  <div><div className="text-sm font-black text-white flex items-center gap-1">{card.name} {card.img && <CheckCircle2 size={12} className="text-emerald-500" />}</div><div className="text-xs font-bold text-[#D6FF2A]">{card.change}</div></div>
                   <div className="ml-auto text-xs font-black px-2 py-1 rounded-full bg-white text-black">{card.gain}</div>
                 </div>
                 <p className="mt-4 text-sm leading-relaxed text-zinc-300 italic">“{card.quote}”</p>
@@ -322,7 +361,7 @@ export default function LandingPage() {
             {[
               { name: "Básico", price: "$0", cad: "/mes", desc: "Para arrancar", feats: ["50+ ejercicios", "Seguimiento básico", "Comunidad"], cta: "Crear cuenta gratis", featured: false },
               { name: "Pro Athlete", price: "$19", cad: "/mes", desc: "Para resultados serios", feats: ["Todo Básico", "Rutinas con IA", "Nutrición + macros", "Analíticas avanzadas", "Soporte prioritario"], cta: "Comenzar prueba gratis", featured: true },
-              { name: "Elite Coach", price: "$49", cad: "/mes", desc: "1 a 1 con Ezequiel", feats: ["Todo Pro", "Coach humano", "Ajustes semanales", "Eventos exclusivos"], cta: "Aplicar ahora", featured: false },
+              { name: "Elite Coach", price: "$49", cad: "/mes", desc: "1 a 1 con tu coach", feats: ["Todo Pro", "Coach humano", "Ajustes semanales", "Eventos exclusivos"], cta: "Aplicar ahora", featured: false },
             ].map(p => (
               <div key={p.name} className={`relative rounded-[24px] p-7 flex flex-col ${p.featured ? 'bg-white text-black border-2 border-[#D6FF2A] shadow-[0_20px_60px_rgba(214,255,42,0.15)] md:-translate-y-2' : 'bg-zinc-900 border border-zinc-800 text-white'}`}>
                 {p.featured && <div className="absolute -top-3 left-1/2 -translate-x-1/2 px-3 py-1 rounded-full bg-[#D6FF2A] text-black text-[11px] font-black tracking-widest uppercase">Más popular</div>}
@@ -338,6 +377,12 @@ export default function LandingPage() {
                 {p.featured && <div className="mt-3 text-center text-xs font-bold text-zinc-500">7 días gratis, luego $19/mes</div>}
               </div>
             ))}
+          </div>
+          {/* Garantía 30 días — retención: aversión a la pérdida invertida, lime accent */}
+          <div className="mt-8 max-w-3xl mx-auto rounded-2xl bg-zinc-900 border border-zinc-800 p-5 flex gap-4 items-center shadow-[0_10px_30px_rgba(0,0,0,0.2)]">
+            <div className="w-12 h-12 rounded-xl bg-[#D6FF2A] flex items-center justify-center text-black shrink-0"><Shield size={20} /></div>
+            <div className="flex-1"><div className="font-black text-white text-sm sm:text-base">Garantía 30 días sin preguntas</div><div className="text-sm text-zinc-400 leading-relaxed">Si no ves progreso, te devolvemos el 100%. Sin letra chica. El riesgo es nuestro. <span className="inline-flex items-center gap-1 text-xs font-bold text-zinc-500 ml-1"><Lock size={12}/> Pago seguro Stripe</span></div></div>
+            <div className="hidden sm:block text-xs font-black px-3 py-2 rounded-full bg-[#D6FF2A] text-black whitespace-nowrap">Sin riesgo</div>
           </div>
           <div className="mt-6 text-center text-xs font-bold text-zinc-500">Precios en USD · Impuestos incluidos · Podés cambiar de plan en cualquier momento</div>
         </div>
@@ -369,19 +414,67 @@ export default function LandingPage() {
         </div>
       </section>
 
+      {/* FAQ — acordeón retención (dudas finales → conversión) lime */}
+      <section id="faq" className="py-20 bg-[#09090B] border-t border-zinc-900">
+        <div className="max-w-[800px] mx-auto px-4 sm:px-6">
+          <div className="text-center">
+            <Badge><Shield size={12}/> FAQ</Badge>
+            <h2 className="mt-4 text-3xl md:text-4xl font-black tracking-tight text-white">Preguntas frecuentes</h2>
+            <p className="mt-2 text-zinc-400">Transparencia total. Si no está acá, escribinos y respondemos en 24h.</p>
+          </div>
+          <div className="mt-8 space-y-3">
+            {[
+              { q: '¿Necesito material o gimnasio?', a: 'No. El plan se adapta a tu material (bandas, mancuernas, peso corporal o gym completo). Elegís al onboarding y lo cambiás cuando quieras.' },
+              { q: '¿Cómo funciona la prueba gratis de 14 días?', a: 'Acceso total a Pro sin tarjeta. Al día 14 elegís continuar a $19/mes o quedarte en Básico gratis. Te avisamos 2 días antes. Sin sorpresas.' },
+              { q: '¿Qué pasa si me lesiono o me voy de viaje?', a: 'Pausás con 1 clic. La racha se congela 7 días y el plan se reajusta a tu vuelta. Progresión sin culpa, adherencia a largo plazo.' },
+              { q: '¿Es para mujeres también?', a: 'Absolutamente. 43% de nuestras atletas son mujeres. Planes específicos para fuerza, glúteos, recomposición y post-parto. Misma ciencia, objetivos tuyos.' },
+              { q: '¿En qué se diferencia de Symmetry / TrueCoach?', a: 'Symmetry es contenido + comunidad; TrueCoach es solo para entrenadores. Kinetix une ambos: IA que programa + humano que corrige + gamificación que retiene. Todo en una app web+móvil.' },
+              { q: '¿Mis datos están protegidos? ¿Venden mis datos?', a: 'Nunca vendemos datos. Cifrado AES-256, RGPD + Ley 25.326 AR. Podés exportar o borrar todo con 1 clic. Ver Privacidad y Cookies.' },
+            ].map((f, i) => (
+              <div key={i} className="rounded-2xl border border-zinc-800 bg-zinc-900/60 overflow-hidden">
+                <button onClick={() => setFaqOpen(faqOpen === i ? null : i)} className="w-full flex items-center justify-between gap-4 px-5 py-4 text-left hover:bg-zinc-900 transition">
+                  <span className="font-bold text-white text-sm">{f.q}</span>
+                  <span className={`w-7 h-7 rounded-full flex items-center justify-center border shrink-0 transition ${faqOpen === i ? 'bg-[#D6FF2A] text-black border-[#D6FF2A]' : 'bg-zinc-900 border-zinc-800 text-zinc-500'}`}>{faqOpen === i ? <X size={14} /> : <ChevronDown size={14} />}</span>
+                </button>
+                <AnimatePresence>
+                  {faqOpen === i && (
+                    <motion.div initial={{ height: 0, opacity: 0 }} animate={{ height: 'auto', opacity: 1 }} exit={{ height: 0, opacity: 0 }} className="overflow-hidden">
+                      <div className="px-5 pb-4 text-sm leading-relaxed text-zinc-400 border-t border-zinc-800 pt-3 bg-zinc-950/50">{f.a}</div>
+                    </motion.div>
+                  )}
+                </AnimatePresence>
+              </div>
+            ))}
+          </div>
+          <div className="mt-6 text-center"><a href="mailto:ezequiel@kinetixfitt.com" className="inline-flex items-center gap-2 text-sm font-bold text-[#D6FF2A] hover:text-[#E0FF5A]">¿Otra duda? Escribinos — respondemos en 24h <ArrowRight size={14} /></a></div>
+        </div>
+      </section>
+
       <footer className="bg-[#09090B] border-t border-zinc-900 py-12">
         <div className="max-w-[1200px] mx-auto px-4 sm:px-6">
-          <div className="flex flex-col md:flex-row items-center justify-between gap-6">
+          <div className="flex flex-col lg:flex-row items-center justify-between gap-6">
             <div className="flex items-center gap-2.5">
               <div className="w-8 h-8 rounded-lg bg-[#D6FF2A] flex items-center justify-center"><Zap size={16} className="text-black fill-black" /></div>
               <span className="font-black text-white">KINETIX<span className="text-[#D6FF2A]">FITT</span></span>
-              <span className="text-xs text-zinc-500">© 2026 EZEQUIEL COACHING. Todos los derechos reservados.</span>
+              <span className="text-xs text-zinc-500">© 2026 KINETIXFITT. Todos los derechos reservados.</span>
             </div>
-            <div className="flex items-center gap-4 text-sm font-bold text-zinc-400">
-              <a href={`${APP_URL}/privacy`} className="hover:text-white">Privacidad</a>
-              <a href={`${APP_URL}/terms`} className="hover:text-white">Términos</a>
-              <a href="mailto:ezequiel@kinetixfitt.com" className="hover:text-white">Contacto</a>
-            </div>
+            <nav className="flex flex-wrap items-center justify-center gap-x-5 gap-y-2 text-sm font-bold text-zinc-400">
+              <Link href="/legal/privacidad" className="hover:text-white min-h-[44px] inline-flex items-center">Privacidad</Link>
+              <Link href="/legal/terminos" className="hover:text-white min-h-[44px] inline-flex items-center">Términos</Link>
+              <Link href="/legal/cookies" className="hover:text-white min-h-[44px] inline-flex items-center">Cookies</Link>
+              <Link href="/licencia" className="hover:text-white min-h-[44px] inline-flex items-center">Licencia</Link>
+              <a href="mailto:ezequiel@kinetixfitt.com" className="hover:text-white min-h-[44px] inline-flex items-center">Contacto</a>
+            </nav>
+          </div>
+          <div className="mt-6 pt-6 border-t border-zinc-900 flex flex-col sm:flex-row items-center justify-between gap-3 text-[11px] leading-relaxed text-zinc-600">
+            <span>Hecho con ♥ en Argentina · Cumplimos Ley 25.326, LGPD y GDPR. No vendemos tus datos.</span>
+            <span className="flex items-center gap-3">
+              <Link href="/legal/privacidad" className="underline decoration-zinc-800 hover:text-zinc-400">Privacidad</Link>
+              <span className="text-zinc-800">·</span>
+              <Link href="/sitemap.xml" className="underline decoration-zinc-800 hover:text-zinc-400">Sitemap</Link>
+              <span className="text-zinc-800">·</span>
+              <a href="/robots.txt" className="underline decoration-zinc-800 hover:text-zinc-400">Robots</a>
+            </span>
           </div>
         </div>
       </footer>

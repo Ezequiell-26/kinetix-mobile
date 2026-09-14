@@ -70,7 +70,7 @@ export default function RegisterPage(){
 
             <div className="space-y-1">
               <CardTitle className="text-2xl tracking-tight">Crear cuenta</CardTitle>
-              <CardDesc>Únete a EZEQUIEL COACHING</CardDesc>
+              <CardDesc>Únete a KINETIXFITT</CardDesc>
             </div>
           </CardHeader>
 
@@ -126,7 +126,7 @@ export default function RegisterPage(){
               </div>
 
               <p className="text-xs text-zinc-500 rounded-xl border border-subtle bg-surface/40 px-3 py-2.5">
-                Tu cuenta es de <span className="font-bold text-zinc-200">atleta</span>. Si eres entrenador, escríbele a Ezequiel para tu acceso.
+                Tu cuenta es de <span className="font-bold text-zinc-200">atleta</span>. Si eres entrenador, escríbele a KinetixFitt para tu acceso.
               </p>
 
               {err && (
@@ -164,7 +164,7 @@ export default function RegisterPage(){
 
         {/* Footer */}
         <p className="text-center text-[11px] text-zinc-600 mt-4">
-          EZEQUIEL COACHING © 2026 · Tu mejor versión, cada día
+          KINETIXFITT © 2026 · Tu mejor versión, cada día
         </p>
       </motion.div>
     </div>

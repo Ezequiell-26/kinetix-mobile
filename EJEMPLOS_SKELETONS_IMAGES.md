@@ -546,5 +546,5 @@ https://react.dev/reference/react/Suspense
 ---
 
 **Creado:** 12 septiembre 2026  
-**Para:** Ezequiel Coaching  
+**Para:** KinetixFitt  
 **Estado:** Listo para implementar

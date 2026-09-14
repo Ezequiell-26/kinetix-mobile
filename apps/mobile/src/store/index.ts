@@ -22,7 +22,7 @@ import { z } from 'zod';
 
 // Esquemas de validación Zod
 export const UserSchema = z.object({
-  email: z.string().email('Email inválido').refine(email => email.endsWith('@gmail.com'), 'Solo se permiten correos @gmail.com'),
+  email: z.string().email('Email inválido').refine(email => email.endsWith('@gmail.com') || email.endsWith('@kinetixfitt.com'), 'Solo se permiten correos @gmail.com o @kinetixfitt.com'),
   displayName: z.string().min(2, 'El nombre debe tener al menos 2 caracteres'),
   photoURL: z.string().url().optional(),
   role: z.enum(['client', 'trainer', 'admin']),

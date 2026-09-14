@@ -1,4 +1,4 @@
-# ✅ CHECKLIST DE TESTING FINAL — EZEQUIEL COACHING
+# ✅ CHECKLIST DE TESTING FINAL — KINETIXFITT
 
 **Fecha:** 12 de septiembre de 2026  
 **Versión:** 1.0 (Pre-lanzamiento)  
@@ -224,7 +224,7 @@ Verificar que TODA la app funciona perfectamente en:
 - [ ] Login como trainer
 - [ ] Verificar header
   - [ ] "Panel del Entrenador"
-  - [ ] Marca: EZEQUIEL COACHING
+  - [ ] Marca: KINETIXFITT
   - [ ] Botones "+ Nuevo Cliente" y "Crear Rutina"
 - [ ] Verificar KPIs (4 cards)
   - [ ] Clientes Activos (número real)
@@ -532,7 +532,7 @@ Verificar que TODA la app funciona perfectamente en:
 - [ ] Abrir en Safari (iPhone/iPad)
 - [ ] Tap "Compartir" (ícono cuadrado con flecha)
 - [ ] Tap "Agregar a pantalla de inicio"
-- [ ] Verificar nombre "Ezequiel Coaching"
+- [ ] Verificar nombre "KinetixFitt"
 - [ ] Verificar ícono de la app
 - [ ] Tap en ícono en home screen
 - [ ] App abre en fullscreen (sin barra de Safari)
@@ -551,7 +551,7 @@ Verificar que TODA la app funciona perfectamente en:
 ### Instalación Desktop
 - [ ] Abrir en Chrome/Edge (Windows/Mac)
 - [ ] Ícono "⊕" en barra de direcciones
-- [ ] Click "Instalar Ezequiel Coaching"
+- [ ] Click "Instalar KinetixFitt"
 - [ ] App abre en ventana independiente
 - [ ] Sin barra de navegación del browser
 - [ ] Redimensionable
@@ -811,5 +811,5 @@ Una vez completado este checklist:
 ---
 
 **Creado:** 12 septiembre 2026  
-**Para:** Ezequiel Coaching  
+**Para:** KinetixFitt  
 **Versión:** 1.0 Pre-launch

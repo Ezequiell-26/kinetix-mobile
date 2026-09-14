@@ -152,7 +152,7 @@ export function PushNotificationSettings() {
                 
                 <NotificationToggle
                   label="Mensajes del coach"
-                  description="Cuando Ezequiel te envía un mensaje"
+                  description="Cuando tu coach te envía un mensaje"
                   enabled={preferences.coachMessage}
                   onToggle={(v) => updatePreference('coachMessage', v)}
                 />

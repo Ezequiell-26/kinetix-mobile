@@ -1,5 +1,5 @@
 /**
- * Sistema de Rate Limiting Avanzado para EZEQUIEL COACHING
+ * Sistema de Rate Limiting Avanzado para KINETIXFITT
  * Implementación tipo Express Rate Limit con ventanas deslizantes
  */
 

@@ -86,7 +86,7 @@ export function CalorieCalculator(){
             variant="outline"
             className="flex-1 min-h-[44px]"
             onClick={()=>{
-              const html = `<!DOCTYPE html><html lang="es"><head><meta charset="utf-8"><title>Mis macros — EZEQUIEL COACHING</title><style>body{font-family:Arial,sans-serif;max-width:560px;margin:32px auto;padding:0 16px;color:#111}h1{font-size:22px}table{width:100%;border-collapse:collapse;margin:16px 0}td{padding:8px;border-bottom:1px solid #ddd;font-size:15px}td:last-child{text-align:right;font-weight:bold}@media print{button{display:none}}</style></head><body><h1>Mis macros — EZEQUIEL COACHING</h1><table><tr><td>Objetivo</td><td>${result.target} kcal/día</td></tr><tr><td>TMB / TDEE</td><td>${result.bmr} / ${result.tdee} kcal</td></tr><tr><td>Proteína</td><td>${result.protein}g (${result.protein*4} kcal)</td></tr><tr><td>Carbos</td><td>${result.carbs}g (${result.carbs*4} kcal)</td></tr><tr><td>Grasas</td><td>${result.fat}g (${result.fat*9} kcal)</td></tr><tr><td>Agua</td><td>${result.water} ml/día</td></tr><tr><td>IMC</td><td>${result.bmi}</td></tr></table><p>Consulta con Ezequiel para el ajuste fino.</p><button onclick="window.print()">Imprimir / Guardar PDF</button></body></html>`;
+              const html = `<!DOCTYPE html><html lang="es"><head><meta charset="utf-8"><title>Mis macros — KINETIXFITT</title><style>body{font-family:Arial,sans-serif;max-width:560px;margin:32px auto;padding:0 16px;color:#111}h1{font-size:22px}table{width:100%;border-collapse:collapse;margin:16px 0}td{padding:8px;border-bottom:1px solid #ddd;font-size:15px}td:last-child{text-align:right;font-weight:bold}@media print{button{display:none}}</style></head><body><h1>Mis macros — KINETIXFITT</h1><table><tr><td>Objetivo</td><td>${result.target} kcal/día</td></tr><tr><td>TMB / TDEE</td><td>${result.bmr} / ${result.tdee} kcal</td></tr><tr><td>Proteína</td><td>${result.protein}g (${result.protein*4} kcal)</td></tr><tr><td>Carbos</td><td>${result.carbs}g (${result.carbs*4} kcal)</td></tr><tr><td>Grasas</td><td>${result.fat}g (${result.fat*9} kcal)</td></tr><tr><td>Agua</td><td>${result.water} ml/día</td></tr><tr><td>IMC</td><td>${result.bmi}</td></tr></table><p>Consulta con tu coach para el ajuste fino.</p><button onclick="window.print()">Imprimir / Guardar PDF</button></body></html>`;
               downloadFile("mis-macros.html", html, "text/html");
             }}
           >
@@ -99,7 +99,7 @@ export function CalorieCalculator(){
           )}
         </CardContent>
       </Card>
-      <p className="text-xs text-zinc-500 text-center">Fórmula Mifflin-St Jeor • VIP — consulta con Ezequiel para ajuste fino. No reemplaza asesoría médica.</p>
+      <p className="text-xs text-zinc-500 text-center">Fórmula Mifflin-St Jeor • VIP — consulta con KinetixFitt para ajuste fino. No reemplaza asesoría médica.</p>
     </div>
   );
 }

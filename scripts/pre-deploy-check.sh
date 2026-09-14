@@ -1,11 +1,11 @@
 #!/bin/bash
 
-# Script de verificación pre-deploy para Ezequiel Coaching
+# Script de verificación pre-deploy para KinetixFitt
 # Ejecutar antes de hacer deploy a producción
 
 set -e
 
-echo "🔍 Verificación Pre-Deploy - Ezequiel Coaching"
+echo "🔍 Verificación Pre-Deploy - KinetixFitt"
 echo "=============================================="
 echo ""
 

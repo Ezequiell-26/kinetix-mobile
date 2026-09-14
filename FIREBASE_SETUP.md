@@ -1,11 +1,11 @@
-# Configuración de Firebase para EZEQUIEL COACHING
+# Configuración de Firebase para KINETIXFITT
 
 ## Pasos para configurar la autenticación:
 
 ### 1. Crear proyecto en Firebase Console
 1. Ve a https://console.firebase.google.com/
 2. Haz clic en "Agregar proyecto"
-3. Nombre del proyecto: `EZEQUIEL COACHING` (o el que prefieras)
+3. Nombre del proyecto: `KINETIXFITT` (o el que prefieras)
 4. Desactiva Google Analytics (opcional)
 5. Haz clic en "Crear proyecto"
 
@@ -27,7 +27,7 @@
 1. Ve a **Configuración del proyecto** (engranaje ⚙️ junto a Overview)
 2. Baja hasta "Tus apps"
 3. Haz clic en el ícono de web `</>`
-4. Registra la app con el nombre: `EZEQUIEL COACHING Web`
+4. Registra la app con el nombre: `KINETIXFITT Web`
 5. **NO** marques la opción de Firebase Hosting (por ahora)
 6. Haz clic en "Registrar app"
 7. Copia el objeto `firebaseConfig` que aparece

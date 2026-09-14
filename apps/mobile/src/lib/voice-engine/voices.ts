@@ -1,16 +1,16 @@
 /**
  * voice-engine/voices.ts — registro de voces y manifiesto de la voz por defecto.
- * Nuevas grabaciones van a /audio/voices/ezequiel/<categoria>/<clave>.mp3
+ * Nuevas grabaciones van a /audio/voices/kinetixfitt/<categoria>/<clave>.mp3
  * y se declaran acá. Otra voz = otro manifiesto, cero cambios de lógica.
  */
 import type { VoiceManifest } from "./types";
 
 const LEGACY = "/audio";
-const V = "/audio/voices/ezequiel";
+const V = "/audio/voices/kinetixfitt";
 
 export const DEFAULT_VOICE: VoiceManifest = {
-  id: "ezequiel",
-  label: "Ezequiel",
+  id: "kinetixfitt",
+  label: "KinetixFitt",
   phrases: {
     "cuenta-regresiva": `${LEGACY}/narrador-cuenta-regresiva.mp3`,
     arranque: `${LEGACY}/narrador-arranque.mp3`,
@@ -129,7 +129,8 @@ export const RachaTrack = `${LEGACY}/narrador-racha.mp3`;
 export const CheckinTrack = `${LEGACY}/narrador-checkin.mp3`;
 
 export const VOICES: Record<string, VoiceManifest> = {
-  ezequiel: DEFAULT_VOICE,
+  kinetixfitt: DEFAULT_VOICE,
+  ezequiel: DEFAULT_VOICE, // alias histórico
 };
 
 export function getVoice(id: string): VoiceManifest {

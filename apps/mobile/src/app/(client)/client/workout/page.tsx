@@ -30,7 +30,7 @@ export default async function WorkoutListPage(){
             </div>
             <p className="font-bold text-base">No hay datos todavía</p>
             <p className="text-xs text-zinc-500 max-w-sm mx-auto">
-              Aún no tienes un perfil de cliente activo. Contacta a Ezequiel para comenzar.
+              Aún no tienes un perfil de cliente activo. Contacta a tu coach para comenzar.
             </p>
           </CardContent>
         </Card>
@@ -59,7 +59,7 @@ export default async function WorkoutListPage(){
     }
   }) : null;
 
-  // Sin fallback: un atleta sin programa asignado ve el estado "Ezequiel está
+  // Sin fallback: un atleta sin programa asignado ve el estado "KinetixFitt está
   // diseñando tu plan", nunca el primer programa de la base de datos.
   const activeProgram = program;
 
@@ -94,12 +94,12 @@ export default async function WorkoutListPage(){
             <div className="w-12 h-12 rounded-2xl bg-primary/10 border border-primary/20 flex items-center justify-center mx-auto text-primary">
               <Dumbbell size={24} />
             </div>
-            <p className="font-bold text-base">Ezequiel está diseñando tu plan</p>
+            <p className="font-bold text-base">Tu coach está diseñando tu plan</p>
             <p className="text-xs text-zinc-500 max-w-sm mx-auto">
               Tu entrenador está preparando las semanas y ejercicios ideales para tu objetivo. Te notificaremos en cuanto esté listo.
             </p>
             <Link href="/client/messages" className="inline-block mt-2 text-xs font-bold text-primary hover:underline">
-              Escribir a Ezequiel por el chat →
+              Escribir a tu coach por el chat →
             </Link>
           </CardContent>
         </Card>

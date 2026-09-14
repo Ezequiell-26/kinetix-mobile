@@ -1,7 +1,7 @@
 {
-  "name": "EZEQUIEL COACHING",
-  "short_name": "EZEQUIEL COACHING",
-  "description": "Plataforma premium de entrenamiento y coaching fitness EZEQUIEL COACHING",
+  "name": "KINETIXFITT",
+  "short_name": "KINETIXFITT",
+  "description": "Plataforma premium de entrenamiento y coaching fitness KINETIXFITT",
   "start_url": "/login",
   "display": "standalone",
   "background_color": "#0A0F14",

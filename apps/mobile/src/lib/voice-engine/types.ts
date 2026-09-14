@@ -52,7 +52,7 @@ export const DEFAULT_SETTINGS: VoiceSettings = {
   motivation: true,
   restAlerts: true,
   restVerbosity: "standard",
-  voiceId: "ezequiel",
+  voiceId: "kinetixfitt",
 };
 
 /** Unidad mínima reproducible. */

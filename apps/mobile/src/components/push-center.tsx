@@ -25,18 +25,18 @@ export function PushCenter(){
     setEnabled(p==="granted");
     if(p==="granted"){
       // En prod: registrar con OneSignal/FCM y guardar token en /api/push/subscribe
-      try{ new Notification("EZEQUIEL COACHING", {body:"¡Notificaciones activadas! Te aviso de entrenos y check-ins.", icon:"/icons/icon-192.png"}); }catch{}
+      try{ new Notification("KINETIXFITT", {body:"¡Notificaciones activadas! Te aviso de entrenos y check-ins.", icon:"/icons/icon-192.png"}); }catch{}
     }
   }
 
   return (
     <Card className={enabled ? "border-emerald-500/20 bg-emerald-500/5" : "border-zinc-800"}>
-      <CardHeader><CardTitle className="flex items-center gap-2"><Bell size={16} className={enabled?"text-emerald-400":"text-zinc-400"}/> Push Notificaciones <Badge variant={enabled?"accent":"muted"}>{enabled?"Activas":"Inactivas"}</Badge></CardTitle><p className="text-xs text-zinc-500">Recordatorios: entreno hoy, check-in pendiente, mensaje de Ezequiel</p></CardHeader>
+      <CardHeader><CardTitle className="flex items-center gap-2"><Bell size={16} className={enabled?"text-emerald-400":"text-zinc-400"}/> Push Notificaciones <Badge variant={enabled?"accent":"muted"}>{enabled?"Activas":"Inactivas"}</Badge></CardTitle><p className="text-xs text-zinc-500">Recordatorios: entreno hoy, check-in pendiente, mensaje de tu coach</p></CardHeader>
       <CardContent className="space-y-3">
         <div className="grid grid-cols-1 gap-2 text-xs">
           <label className="flex items-center justify-between bg-zinc-900 border border-zinc-800 rounded-xl p-3"><span className="flex items-center gap-2"><Dumbbell size={14} className="text-primary" /> Entreno de hoy — 08:00</span><input type="checkbox" defaultChecked={enabled} className="accent-primary" /></label>
           <label className="flex items-center justify-between bg-zinc-900 border border-zinc-800 rounded-xl p-3"><span className="flex items-center gap-2"><ClipboardCheck size={14} className="text-primary" /> Check-in pendiente — Domingo 20:00</span><input type="checkbox" defaultChecked={enabled} className="accent-primary" /></label>
-          <label className="flex items-center justify-between bg-zinc-900 border border-zinc-800 rounded-xl p-3"><span className="flex items-center gap-2"><MessageCircle size={14} className="text-primary" /> Nuevo mensaje de Ezequiel</span><input type="checkbox" defaultChecked={enabled} className="accent-primary" /></label>
+          <label className="flex items-center justify-between bg-zinc-900 border border-zinc-800 rounded-xl p-3"><span className="flex items-center gap-2"><MessageCircle size={14} className="text-primary" /> Nuevo mensaje de tu coach</span><input type="checkbox" defaultChecked={enabled} className="accent-primary" /></label>
         </div>
         {perm!=="granted" ? (
           <Button variant="accent" className="w-full" onClick={enable}><Bell size={14} className="mr-2"/> Activar notificaciones</Button>

@@ -14,7 +14,7 @@ const ARTICLES=[
 export function EducationHub(){
   return (
     <Card>
-      <CardHeader><CardTitle className="flex items-center gap-2"><BookOpen size={16} className="text-violet-400"/> Educación</CardTitle><p className="text-xs text-zinc-500">Artículos y videos de Ezequiel — sin YouTube, todo en la app</p></CardHeader>
+      <CardHeader><CardTitle className="flex items-center gap-2"><BookOpen size={16} className="text-violet-400"/> Educación</CardTitle><p className="text-xs text-zinc-500">Artículos y videos de KinetixFitt — sin YouTube, todo en la app</p></CardHeader>
       <CardContent className="space-y-2">
         {ARTICLES.map(a=>(
           <a key={a.title} href="/client/resources" className="flex gap-3 p-3 rounded-xl bg-zinc-900 border border-zinc-800 hover:border-zinc-700 transition">

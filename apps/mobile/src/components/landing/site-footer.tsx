@@ -8,7 +8,7 @@ export function SiteFooter() {
           href="/"
           className="font-black text-white min-h-[44px] inline-flex items-center"
         >
-          EZEQUIEL<span className="text-[#34D399]">COACHING</span>
+          KINETIX<span className="text-[#34D399]">FITT</span>
         </Link>
         <nav className="flex flex-wrap justify-center gap-x-4">
           <Link

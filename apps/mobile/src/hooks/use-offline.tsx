@@ -1,5 +1,5 @@
 /**
- * Hook para funcionalidades offline en EZEQUIEL COACHING
+ * Hook para funcionalidades offline en KINETIXFITT
  * Proporciona detección de estado online/offline y cola de acciones pendientes
  */
 
@@ -23,7 +23,7 @@ interface UseOfflineReturn {
   removeQueuedItem: (id: string) => void;
 }
 
-const QUEUE_STORAGE_KEY = 'ezequiel-offline-queue';
+const QUEUE_STORAGE_KEY = 'kinetixfitt-offline-queue';
 
 export function useOffline(): UseOfflineReturn {
   const [isOnline, setIsOnline] = useState(typeof navigator !== 'undefined' ? navigator.onLine : true);

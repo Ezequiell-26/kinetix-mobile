@@ -395,7 +395,7 @@ html.light .bg-\[\#0D1319\]\/90 { background-color: rgba(255,255,255,0.95) !impo
 html.light .bg-\[\#0C131A\] { background-color: #FFFFFF !important; }
 html.light .bg-\[\#0C131A\]\/92 { background-color: rgba(255,255,255,0.95) !important; }
 
-/* VIP Polish — EZEQUIEL COACHING alto nivel */
+/* VIP Polish — KINETIXFITT alto nivel */
 * {
   scrollbar-width: thin;
   scrollbar-color: #27272a #080808;
@@ -466,7 +466,7 @@ html.light .surface-card {
   box-shadow: 0 6px 22px rgba(0,0,0,0.07), 0 0 0 1px rgba(228,228,231,0.7);
 }
 
-/* ===== Sistema visual EZEQUIEL COACHING — cross-platform (Windows/Mac/Android/iOS) ===== */
+/* ===== Sistema visual KINETIXFITT — cross-platform (Windows/Mac/Android/iOS) ===== */
 
 /* Etiqueta de sección: eyebrow 10px uppercase — escaneo en F en 1s */
 .section-eyebrow {
@@ -502,7 +502,7 @@ h1, h2 { text-wrap: balance; }
 /* Aceleración GPU para blur fijo en Windows/Mac de gama media */
 .glass, .cta-sticky { transform: translateZ(0); }
 
-/* ===== Motion system EZEQUIEL COACHING — rápido, físico, consistente =====
+/* ===== Motion system KINETIXFITT — rápido, físico, consistente =====
    Tokens: fast 150ms (feedback), base 250ms (superficies), spring nativo.
    Revive las clases animate-in usadas en drawers/modales sin dependencias. */
 :root {

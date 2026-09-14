@@ -274,7 +274,7 @@ export default function ProgressPage(){
       <div className="flex flex-col sm:flex-row justify-between sm:items-center gap-3">
         <div>
           <h1 className="text-2xl font-display font-bold">Mi Progreso</h1>
-          <p className="text-sm text-zinc-500">Métricas reales — Privado entre vos y Ezequiel</p>
+          <p className="text-sm text-zinc-500">Métricas reales — Privado entre vos y tu coach</p>
         </div>
         <Button
           variant="outline"
@@ -569,7 +569,7 @@ export default function ProgressPage(){
                     <div className="pt-2">
                       <FileUpload type="progress" onUploaded={() => loadData()} label="Subir nueva foto de progreso (privada)" />
                       <p className="text-[11px] text-zinc-500 text-center mt-2">
-                        Tus fotos son estrictamente confidenciales. Solo vos y Ezequiel tienen acceso a ellas.
+                        Tus fotos son estrictamente confidenciales. Solo vos y KinetixFitt tienen acceso a ellas.
                       </p>
                     </div>
                   </CardContent>

@@ -426,7 +426,7 @@ src/app/globals.css                  (actualizado con light mode vars)
 
 ##### ThemeProvider
 ```tsx
-<ThemeProvider defaultTheme="system" storageKey="ezequiel-coaching-theme">
+<ThemeProvider defaultTheme="system" storageKey="kinetixfitt-theme">
   <App />
 </ThemeProvider>
 ```

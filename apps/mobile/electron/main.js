@@ -1,5 +1,5 @@
 /**
- * Electron shell — EZEQUIEL COACHING desktop (Windows/Mac/Linux).
+ * Electron shell — KINETIXFITT desktop (Windows/Mac/Linux).
  *
  * No empaqueta servidor: es un wrapper del deploy de producción
  * (misma sesión/cookie, misma Supabase). En dev apunta a localhost:3001.
@@ -8,7 +8,7 @@ const { app, BrowserWindow, shell } = require("electron");
 const path = require("path");
 
 const APP_URL =
-  process.env.EZEQUIEL_APP_URL ||
+  process.env.KINETIXFITT_APP_URL ||
   (process.env.NODE_ENV === "development"
     ? "http://localhost:3001"
     : "https://kinetixfitt-world-ia.vercel.app");

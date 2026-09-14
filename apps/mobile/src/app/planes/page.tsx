@@ -5,7 +5,7 @@ import { SiteNav } from "@/components/landing/site-nav";
 import { SiteFooter } from "@/components/landing/site-footer";
 
 export const metadata: Metadata = {
-  title: "Planes — EZEQUIEL COACHING",
+  title: "Planes — KINETIXFITT",
   description:
     "Planes mensuales en pesos argentinos, sin permanencia. Elegí el tuyo y empezá hoy.",
 };
@@ -46,7 +46,7 @@ const faqs = [
   },
   {
     q: "¿Cómo pago?",
-    a: "Coordinás el pago con Ezequiel al registrarte. Aceptamos Mercado Pago.",
+    a: "Coordinás el pago con KinetixFitt al registrarte. Aceptamos Mercado Pago.",
   },
   {
     q: "¿Necesito ir a un gimnasio?",

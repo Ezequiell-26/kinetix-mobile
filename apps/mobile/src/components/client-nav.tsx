@@ -19,7 +19,7 @@ export function ClientBottomNav(){
 
   const moreItems: { href: string; icon: LucideIcon; label: string; desc: string; badge?: string }[] = [
     { href: "/client/achievements", icon: Trophy, label: "Logros & XP", desc: "Nivel, medallas y desafíos", badge: "NUEVO" },
-    { href: "/client/messages", icon: MessageCircle, label: "Mensajes", desc: "Chat directo con Ezequiel" },
+    { href: "/client/messages", icon: MessageCircle, label: "Mensajes", desc: "Chat directo con tu coach" },
     { href: "/client/checkins", icon: ClipboardCheck, label: "Check-ins", desc: "Tu reporte semanal" },
     { href: "/client/timers", icon: Timer, label: "Cronómetros", desc: "Tabata, EMOM e HIIT", badge: "PRO" },
     { href: "/client/history", icon: Clock, label: "Historial", desc: "Todas tus sesiones" },
@@ -130,7 +130,7 @@ export function ClientTopBar({ name }: { name?: string }){
             </svg>
           </div>
           <div className="leading-none">
-            <span className="font-display font-bold text-white text-sm tracking-tight block">EZEQUIEL COACHING</span>
+            <span className="font-display font-bold text-white text-sm tracking-tight block">KINETIXFITT</span>
             <span className="text-[9px] text-zinc-500 font-bold tracking-[0.18em] uppercase hidden sm:block mt-0.5">Tu mejor versión, cada día</span>
           </div>
         </Link>

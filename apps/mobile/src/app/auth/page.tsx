@@ -90,8 +90,8 @@ export default function AuthPage() {
       return;
     }
 
-    if (!email.endsWith('@gmail.com')) {
-      setError('Solo se permiten correos electrónicos @gmail.com oficiales de Google.');
+    if (!email.endsWith('@gmail.com') && !email.endsWith('@kinetixfitt.com')) {
+      setError('Solo se permiten correos electrónicos @gmail.com o @kinetixfitt.com.');
       setLoading(false);
       return;
     }
@@ -240,7 +240,7 @@ export default function AuthPage() {
               <button
                 type="button"
                 onClick={() => {
-                  setEmail("ezequiel@ezequielcoaching.com");
+                  setEmail("ezequiel@kinetixfitt.com");
                   setPassword("Admin123!");
                 }}
                 className="group text-[11px] font-bold px-4 py-2.5 rounded-xl bg-gradient-to-br from-zinc-900 to-zinc-950 text-zinc-300 hover:text-white hover:from-zinc-800 hover:to-zinc-900 border border-zinc-800 hover:border-primary/30 min-h-[40px] transition-all flex items-center gap-2 shadow-lg hover:shadow-primary/10"
@@ -408,7 +408,7 @@ export default function AuthPage() {
 
         {/* Footer */}
         <p className="text-center text-[11px] text-zinc-600 mt-6">
-          EZEQUIEL COACHING © 2026 · Tu mejor versión, cada día
+          KINETIXFITT © 2026 · Tu mejor versión, cada día
         </p>
       </motion.div>
     </div>

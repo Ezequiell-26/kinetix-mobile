@@ -1,8 +1,8 @@
-# Documentación de EZEQUIEL COACHING (KinetixFit)
+# Documentación de KINETIXFITT (KinetixFit)
 
 ## 📋 Descripción del Proyecto
 
-EZEQUIEL COACHING es una plataforma integral de fitness y nutrición que conecta clientes con entrenadores personales. Ofrece seguimiento de entrenamientos, planes nutricionales, mensajería directa y análisis de progreso con IA.
+KINETIXFITT es una plataforma integral de fitness y nutrición que conecta clientes con entrenadores personales. Ofrece seguimiento de entrenamientos, planes nutricionales, mensajería directa y análisis de progreso con IA.
 
 ## 🏗️ Arquitectura del Proyecto
 
@@ -217,12 +217,12 @@ Los textos se cargan dinámicamente según la preferencia del usuario.
 
 ## 📄 Licencia
 
-Este proyecto es propiedad de EZEQUIEL COACHING. Todos los derechos reservados.
+Este proyecto es propiedad de KINETIXFITT. Todos los derechos reservados.
 
 ## 📞 Soporte
 
 Para soporte técnico o consultas:
-- Email: soporte@ezequielcoaching.com
+- Email: soporte@kinetixfitt.com
 - Documentación: `/docs` folder
 - Issues: GitHub Issues
 

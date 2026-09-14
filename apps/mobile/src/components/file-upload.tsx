@@ -42,7 +42,7 @@ export function FileUpload({ type="progress", onUploaded, accept="image/*", labe
         ) : (
           <>
             <p>{uploading ? "Subiendo..." : label}</p>
-            <p className="text-xs mt-1">Privadas • solo vos y Ezequiel • máx 5MB</p>
+            <p className="text-xs mt-1">Privadas • solo vos y tu coach • máx 5MB</p>
           </>
         )}
       </div>

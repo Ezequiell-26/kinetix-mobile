@@ -1,4 +1,4 @@
-# Configuración de Supabase para EZEQUIEL COACHING
+# Configuración de Supabase para KINETIXFITT
 
 ## 1. Crear Proyecto en Supabase
 

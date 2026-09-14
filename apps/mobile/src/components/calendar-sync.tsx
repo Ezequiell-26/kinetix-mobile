@@ -33,11 +33,11 @@ export function CalendarSync(){
           </div>
         ))}
         <Button variant="outline" className="w-full" onClick={()=>{
-          const ical="BEGIN:VCALENDAR\nVERSION:2.0\nBEGIN:VEVENT\nSUMMARY:Entreno EZEQUIEL COACHING - Tren Superior\nDTSTART:20260915T140000Z\nDURATION:PT60M\nDESCRIPTION:Press Banca 4x8 RIR2\nEND:VEVENT\nEND:VCALENDAR";
+          const ical="BEGIN:VCALENDAR\nVERSION:2.0\nBEGIN:VEVENT\nSUMMARY:Entreno KINETIXFITT - Tren Superior\nDTSTART:20260915T140000Z\nDURATION:PT60M\nDESCRIPTION:Press Banca 4x8 RIR2\nEND:VEVENT\nEND:VCALENDAR";
           const blob=new Blob([ical],{type:"text/calendar"});
           const url=URL.createObjectURL(blob);
           const a=document.createElement("a");
-          a.href=url; a.download="ezequiel_entrenos.ics"; a.click();
+          a.href=url; a.download="kinetixfitt_entrenos.ics"; a.click();
         }}><Smartphone size={14} className="mr-2"/> Descargar .ics (todos)</Button>
       </CardContent>
     </Card>

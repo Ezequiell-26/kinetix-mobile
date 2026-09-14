@@ -13,9 +13,9 @@ import { SiteNav } from "@/components/landing/site-nav";
 import { SiteFooter } from "@/components/landing/site-footer";
 
 export const metadata: Metadata = {
-  title: "Descargar la app — EZEQUIEL COACHING",
+  title: "Descargar la app — KINETIXFITT",
   description:
-    "Instalá EZEQUIEL COACHING en tu celular o compu. Una sola cuenta en todos lados.",
+    "Instalá KINETIXFITT en tu celular o compu. Una sola cuenta en todos lados.",
 };
 
 // Se actualizan solos con cada Release (workflow Native).

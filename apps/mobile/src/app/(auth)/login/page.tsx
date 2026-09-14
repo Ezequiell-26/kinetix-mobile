@@ -79,7 +79,7 @@ export default function LoginPage() {
             </motion.div>
 
             <div className="space-y-1">
-              <CardTitle className="text-2xl tracking-tight">EZEQUIEL COACHING</CardTitle>
+              <CardTitle className="text-2xl tracking-tight">KINETIXFITT</CardTitle>
               <CardDesc>Entrenamiento personalizado online</CardDesc>
             </div>
 
@@ -97,7 +97,7 @@ export default function LoginPage() {
                 <Star size={12} fill="currentColor" />
                 <Star size={12} fill="currentColor" />
               </span>
-              Atletas entrenando cada semana con Ezequiel
+              Atletas entrenando cada semana con KinetixFitt
             </motion.div>
 
             {/* Demo accounts */}
@@ -105,7 +105,7 @@ export default function LoginPage() {
               <button
                 type="button"
                 onClick={() => {
-                  setEmail("ezequiel@ezequielcoaching.com");
+                  setEmail("ezequiel@kinetixfitt.com");
                   setPassword("Admin123!");
                 }}
                 className="group text-[11px] font-bold px-3.5 py-2 rounded-full bg-zinc-900/80 text-zinc-400 hover:text-white hover:bg-zinc-800 border border-zinc-800 hover:border-zinc-700 min-h-[36px] transition-all flex items-center gap-1.5"
@@ -222,7 +222,7 @@ export default function LoginPage() {
 
         {/* Footer */}
         <p className="text-center text-[11px] text-zinc-600 mt-4">
-          EZEQUIEL COACHING © 2026 · Tu mejor versión, cada día
+          KINETIXFITT © 2026 · Tu mejor versión, cada día
         </p>
       </motion.div>
     </div>

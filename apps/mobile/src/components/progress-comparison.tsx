@@ -1,5 +1,5 @@
 /**
- * EZEQUIEL COACHING - Progress Comparison Components
+ * KINETIXFITT - Progress Comparison Components
  * Componentes de UI para visualizar análisis de progreso y comparaciones
  */
 

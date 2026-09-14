@@ -92,7 +92,7 @@ const CATEGORIES = [
     id: "educacion",
     label: "Educación",
     icon: BookOpen,
-    intro: "Artículos y videos de Ezequiel, sin salir de la app.",
+    intro: "Artículos y videos de KinetixFitt, sin salir de la app.",
     tools: [
       { label: "Wiki de entrenamiento", desc: "Técnica, nutrición y recovery en piezas cortas", el: <EducationHub /> },
     ],
@@ -107,7 +107,7 @@ const CATEGORIES = [
       { label: "Notificaciones Push", desc: "Recordatorios de entreno, check-in y mensajes", el: <PushCenter /> },
       { label: "Sync de calendarios", desc: "Tus entrenos en Google/Apple Calendar", el: <CalendarSync /> },
       { label: "Calendario premium", desc: "Vista mensual de tu planificación", el: <PremiumCalendar /> },
-      { label: "Bienvenida de Ezequiel", desc: "Video + test de movimiento inicial", el: <OnboardingVideo /> },
+      { label: "Bienvenida de KinetixFitt", desc: "Video + test de movimiento inicial", el: <OnboardingVideo /> },
     ],
   },
 ] as const;

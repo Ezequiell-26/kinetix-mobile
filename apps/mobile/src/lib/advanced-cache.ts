@@ -1,5 +1,5 @@
 /**
- * Sistema de Caché Avanzado para EZEQUIEL COACHING
+ * Sistema de Caché Avanzado para KINETIXFITT
  * Implementación tipo Redis con soporte para TTL, invalidación y persistencia
  */
 
@@ -21,7 +21,7 @@ export class AdvancedCache {
   private cache: Map<string, CacheEntry<any>>;
   private max_size: number;
   private stats: CacheStats;
-  private persistence_key: string = 'ezequiel_coaching_cache';
+  private persistence_key: string = 'kinetixfitt_cache';
   private tags_index: Map<string, Set<string>>;
 
   constructor(maxSize: number = 1000) {

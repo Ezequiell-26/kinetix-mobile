@@ -24,7 +24,7 @@ export default function ClientSettings(){
       <Card><CardHeader><CardTitle>Notificaciones</CardTitle></CardHeader>
         <CardContent className="space-y-3 text-sm">
           <label className="flex justify-between p-3 rounded-xl bg-zinc-900 border border-zinc-800"><span>Nuevo entrenamiento</span><input type="checkbox" defaultChecked /></label>
-          <label className="flex justify-between p-3 rounded-xl bg-zinc-900 border border-zinc-800"><span>Mensaje de Ezequiel</span><input type="checkbox" defaultChecked /></label>
+          <label className="flex justify-between p-3 rounded-xl bg-zinc-900 border border-zinc-800"><span>Mensaje de tu coach</span><input type="checkbox" defaultChecked /></label>
           <label className="flex justify-between p-3 rounded-xl bg-zinc-900 border border-zinc-800"><span>Recordatorio de entrenamiento</span><input type="checkbox" defaultChecked /></label>
           <label className="flex justify-between p-3 rounded-xl bg-zinc-900 border border-zinc-800"><span>Check-in pendiente</span><input type="checkbox" defaultChecked /></label>
         </CardContent>

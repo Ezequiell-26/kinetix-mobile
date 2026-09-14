@@ -1,5 +1,5 @@
 /**
- * Sistema de internacionalización (i18n) para EZEQUIEL COACHING
+ * Sistema de internacionalización (i18n) para KINETIXFITT
  * Soporte multi-idioma: español (es), inglés (en), portugués (pt)
  */
 
@@ -373,7 +373,7 @@ export interface Translation {
 export const translations: Record<Locale, Translation> = {
   es: {
     common: {
-      app: 'EZEQUIEL COACHING',
+      app: 'KINETIXFITT',
       loading: 'Cargando...',
       error: 'Error',
       save: 'Guardar',
@@ -427,7 +427,7 @@ export const translations: Record<Locale, Translation> = {
       yearsAgo: 'hace {years} años',
     },
     auth: {
-      title: 'EZEQUIEL COACHING',
+      title: 'KINETIXFITT',
       subtitle: 'Entrenamiento personalizado online',
       emailLabel: 'Email',
       emailPlaceholder: 'tu@email.com',
@@ -663,7 +663,7 @@ export const translations: Record<Locale, Translation> = {
       cancelSubscription: 'Cancelar suscripción',
     },
     onboarding: {
-      welcome: 'Bienvenido a EZEQUIEL COACHING',
+      welcome: 'Bienvenido a KINETIXFITT',
       step1: 'Paso 1/5',
       step2: 'Paso 2/5',
       step3: 'Paso 3/5',
@@ -697,7 +697,7 @@ export const translations: Record<Locale, Translation> = {
       },
       ready: '¡Listo!',
       profileReady: '¡Tu perfil está listo!',
-      coachAssigned: 'Ezequiel te asignará tu primer programa',
+      coachAssigned: 'Tu coach te asignará tu primer programa',
       goToWorkout: 'Ir a mi entreno',
     },
     errors: {
@@ -737,7 +737,7 @@ export const translations: Record<Locale, Translation> = {
   },
   en: {
     common: {
-      app: 'EZEQUIEL COACHING',
+      app: 'KINETIXFITT',
       loading: 'Loading...',
       error: 'Error',
       save: 'Save',
@@ -791,7 +791,7 @@ export const translations: Record<Locale, Translation> = {
       yearsAgo: '{years} years ago',
     },
     auth: {
-      title: 'EZEQUIEL COACHING',
+      title: 'KINETIXFITT',
       subtitle: 'Personalized online training',
       emailLabel: 'Email',
       emailPlaceholder: 'your@email.com',
@@ -1027,7 +1027,7 @@ export const translations: Record<Locale, Translation> = {
       cancelSubscription: 'Cancel Subscription',
     },
     onboarding: {
-      welcome: 'Welcome to EZEQUIEL COACHING',
+      welcome: 'Welcome to KINETIXFITT',
       step1: 'Step 1/5',
       step2: 'Step 2/5',
       step3: 'Step 3/5',
@@ -1061,7 +1061,7 @@ export const translations: Record<Locale, Translation> = {
       },
       ready: "You're Ready!",
       profileReady: 'Your profile is ready!',
-      coachAssigned: 'Ezequiel will assign your first program',
+      coachAssigned: 'Your coach will assign your first program',
       goToWorkout: 'Go to My Workout',
     },
     errors: {
@@ -1101,7 +1101,7 @@ export const translations: Record<Locale, Translation> = {
   },
   pt: {
     common: {
-      app: 'EZEQUIEL COACHING',
+      app: 'KINETIXFITT',
       loading: 'Carregando...',
       error: 'Erro',
       save: 'Salvar',
@@ -1155,7 +1155,7 @@ export const translations: Record<Locale, Translation> = {
       yearsAgo: 'há {years} anos',
     },
     auth: {
-      title: 'EZEQUIEL COACHING',
+      title: 'KINETIXFITT',
       subtitle: 'Treinamento personalizado online',
       emailLabel: 'Email',
       emailPlaceholder: 'seu@email.com',
@@ -1391,7 +1391,7 @@ export const translations: Record<Locale, Translation> = {
       cancelSubscription: 'Cancelar assinatura',
     },
     onboarding: {
-      welcome: 'Bem-vindo ao EZEQUIEL COACHING',
+      welcome: 'Bem-vindo ao KINETIXFITT',
       step1: 'Passo 1/5',
       step2: 'Passo 2/5',
       step3: 'Passo 3/5',
@@ -1425,7 +1425,7 @@ export const translations: Record<Locale, Translation> = {
       },
       ready: 'Você está pronto!',
       profileReady: 'Seu perfil está pronto!',
-      coachAssigned: 'Ezequiel atribuirá seu primeiro programa',
+      coachAssigned: 'Tu coach atribuirá seu primeiro programa',
       goToWorkout: 'Ir para meu treino',
     },
     errors: {

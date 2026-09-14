@@ -16,7 +16,7 @@ export function OnboardingFlow({ onComplete }:{ onComplete?: ()=>void }){
     <Card className="border-primary/20 bg-gradient-to-br from-primary/5 via-zinc-900 to-zinc-900">
       <CardContent className="pt-6 text-center space-y-4">
         <div className="w-16 h-16 rounded-2xl bg-primary flex items-center justify-center font-black text-black text-xl mx-auto">E</div>
-        <div><h2 className="text-xl font-black">Bienvenido a EZEQUIEL COACHING</h2><p className="text-xs text-zinc-500">Tu transformación empieza hoy. 5 pasos, 2 minutos.</p></div>
+        <div><h2 className="text-xl font-black">Bienvenido a KINETIXFITT</h2><p className="text-xs text-zinc-500">Tu transformación empieza hoy. 5 pasos, 2 minutos.</p></div>
         <Button variant="accent" className="w-full h-12 font-black" onClick={()=>setStep(2)}>Comenzar →</Button>
       </CardContent>
     </Card>
@@ -58,7 +58,7 @@ export function OnboardingFlow({ onComplete }:{ onComplete?: ()=>void }){
     <Card className="border-emerald-500/20 bg-emerald-500/5">
       <CardContent className="pt-6 text-center space-y-4">
         <div className="w-12 h-12 rounded-full bg-emerald-500 flex items-center justify-center text-white mx-auto"><Check size={20}/></div>
-        <div><h2 className="font-black">¡Tu perfil está listo!</h2><p className="text-xs text-zinc-500">{goal} • {days} días • {place} • Ezequiel te asignará tu primer programa</p></div>
+        <div><h2 className="font-black">¡Tu perfil está listo!</h2><p className="text-xs text-zinc-500">{goal} • {days} días • {place} • Tu coach te asignará tu primer programa</p></div>
         <Button variant="accent" className="w-full" onClick={()=>onComplete?.()}>Ir a mi entreno →</Button>
         <p className="text-[11px] text-zinc-600">Paso 5/5 — onboarding completo</p>
       </CardContent>

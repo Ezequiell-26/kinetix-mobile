@@ -123,7 +123,7 @@ export default function ClientMessagesPage(){
             <span className="absolute bottom-0 right-0 w-3 h-3 rounded-full bg-emerald-400 ring-2 ring-zinc-950" />
           </div>
           <div className="flex-1 min-w-0">
-            <p className="font-display font-bold text-[15px] text-white leading-tight tracking-tight">Ezequiel</p>
+            <p className="font-display font-bold text-[15px] text-white leading-tight tracking-tight">KinetixFitt</p>
             <p className="text-[11px] text-emerald-400/90 font-medium">En línea • responde en el día</p>
           </div>
         </div>
@@ -145,7 +145,7 @@ export default function ClientMessagesPage(){
           {msgs.length === 0 ? (
             <div className="text-center pt-14 pb-8 space-y-3 px-6">
               <div className="w-16 h-16 rounded-full bg-primary flex items-center justify-center mx-auto font-display font-black text-black text-2xl ring-4 ring-primary/20">E</div>
-              <p className="font-display font-bold text-white text-lg tracking-tight">Ezequiel</p>
+              <p className="font-display font-bold text-white text-lg tracking-tight">KinetixFitt</p>
               <p className="text-[13px] text-zinc-400 max-w-[280px] mx-auto leading-relaxed">Tu canal privado con tu entrenador. Dudas, videos de técnica, cómo te sentiste — todo acá.</p>
               <p className="inline-block text-[11px] font-semibold text-zinc-500 bg-white/[0.05] border border-white/[0.07] rounded-full px-3 py-1.5">🔒 Solo entre ustedes dos</p>
             </div>

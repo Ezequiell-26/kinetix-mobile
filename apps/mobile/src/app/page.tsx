@@ -21,7 +21,7 @@ export default async function Home() {
     {
       icon: ClipboardList,
       title: "Programa personalizado",
-      desc: "Tu plan armado por Ezequiel según tu objetivo, días y lugar de entreno.",
+      desc: "Tu plan armado por KinetixFitt según tu objetivo, días y lugar de entreno.",
     },
     {
       icon: Dumbbell,
@@ -137,7 +137,7 @@ export default async function Home() {
           <ol className="mt-8 grid sm:grid-cols-3 gap-4">
             {[
               ["1", "Creá tu cuenta", "Registrate gratis en menos de un minuto."],
-              ["2", "Recibí tu programa", "Ezequiel arma tu plan según tu objetivo."],
+              ["2", "Recibí tu programa", "KinetixFitt arma tu plan según tu objetivo."],
               ["3", "Entrená y progresá", "Registrá, medí y ajustamos juntos."],
             ].map(([n, t, d]) => (
               <li key={n} className="rounded-2xl border border-zinc-800 p-5">

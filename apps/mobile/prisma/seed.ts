@@ -23,7 +23,7 @@ async function main(){
   await prisma.trainerProfile.deleteMany();
   await prisma.user.deleteMany();
 
-  const trainer = await prisma.user.create({data:{email:"ezequiel@ezequielcoaching.com", password:hashedTrainer, name:"Ezequiel", role:"TRAINER"}});
+  const trainer = await prisma.user.create({data:{email:"ezequiel@kinetixfitt.com", password:hashedTrainer, name:"KinetixFitt", role:"TRAINER"}});
   await prisma.trainerProfile.create({data:{userId:trainer.id, bio:"Coach certificado • 8 años transformando físicos", specialty:"Hipertrofia & Recomposición"}});
 
   // Carga desde Free Exercise DB (Unlicense, 876 ejercicios) - top 50 diversos
@@ -46,7 +46,7 @@ async function main(){
   const exercises = [];
   for(const e of exercisesData){ const ex = await prisma.exercise.create({data:e}); exercises.push(ex); }
 
-  const program = await prisma.program.create({data:{name:"Hipertrofia 12 Semanas", description:"Programa insignia EZEQUIEL COACHING — 4 días, progresión ondulante, RIR controlado.", durationWeeks:12, frequency:4}});
+  const program = await prisma.program.create({data:{name:"Hipertrofia 12 Semanas", description:"Programa insignia KINETIXFITT — 4 días, progresión ondulante, RIR controlado.", durationWeeks:12, frequency:4}});
   for(let w=1; w<=4; w++){
     const week = await prisma.programWeek.create({data:{programId:program.id, weekNumber:w}});
     const workouts = [

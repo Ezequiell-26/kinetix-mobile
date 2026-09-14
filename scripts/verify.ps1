@@ -1,5 +1,5 @@
 # Script simple de verificacion multiplataforma
-Write-Host "`n=== VERIFICACION EZEQUIEL COACHING ===`n" -ForegroundColor Cyan
+Write-Host "`n=== VERIFICACION KINETIXFITT ===`n" -ForegroundColor Cyan
 
 $checks = @{
     "Node.js instalado" = { Test-Command "node" }

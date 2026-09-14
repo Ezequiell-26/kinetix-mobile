@@ -1,4 +1,4 @@
-# DESIGN_SYSTEM.md — FitSync Premium (EZEQUIEL COACHING)
+# DESIGN_SYSTEM.md — FitSync Premium (KINETIXFITT)
 
 Filosofía: **completa por dentro, simple por fuera.** Un solo sistema de tokens; ningún componente define colores propios.
 

@@ -1,4 +1,4 @@
-# 📱💻🖥️ PREVIEW MULTIPLATAFORMA — EZEQUIEL COACHING
+# 📱💻🖥️ PREVIEW MULTIPLATAFORMA — KINETIXFITT
 
 **Fecha:** 12 de septiembre de 2026  
 **Estado:** App lista para producción en todos los dispositivos  
@@ -8,7 +8,7 @@
 
 ## 🎯 RESUMEN EJECUTIVO
 
-**EZEQUIEL COACHING** funciona perfectamente en **todos los dispositivos**:
+**KINETIXFITT** funciona perfectamente en **todos los dispositivos**:
 - ✅ **Móvil** (iOS/Android) — Responsive design optimizado touch-first
 - ✅ **Tablet** (iPad/Android tablets) — Layout adaptativo con grids optimizados
 - ✅ **Desktop** (Windows/Mac/Linux) — Interfaz completa con sidebars y multi-columna
@@ -41,7 +41,7 @@ xl:  1280px  → Desktops
 
 ```
 ┌─────────────────────────────────┐
-│ ⚡ EZEQUIEL COACHING           │
+│ ⚡ KINETIXFITT           │
 │                                 │
 │ ¡Hola, [Nombre]!               │
 │ Hoy es un gran día para ser    │
@@ -192,7 +192,7 @@ xl:  1280px  → Desktops
 
 ```
 ┌────────────────────────────────────────────────────────────┐
-│  EZEQUIEL COACHING              [Más] [Profile]            │
+│  KINETIXFITT              [Más] [Profile]            │
 ├────────────────────────────────────────────────────────────┤
 │                                                            │
 │  ¡Hola, [Nombre]!                                         │
@@ -255,7 +255,7 @@ xl:  1280px  → Desktops
 
 ```
 ┌────────────────────────────────────────────────────────────────────────────────┐
-│  [☰] EZEQUIEL COACHING                     [🔍] [🔔] [Profile] [Settings]     │
+│  [☰] KINETIXFITT                     [🔍] [🔔] [Profile] [Settings]     │
 ├────────────────────────────────────────────────────────────────────────────────┤
 │ [🏠 Inicio] [💪 Entrenar] [🍎 Nutrición] [📊 Progreso] [🛠️ Herramientas]     │
 ├────────────────────────────────────────────────────────────────────────────────┤
@@ -349,11 +349,11 @@ xl:  1280px  → Desktops
 
 ```
 ┌────────────────────────────────────────────────────────────────────────────────┐
-│  EZEQUIEL COACHING                                    [🔔] [Profile] [Salir]  │
+│  KINETIXFITT                                    [🔔] [Profile] [Salir]  │
 │                                                                                │
 │  ┌─────────────────┐                                                          │
 │  │ 🏠 Panel         │ PANEL DEL ENTRENADOR                                    │
-│  │ 👥 Clientes      │ Resumen en tiempo real · Marca: EZEQUIEL COACHING       │
+│  │ 👥 Clientes      │ Resumen en tiempo real · Marca: KINETIXFITT       │
 │  │ 💬 Mensajes      │                                                          │
 │  │ 📋 Check-ins     │ [+ Nuevo Cliente]  [📝 Crear Rutina]  [📊 Analytics]   │
 │  │ 💪 Rutinas       │                                                          │
@@ -433,7 +433,7 @@ xl:  1280px  → Desktops
 ```
 1. Abrir en Chrome/Edge
 2. Clic en ícono "⊕" en barra de direcciones
-3. "Instalar Ezequiel Coaching"
+3. "Instalar KinetixFitt"
 4. App se abre en ventana independiente
 ```
 
@@ -699,7 +699,7 @@ Gap entre cards:
 
 ## 🎉 RESULTADO FINAL
 
-**EZEQUIEL COACHING es una app moderna, rápida y hermosa en CUALQUIER dispositivo:**
+**KINETIXFITT es una app moderna, rápida y hermosa en CUALQUIER dispositivo:**
 
 ✅ **Móvil:** Experiencia nativa, fluida, touch-optimized  
 ✅ **Tablet:** Balance perfecto de información y usabilidad  
@@ -712,4 +712,4 @@ Gap entre cards:
 
 **Documentado:** 12 de septiembre de 2026  
 **Por:** Kiro AI  
-**Para:** Ezequiel Coaching Platform
+**Para:** KinetixFitt Platform

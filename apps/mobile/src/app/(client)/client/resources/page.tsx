@@ -15,7 +15,7 @@ export default function ResourcesPage(){
   return (
     <div className="space-y-4">
       <div className="flex justify-between items-start">
-        <div><h1 className="text-2xl font-display font-bold">Recursos VIP</h1><p className="text-sm text-zinc-500">Videos, guías y e-books exclusivos de Ezequiel</p></div>
+        <div><h1 className="text-2xl font-display font-bold">Recursos VIP</h1><p className="text-sm text-zinc-500">Videos, guías y e-books exclusivos de KinetixFitt</p></div>
         <Badge variant="accent">VIP</Badge>
       </div>
 
@@ -47,7 +47,7 @@ export default function ResourcesPage(){
       <Card>
         <CardHeader><CardTitle>¿Necesitás ayuda?</CardTitle></CardHeader>
         <CardContent className="flex gap-2">
-          <Link href="/client/messages" className="flex-1"><Button variant="accent" className="w-full">Chatear con Ezequiel</Button></Link>
+          <Link href="/client/messages" className="flex-1"><Button variant="accent" className="w-full">Chatear con tu coach</Button></Link>
           <a href="https://wa.me/5490000000000" target="_blank" className="flex-1"><Button variant="outline" className="w-full">WhatsApp</Button></a>
         </CardContent>
       </Card>

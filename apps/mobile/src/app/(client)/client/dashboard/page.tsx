@@ -69,7 +69,7 @@ export default async function ClientDashboardPage() {
     return (
       <div className="space-y-8 pt-4">
         <header className="space-y-2">
-          <p className="text-[10px] font-bold tracking-[0.2em] text-zinc-500 uppercase">Ezequiel Coaching</p>
+          <p className="text-[10px] font-bold tracking-[0.2em] text-zinc-500 uppercase">KinetixFitt</p>
           <h1 className="text-4xl font-display font-black text-white tracking-tight">Hola, {firstName}</h1>
           <p className="text-sm text-zinc-400">Bienvenido a tu equipo de entrenamiento.</p>
         </header>
@@ -79,13 +79,13 @@ export default async function ClientDashboardPage() {
           </div>
           <p className="font-display font-bold text-lg text-white">Tu cuenta está en preparación</p>
           <p className="text-sm text-zinc-500 max-w-sm mx-auto">
-            Ezequiel está configurando tu ficha de atleta y tu primer programa de entrenamiento.
+            Tu coach está configurando tu ficha de atleta y tu primer programa de entrenamiento.
           </p>
           <Link
             href="/client/messages"
             className="inline-flex items-center justify-center font-black h-12 px-6 rounded-xl bg-primary text-black hover:brightness-110 transition"
           >
-            Escribir a Ezequiel →
+            Escribir a tu coach →
           </Link>
         </div>
       </div>
@@ -97,7 +97,7 @@ export default async function ClientDashboardPage() {
   const startOfToday = new Date(now.getFullYear(), now.getMonth(), now.getDate());
 
   // Carga paralela. Sin fallback: un atleta sin programa asignado ve el estado
-  // "Ezequiel está diseñando tu plan", nunca el primer programa de la base.
+  // "Tu coach está diseñando tu plan", nunca el primer programa de la base.
   const [
     program,
     todayWorkoutLog,
@@ -407,7 +407,7 @@ export default async function ClientDashboardPage() {
                 <div className="w-14 h-14 rounded-2xl bg-primary/10 border border-primary/20 flex items-center justify-center text-primary">
                   <Dumbbell size={26} />
                 </div>
-                <p className="font-display font-black text-2xl text-white">Ezequiel está diseñando tu plan</p>
+                <p className="font-display font-black text-2xl text-white">Tu coach está diseñando tu plan</p>
                 <p className="text-sm text-zinc-500 max-w-xs">
                   Está preparando las semanas y ejercicios ideales para tu objetivo. Te avisa en cuanto esté listo.
                 </p>
@@ -516,8 +516,8 @@ export default async function ClientDashboardPage() {
               </p>
               <p className="text-xs text-zinc-500 truncate mt-0.5">
                 {latestCheckin
-                  ? `Último: ${new Date(latestCheckin.date).toLocaleDateString("es-AR", { day: "numeric", month: "short" })} · ${latestCheckin.reviewed ? "revisado por Ezequiel" : "en revisión"}`
-                  : "Contale a Ezequiel cómo vino tu semana"}
+                  ? `Último: ${new Date(latestCheckin.date).toLocaleDateString("es-AR", { day: "numeric", month: "short" })} · ${latestCheckin.reviewed ? "revisado por tu coach" : "en revisión"}`
+                  : "Contale a tu coach cómo vino tu semana"}
               </p>
             </div>
             <ArrowRight size={16} className="text-zinc-600 group-hover:text-primary group-hover:translate-x-0.5 transition-all shrink-0" />
@@ -532,7 +532,7 @@ export default async function ClientDashboardPage() {
                 E
               </div>
               <div className="flex-1 min-w-0">
-                <p className="font-bold text-sm text-white">Mensaje de Ezequiel</p>
+                <p className="font-bold text-sm text-white">Mensaje de tu coach</p>
                 <p className="text-xs text-zinc-500 truncate mt-0.5 italic">
                   &quot;{latestMessage.content}&quot;
                 </p>
