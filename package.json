@@ -1,0 +1,43 @@
+{
+  "name": "kinetix",
+  "version": "1.0.0",
+  "description": "Kinetix - Unified Platform for fitness coaching (mobile app + web dashboard)",
+  "private": true,
+  "type": "module",
+  "workspaces": [
+    "apps/mobile",
+    "packages/shared",
+    "packages/ai-models",
+    "packages/core",
+    "packages/native-modules"
+  ],
+  "scripts": {
+    "dev": "npm run dev --workspaces --if-present",
+    "build": "npm run build --workspaces --if-present",
+    "test": "npm run test --workspaces --if-present",
+    "lint": "npm run lint --workspaces --if-present",
+    "typecheck": "npm run typecheck --workspaces --if-present",
+    "format": "npm run format --workspaces --if-present",
+    "mobile": "npm -w apps/mobile run dev",
+    "mobile:build": "npm -w apps/mobile run build",
+    "clean": "npm run clean --workspaces && rm -rf node_modules .turbo"
+  },
+  "devDependencies": {
+    "@radix-ui/react-checkbox": "^1.3.11",
+    "@tanstack/react-table": "^8.21.3",
+    "typescript": "^5.3.3"
+  },
+  "engines": {
+    "node": ">=18.0.0",
+    "npm": ">=9.0.0"
+  },
+  "dependencies": {
+    "@supabase/ssr": "^0.12.7",
+    "@supabase/supabase-js": "^2.109.0",
+    "class-variance-authority": "^0.7.1",
+    "clsx": "^2.1.1",
+    "lucide-react": "^1.45.0",
+    "recharts": "^3.10.1",
+    "tailwind-merge": "^3.7.0"
+  }
+}

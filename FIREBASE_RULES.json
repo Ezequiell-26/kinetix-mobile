@@ -1,0 +1,150 @@
+# Reglas de Seguridad para Firebase Firestore
+
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    
+    // Función auxiliar para verificar si el usuario está autenticado
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+    
+    // Función para verificar si el usuario es el dueño del recurso
+    function isOwner(userId) {
+      return isAuthenticated() && request.auth.uid == userId;
+    }
+    
+    // Función para validar email @gmail.com
+    function isValidGmail() {
+      return request.resource.data.email.matches('.+@gmail\\.com');
+    }
+    
+    // Función para validar estructura de usuario
+    function isValidUser() {
+      let data = request.resource.data;
+      return data.keys().hasAll(['email', 'displayName', 'role', 'createdAt']) &&
+             data.email is string &&
+             data.displayName is string &&
+             data.role in ['client', 'trainer', 'admin'] &&
+             data.createdAt is number;
+    }
+    
+    // Función para validar estructura de entrenamiento
+    function isValidWorkout() {
+      let data = request.resource.data;
+      return data.keys().hasAll(['name', 'exercises', 'userId']) &&
+             data.name is string &&
+             data.name.size() > 0 &&
+             data.exercises is list &&
+             data.exercises.size() > 0 &&
+             data.userId is string;
+    }
+    
+    // Función para validar registro nutricional
+    function isValidNutritionLog() {
+      let data = request.resource.data;
+      return data.keys().hasAll(['foodName', 'calories', 'userId']) &&
+             data.foodName is string &&
+             data.calories is number &&
+             data.calories > 0 &&
+             data.userId is string;
+    }
+    
+    // Función para validar foto de progreso
+    function isValidProgressPhoto() {
+      let data = request.resource.data;
+      return data.keys().hasAll(['url', 'date', 'type', 'userId']) &&
+             data.url is string &&
+             data.date is number &&
+             data.type in ['front', 'side', 'back'] &&
+             data.userId is string;
+    }
+    
+    // Función para validar mensaje
+    function isValidMessage() {
+      let data = request.resource.data;
+      return data.keys().hasAll(['content', 'recipientId', 'userId']) &&
+             data.content is string &&
+             data.content.size() > 0 &&
+             data.content.size() <= 1000 &&
+             data.userId is string;
+    }
+    
+    // Colección de usuarios
+    match /users/{userId} {
+      allow read: if isAuthenticated();
+      allow create: if isOwner(userId) && isValidUser() && isValidGmail();
+      allow update: if isOwner(userId);
+      allow delete: if false; // Los usuarios no pueden eliminarse a sí mismos
+    }
+    
+    // Colección de entrenamientos
+    match /workouts/{workoutId} {
+      allow read: if isAuthenticated() && 
+                     (resource.data.userId == request.auth.uid || 
+                      get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'trainer');
+      allow create: if isAuthenticated() && isValidWorkout() && 
+                       request.resource.data.userId == request.auth.uid;
+      allow update: if isAuthenticated() && resource.data.userId == request.auth.uid;
+      allow delete: if isAuthenticated() && resource.data.userId == request.auth.uid;
+    }
+    
+    // Colección de registros nutricionales
+    match /nutrition_logs/{logId} {
+      allow read: if isAuthenticated() && resource.data.userId == request.auth.uid;
+      allow create: if isAuthenticated() && isValidNutritionLog() && 
+                       request.resource.data.userId == request.auth.uid;
+      allow update: if isAuthenticated() && resource.data.userId == request.auth.uid;
+      allow delete: if isAuthenticated() && resource.data.userId == request.auth.uid;
+    }
+    
+    // Colección de fotos de progreso
+    match /progress_photos/{photoId} {
+      allow read: if isAuthenticated() && resource.data.userId == request.auth.uid;
+      allow create: if isAuthenticated() && isValidProgressPhoto() && 
+                       request.resource.data.userId == request.auth.uid;
+      allow update: if isAuthenticated() && resource.data.userId == request.auth.uid;
+      allow delete: if isAuthenticated() && resource.data.userId == request.auth.uid;
+    }
+    
+    // Colección de mensajes
+    match /messages/{messageId} {
+      allow read: if isAuthenticated() && 
+                     (resource.data.userId == request.auth.uid || 
+                      resource.data.recipientId == request.auth.uid);
+      allow create: if isAuthenticated() && isValidMessage() && 
+                       request.resource.data.userId == request.auth.uid;
+      allow update: if false; // Los mensajes no se pueden editar
+      allow delete: if isAuthenticated() && resource.data.userId == request.auth.uid;
+    }
+    
+    // Colección de citas/reservas
+    match /appointments/{appointmentId} {
+      allow read: if isAuthenticated() && 
+                    (resource.data.clientId == request.auth.uid || 
+                     resource.data.trainerId == request.auth.uid);
+      allow create: if isAuthenticated() && 
+                       request.resource.data.keys().hasAll(['date', 'clientId', 'trainerId']);
+      allow update: if isAuthenticated() && 
+                       (resource.data.clientId == request.auth.uid || 
+                        resource.data.trainerId == request.auth.uid);
+      allow delete: if isAuthenticated() && 
+                       (resource.data.clientId == request.auth.uid || 
+                        resource.data.trainerId == request.auth.uid);
+    }
+    
+    // Colección de suscripciones/pagos
+    match /subscriptions/{subId} {
+      allow read: if isAuthenticated() && resource.data.userId == request.auth.uid;
+      allow create: if isAuthenticated() && 
+                       request.resource.data.keys().hasAll(['userId', 'plan', 'status']);
+      allow update: if false; // Solo el sistema puede actualizar suscripciones
+      allow delete: if false;
+    }
+    
+    // Índices compuestos (se crean automáticamente en Firebase Console)
+    // match /workouts/{workoutId} {
+    //   index: { fields: [{ fieldPath: 'userId' }, { fieldPath: 'createdAt' }] }
+    // }
+  }
+}

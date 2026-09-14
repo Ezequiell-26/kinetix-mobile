@@ -1,0 +1,120 @@
+{
+  "name": "KinetixFit - Tu Entrenador Inteligente",
+  "short_name": "KinetixFit",
+  "description": "La plataforma todo-en-uno que combina ciencia del deporte, IA personalizada y comunidad",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#0f172a",
+  "theme_color": "#10b981",
+  "orientation": "portrait-primary",
+  "icons": [
+    {
+      "src": "/icons/icon-72x72.png",
+      "sizes": "72x72",
+      "type": "image/png",
+      "purpose": "maskable any"
+    },
+    {
+      "src": "/icons/icon-96x96.png",
+      "sizes": "96x96",
+      "type": "image/png",
+      "purpose": "maskable any"
+    },
+    {
+      "src": "/icons/icon-128x128.png",
+      "sizes": "128x128",
+      "type": "image/png",
+      "purpose": "maskable any"
+    },
+    {
+      "src": "/icons/icon-144x144.png",
+      "sizes": "144x144",
+      "type": "image/png",
+      "purpose": "maskable any"
+    },
+    {
+      "src": "/icons/icon-152x152.png",
+      "sizes": "152x152",
+      "type": "image/png",
+      "purpose": "maskable any"
+    },
+    {
+      "src": "/icons/icon-192x192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "maskable any"
+    },
+    {
+      "src": "/icons/icon-384x384.png",
+      "sizes": "384x384",
+      "type": "image/png",
+      "purpose": "maskable any"
+    },
+    {
+      "src": "/icons/icon-512x512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable any"
+    }
+  ],
+  "categories": ["health", "fitness", "lifestyle"],
+  "lang": "es",
+  "dir": "ltr",
+  "scope": "/",
+  "prefer_related_applications": false,
+  "shortcuts": [
+    {
+      "name": "Iniciar Entrenamiento",
+      "short_name": "Entrenar",
+      "description": "Comienza tu sesión de entrenamiento",
+      "url": "/workout/start",
+      "icons": [{ "src": "/icons/shortcut-workout.png", "sizes": "96x96" }]
+    },
+    {
+      "name": "Ver Progreso",
+      "short_name": "Progreso",
+      "description": "Revisa tu progreso y estadísticas",
+      "url": "/dashboard",
+      "icons": [{ "src": "/icons/shortcut-progress.png", "sizes": "96x96" }]
+    },
+    {
+      "name": "Nutrición",
+      "short_name": "Comida",
+      "description": "Registra tus comidas",
+      "url": "/nutrition",
+      "icons": [{ "src": "/icons/shortcut-nutrition.png", "sizes": "96x96" }]
+    }
+  ],
+  "screenshots": [
+    {
+      "src": "/screenshots/dashboard.png",
+      "sizes": "1280x720",
+      "type": "image/png",
+      "form_factor": "wide",
+      "label": "Dashboard Principal"
+    },
+    {
+      "src": "/screenshots/workout.png",
+      "sizes": "750x1334",
+      "type": "image/png",
+      "form_factor": "narrow",
+      "label": "Entrenamiento en Curso"
+    }
+  ],
+  "share_target": {
+    "action": "/share",
+    "method": "POST",
+    "enctype": "multipart/form-data",
+    "params": {
+      "title": "title",
+      "text": "text",
+      "url": "url",
+      "files": [
+        {
+          "name": "photos",
+          "accept": ["image/*", "video/*"]
+        }
+      ]
+    }
+  }
+}

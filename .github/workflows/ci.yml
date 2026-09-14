@@ -1,0 +1,68 @@
+name: CI
+
+# Gate anti-ruptura (V8 §80 + PARALLEL_PROTOCOL §4).
+# Ningún PR a develop/main se fusiona en rojo.
+# Árbol único: install en RAÍZ (workspaces), gates con -w apps/mobile.
+# DB de CI: Postgres efímero (services), NO sqlite (el schema es postgresql
+# desde 2026-09-13). Sin secrets: el servicio vive dentro del runner.
+# NOTA: no hay job de lint porque apps/mobile no tiene config de ESLint
+# (Next 15 lo pediría interactivo). `next build` ya valida tipos+compilación.
+
+on:
+  push:
+    branches: [develop, main]
+  pull_request:
+    branches: [develop, main]
+
+jobs:
+  gates:
+    runs-on: ubuntu-latest
+
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: postgres
+        ports:
+          - 5432:5432
+
+    env:
+      DATABASE_URL: postgresql://postgres:postgres@localhost:5432/postgres
+      DIRECT_URL: postgresql://postgres:postgres@localhost:5432/postgres
+      JWT_SECRET: ci-only-insecure-32chars-minimum
+
+    steps:
+      - uses: actions/checkout@v5
+
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: package-lock.json
+
+      - name: Install (árbol único raíz)
+        run: npm ci
+
+      - name: Typecheck (0 errores)
+        run: npm run typecheck -w apps/mobile
+
+      - name: Esperar Postgres efímero
+        run: |
+          for i in $(seq 1 30); do
+            if echo "SELECT 1;" | npx prisma db execute --stdin --schema apps/mobile/prisma/schema.prisma >/dev/null 2>&1; then
+              echo "Postgres listo"; break
+            fi
+            sleep 3
+          done
+
+      - name: Migrate + seed (Postgres efímero de CI)
+        run: |
+          npx prisma migrate deploy --schema apps/mobile/prisma/schema.prisma
+          npm run db:seed -w apps/mobile
+
+      - name: Tests
+        run: npm run test -w apps/mobile
+
+      - name: Build
+        run: npm run build -w apps/mobile
