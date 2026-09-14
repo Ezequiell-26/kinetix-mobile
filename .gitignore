@@ -1,23 +1,22 @@
 ```
 # Dependencies
 node_modules/
+.pnpm-store/
 
-# Build artifacts
+# Build directories
 dist/
 build/
-target/
-
-# TypeScript/JavaScript
 .next/
 .nuxt/
-.vercel/
-public/
-coverage/
+public/build/
+
+# Database
+prisma/migrations/*/migration.sql
 
 # Environment variables
-.env
 .env.local
-.env.*
+.env.production
+.env.development
 
 # Logs
 *.log
@@ -25,37 +24,16 @@ coverage/
 # Temporary files
 *.tmp
 *.temp
+
+# OS generated files
 .DS_Store
 Thumbs.db
 
-# IDE files
+# IDE
 .vscode/
 .idea/
-*.swp
-*.swo
 
-# Python (if applicable)
-__pycache__/
-*.pyc
-*.pyo
-*.pyd
-.Python
-env/
-venv/
-.venv/
-pip-log.txt
-pip-delete-this-directory.txt
-.tox/
-.coverage
-.coverage.*
-.cache
-nosetests.xml
-coverage.xml
-*.cover
-*.log
-.git/
-.mypy_cache/
-.pytest_cache/
-.hypothesis/
+# Coverage
+coverage/
+.nyc_output/
 ```
-.vercel
