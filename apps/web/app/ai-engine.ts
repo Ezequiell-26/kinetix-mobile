@@ -96,7 +96,7 @@ export class AdaptiveRecommendationEngine {
 
     // Analizar mejor horario
     const optimalTime = this.findOptimalWorkoutTime(userData.progressHistory);
-    patterns.set('optimalTime', optimalTime);
+    patterns.set('optimalTime', optimalTime as unknown as number);
 
     return patterns;
   }

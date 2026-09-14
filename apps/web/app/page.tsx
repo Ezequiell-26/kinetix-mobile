@@ -2,142 +2,73 @@
 
 import { useState, useEffect } from 'react';
 import { motion, AnimatePresence, useScroll, useTransform } from 'framer-motion';
-import { 
-  Dumbbell, 
-  Users, 
-  TrendingUp, 
-  ShieldCheck, 
-  Zap, 
-  Activity, 
-  CheckCircle2, 
-  Play, 
-  Star, 
-  ArrowRight,
-  Menu,
-  X,
-  ChevronRight,
-  Crown,
-  Heart
+import {
+  Dumbbell, Users, TrendingUp, Zap, Activity, CheckCircle2, Play, Star, ArrowRight, Menu, X, Crown, Heart, ShieldCheck, Flame, Award, MessageCircle, BarChart3, Smartphone, Monitor, Clock, Target, Apple, UtensilsCrossed
 } from 'lucide-react';
 import Link from 'next/link';
 
-// --- Componentes UI Reutilizables ---
+const APP_URL = 'https://kinetixfitt-world-ia.vercel.app';
+const APP_LOGIN = `${APP_URL}/login`;
+const APP_REGISTER = `${APP_URL}/register`;
 
-const Badge = ({ children, className = "" }: { children: React.ReactNode; className?: string }) => (
-  <span className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 ${className}`}>
-    {children}
-  </span>
-);
-
-const Button = ({ 
-  children, 
-  variant = 'primary', 
-  className = "", 
-  icon: Icon,
-  ...props 
-}: any) => {
-  const baseStyle = "inline-flex items-center justify-center px-6 py-3.5 rounded-xl font-semibold transition-all duration-300 transform hover:scale-105 active:scale-95 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-slate-900";
-  const variants: any = {
-    primary: "bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-400 hover:to-teal-400 text-white shadow-lg shadow-emerald-500/25 focus:ring-emerald-500",
-    secondary: "bg-slate-800 hover:bg-slate-700 text-white border border-slate-700 focus:ring-slate-500",
-    outline: "bg-transparent border-2 border-slate-700 hover:border-emerald-500 text-slate-300 hover:text-white focus:ring-emerald-500",
-    ghost: "bg-transparent hover:bg-slate-800/50 text-slate-300 hover:text-white"
+// UI helpers
+const LimeButton = ({ children, variant = 'lime', className = '', href, ...props }: any) => {
+  const base = "inline-flex items-center justify-center px-7 py-4 rounded-2xl font-black text-sm tracking-wide transition-all duration-200 active:scale-[0.98]";
+  const styles: any = {
+    lime: "bg-[#D6FF2A] text-black hover:bg-[#E0FF5A] shadow-[0_8px_24px_rgba(214,255,42,0.25)] hover:shadow-[0_12px_32px_rgba(214,255,42,0.3)]",
+    dark: "bg-zinc-900 text-white border border-zinc-800 hover:bg-zinc-800 hover:border-zinc-700",
+    ghost: "bg-transparent text-zinc-400 hover:text-white hover:bg-white/5",
+    white: "bg-white text-black hover:bg-zinc-100 shadow-lg"
   };
-
-  return (
-    <motion.button 
-      whileTap={{ scale: 0.95 }}
-      className={`${baseStyle} ${variants[variant]} ${className}`}
-      {...props}
-    >
-      {children}
-      {Icon && <Icon className="ml-2 w-5 h-5" />}
-    </motion.button>
-  );
+  const Comp: any = href ? 'a' : 'button';
+  return <Comp href={href} className={`${base} ${styles[variant]} ${className}`} {...props}>{children}</Comp>;
 };
 
-// --- Secciones Principales ---
+const Badge = ({ children, className = "" }: any) => (
+  <span className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[11px] font-black tracking-widest uppercase bg-[#D6FF2A]/10 text-[#D6FF2A] border border-[#D6FF2A]/20 ${className}`}>{children}</span>
+);
 
 const Navbar = () => {
-  const [isScrolled, setIsScrolled] = useState(false);
-  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
-
+  const [scrolled, setScrolled] = useState(false);
+  const [open, setOpen] = useState(false);
   useEffect(() => {
-    const handleScroll = () => setIsScrolled(window.scrollY > 20);
-    window.addEventListener('scroll', handleScroll);
-    return () => window.removeEventListener('scroll', handleScroll);
+    const h = () => setScrolled(window.scrollY > 10);
+    window.addEventListener('scroll', h);
+    return () => window.removeEventListener('scroll', h);
   }, []);
-
   return (
-    <motion.nav
-      initial={{ y: -100 }}
-      animate={{ y: 0 }}
-      className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${
-        isScrolled ? 'bg-slate-950/80 backdrop-blur-md border-b border-slate-800/50 py-4' : 'bg-transparent py-6'
-      }`}
-    >
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex items-center justify-between">
-        <Link href="/" className="flex items-center space-x-2 group">
-          <div className="relative w-10 h-10 bg-gradient-to-br from-emerald-500 to-teal-600 rounded-xl flex items-center justify-center transform group-hover:rotate-12 transition-transform duration-300 shadow-lg shadow-emerald-500/20">
-            <Zap className="text-white w-6 h-6 fill-white" />
+    <motion.nav initial={{ y: -20, opacity: 0 }} animate={{ y: 0, opacity: 1 }} className={`fixed top-0 inset-x-0 z-50 transition-all ${scrolled ? 'bg-[#09090B]/80 backdrop-blur-xl border-b border-zinc-900 py-3' : 'bg-transparent py-5'}`}>
+      <div className="max-w-[1200px] mx-auto px-4 sm:px-6 flex items-center justify-between">
+        <Link href="/" className="flex items-center gap-2.5 group">
+          <div className="w-9 h-9 rounded-xl bg-[#D6FF2A] flex items-center justify-center group-hover:rotate-3 transition-transform">
+            <Zap className="w-5 h-5 text-black fill-black" />
           </div>
-          <span className="text-2xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-white to-slate-400">
-            Kinetix<span className="text-emerald-500">Fit</span>
-          </span>
+          <span className="text-[18px] font-black tracking-tight text-white">KINETIX<span className="text-[#D6FF2A]">FITT</span></span>
+          <span className="hidden sm:inline text-[10px] font-bold tracking-[0.18em] text-zinc-500 ml-1">by EZEQUIEL</span>
         </Link>
-
-        {/* Desktop Menu */}
-        <div className="hidden md:flex items-center space-x-8">
-          {['Características', 'Programas', 'Precios', 'Comunidad'].map((item) => (
-            <a key={item} href={`#${item.toLowerCase()}`} className="text-sm font-medium text-slate-300 hover:text-emerald-400 transition-colors">
-              {item}
-            </a>
-          ))}
-          <Link href="/auth/login">
-            <Button variant="ghost" className="!px-4 !py-2">Ingresar</Button>
-          </Link>
-          <Link href="/auth/register">
-            <Button variant="primary" className="!px-5 !py-2.5 !rounded-lg text-sm">Empezar Gratis</Button>
-          </Link>
+        <div className="hidden lg:flex items-center gap-7 text-sm font-bold text-zinc-300">
+          <a href="#funcionalidades" className="hover:text-white transition">Funcionalidades</a>
+          <a href="#como-funciona" className="hover:text-white transition">Cómo funciona</a>
+          <a href="#pricing" className="hover:text-white transition">Planes</a>
+          <a href={`${APP_URL}/client/tools`} className="hover:text-white transition">Herramientas</a>
+          <a href={APP_LOGIN} className="ml-2 text-white hover:text-[#D6FF2A]">Ingresar</a>
+          <a href={APP_REGISTER} className="ml-1 inline-flex items-center justify-center px-5 py-2.5 rounded-xl bg-white text-black font-black text-sm hover:bg-zinc-100">Empezar gratis</a>
+          <span className="hidden xl:inline-flex items-center gap-2 text-xs font-bold text-zinc-500"><Monitor size={14}/> Web + <Smartphone size={14}/> App</span>
         </div>
-
-        {/* Mobile Menu Button */}
-        <button 
-          className="md:hidden text-slate-300 hover:text-white"
-          onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-        >
-          {isMobileMenuOpen ? <X /> : <Menu />}
-        </button>
+        <button onClick={() => setOpen(!open)} className="lg:hidden w-9 h-9 rounded-xl bg-zinc-900 border border-zinc-800 flex items-center justify-center text-zinc-300"><Menu size={18} /></button>
       </div>
-
-      {/* Mobile Menu */}
       <AnimatePresence>
-        {isMobileMenuOpen && (
-          <motion.div
-            initial={{ opacity: 0, height: 0 }}
-            animate={{ opacity: 1, height: 'auto' }}
-            exit={{ opacity: 0, height: 0 }}
-            className="md:hidden bg-slate-950 border-b border-slate-800 overflow-hidden"
-          >
+        {open && (
+          <motion.div initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: 'auto' }} exit={{ opacity: 0, height: 0 }} className="lg:hidden bg-[#09090B] border-b border-zinc-900 overflow-hidden">
             <div className="px-4 py-6 space-y-4">
-              {['Características', 'Programas', 'Precios', 'Comunidad'].map((item) => (
-                <a 
-                  key={item} 
-                  href={`#${item.toLowerCase()}`}
-                  className="block text-base font-medium text-slate-300 hover:text-emerald-400"
-                  onClick={() => setIsMobileMenuOpen(false)}
-                >
-                  {item}
-                </a>
-              ))}
-              <div className="pt-4 flex flex-col space-y-3">
-                <Link href="/auth/login" onClick={() => setIsMobileMenuOpen(false)}>
-                  <Button variant="secondary" className="w-full justify-center">Ingresar</Button>
-                </Link>
-                <Link href="/auth/register" onClick={() => setIsMobileMenuOpen(false)}>
-                  <Button variant="primary" className="w-full justify-center">Empezar Gratis</Button>
-                </Link>
+              <a href="#funcionalidades" onClick={() => setOpen(false)} className="block text-white font-bold">Funcionalidades</a>
+              <a href="#como-funciona" onClick={() => setOpen(false)} className="block text-white font-bold">Cómo funciona</a>
+              <a href="#pricing" onClick={() => setOpen(false)} className="block text-white font-bold">Planes</a>
+              <div className="grid grid-cols-2 gap-3 pt-4">
+                <a href={APP_LOGIN} className="py-3 rounded-xl bg-zinc-900 border border-zinc-800 text-center font-black text-white">Ingresar</a>
+                <a href={APP_REGISTER} className="py-3 rounded-xl bg-[#D6FF2A] text-center font-black text-black">Empezar</a>
               </div>
+              <a href={APP_URL} className="flex items-center justify-center gap-2 text-xs font-bold text-[#D6FF2A]">→ Abrir app en navegador</a>
             </div>
           </motion.div>
         )}
@@ -146,401 +77,314 @@ const Navbar = () => {
   );
 };
 
-const HeroSection = () => {
+export default function LandingPage() {
   const { scrollY } = useScroll();
-  const y1 = useTransform(scrollY, [0, 500], [0, 200]);
-  const y2 = useTransform(scrollY, [0, 500], [0, -150]);
+  const heroY = useTransform(scrollY, [0, 600], [0, 120]);
 
   return (
-    <section className="relative min-h-screen flex items-center justify-center overflow-hidden pt-20">
-      {/* Background Elements */}
-      <div className="absolute inset-0 bg-slate-950">
-        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-slate-900 via-slate-950 to-black opacity-80"></div>
-        <div className="absolute top-0 left-1/4 w-96 h-96 bg-emerald-500/20 rounded-full blur-[128px]" />
-        <div className="absolute bottom-0 right-1/4 w-96 h-96 bg-blue-500/10 rounded-full blur-[128px]" />
-      </div>
+    <div className="min-h-screen bg-[#09090B] text-white selection:bg-[#D6FF2A]/30 selection:text-[#D6FF2A]">
+      <Navbar />
 
-      <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center z-10">
-        <motion.div
-          initial={{ opacity: 0, y: 30 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.8 }}
-        >
-          <Badge className="mb-6 animate-pulse">
-            <Star className="w-3 h-3 mr-1 fill-current" />
-            #1 App de Fitness Inteligente en Latinoamérica
-          </Badge>
-          
-          <h1 className="text-5xl md:text-7xl lg:text-8xl font-extrabold tracking-tight text-white mb-8 leading-tight">
-            Transforma tu cuerpo,<br />
-            <span className="bg-clip-text text-transparent bg-gradient-to-r from-emerald-400 via-teal-400 to-cyan-400">
-              Domina tu mente
-            </span>
-          </h1>
-          
-          <p className="text-xl md:text-2xl text-slate-400 max-w-3xl mx-auto mb-10 leading-relaxed">
-            La plataforma todo-en-uno que combina ciencia del deporte, IA personalizada y comunidad para resultados que duran para siempre.
-          </p>
+      {/* HERO - Symmetry style */}
+      <section className="relative pt-28 pb-10 overflow-hidden">
+        <div className="absolute inset-0 bg-[#09090B]">
+          <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top,_rgba(214,255,42,0.08),transparent_60%)]" />
+          <div className="absolute top-20 left-1/2 -translate-x-1/2 w-[900px] h-[500px] bg-[#D6FF2A]/[0.03] rounded-full blur-[100px]" />
+        </div>
 
-          <div className="flex flex-col sm:flex-row items-center justify-center gap-4 mb-16">
-            <Link href="/auth/register">
-              <Button variant="primary" icon={ArrowRight} className="w-full sm:w-auto text-lg px-8 py-4 shadow-emerald-500/30 shadow-xl">
-                Comienza tu transformación
-              </Button>
-            </Link>
-            <Button variant="secondary" icon={Play} className="w-full sm:w-auto text-lg px-8 py-4">
-              Ver cómo funciona
-            </Button>
-          </div>
-
-          {/* Social Proof Stats */}
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-8 border-t border-slate-800/50 pt-10">
-            {[
-              { label: 'Usuarios Activos', value: '+50k', icon: Users },
-              { label: 'Entrenamientos', value: '+1M', icon: Dumbbell },
-              { label: 'Calificación', value: '4.9/5', icon: Star },
-              { label: 'Retención', value: '92%', icon: TrendingUp },
-            ].map((stat, i) => (
-              <motion.div
-                key={i}
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.5 + (i * 0.1) }}
-                className="flex flex-col items-center"
-              >
-                <stat.icon className="w-6 h-6 text-emerald-500 mb-2" />
-                <span className="text-3xl font-bold text-white">{stat.value}</span>
-                <span className="text-sm text-slate-500">{stat.label}</span>
-              </motion.div>
-            ))}
-          </div>
-        </motion.div>
-
-        {/* Floating Dashboard Preview */}
-        <motion.div 
-          style={{ y: y1 }}
-          className="mt-20 relative mx-auto max-w-5xl"
-        >
-          <div className="relative rounded-2xl overflow-hidden shadow-2xl shadow-emerald-500/10 border border-slate-800 bg-slate-900/50 backdrop-blur-sm">
-            <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-emerald-500/50 to-transparent"></div>
-            <div className="aspect-video bg-slate-900 flex items-center justify-center relative overflow-hidden group">
-               <div className="absolute inset-0 bg-gradient-to-tr from-slate-900 via-slate-800 to-slate-900 opacity-90"></div>
-               <div className="relative z-10 text-center">
-                 <Activity className="w-20 h-20 text-emerald-500/20 mx-auto mb-4 animate-pulse" />
-                 <p className="text-slate-500 font-medium">Dashboard Interactivo en Tiempo Real</p>
-               </div>
-               <div className="absolute top-10 left-10 w-32 h-32 bg-emerald-500/10 rounded-full blur-2xl"></div>
-               <div className="absolute bottom-10 right-10 w-40 h-40 bg-blue-500/10 rounded-full blur-2xl"></div>
+        {/* Top badges like symmetry */}
+        <div className="relative max-w-[1200px] mx-auto px-4 sm:px-6">
+          <div className="flex items-center justify-between max-w-5xl mx-auto mb-6">
+            <div className="hidden md:flex items-center gap-2 px-3 py-2 rounded-full bg-white/5 border border-white/10">
+              <Star size={14} className="text-[#D6FF2A] fill-[#D6FF2A]" />
+              <span className="text-xs font-black text-white">4.9</span>
+              <span className="text-xs text-zinc-400">· Excelente · 2.400 reseñas</span>
+            </div>
+            <Badge><Crown size={12}/> #1 Coaching personalizado LATAM</Badge>
+            <div className="hidden md:flex items-center gap-2 px-3 py-2 rounded-full bg-white/5 border border-white/10 text-xs font-bold text-zinc-300">
+              <Users size={14} /> +12k atletas
             </div>
           </div>
-        </motion.div>
-      </div>
-    </section>
-  );
-};
 
-const FeaturesSection = () => {
-  const features = [
-    {
-      title: "IA Adaptativa",
-      desc: "Algoritmos que ajustan tu rutina diariamente según tu progreso y fatiga.",
-      icon: Zap,
-      color: "from-yellow-400 to-orange-500"
-    },
-    {
-      title: "Nutrición Precisa",
-      desc: "Planes de comida macro-calculados que se adaptan a tus gustos y objetivos.",
-      icon: Heart,
-      color: "from-red-400 to-pink-500"
-    },
-    {
-      title: "Comunidad Elite",
-      desc: "Únete a grupos de entrenamiento, retos semanales y compite globalmente.",
-      icon: Users,
-      color: "from-blue-400 to-indigo-500"
-    },
-    {
-      title: "Seguimiento 360°",
-      desc: "Métricas avanzadas de sueño, recuperación y rendimiento deportivo.",
-      icon: Activity,
-      color: "from-emerald-400 to-teal-500"
-    }
-  ];
-
-  return (
-    <section id="características" className="py-32 bg-slate-950 relative">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="text-center mb-20">
-          <Badge>Tecnología de Punta</Badge>
-          <h2 className="text-4xl md:text-5xl font-bold text-white mt-6 mb-6">
-            Todo lo que necesitas para <br/>
-            <span className="text-emerald-400">superar tus límites</span>
-          </h2>
-          <p className="text-xl text-slate-400 max-w-2xl mx-auto">
-            No es solo una app de ejercicios. Es tu entrenador, nutricionista y compañero de entrenamiento en tu bolsillo.
-          </p>
-        </div>
-
-        <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-8">
-          {features.map((feature, i) => (
-            <motion.div
-              key={i}
-              initial={{ opacity: 0, y: 30 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              transition={{ delay: i * 0.1 }}
-              whileHover={{ y: -10 }}
-              className="group p-8 rounded-3xl bg-slate-900/50 border border-slate-800 hover:border-emerald-500/30 transition-all duration-300 hover:shadow-2xl hover:shadow-emerald-500/10 relative overflow-hidden"
-            >
-              <div className={`absolute top-0 right-0 w-32 h-32 bg-gradient-to-br ${feature.color} opacity-5 rounded-bl-full transition-opacity group-hover:opacity-10`}></div>
-              
-              <div className={`w-14 h-14 rounded-2xl bg-gradient-to-br ${feature.color} flex items-center justify-center mb-6 shadow-lg`}>
-                <feature.icon className="text-white w-7 h-7" />
-              </div>
-              
-              <h3 className="text-xl font-bold text-white mb-3">{feature.title}</h3>
-              <p className="text-slate-400 leading-relaxed">{feature.desc}</p>
-            </motion.div>
-          ))}
-        </div>
-      </div>
-    </section>
-  );
-};
-
-const RetentionSection = () => {
-  return (
-    <section className="py-32 bg-slate-900 relative overflow-hidden">
-      <div className="absolute inset-0 opacity-10" style={{ backgroundImage: 'radial-gradient(#10b981 1px, transparent 1px)', backgroundSize: '32px 32px' }}></div>
-      
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
-        <div className="lg:grid lg:grid-cols-2 lg:gap-16 items-center">
-          <motion.div
-            initial={{ opacity: 0, x: -50 }}
-            whileInView={{ opacity: 1, x: 0 }}
-            viewport={{ once: true }}
-          >
-            <Badge className="mb-6 bg-purple-500/10 text-purple-400 border-purple-500/20">Gamificación</Badge>
-            <h2 className="text-4xl md:text-5xl font-bold text-white mb-6">
-              Convierte el esfuerzo en <br/>
-              <span className="text-purple-400">recompensas reales</span>
-            </h2>
-            <p className="text-xl text-slate-400 mb-8">
-              Nuestro sistema de niveles y rachas está diseñado psicológicamente para mantenerte motivado día tras día.
+          <motion.div initial={{ opacity: 0, y: 24 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.7 }} className="text-center">
+            <h1 className="text-[42px] md:text-[64px] lg:text-[72px] font-black tracking-[-0.04em] leading-[0.9] text-white">
+              Consigue un físico<br />
+              <span className="text-[#D6FF2A]">estético y fuerte</span><br />
+              progresando con ciencia
+            </h1>
+            <p className="mt-6 text-[17px] md:text-[19px] leading-relaxed text-zinc-400 max-w-2xl mx-auto">
+              La plataforma de <span className="text-white font-bold">EZEQUIEL COACHING</span> que une programación inteligente, nutrición precisa y seguimiento real. Sin humo, solo progresión.
             </p>
-            
-            <ul className="space-y-6 mb-10">
+
+            <div className="mt-8 flex flex-col sm:flex-row items-center justify-center gap-3">
+              <a href={APP_REGISTER} className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-8 py-4 rounded-2xl bg-[#D6FF2A] text-black font-black text-[15px] hover:bg-[#E0FF5A] shadow-[0_10px_30px_rgba(214,255,42,0.25)] transition">
+                Comenzar mi transformación <ArrowRight size={18} />
+              </a>
+              <a href={APP_URL} className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-8 py-4 rounded-2xl bg-zinc-900 border border-zinc-800 text-white font-black text-[15px] hover:bg-zinc-800 transition">
+                <Monitor size={18}/> Usar en web <span className="text-zinc-500 font-bold">· sin instalar</span>
+              </a>
+            </div>
+
+            <div className="mt-4 flex flex-wrap items-center justify-center gap-3">
+              <a href={APP_REGISTER} className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white text-black text-xs font-black">● App Store</a>
+              <a href={APP_REGISTER} className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white text-black text-xs font-black">▶ Google Play</a>
+              <span className="text-xs text-zinc-500 font-bold">Descarga gratuita · Cancela cuando quieras</span>
+            </div>
+
+            {/* Stats row like symmetry 3M+ */}
+            <div className="mt-12 grid grid-cols-2 md:grid-cols-4 gap-4 max-w-4xl mx-auto">
               {[
-                "Rachas diarias con multiplicadores de XP",
-                "Desbloquea equipamiento virtual y badges exclusivos",
-                "Compite en ligas semanales con premios reales",
-                "Historial visual de tu evolución corporal"
-              ].map((item, i) => (
-                <li key={i} className="flex items-start">
-                  <CheckCircle2 className="w-6 h-6 text-emerald-500 mr-4 flex-shrink-0 mt-1" />
-                  <span className="text-lg text-slate-300">{item}</span>
-                </li>
-              ))}
-            </ul>
-            
-            <Link href="/auth/register">
-              <Button variant="primary" className="bg-purple-600 hover:bg-purple-500 shadow-purple-500/25">
-                Únete a la Liga Elite
-              </Button>
-            </Link>
-          </motion.div>
-          
-          <motion.div
-            initial={{ opacity: 0, x: 50 }}
-            whileInView={{ opacity: 1, x: 0 }}
-            viewport={{ once: true }}
-            className="mt-16 lg:mt-0 relative"
-          >
-            <div className="relative rounded-3xl bg-slate-800 p-2 shadow-2xl rotate-3 hover:rotate-0 transition-transform duration-500">
-              <div className="absolute -top-10 -right-10 w-24 h-24 bg-yellow-400 rounded-full flex items-center justify-center shadow-lg animate-bounce">
-                <Crown className="w-12 h-12 text-yellow-900" />
-              </div>
-              <div className="bg-slate-900 rounded-2xl overflow-hidden aspect-square relative flex items-center justify-center border border-slate-700">
-                 <div className="text-center">
-                    <div className="text-6xl font-black text-transparent bg-clip-text bg-gradient-to-r from-yellow-400 to-orange-500 mb-2">NIVEL 12</div>
-                    <div className="text-slate-400 mb-6">Atleta Dedicado</div>
-                    <div className="w-64 h-4 bg-slate-800 rounded-full mx-auto overflow-hidden mb-2">
-                      <div className="w-3/4 h-full bg-gradient-to-r from-yellow-400 to-orange-500 rounded-full"></div>
-                    </div>
-                    <div className="text-xs text-slate-500">2,450 / 3,000 XP para Nivel 13</div>
-                 </div>
-              </div>
-            </div>
-          </motion.div>
-        </div>
-      </div>
-    </section>
-  );
-};
-
-const PricingSection = () => {
-  return (
-    <section id="precios" className="py-32 bg-slate-950">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="text-center mb-20">
-          <h2 className="text-4xl md:text-5xl font-bold text-white mb-6">
-            Inversión en tu salud, <br/>
-            <span className="text-emerald-400">sin letra chica</span>
-          </h2>
-          <p className="text-xl text-slate-400">
-            Cancela cuando quieras. Sin contratos forzados.
-          </p>
-        </div>
-
-        <div className="grid md:grid-cols-3 gap-8 max-w-6xl mx-auto">
-          {/* Free Plan */}
-          <div className="p-8 rounded-3xl bg-slate-900 border border-slate-800 flex flex-col">
-            <h3 className="text-xl font-semibold text-white mb-2">Básico</h3>
-            <div className="text-4xl font-bold text-white mb-6">$0<span className="text-lg text-slate-500 font-normal">/mes</span></div>
-            <p className="text-slate-400 mb-8 text-sm">Ideal para comenzar tu viaje fitness.</p>
-            <ul className="space-y-4 mb-8 flex-1">
-              {['Acceso a 50+ ejercicios', 'Seguimiento básico', 'Comunidad pública'].map((feat, i) => (
-                <li key={i} className="flex items-center text-slate-300 text-sm">
-                  <CheckCircle2 className="w-4 h-4 text-slate-500 mr-3" /> {feat}
-                </li>
-              ))}
-            </ul>
-            <Button variant="outline" className="w-full">Crear cuenta gratis</Button>
-          </div>
-
-          {/* Pro Plan (Highlighted) */}
-          <div className="relative p-8 rounded-3xl bg-slate-900 border-2 border-emerald-500 flex flex-col transform md:-translate-y-4 shadow-2xl shadow-emerald-500/20">
-            <div className="absolute top-0 left-1/2 -translate-x-1/2 -translate-y-1/2 bg-emerald-500 text-white px-4 py-1 rounded-full text-sm font-bold uppercase tracking-wide">
-              Más Popular
-            </div>
-            <h3 className="text-xl font-semibold text-white mb-2">Pro Athlete</h3>
-            <div className="text-4xl font-bold text-white mb-6">$19<span className="text-lg text-slate-500 font-normal">/mes</span></div>
-            <p className="text-slate-400 mb-8 text-sm">Para quienes buscan resultados serios.</p>
-            <ul className="space-y-4 mb-8 flex-1">
-              {['Todo lo de Básico', 'Rutinas con IA', 'Planes de nutrición', 'Estadísticas avanzadas', 'Soporte prioritario'].map((feat, i) => (
-                <li key={i} className="flex items-center text-white text-sm">
-                  <CheckCircle2 className="w-4 h-4 text-emerald-500 mr-3" /> {feat}
-                </li>
-              ))}
-            </ul>
-            <Button variant="primary" className="w-full">Comenzar Prueba Gratis</Button>
-            <p className="text-center text-xs text-slate-500 mt-4">7 días de prueba gratis, luego $19/mes</p>
-          </div>
-
-          {/* Elite Plan */}
-          <div className="p-8 rounded-3xl bg-slate-900 border border-slate-800 flex flex-col">
-            <h3 className="text-xl font-semibold text-white mb-2">Elite Coach</h3>
-            <div className="text-4xl font-bold text-white mb-6">$49<span className="text-lg text-slate-500 font-normal">/mes</span></div>
-            <p className="text-slate-400 mb-8 text-sm">Entrenamiento personalizado 1 a 1.</p>
-            <ul className="space-y-4 mb-8 flex-1">
-              {['Todo lo de Pro', 'Coach humano asignado', 'Ajustes semanales en vivo', 'Acceso a eventos exclusivos'].map((feat, i) => (
-                <li key={i} className="flex items-center text-slate-300 text-sm">
-                  <CheckCircle2 className="w-4 h-4 text-slate-500 mr-3" /> {feat}
-                </li>
-              ))}
-            </ul>
-            <Button variant="outline" className="w-full">Aplicar ahora</Button>
-          </div>
-        </div>
-      </div>
-    </section>
-  );
-};
-
-const Footer = () => {
-  return (
-    <footer className="bg-slate-950 border-t border-slate-900 pt-20 pb-10">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-10 mb-16">
-          <div className="col-span-2 lg:col-span-2">
-            <Link href="/" className="flex items-center space-x-2 mb-6">
-              <div className="w-8 h-8 bg-gradient-to-br from-emerald-500 to-teal-600 rounded-lg flex items-center justify-center">
-                <Zap className="text-white w-5 h-5 fill-white" />
-              </div>
-              <span className="text-xl font-bold text-white">KinetixFit</span>
-            </Link>
-            <p className="text-slate-400 text-sm leading-relaxed max-w-xs mb-6">
-              La plataforma definitiva para transformar tu físico y mentalidad. Ciencia, tecnología y comunidad en un solo lugar.
-            </p>
-            <div className="flex space-x-4">
-              {[1, 2, 3, 4].map((i) => (
-                <div key={i} className="w-10 h-10 rounded-full bg-slate-900 flex items-center justify-center text-slate-400 hover:bg-emerald-500 hover:text-white transition-all cursor-pointer">
-                  <Users className="w-5 h-5" />
+                { v: "12k+", l: "Atletas activos", sub: "transformando" },
+                { v: "1.2M+", l: "Entrenamientos", sub: "completados" },
+                { v: "4.9", l: "Valoración", sub: "App Store" },
+                { v: "92%", l: "Retención", sub: "a 90 días" },
+              ].map(s => (
+                <div key={s.l} className="rounded-2xl bg-zinc-900/60 border border-zinc-800/80 p-5 text-center">
+                  <div className="text-3xl font-black text-white tracking-tight">{s.v}</div>
+                  <div className="text-xs font-black tracking-wide text-[#D6FF2A] uppercase mt-1">{s.l}</div>
+                  <div className="text-xs text-zinc-500">{s.sub}</div>
                 </div>
               ))}
             </div>
-          </div>
-          
-          <div>
-            <h4 className="text-white font-semibold mb-6">Producto</h4>
-            <ul className="space-y-4 text-sm text-slate-400">
-              <li><a href="#características" className="hover:text-emerald-400 transition-colors">Características</a></li>
-              <li><a href="#precios" className="hover:text-emerald-400 transition-colors">Precios</a></li>
-              <li><a href="#" className="hover:text-emerald-400 transition-colors">Descargar App</a></li>
-              <li><a href="#" className="hover:text-emerald-400 transition-colors">Actualizaciones</a></li>
-            </ul>
-          </div>
-          
-          <div>
-            <h4 className="text-white font-semibold mb-6">Empresa</h4>
-            <ul className="space-y-4 text-sm text-slate-400">
-              <li><a href="#" className="hover:text-emerald-400 transition-colors">Sobre Nosotros</a></li>
-              <li><a href="#" className="hover:text-emerald-400 transition-colors">Blog</a></li>
-              <li><a href="#" className="hover:text-emerald-400 transition-colors">Carreras</a></li>
-              <li><a href="#" className="hover:text-emerald-400 transition-colors">Contacto</a></li>
-            </ul>
-          </div>
-          
-          <div>
-            <h4 className="text-white font-semibold mb-6">Legal</h4>
-            <ul className="space-y-4 text-sm text-slate-400">
-              <li><a href="#" className="hover:text-emerald-400 transition-colors">Privacidad</a></li>
-              <li><a href="#" className="hover:text-emerald-400 transition-colors">Términos</a></li>
-              <li><a href="#" className="hover:text-emerald-400 transition-colors">Cookies</a></li>
-            </ul>
-          </div>
-        </div>
-        
-        <div className="border-t border-slate-900 pt-8 flex flex-col md:flex-row justify-between items-center">
-          <p className="text-slate-500 text-sm">© 2024 KinetixFit Inc. Todos los derechos reservados.</p>
-          <div className="flex items-center space-x-2 mt-4 md:mt-0">
-            <ShieldCheck className="w-4 h-4 text-emerald-500" />
-            <span className="text-slate-500 text-sm">SSL Secure & Data Encrypted</span>
-          </div>
-        </div>
-      </div>
-    </footer>
-  );
-};
+          </motion.div>
 
-export default function LandingPage() {
-  return (
-    <div className="min-h-screen bg-slate-950 text-slate-200 selection:bg-emerald-500/30 selection:text-emerald-200">
-      <Navbar />
-      <main>
-        <HeroSection />
-        <FeaturesSection />
-        <RetentionSection />
-        <PricingSection />
-        
-        {/* CTA Final */}
-        <section className="py-20 relative overflow-hidden">
-          <div className="absolute inset-0 bg-gradient-to-r from-emerald-600 to-teal-600"></div>
-          <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-slate-900 via-slate-950 to-black opacity-30"></div>
-          <div className="max-w-4xl mx-auto px-4 text-center relative z-10">
-            <h2 className="text-4xl md:text-5xl font-bold text-white mb-6">¿Listo para empezar?</h2>
-            <p className="text-xl text-emerald-100 mb-10">Únete a más de 50,000 atletas que ya están transformando sus vidas.</p>
-            <div className="flex flex-col sm:flex-row justify-center gap-4">
-              <Link href="/auth/register">
-                <Button className="bg-white text-emerald-600 hover:bg-slate-100 shadow-xl w-full sm:w-auto text-lg px-8 py-4">
-                  Obtener Acceso Gratis
-                </Button>
-              </Link>
+          {/* Mockup */}
+          <motion.div style={{ y: heroY }} className="mt-12 relative max-w-[980px] mx-auto">
+            <div className="relative rounded-[28px] overflow-hidden bg-zinc-900 border border-zinc-800 shadow-[0_30px_80px_rgba(0,0,0,0.6)] p-2">
+              <div className="rounded-[20px] overflow-hidden bg-[#101012] aspect-[16/9] md:aspect-[16/8] flex items-center justify-center relative">
+                <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,_rgba(214,255,42,0.07),transparent_60%)]" />
+                <div className="relative grid md:grid-cols-3 gap-4 p-6 md:p-10 w-full">
+                  <div className="md:col-span-2 rounded-2xl bg-zinc-900 border border-zinc-800 p-5">
+                    <div className="flex items-center justify-between mb-4">
+                      <span className="text-xs font-black tracking-widest text-zinc-500 uppercase">Dashboard · Hoy</span>
+                      <span className="text-xs font-black px-2 py-1 rounded-full bg-[#D6FF2A] text-black">Racha 14 días 🔥</span>
+                    </div>
+                    <div className="h-28 rounded-xl bg-zinc-950 border border-zinc-800 flex items-end gap-1 p-3">
+                      {[40, 65, 45, 80, 60, 95, 70].map((h, i) => (
+                        <div key={i} className="flex-1 rounded-t-lg bg-[#D6FF2A]" style={{ height: `${h}%`, opacity: 0.6 + i * 0.05 }} />
+                      ))}
+                    </div>
+                    <div className="mt-4 grid grid-cols-3 gap-3 text-center">
+                      <div className="rounded-xl bg-zinc-950 border border-zinc-800 py-3"><div className="text-sm font-black text-white">3/4</div><div className="text-[10px] text-zinc-500 uppercase font-bold">Sesiones</div></div>
+                      <div className="rounded-xl bg-zinc-950 border border-zinc-800 py-3"><div className="text-sm font-black text-white">82%</div><div className="text-[10px] text-zinc-500 uppercase font-bold">Adherencia</div></div>
+                      <div className="rounded-xl bg-zinc-950 border border-zinc-800 py-3"><div className="text-sm font-black text-white">+2.1kg</div><div className="text-[10px] text-zinc-500 uppercase font-bold">Músculo</div></div>
+                    </div>
+                  </div>
+                  <div className="space-y-3">
+                    <div className="rounded-2xl bg-[#D6FF2A] p-4 text-black">
+                      <div className="text-xs font-black uppercase tracking-wide opacity-70">Entrenamiento de hoy</div>
+                      <div className="text-lg font-black leading-tight mt-1">Pecho · Hombro · Tríceps</div>
+                      <div className="text-xs font-bold opacity-70">5 ejercicios · 60 min · RIR 2</div>
+                      <a href={APP_REGISTER} className="mt-3 inline-flex w-full justify-center py-2.5 rounded-xl bg-black text-white font-black text-xs">COMENZAR →</a>
+                    </div>
+                    <div className="rounded-2xl bg-zinc-900 border border-zinc-800 p-4">
+                      <div className="text-xs font-bold text-zinc-400">Próximo check-in</div>
+                      <div className="text-sm font-black text-white">En 2 días · Energía 8/10</div>
+                      <div className="text-xs text-[#D6FF2A] font-bold">Ezequiel revisa en 24h →</div>
+                    </div>
+                  </div>
+                </div>
+                <div className="absolute top-3 left-1/2 -translate-x-1/2 flex items-center gap-1.5">
+                  <span className="w-2.5 h-2.5 rounded-full bg-red-500/80" /><span className="w-2.5 h-2.5 rounded-full bg-yellow-500/80" /><span className="w-2.5 h-2.5 rounded-full bg-green-500/80" />
+                </div>
+              </div>
+            </div>
+            <div className="absolute -bottom-6 left-1/2 -translate-x-1/2 hidden md:flex items-center gap-2 px-4 py-2 rounded-full bg-zinc-900 border border-zinc-800 text-xs font-bold text-zinc-300 shadow-lg">
+              <div className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" /> App lista · Web y móvil sincronizados
+            </div>
+          </motion.div>
+        </div>
+      </section>
+
+      {/* 3 PASOS - symmetry guarantee */}
+      <section id="como-funciona" className="py-20 bg-[#101012] border-y border-zinc-900">
+        <div className="max-w-[1200px] mx-auto px-4 sm:px-6">
+          <div className="text-center max-w-3xl mx-auto">
+            <Badge>Garantizamos tu éxito en 3 pasos</Badge>
+            <h2 className="mt-4 text-4xl md:text-5xl font-black tracking-tight text-white">Tres pilares que aseguran<br /><span className="text-zinc-500">tu progreso real</span></h2>
+            <p className="mt-4 text-zinc-400">Sin motivación vacía. Ciencia + sistema + seguimiento humano.</p>
+          </div>
+          <div className="mt-12 grid md:grid-cols-3 gap-6">
+            {[
+              { n: "01", t: "Motivación que no falla", d: "Rachas, XP, rangos y misiones. No dependés de ganas: el sistema te empuja.", icon: Flame, c: "from-[#D6FF2A] to-emerald-400" },
+              { n: "02", t: "Transformación garantizada", d: "Programación 100% personalizada con sobrecarga progresiva automática. Basado en Schoenfeld, Israetel, Beardsley.", icon: TrendingUp, c: "from-violet-500 to-fuchsia-500" },
+              { n: "03", t: "Cero lesiones", d: "Técnica guiada, RIR controlado y progresión segura. Tu cuerpo nunca paga el precio.", icon: ShieldCheck, c: "from-cyan-400 to-blue-500" },
+            ].map(s => (
+              <div key={s.n} className="group relative rounded-[24px] bg-[#0A0A0B] border border-zinc-800 p-7 overflow-hidden hover:border-zinc-700 transition">
+                <div className={`absolute -top-10 -right-10 w-32 h-32 bg-gradient-to-br ${s.c} opacity-[0.08] rounded-full blur-2xl`} />
+                <div className="text-[12px] font-black tracking-[0.2em] text-zinc-500">{s.n}</div>
+                <div className={`mt-3 w-12 h-12 rounded-2xl bg-gradient-to-br ${s.c} flex items-center justify-center text-white`}><s.icon size={20} /></div>
+                <h3 className="mt-5 text-xl font-black text-white leading-tight">{s.t}</h3>
+                <p className="mt-2 text-sm leading-relaxed text-zinc-400">{s.d}</p>
+                <div className="mt-6">
+                  <a href={APP_REGISTER} className="inline-flex items-center gap-1 text-sm font-black text-white hover:text-[#D6FF2A]">Comenzar <ArrowRight size={14} /></a>
+                </div>
+              </div>
+            ))}
+          </div>
+          <div className="mt-10 text-center">
+            <a href={APP_REGISTER} className="inline-flex items-center justify-center px-8 py-4 rounded-2xl bg-[#D6FF2A] text-black font-black hover:bg-[#E0FF5A]">Comenzar mi transformación →</a>
+            <p className="mt-3 text-xs font-bold tracking-wide text-zinc-500">Únete a +12k atletas que ya transforman su vida</p>
+          </div>
+        </div>
+      </section>
+
+      {/* TESTIMONIOS - symmetry */}
+      <section className="py-20 bg-[#09090B]">
+        <div className="max-w-[1200px] mx-auto px-4 sm:px-6">
+          <div className="text-center">
+            <Badge><Star size={12} className="fill-[#D6FF2A]" /> Historias reales</Badge>
+            <h2 className="mt-4 text-4xl font-black tracking-tight text-white">Resultados que hablan</h2>
+            <p className="mt-2 text-zinc-400">Aquí lideramos con ejemplo. Atletas reales, datos reales.</p>
+          </div>
+          <div className="mt-10 grid md:grid-cols-3 gap-6">
+            {[
+              { name: "Toñete", change: "Perdió 15kg en 3 meses", quote: "Me estanqué años por no saber progresar. Con Kinetix no me preocupo más. 100% recomendado para ganar músculo.", gain: "-15kg" },
+              { name: "Sofía R.", change: "Ganó 8kg músculo", quote: "La racha y los rangos me hicieron constante por primera vez. Resultados en semanas.", gain: "+8kg" },
+              { name: "Lucas P.", change: "+40% composición", quote: "Progreso automático por planificación personalizada. Todo el que quiera estética debe probarlo.", gain: "+40%" },
+            ].map(card => (
+              <div key={card.name} className="rounded-[24px] bg-zinc-900/60 border border-zinc-800 p-6">
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 rounded-full bg-[#D6FF2A] flex items-center justify-center font-black text-black">{card.name[0]}</div>
+                  <div><div className="text-sm font-black text-white">{card.name}</div><div className="text-xs font-bold text-[#D6FF2A]">{card.change}</div></div>
+                  <div className="ml-auto text-xs font-black px-2 py-1 rounded-full bg-white text-black">{card.gain}</div>
+                </div>
+                <p className="mt-4 text-sm leading-relaxed text-zinc-300 italic">“{card.quote}”</p>
+                <div className="mt-4 flex gap-1">{[1, 2, 3, 4, 5].map(i => <Star key={i} size={14} className="fill-[#D6FF2A] text-[#D6FF2A]" />)}</div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* FUNCIONALIDADES - truecoach + symmetry */}
+      <section id="funcionalidades" className="py-20 bg-[#101012] border-y border-zinc-900">
+        <div className="max-w-[1200px] mx-auto px-4 sm:px-6">
+          <div className="text-center max-w-3xl mx-auto">
+            <Badge>Funcionalidades principales</Badge>
+            <h2 className="mt-4 text-4xl font-black tracking-tight text-white">Todo lo que necesitás,<br />en una sola app</h2>
+            <p className="mt-3 text-zinc-400">Programación, nutrición, progreso y comunidad. Sin spreadsheets, sin WhatsApps perdidos.</p>
+          </div>
+
+          <div className="mt-10 grid md:grid-cols-2 lg:grid-cols-4 gap-6">
+            {[
+              { title: "Plan Personalizado", desc: "1 clic. Adaptado a tu cuerpo, objetivo y material.", icon: Target, grad: "from-[#D6FF2A] to-emerald-400" },
+              { title: "Cálculo Automático", desc: "Sobrecarga progresiva: te dice cuánto levantar.", icon: BarChart3, grad: "from-violet-500 to-purple-500" },
+              { title: "Rangos & Gamificación", desc: "Subí de rango según tu nivel real. XP, rachas, badges.", icon: Crown, grad: "from-amber-400 to-orange-500" },
+              { title: "Red Social Privada", desc: "Compartí progreso con tu entrenador y amigos.", icon: Users, grad: "from-cyan-400 to-blue-500" },
+            ].map(f => (
+              <div key={f.title} className="rounded-[24px] bg-[#0A0A0B] border border-zinc-800 p-7 hover:border-zinc-700 transition group">
+                <div className={`w-12 h-12 rounded-2xl bg-gradient-to-br ${f.grad} flex items-center justify-center text-white`}><f.icon size={20} /></div>
+                <h3 className="mt-5 font-black text-white">{f.title}</h3>
+                <p className="mt-2 text-sm text-zinc-400 leading-relaxed">{f.desc}</p>
+              </div>
+            ))}
+          </div>
+
+          <div className="mt-10 grid lg:grid-cols-2 gap-6 items-center">
+            <div className="rounded-[24px] bg-zinc-900 border border-zinc-800 p-6">
+              <div className="text-xs font-black tracking-widest text-zinc-500 uppercase">Para entrenadores — TrueCoach style</div>
+              <h3 className="mt-2 text-2xl font-black text-white">Menos admin, más coaching</h3>
+              <ul className="mt-4 space-y-3 text-sm text-zinc-300">
+                <li className="flex gap-2"><CheckCircle2 size={16} className="text-[#D6FF2A] mt-0.5" /> <span><b>Public Profiles:</b> web para captar clientes en tu link de bio</span></li>
+                <li className="flex gap-2"><CheckCircle2 size={16} className="text-[#D6FF2A] mt-0.5" /> <span><b>Program Builder:</b> escribí una vez, personalizá por cliente</span></li>
+                <li className="flex gap-2"><CheckCircle2 size={16} className="text-[#D6FF2A] mt-0.5" /> <span><b>Client Management:</b> todo en un lugar — check-ins, pagos, progreso</span></li>
+                <li className="flex gap-2"><CheckCircle2 size={16} className="text-[#D6FF2A] mt-0.5" /> <span><b>Compliance 7/30/90:</b> ves quién cumple y quién necesita atención</span></li>
+              </ul>
+              <div className="mt-6 flex gap-3">
+                <a href={APP_REGISTER} className="px-5 py-3 rounded-xl bg-white text-black font-black text-sm">Probar 14 días gratis</a>
+                <a href={APP_URL} className="px-5 py-3 rounded-xl bg-zinc-800 text-white font-black text-sm border border-zinc-700">Ver demo</a>
+              </div>
+            </div>
+            <div className="rounded-[24px] bg-[#D6FF2A] p-7 text-black">
+              <div className="text-xs font-black tracking-widest uppercase opacity-60">Usá donde quieras</div>
+              <h3 className="mt-1 text-2xl font-black">Web + Móvil, sincronizados</h3>
+              <p className="mt-2 text-sm font-medium opacity-70">Entrená en el gimnasio con el móvil, analizá en casa en la web. Progreso, check-ins y mensajes 100% sincronizados.</p>
+              <div className="mt-5 grid grid-cols-2 gap-3">
+                <a href={APP_URL} className="flex items-center justify-center gap-2 py-3 rounded-xl bg-black text-white font-black text-sm"><Monitor size={16} /> Abrir en web</a>
+                <a href={APP_REGISTER} className="flex items-center justify-center gap-2 py-3 rounded-xl bg-white text-black font-black text-sm border border-black/10"><Smartphone size={16} /> Descargar app</a>
+              </div>
+              <div className="mt-4 text-xs font-bold opacity-60">Si TikTok no deja abrir la tienda: ⋯ → Abrir en navegador</div>
             </div>
           </div>
-        </section>
-      </main>
-      <Footer />
+        </div>
+      </section>
+
+      {/* PRICING - truecoach */}
+      <section id="pricing" className="py-20 bg-[#09090B]">
+        <div className="max-w-[1200px] mx-auto px-4 sm:px-6">
+          <div className="text-center max-w-3xl mx-auto">
+            <Badge><Award size={12} /> Planes</Badge>
+            <h2 className="mt-4 text-4xl font-black tracking-tight text-white">Invertí en tu salud,<br />sin letra chica</h2>
+            <p className="mt-3 text-zinc-400">Cancelá cuando quieras. Sin contratos. 14 días de prueba, sin tarjeta.</p>
+          </div>
+          <div className="mt-10 grid md:grid-cols-3 gap-6 max-w-5xl mx-auto">
+            {[
+              { name: "Básico", price: "$0", cad: "/mes", desc: "Para arrancar", feats: ["50+ ejercicios", "Seguimiento básico", "Comunidad"], cta: "Crear cuenta gratis", featured: false },
+              { name: "Pro Athlete", price: "$19", cad: "/mes", desc: "Para resultados serios", feats: ["Todo Básico", "Rutinas con IA", "Nutrición + macros", "Analíticas avanzadas", "Soporte prioritario"], cta: "Comenzar prueba gratis", featured: true },
+              { name: "Elite Coach", price: "$49", cad: "/mes", desc: "1 a 1 con Ezequiel", feats: ["Todo Pro", "Coach humano", "Ajustes semanales", "Eventos exclusivos"], cta: "Aplicar ahora", featured: false },
+            ].map(p => (
+              <div key={p.name} className={`relative rounded-[24px] p-7 flex flex-col ${p.featured ? 'bg-white text-black border-2 border-[#D6FF2A] shadow-[0_20px_60px_rgba(214,255,42,0.15)] md:-translate-y-2' : 'bg-zinc-900 border border-zinc-800 text-white'}`}>
+                {p.featured && <div className="absolute -top-3 left-1/2 -translate-x-1/2 px-3 py-1 rounded-full bg-[#D6FF2A] text-black text-[11px] font-black tracking-widest uppercase">Más popular</div>}
+                <h3 className={`text-lg font-black ${p.featured ? 'text-black' : 'text-white'}`}>{p.name}</h3>
+                <div className="mt-2 flex items-baseline gap-1"><span className={`text-4xl font-black ${p.featured ? 'text-black' : 'text-white'}`}>{p.price}</span><span className={`text-sm ${p.featured ? 'text-zinc-500' : 'text-zinc-500'}`}>{p.cad}</span></div>
+                <p className={`text-sm ${p.featured ? 'text-zinc-600' : 'text-zinc-400'}`}>{p.desc}</p>
+                <ul className="mt-6 space-y-3 flex-1">
+                  {p.feats.map(f => (
+                    <li key={f} className={`flex items-center gap-2 text-sm font-bold ${p.featured ? 'text-black' : 'text-zinc-300'}`}><CheckCircle2 size={16} className={p.featured ? 'text-black' : 'text-[#D6FF2A]'} /> {f}</li>
+                  ))}
+                </ul>
+                <a href={APP_REGISTER} className={`mt-7 inline-flex justify-center py-3 rounded-xl font-black ${p.featured ? 'bg-black text-white hover:bg-zinc-900' : 'bg-[#D6FF2A] text-black hover:bg-[#E0FF5A]'}`}>{p.cta}</a>
+                {p.featured && <div className="mt-3 text-center text-xs font-bold text-zinc-500">7 días gratis, luego $19/mes</div>}
+              </div>
+            ))}
+          </div>
+          <div className="mt-6 text-center text-xs font-bold text-zinc-500">Precios en USD · Impuestos incluidos · Podés cambiar de plan en cualquier momento</div>
+        </div>
+      </section>
+
+      {/* ABRE EN NAVEGADOR + FINAL CTA */}
+      <section className="py-16 bg-[#101012] border-y border-zinc-900">
+        <div className="max-w-[900px] mx-auto px-4 sm:px-6 text-center">
+          <h3 className="text-2xl font-black text-white">Tu transformación comienza hoy</h3>
+          <p className="mt-2 text-zinc-400">Usalo en web sin instalar, o descargá la app. Tu progreso vive en ambos.</p>
+          <div className="mt-6 flex flex-col sm:flex-row justify-center gap-3">
+            <a href={APP_URL} className="inline-flex items-center justify-center gap-2 px-7 py-4 rounded-2xl bg-[#D6FF2A] text-black font-black hover:bg-[#E0FF5A]"><Monitor size={18} /> Abrir en navegador</a>
+            <a href={APP_REGISTER} className="inline-flex items-center justify-center gap-2 px-7 py-4 rounded-2xl bg-white text-black font-black"><Zap size={18} /> Crear cuenta gratis</a>
+          </div>
+          <div className="mt-6 p-4 rounded-2xl bg-zinc-900 border border-zinc-800 text-left max-w-xl mx-auto">
+            <div className="text-xs font-black tracking-widest text-zinc-400 uppercase">¿TikTok no te deja abrir la tienda?</div>
+            <ol className="mt-2 text-sm text-zinc-300 list-decimal list-inside space-y-1">
+              <li>Pulsá los tres puntos ⋯ arriba a la derecha</li>
+              <li>Elegí “Abrir en el navegador”</li>
+              <li>Volvé a pulsar descarga — o usá “Abrir en navegador” directo</li>
+            </ol>
+            <button onClick={() => navigator.clipboard.writeText(APP_URL)} className="mt-3 text-xs font-black px-3 py-2 rounded-xl bg-zinc-800 text-white border border-zinc-700 hover:bg-zinc-700">Copiar enlace del app</button>
+          </div>
+          <div className="mt-8 flex items-center justify-center gap-6 text-xs font-bold text-zinc-500">
+            <span className="flex items-center gap-1.5"><Clock size={14} /> 3 meses transformación</span>
+            <span className="flex items-center gap-1.5"><Heart size={14} /> Soporte humano</span>
+            <span className="flex items-center gap-1.5"><ShieldCheck size={14} /> Datos protegidos</span>
+          </div>
+        </div>
+      </section>
+
+      <footer className="bg-[#09090B] border-t border-zinc-900 py-12">
+        <div className="max-w-[1200px] mx-auto px-4 sm:px-6">
+          <div className="flex flex-col md:flex-row items-center justify-between gap-6">
+            <div className="flex items-center gap-2.5">
+              <div className="w-8 h-8 rounded-lg bg-[#D6FF2A] flex items-center justify-center"><Zap size={16} className="text-black fill-black" /></div>
+              <span className="font-black text-white">KINETIX<span className="text-[#D6FF2A]">FITT</span></span>
+              <span className="text-xs text-zinc-500">© 2026 EZEQUIEL COACHING. Todos los derechos reservados.</span>
+            </div>
+            <div className="flex items-center gap-4 text-sm font-bold text-zinc-400">
+              <a href={`${APP_URL}/privacy`} className="hover:text-white">Privacidad</a>
+              <a href={`${APP_URL}/terms`} className="hover:text-white">Términos</a>
+              <a href="mailto:ezequiel@kinetixfitt.com" className="hover:text-white">Contacto</a>
+            </div>
+          </div>
+        </div>
+      </footer>
     </div>
   );
 }
