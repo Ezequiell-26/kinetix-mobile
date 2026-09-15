@@ -1,194 +1,210 @@
 import { NextResponse } from "next/server";
-import { prisma } from "@/lib/db";
 import crypto from "crypto";
+import { Prisma } from "@prisma/client";
+import { prisma } from "@/lib/db";
 
-/**
- * Webhook para Stripe y Mercado Pago
- * 
- * Este endpoint recibe notificaciones automáticas de las plataformas de pago
- * y actualiza el estado de pagos y suscripciones en la base de datos.
- * 
- * Configuración requerida en .env:
- * - STRIPE_WEBHOOK_SECRET: Firmado desde dashboard de Stripe
- * - MP_ACCESS_TOKEN: Token de acceso de Mercado Pago
- * - MP_WEBHOOK_SECRET: Secret de notificaciones de MP
- */
+function constantTimeHexEqual(a: string, b: string) {
+  const aa = Buffer.from(a, "utf8");
+  const bb = Buffer.from(b, "utf8");
+  return aa.length === bb.length && crypto.timingSafeEqual(aa, bb);
+}
 
-function verifyMpSignature(rawBody: string, headerVal: string | null, secret: string): boolean {
-  if (!headerVal || !secret) return false;
-  // MP envía x-signature: ts=TIMESTAMP,v1=HASH  (ver docs MP)
-  // Para test: también soporta hash plano
-  try {
-    const parts = Object.fromEntries(
-      headerVal.split(",").map((p) => {
-        const idx = p.indexOf("=");
-        if (idx === -1) return [p.trim(), ""] as [string, string];
-        return [p.slice(0, idx).trim(), p.slice(idx + 1).trim()] as [string, string];
-      })
-    );
-    const ts = parts["ts"];
-    const v1 = parts["v1"] || headerVal.trim();
-    if (!v1) return false;
-    // Construcción del payload firmado: si hay ts usamos "ts.rawBody", si no solo rawBody
-    const payload = ts ? `${ts}.${rawBody}` : rawBody;
-    const computed = crypto.createHmac("sha256", secret).update(payload).digest("hex");
-    const a = Buffer.from(computed, "utf8");
-    const b = Buffer.from(v1, "utf8");
-    if (a.length !== b.length) return false;
-    return crypto.timingSafeEqual(a, b);
-  } catch {
-    return false;
+function verifyMpSignature(req: Request, dataId: string | null, secret: string) {
+  const signature = req.headers.get("x-signature");
+  const requestId = req.headers.get("x-request-id");
+  if (!signature || !secret) return false;
+  const parts = Object.fromEntries(signature.split(",").map((part) => {
+    const index = part.indexOf("=");
+    return index >= 0 ? [part.slice(0, index).trim(), part.slice(index + 1).trim()] : [part.trim(), ""];
+  }));
+  const ts = parts.ts;
+  const v1 = parts.v1;
+  if (!v1 || !ts) return false;
+  const manifestParts: string[] = [];
+  if (dataId) manifestParts.push(`id:${dataId};`);
+  if (requestId) manifestParts.push(`request-id:${requestId};`);
+  manifestParts.push(`ts:${ts};`);
+  const manifest = manifestParts.join("");
+  const digest = crypto.createHmac("sha256", secret).update(manifest).digest("hex");
+  return constantTimeHexEqual(digest, v1);
+}
+
+async function claimEvent(provider: "stripe" | "mercadopago", eventId: string) {
+  const inserted = await prisma.$queryRaw<Array<{ id: string }>>(Prisma.sql`
+    INSERT INTO "PaymentWebhookEvent" ("id", "provider", "eventId")
+    VALUES (${crypto.randomUUID()}, ${provider}, ${eventId})
+    ON CONFLICT ("provider", "eventId") DO NOTHING
+    RETURNING "id"
+  `);
+  return inserted.length > 0;
+}
+
+function subscriptionStatus(status: string) {
+  if (status === "active" || status === "trialing") return "ACTIVA" as const;
+  if (status === "canceled") return "CANCELADA" as const;
+  if (status === "past_due" || status === "unpaid" || status === "incomplete_expired") return "VENCIDA" as const;
+  return "PENDIENTE" as const;
+}
+
+async function settlePayment(input: {
+  paymentId?: string | null;
+  clientId?: string | null;
+  status: "PAGADO" | "PENDIENTE" | "VENCIDO";
+  method: string;
+  externalDescription: string;
+  amount?: number | null;
+}) {
+  const where = input.paymentId
+    ? { id: input.paymentId }
+    : input.clientId
+      ? { clientId: input.clientId, status: "PENDIENTE" as const }
+      : null;
+  if (!where) return;
+
+  await prisma.payment.updateMany({
+    where,
+    data: {
+      status: input.status,
+      method: input.method,
+      ...(input.amount && Number.isFinite(input.amount) && input.amount > 0 ? { amount: input.amount } : {}),
+      description: input.externalDescription.slice(0, 500),
+    },
+  });
+
+  if (input.status === "PAGADO" && input.clientId) {
+    const subscription = await prisma.subscription.findUnique({ where: { clientId: input.clientId } });
+    if (subscription) {
+      const nextPayment = new Date();
+      nextPayment.setDate(nextPayment.getDate() + 30);
+      await prisma.subscription.update({
+        where: { clientId: input.clientId },
+        data: { status: "ACTIVA", nextPayment, ...(input.amount ? { price: input.amount } : {}) },
+      });
+    }
   }
 }
 
 export async function POST(req: Request) {
   try {
     const body = await req.text();
-    const signature = req.headers.get("stripe-signature");
+    const url = new URL(req.url);
+    const stripeSignature = req.headers.get("stripe-signature");
     const mpSignature = req.headers.get("x-signature");
-    
-    // Determinar proveedor por headers o contenido
-    const isStripe = !!signature;
-    const isMercadoPago = !!mpSignature || req.headers.get("x-request-id")?.includes("MP");
-    
-    let event: any;
-    
-    // Verificar firma de Stripe
-    if (isStripe) {
+
+    if (stripeSignature) {
       if (!process.env.STRIPE_SECRET_KEY || !process.env.STRIPE_WEBHOOK_SECRET) {
         return NextResponse.json({ error: "Stripe no configurado" }, { status: 500 });
       }
-      const { default: Stripe } = await import("stripe");
+      const Stripe = (await import("stripe")).default;
       const stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
+      let event: import("stripe").default.Event;
       try {
-        event = stripe.webhooks.constructEvent(
-          body,
-          signature!,
-          process.env.STRIPE_WEBHOOK_SECRET!
-        );
-      } catch (err) {
-        console.error("[WEBHOOK] Stripe signature verification failed:", err);
+        event = stripe.webhooks.constructEvent(body, stripeSignature, process.env.STRIPE_WEBHOOK_SECRET);
+      } catch {
         return NextResponse.json({ error: "Invalid signature" }, { status: 400 });
       }
-      
-      // Procesar eventos de Stripe
+
+      if (!(await claimEvent("stripe", event.id))) {
+        return NextResponse.json({ received: true, duplicate: true });
+      }
+
+      const payload = event.data.object as unknown as Record<string, any>;
       switch (event.type) {
-        case "checkout.session.completed": {
-          const session = event.data.object;
-          const clientId = session.metadata?.clientId;
-          const paymentId = session.metadata?.paymentId;
-          
-          if (clientId) {
-            await prisma.payment.updateMany({
-              where: { 
-                clientId,
-                status: "PENDIENTE"
-              },
-              data: {
-                status: "PAGADO",
-                method: "STRIPE",
-                description: `Pago vía Stripe - ${session.id}`
-              }
-            });
-            
-            // Actualizar suscripción
-            const client = await prisma.client.findUnique({
-              where: { id: clientId },
-              include: { subscription: true }
-            });
-            
-            if (client?.subscription) {
-              const nextPayment = new Date();
-              nextPayment.setDate(nextPayment.getDate() + 30);
-              
-              await prisma.subscription.update({
-                where: { clientId },
-                data: {
-                  status: "ACTIVA",
-                  nextPayment,
-                  price: session.amount_total / 100 // Convertir de centavos
-                }
-              });
-            }
-          }
+        case "checkout.session.completed":
+        case "checkout.session.async_payment_succeeded": {
+          const clientId = typeof payload.metadata?.clientId === "string" ? payload.metadata.clientId : null;
+          const paymentId = typeof payload.metadata?.paymentId === "string" ? payload.metadata.paymentId : null;
+          await settlePayment({
+            paymentId,
+            clientId,
+            status: "PAGADO",
+            method: "STRIPE",
+            externalDescription: `Pago vía Stripe · ${event.id}`,
+            amount: typeof payload.amount_total === "number" ? payload.amount_total / 100 : null,
+          });
           break;
         }
-        
         case "payment_intent.succeeded": {
-          const paymentIntent = event.data.object;
-          // Similar lógica para payment intents
+          const clientId = typeof payload.metadata?.clientId === "string" ? payload.metadata.clientId : null;
+          const paymentId = typeof payload.metadata?.paymentId === "string" ? payload.metadata.paymentId : null;
+          await settlePayment({
+            paymentId,
+            clientId,
+            status: "PAGADO",
+            method: "STRIPE",
+            externalDescription: `PaymentIntent · ${event.id}`,
+            amount: typeof payload.amount_received === "number" ? payload.amount_received / 100 : null,
+          });
           break;
         }
-        
-        case "customer.subscription.updated": {
-          const subscription = event.data.object;
-          const clientId = subscription.metadata?.clientId;
-          
+        case "payment_intent.payment_failed": {
+          const clientId = typeof payload.metadata?.clientId === "string" ? payload.metadata.clientId : null;
+          const paymentId = typeof payload.metadata?.paymentId === "string" ? payload.metadata.paymentId : null;
+          await settlePayment({ paymentId, clientId, status: "VENCIDO", method: "STRIPE", externalDescription: `Pago rechazado · ${event.id}` });
+          break;
+        }
+        case "customer.subscription.updated":
+        case "customer.subscription.deleted": {
+          const clientId = typeof payload.metadata?.clientId === "string" ? payload.metadata.clientId : null;
           if (clientId) {
-            await prisma.subscription.update({
+            await prisma.subscription.updateMany({
               where: { clientId },
               data: {
-                status: subscription.status === "active" ? "ACTIVA" : 
-                       subscription.status === "canceled" ? "CANCELADA" : "VENCIDA"
-              }
+                status: subscriptionStatus(String(payload.status || (event.type.endsWith("deleted") ? "canceled" : "unknown"))),
+                ...(typeof payload.current_period_end === "number" ? { nextPayment: new Date(payload.current_period_end * 1000) } : {}),
+              },
             });
           }
           break;
         }
+        default:
+          break;
       }
+      return NextResponse.json({ received: true });
     }
-    
-    // Verificar firma de Mercado Pago
-    if (isMercadoPago) {
+
+    if (mpSignature) {
       const secret = process.env.MP_WEBHOOK_SECRET;
-      if (!secret) {
-        console.error("[WEBHOOK] MP_WEBHOOK_SECRET no configurado");
-        return NextResponse.json({ error: "MP no configurado" }, { status: 500 });
+      if (!secret) return NextResponse.json({ error: "MP no configurado" }, { status: 500 });
+      const dataId = url.searchParams.get("data.id") || url.searchParams.get("data_id");
+      if (!verifyMpSignature(req, dataId, secret)) {
+        return NextResponse.json({ error: "Invalid MP signature" }, { status: 401 });
       }
-      if (!verifyMpSignature(body, mpSignature, secret)) {
-        console.error("[WEBHOOK] MP signature verification failed");
-        return NextResponse.json({ error: "Invalid MP signature" }, { status: 400 });
+      let data: Record<string, any>;
+      try { data = JSON.parse(body); } catch { return NextResponse.json({ error: "Invalid JSON" }, { status: 400 }); }
+      const eventId = data.id != null ? String(data.id) : `${data.type || "unknown"}:${dataId || "unknown"}:${data.action || "unknown"}`;
+      if (!(await claimEvent("mercadopago", eventId))) {
+        return NextResponse.json({ received: true, duplicate: true });
       }
-      
-      const data = JSON.parse(body);
-      
-      switch (data.type) {
-        case "payment": {
-          const payment = data.data?.id;
-          // Fetch payment details from MP API
-          // Update local payment record
-          break;
+
+      if (data.type === "payment" && dataId && process.env.MP_ACCESS_TOKEN) {
+        const response = await fetch(`https://api.mercadopago.com/v1/payments/${encodeURIComponent(dataId)}`, {
+          headers: { Authorization: `Bearer ${process.env.MP_ACCESS_TOKEN}` },
+          cache: "no-store",
+        });
+        if (response.ok) {
+          const payment = await response.json() as Record<string, any>;
+          const externalReference = typeof payment.external_reference === "string" ? payment.external_reference : null;
+          const status = payment.status === "approved" ? "PAGADO" : payment.status === "pending" || payment.status === "in_process" ? "PENDIENTE" : "VENCIDO";
+          await settlePayment({
+            paymentId: externalReference,
+            status,
+            method: "MERCADOPAGO",
+            externalDescription: `Mercado Pago · ${dataId}`,
+            amount: typeof payment.transaction_amount === "number" ? payment.transaction_amount : null,
+          });
         }
-        
-        case "subscription": {
-          const subscription = data.data?.id;
-          // Fetch subscription details and update local record
-          break;
-        }
       }
+      return NextResponse.json({ received: true });
     }
-    
-    // Si no es ni Stripe ni MP, podría ser un ping de prueba
-    if (!isStripe && !isMercadoPago) {
-      console.log("[WEBHOOK] Received unknown webhook type");
-      // Aceptar para evitar reintentos si es un ping de salud
-    }
-    
+
     return NextResponse.json({ received: true });
   } catch (error) {
-    console.error("[WEBHOOK] Error processing webhook:", error);
-    return NextResponse.json(
-      { error: "Webhook processing failed" },
-      { status: 500 }
-    );
+    console.error("[WEBHOOK] processing failed", error);
+    return NextResponse.json({ error: "Webhook processing failed" }, { status: 500 });
   }
 }
 
-// GET para verificación de endpoint (usado por algunas plataformas)
 export async function GET() {
-  return NextResponse.json({ 
-    status: "ok", 
-    message: "Webhook endpoint active",
-    providers: ["stripe", "mercadopago"]
-  });
+  return NextResponse.json({ status: "ok", providers: ["stripe", "mercadopago"] });
 }
