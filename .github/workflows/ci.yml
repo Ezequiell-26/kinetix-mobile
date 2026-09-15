@@ -1,8 +1,7 @@
 name: CI
 
-# Gates del monorepo. apps/mobile usa el lock raíz; apps/web conserva su
-# lock independiente para no mezclar dos árboles de dependencias de Next/React.
-# PostgreSQL efímero es la base de CI y coincide con el schema PostgreSQL.
+# Gates del monorepo. PostgreSQL efímero coincide con el schema de apps/mobile.
+# El workflow valida tipos, lint, migraciones, seed, tests y builds antes de integrar cambios.
 
 on:
   push:
@@ -22,6 +21,11 @@ jobs:
           POSTGRES_DB: postgres
         ports:
           - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U postgres -d postgres"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 20
 
     env:
       DATABASE_URL: postgresql://postgres:postgres@localhost:5432/postgres
@@ -54,18 +58,6 @@ jobs:
 
       - name: Lint web
         run: npm run lint --prefix apps/web
-
-      - name: Esperar Postgres efímero
-        run: |
-          for i in $(seq 1 30); do
-            if echo "SELECT 1;" | npx prisma db execute --stdin --schema apps/mobile/prisma/schema.prisma >/dev/null 2>&1; then
-              echo "Postgres listo"
-              exit 0
-            fi
-            sleep 3
-          done
-          echo "Postgres no respondió a tiempo"
-          exit 1
 
       - name: Migrate + seed
         run: |
