@@ -6,6 +6,7 @@ on:
 
 permissions:
   contents: write
+  workflows: write
 
 jobs:
   cleanup:
@@ -143,7 +144,7 @@ jobs:
           sidebar_path.write_text(sidebar, encoding="utf-8")
           PY
 
-      - name: Commit and remove temporary workflow
+      - name: Commit cleanup and remove temporary workflow
         shell: bash
         run: |
           git config user.name "github-actions[bot]"
