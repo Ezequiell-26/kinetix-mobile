@@ -55,5 +55,14 @@
       "path": "/api/cron/sync-data",
       "schedule": "0 2 * * *"
     }
-  ]
+  ],
+  "github": {
+    "silent": false,
+    "autoJobCancelation": true
+  },
+  "functions": {
+    "app/api/**/*.ts": {
+      "maxDuration": 60
+    }
+  }
 }
