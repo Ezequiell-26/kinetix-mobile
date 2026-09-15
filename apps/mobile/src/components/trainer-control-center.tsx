@@ -9,6 +9,7 @@ import { AlertTriangle, TrendingUp, Users, Clock, Flame, Target, Mail, Loader2 }
 
 type ApiClient = {
   id: string;
+  userId?: string | null;
   name: string;
   goal: string;
   status: string;
@@ -20,18 +21,6 @@ type ApiLog = {
   clientId?: string | null;
   date: string;
   sets?: Array<{ exerciseName?: string; weight?: number | null; reps?: number | null }>;
-};
-
-type ClientRow = {
-  id: string;
-  name: string;
-  goal: string;
-  adherence: number;
-  lastWorkoutDaysAgo: number;
-  streak: number;
-  volumeWeek: number;
-  prs: number;
-  checkinPending: boolean;
 };
 
 function daysAgo(date: string) {
@@ -91,10 +80,7 @@ export function TrainerControlCenter(){
           fetch("/api/clients", { cache: "no-store" }),
           fetch("/api/workout-logs", { cache: "no-store" }),
         ]);
-        const [clientsPayload, logsPayload] = await Promise.all([
-          clientsResponse.json(),
-          logsResponse.json(),
-        ]);
+        const [clientsPayload, logsPayload] = await Promise.all([clientsResponse.json(), logsResponse.json()]);
         if (!clientsResponse.ok) throw new Error(clientsPayload?.error || "No se pudieron cargar los clientes.");
         if (!logsResponse.ok) throw new Error(logsPayload?.error || "No se pudieron cargar los entrenamientos.");
         if (!cancelled) {
@@ -117,22 +103,13 @@ export function TrainerControlCenter(){
     const frequency = Math.max(1, Number(client.assignedProgram?.frequency || 3));
     const expected = frequency * 4;
     const adherence = Math.min(100, Math.round((recent28.length / expected) * 100));
+    const streak = computeStreak(clientLogs.map((log) => log.date));
     const lastWorkoutDaysAgo = clientLogs.length ? Math.min(...clientLogs.map((log) => daysAgo(log.date))) : 999;
     const volumeWeek = clientLogs.filter((log) => daysAgo(log.date) <= 7).reduce((total, log) => total + (log.sets || []).reduce((sum, set) => sum + (Number(set.weight) || 0) * (Number(set.reps) || 0), 0), 0);
-    const status = lastWorkoutDaysAgo >= 5 || adherence < 50 ? "riesgo" : computePrs(clientLogs) === 0 && adherence < 75 ? "estancado" : adherence >= 90 && computeStreak(clientLogs.map((log) => log.date)) >= 7 ? "top" : "ok";
-    return {
-      id: client.id,
-      name: client.name,
-      goal: client.goal,
-      adherence,
-      lastWorkoutDaysAgo,
-      streak: computeStreak(clientLogs.map((log) => log.date)),
-      volumeWeek: Math.round(volumeWeek),
-      prs: computePrs(clientLogs),
-      checkinPending: false,
-      status,
-      reason: status === "riesgo" ? `${lastWorkoutDaysAgo >= 999 ? "Sin entrenamientos" : `${lastWorkoutDaysAgo}d sin entrenar`} • ${adherence}% adherencia` : status === "estancado" ? "Sin PRs recientes + adherencia por debajo del objetivo" : status === "top" ? `Racha ${computeStreak(clientLogs.map((log) => log.date))}d • ${Math.round(volumeWeek).toLocaleString("es-AR")}kg` : `${adherence}% adherencia`,
-    };
+    const prs = computePrs(clientLogs);
+    const status = lastWorkoutDaysAgo >= 5 || adherence < 50 ? "riesgo" : prs === 0 && adherence < 75 ? "estancado" : adherence >= 90 && streak >= 7 ? "top" : "ok";
+    const reason = status === "riesgo" ? `${lastWorkoutDaysAgo >= 999 ? "Sin entrenamientos" : `${lastWorkoutDaysAgo}d sin entrenar`} • ${adherence}% adherencia` : status === "estancado" ? "Sin PRs recientes + adherencia por debajo del objetivo" : status === "top" ? `Racha ${streak}d • ${Math.round(volumeWeek).toLocaleString("es-AR")}kg` : `${adherence}% adherencia`;
+    return { ...client, adherence, lastWorkoutDaysAgo, streak, volumeWeek: Math.round(volumeWeek), prs, checkinPending: false, status, reason };
   }), [clients, logs]);
 
   const filtered = enriched.filter((client) => filter === "todos" || client.status === filter);
@@ -149,14 +126,7 @@ export function TrainerControlCenter(){
         <CardTitle className="flex items-center gap-2 text-white"><Users size={18} className="text-primary"/> Control de clientes</CardTitle>
         <p className="text-xs text-[#8193A5]">Señales calculadas a partir de tus clientes y entrenamientos registrados.</p>
         <div className="flex gap-1.5 overflow-x-auto pb-1 pt-1">
-          {[
-            {id:"todos", label:`Todos (${counts.todos})`},
-            {id:"riesgo", label:`Atención (${counts.riesgo})`},
-            {id:"estancado", label:`Estancados (${counts.estancado})`},
-            {id:"top", label:`Racha (${counts.top})`},
-          ].map((item) => (
-            <button key={item.id} type="button" onClick={() => setFilter(item.id as typeof filter)} className={`rounded-full border px-3 py-1.5 text-xs font-bold whitespace-nowrap transition ${filter===item.id ? "border-primary bg-primary text-black" : "border-white/[0.06] bg-white/[0.02] text-zinc-400 hover:text-white"}`}>{item.label}</button>
-          ))}
+          {[{id:"todos", label:`Todos (${counts.todos})`},{id:"riesgo", label:`Atención (${counts.riesgo})`},{id:"estancado", label:`Estancados (${counts.estancado})`},{id:"top", label:`Racha (${counts.top})`}].map((item)=><button key={item.id} type="button" onClick={()=>setFilter(item.id as typeof filter)} className={`rounded-full border px-3 py-1.5 text-xs font-bold whitespace-nowrap transition ${filter===item.id?"border-primary bg-primary text-black":"border-white/[0.06] bg-white/[0.02] text-zinc-400 hover:text-white"}`}>{item.label}</button>)}
         </div>
       </CardHeader>
       <CardContent className="space-y-3">
@@ -165,15 +135,8 @@ export function TrainerControlCenter(){
         {!loading && !error && filtered.map((client) => (
           <div key={client.id} className={`flex items-center gap-3 rounded-xl border p-3 ${client.status==="riesgo"?"border-red-500/20 bg-red-500/5":client.status==="estancado"?"border-amber-500/20 bg-amber-500/5":client.status==="top"?"border-primary/20 bg-primary/5":"border-white/[0.06] bg-white/[0.02]"}`}>
             <div className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-xl text-sm font-black ${client.status==="riesgo"?"bg-red-500 text-white":client.status==="estancado"?"bg-amber-500 text-white":client.status==="top"?"bg-primary text-black":"bg-white/[0.06] text-zinc-300"}`}>{client.name.charAt(0).toUpperCase()}</div>
-            <div className="min-w-0 flex-1">
-              <p className="flex items-center gap-1.5 text-sm font-bold text-white">{client.name} {client.status==="top" && <Flame size={12} className="text-primary"/>}</p>
-              <p className="truncate text-xs text-[#8193A5]">{client.goal} • {client.reason}</p>
-              <div className="mt-1 flex flex-wrap gap-2 text-[11px] text-zinc-500"><span className="flex items-center gap-1"><Target size={10}/> {client.adherence}%</span><span className="flex items-center gap-1"><Clock size={10}/> {client.lastWorkoutDaysAgo===999?"Nunca":client.lastWorkoutDaysAgo===0?"Hoy":`${client.lastWorkoutDaysAgo}d`}</span><span className="flex items-center gap-1"><TrendingUp size={10}/> {client.volumeWeek.toLocaleString("es-AR")}kg</span><span>{client.prs} PRs</span></div>
-            </div>
-            <div className="flex flex-col gap-1">
-              <Link href={`/trainer/messages?with=${encodeURIComponent(client.id)}`}><Button size="sm" variant={client.status==="riesgo"?"accent":"outline"} className="h-8 text-xs"><Mail size={12}/> Mensaje</Button></Link>
-              <Link href={`/trainer/clients/${client.id}`}><Button size="sm" variant="ghost" className="h-7 text-[11px]">Ver ficha →</Button></Link>
-            </div>
+            <div className="min-w-0 flex-1"><p className="flex items-center gap-1.5 text-sm font-bold text-white">{client.name} {client.status==="top" && <Flame size={12} className="text-primary"/>}</p><p className="truncate text-xs text-[#8193A5]">{client.goal} • {client.reason}</p><div className="mt-1 flex flex-wrap gap-2 text-[11px] text-zinc-500"><span className="flex items-center gap-1"><Target size={10}/> {client.adherence}%</span><span className="flex items-center gap-1"><Clock size={10}/> {client.lastWorkoutDaysAgo===999?"Nunca":client.lastWorkoutDaysAgo===0?"Hoy":`${client.lastWorkoutDaysAgo}d`}</span><span className="flex items-center gap-1"><TrendingUp size={10}/> {client.volumeWeek.toLocaleString("es-AR")}kg</span><span>{client.prs} PRs</span></div></div>
+            <div className="flex flex-col gap-1"><Link href={`/trainer/messages?with=${encodeURIComponent(client.userId || "")}`}><Button size="sm" variant={client.status==="riesgo"?"accent":"outline"} className="h-8 text-xs" disabled={!client.userId}><Mail size={12}/> Mensaje</Button></Link><Link href={`/trainer/clients/${client.id}`}><Button size="sm" variant="ghost" className="h-7 text-[11px]">Ver ficha →</Button></Link></div>
           </div>
         ))}
         {!loading && !error && filtered.length===0 && <p className="py-8 text-center text-xs text-[#8193A5]">No hay clientes en esta categoría.</p>}
