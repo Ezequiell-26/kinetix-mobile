@@ -1,17 +1,32 @@
-```
 # Dependencies
 node_modules/
 
 # Build outputs
+.next/
+.next-dev*/
+.next-stale*/
 dist/
 build/
-.next/
 out/
 
 # Environment variables
 .env
-.env.local
-*.env.*
+.env.*
+!.env.example
+
+# Local databases / generated state
+*.db
+*.db-journal
+*.sqlite
+*.sqlite3
+*.tsbuildinfo
+
+# Runtime uploads / temporary assets
+public/uploads/
+tmp/
+coverage/
+playwright-report/
+test-results/
 
 # Logs
 *.log
@@ -28,4 +43,3 @@ Thumbs.db
 # IDE specific
 .vscode/
 .idea/
-```
