@@ -1,7 +1,7 @@
 "use client";
 import Link from "next/link";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import {
   Activity,
   Apple,
@@ -30,11 +30,13 @@ import {
   X,
   ClipboardCheck,
   Clock,
+  Loader2,
 } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 import { NotificationsBell } from "@/components/notifications-bell";
 import { OfflineIndicator } from "@/components/offline-indicator";
 import { ThemeToggle } from "@/components/theme-toggle";
+import { BRAND } from "@/constants/branding";
 
 type NavLink = { href: string; label: string; icon: LucideIcon; badge?: string };
 type NavGroup = { label: string; links: NavLink[] };
@@ -138,8 +140,26 @@ export function WebSidebar({ role, userName, children }: WebSidebarProps) {
   const searchParams = useSearchParams();
   const router = useRouter();
   const [mobileOpen, setMobileOpen] = useState(false);
+  const [navigating, setNavigating] = useState(false);
   const navGroups = role === "CLIENT" ? clientNavGroups : trainerNavGroups;
   const dashboardHref = role === "CLIENT" ? "/client/dashboard" : "/trainer/dashboard";
+  const searchKey = searchParams.toString();
+  const currentHref = `${pathname}${searchKey ? `?${searchKey}` : ""}`;
+
+  useEffect(() => {
+    setNavigating(false);
+  }, [pathname, searchKey]);
+
+  useEffect(() => {
+    if (!navigating) return;
+    const timeoutId = window.setTimeout(() => setNavigating(false), 10000);
+    return () => window.clearTimeout(timeoutId);
+  }, [navigating]);
+
+  function startNavigation(href: string, closeMobile = false) {
+    if (href !== currentHref) setNavigating(true);
+    if (closeMobile) setMobileOpen(false);
+  }
 
   async function handleLogout() {
     await fetch("/api/auth/logout", { method: "POST" });
@@ -176,7 +196,7 @@ export function WebSidebar({ role, userName, children }: WebSidebarProps) {
                 <li key={`${link.href}-${link.label}`}>
                   <Link
                     href={link.href}
-                    onClick={mobile ? () => setMobileOpen(false) : undefined}
+                    onClick={() => startNavigation(link.href, mobile)}
                     aria-current={active ? "page" : undefined}
                     className={`flex min-h-11 items-center gap-3 rounded-xl border px-3 py-2.5 text-sm font-semibold transition-all ${
                       active
@@ -215,13 +235,13 @@ export function WebSidebar({ role, userName, children }: WebSidebarProps) {
             >
               {mobileOpen ? <X size={20} /> : <Menu size={20} />}
             </button>
-            <Link href={dashboardHref} className="group flex min-w-0 items-center gap-3">
+            <Link href={dashboardHref} onClick={() => startNavigation(dashboardHref)} className="group flex min-w-0 items-center gap-3">
               <div className="relative flex h-9 w-9 shrink-0 items-center justify-center overflow-hidden rounded-xl bg-primary font-black text-black shadow-[0_4px_20px_rgba(214,255,42,0.18)]">
                 <span className="absolute inset-0 rounded-xl bg-white/20 opacity-0 transition-opacity group-hover:opacity-100" />
                 <span className="font-display text-lg font-black" aria-hidden="true">K</span>
               </div>
               <div className="hidden min-w-0 sm:block">
-                <span className="block font-display text-sm font-bold tracking-tight text-white">KINETIXFITT</span>
+                <span className="block font-display text-sm font-bold tracking-tight text-white">{BRAND.name}</span>
                 <span className="block truncate text-[9px] font-bold uppercase tracking-[0.18em] text-zinc-500">
                   {role === "CLIENT" ? "Panel de Cliente" : "Panel de Entrenador"}
                 </span>
@@ -260,7 +280,7 @@ export function WebSidebar({ role, userName, children }: WebSidebarProps) {
           </div>
         </aside>
 
-        <main className="min-w-0 flex-1 bg-transparent">
+        <main className={`min-w-0 flex-1 bg-transparent${role === "CLIENT" && pathname === "/client/dashboard" ? " kfx-client-dashboard" : ""}`}>
           <div className="mx-auto w-full max-w-[1600px] px-4 py-5 sm:px-6 sm:py-6 lg:px-8">{children}</div>
         </main>
       </div>
@@ -271,7 +291,7 @@ export function WebSidebar({ role, userName, children }: WebSidebarProps) {
           <aside className="fixed inset-y-0 left-0 z-[51] w-[min(88vw,22rem)] overflow-y-auto border-r border-subtle/50 bg-[#080D11] shadow-2xl lg:hidden" aria-label="Menú móvil">
             <div className="p-4 pt-5">
               <div className="mb-6 flex items-center justify-between">
-                <Link href={dashboardHref} onClick={() => setMobileOpen(false)} className="font-display font-bold text-white">KINETIXFITT</Link>
+                <Link href={dashboardHref} onClick={() => { startNavigation(dashboardHref, true); }} className="font-display font-bold text-white">{BRAND.name}</Link>
                 <button onClick={() => setMobileOpen(false)} className="flex h-9 w-9 items-center justify-center rounded-lg border border-subtle/50 bg-white/[0.06] text-zinc-400 transition hover:text-white" aria-label="Cerrar menú"><X size={18} /></button>
               </div>
               <div className="mb-6 flex items-center gap-3 rounded-xl border border-subtle/30 bg-white/[0.03] p-3">
@@ -286,6 +306,46 @@ export function WebSidebar({ role, userName, children }: WebSidebarProps) {
             </div>
           </aside>
         </>
+      )}
+
+      {navigating && (
+        <div
+          className="fixed inset-0 z-[100] overflow-hidden bg-[#080D11]/95 backdrop-blur-md"
+          role="status"
+          aria-live="polite"
+          aria-busy="true"
+          aria-label={`Cargando ${BRAND.name}`}
+        >
+          <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_50%_38%,rgba(214,255,42,0.10),transparent_34%)]" aria-hidden="true" />
+          <div className="relative flex min-h-screen items-center justify-center px-6">
+            <div className="flex w-full max-w-xs flex-col items-center text-center">
+              <div className="relative mb-5">
+                <div className="absolute -inset-5 rounded-[1.9rem] border border-primary/10 animate-pulse motion-reduce:animate-none" aria-hidden="true" />
+                <div className="absolute -inset-2 rounded-[1.5rem] bg-primary/10 blur-2xl animate-pulse motion-reduce:animate-none" aria-hidden="true" />
+                <div className="relative flex h-16 w-16 items-center justify-center overflow-hidden rounded-[1.35rem] border border-primary/35 bg-primary text-black shadow-[0_0_60px_rgba(214,255,42,0.2)]">
+                  <span className="font-display text-3xl font-black tracking-tight" aria-hidden="true">K</span>
+                </div>
+              </div>
+              <p className="font-display text-xl font-black tracking-tight text-white">{BRAND.name}</p>
+              <div className="mt-1 flex items-center gap-2 text-[10px] font-bold uppercase tracking-[0.24em] text-zinc-500">
+                <Loader2 size={11} className="animate-spin motion-reduce:animate-none" aria-hidden="true" />
+                <span>Preparando panel</span>
+              </div>
+              <div className="mt-7 h-1 w-48 overflow-hidden rounded-full bg-white/[0.06]" aria-hidden="true">
+                <div className="h-full w-1/2 rounded-full bg-primary animate-pulse motion-reduce:animate-none" />
+              </div>
+              <p className="mt-3 text-[11px] text-zinc-600">Cargando datos y navegación</p>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {role === "CLIENT" && (
+        <style jsx global>{`
+          .kfx-client-dashboard > div > div:has(a[href="/client/tools?cat=gamificacion"]) {
+            display: none !important;
+          }
+        `}</style>
       )}
     </div>
   );
