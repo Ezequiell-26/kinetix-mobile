@@ -26,7 +26,7 @@ export class BackgroundSyncService {
     document.addEventListener("visibilitychange", this.handleVisibility);
     this.syncTimer = setInterval(() => { if (this.isOnline) void this.performSync(); }, 30000);
     if ("serviceWorker" in navigator) {
-      await navigator.serviceWorker.register("/sw-background.js").catch(() => undefined);
+      await navigator.serviceWorker.register("/sw.js").catch(() => undefined);
     }
     if (this.isOnline) await this.performSync();
   }
@@ -63,7 +63,7 @@ export class BackgroundSyncService {
   }
 
   public async queueWorkout(workoutData: OfflineWorkout): Promise<void> {
-    if (!this.db) return;
+    if (!this.db) throw new Error("Offline storage is not initialized.");
     const item = { ...workoutData, clientMutationId: workoutData.clientMutationId || crypto.randomUUID(), timestamp: Date.now() };
     await new Promise<void>((resolve, reject) => {
       const tx = this.db!.transaction("workoutQueue", "readwrite");
