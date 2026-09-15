@@ -4,7 +4,7 @@ import Link from "next/link";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { ThemeToggle } from "@/components/theme-toggle";
-import { LogOut, KeyRound } from "lucide-react";
+import { LogOut, KeyRound, BellOff } from "lucide-react";
 
 export default function ClientSettings() {
   const router = useRouter();
@@ -31,11 +31,14 @@ export default function ClientSettings() {
       </Card>
       <Card>
         <CardHeader><CardTitle>Notificaciones</CardTitle></CardHeader>
-        <CardContent className="space-y-3 text-sm">
-          <label className="flex justify-between p-3 rounded-xl bg-zinc-900 border border-zinc-800"><span>Nuevo entrenamiento</span><input type="checkbox" defaultChecked /></label>
-          <label className="flex justify-between p-3 rounded-xl bg-zinc-900 border border-zinc-800"><span>Mensaje de tu coach</span><input type="checkbox" defaultChecked /></label>
-          <label className="flex justify-between p-3 rounded-xl bg-zinc-900 border border-zinc-800"><span>Recordatorio de entrenamiento</span><input type="checkbox" defaultChecked /></label>
-          <label className="flex justify-between p-3 rounded-xl bg-zinc-900 border border-zinc-800"><span>Check-in pendiente</span><input type="checkbox" defaultChecked /></label>
+        <CardContent>
+          <div className="flex items-start gap-3 rounded-2xl border border-zinc-800 bg-zinc-900/60 p-4">
+            <BellOff size={18} className="mt-0.5 shrink-0 text-zinc-500" />
+            <div>
+              <p className="text-sm font-semibold text-white">Preferencias de notificación en preparación</p>
+              <p className="mt-1 text-xs leading-relaxed text-zinc-500">No mostramos controles que todavía no se guardan en el backend. Cuando la persistencia esté conectada, esta sección tendrá preferencias por canal y tipo.</p>
+            </div>
+          </div>
         </CardContent>
       </Card>
       <Card>
