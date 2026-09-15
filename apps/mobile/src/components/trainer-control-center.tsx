@@ -3,7 +3,6 @@
 import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { AlertTriangle, TrendingUp, Users, Clock, Flame, Target, Mail, Loader2 } from "lucide-react";
 
@@ -109,7 +108,7 @@ export function TrainerControlCenter(){
     const prs = computePrs(clientLogs);
     const status = lastWorkoutDaysAgo >= 5 || adherence < 50 ? "riesgo" : prs === 0 && adherence < 75 ? "estancado" : adherence >= 90 && streak >= 7 ? "top" : "ok";
     const reason = status === "riesgo" ? `${lastWorkoutDaysAgo >= 999 ? "Sin entrenamientos" : `${lastWorkoutDaysAgo}d sin entrenar`} • ${adherence}% adherencia` : status === "estancado" ? "Sin PRs recientes + adherencia por debajo del objetivo" : status === "top" ? `Racha ${streak}d • ${Math.round(volumeWeek).toLocaleString("es-AR")}kg` : `${adherence}% adherencia`;
-    return { ...client, adherence, lastWorkoutDaysAgo, streak, volumeWeek: Math.round(volumeWeek), prs, checkinPending: false, status, reason };
+    return { ...client, adherence, lastWorkoutDaysAgo, streak, volumeWeek: Math.round(volumeWeek), prs, status, reason };
   }), [clients, logs]);
 
   const filtered = enriched.filter((client) => filter === "todos" || client.status === filter);
