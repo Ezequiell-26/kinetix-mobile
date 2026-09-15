@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
 import { hashPassword } from "@/lib/auth";
-import { validateResetToken, consumeResetToken } from "@/lib/password-reset-store";
+import { hashToken, validateResetToken } from "@/lib/password-reset-store";
 
 export async function POST(req: Request) {
   const { token, password } = await req.json().catch(() => ({}));
@@ -28,7 +28,7 @@ export async function POST(req: Request) {
     const consumed = await prisma.$transaction(async (tx) => {
       const tokenResult = await tx.passwordResetToken.updateMany({
         where: {
-          token: (await import("@/lib/password-reset-store")).hashToken(token),
+          token: hashToken(token),
           used: false,
           expiresAt: { gt: new Date() },
         },
