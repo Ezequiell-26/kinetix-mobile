@@ -6,8 +6,7 @@ import { Button } from "@/components/ui/button";
 import { BRAND } from "@/constants/branding";
 import { computeAdherence, computeStreak } from "@/lib/stats";
 import { TimeGreeting } from "@/components/narrator-cues";
-import { NotificationsBell } from "@/components/notifications-bell";
-import { ClipboardCheck, Clock3, Dumbbell, Flame, Footprints, Goal, HeartPulse, MessageCircle, Play, Scale, Sparkles, Trophy, TrendingUp, Utensils, ArrowRight } from "lucide-react";
+import { ClipboardCheck, Clock3, Dumbbell, Flame, Goal, HeartPulse, MessageCircle, Play, Scale, Sparkles, TrendingUp, Trophy, Utensils, ArrowRight } from "lucide-react";
 
 const AiCoachChat = dynamic(() => import("@/components/ai-coach-chat").then((m) => m.AiCoachChat), {
   loading: () => <div className="rounded-3xl border border-white/[0.06] bg-white/[0.025] p-6 text-sm text-zinc-500">Cargando coach IA…</div>,
@@ -17,12 +16,7 @@ export const dynamic = "force-dynamic";
 export const revalidate = 0;
 
 function MiniSparkline({ active = true }: { active?: boolean }) {
-  return (
-    <svg viewBox="0 0 120 36" className="h-9 w-full" aria-hidden="true">
-      <path d="M1 30 C 10 27, 12 18, 21 23 S 35 27, 41 19 S 54 15, 61 20 S 74 13, 82 16 S 94 9, 102 13 S 112 8, 119 4" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" className={active ? "text-primary" : "text-zinc-700"} />
-      <path d="M1 30 C 10 27, 12 18, 21 23 S 35 27, 41 19 S 54 15, 61 20 S 74 13, 82 16 S 94 9, 102 13 S 112 8, 119 4 V36 H1Z" className={active ? "fill-primary/10" : "fill-white/[0.02]"} />
-    </svg>
-  );
+  return <svg viewBox="0 0 120 36" className="h-9 w-full" aria-hidden="true"><path d="M1 30 C 10 27, 12 18, 21 23 S 35 27, 41 19 S 54 15, 61 20 S 74 13, 82 16 S 94 9, 102 13 S 112 8, 119 4" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" className={active ? "text-primary" : "text-zinc-700"} /><path d="M1 30 C 10 27, 12 18, 21 23 S 35 27, 41 19 S 54 15, 61 20 S 74 13, 82 16 S 94 9, 102 13 S 112 8, 119 4 V36 H1Z" className={active ? "fill-primary/10" : "fill-white/[0.02]"} /></svg>;
 }
 
 const formatKg = (value: number) => `${new Intl.NumberFormat("es-AR", { maximumFractionDigits: 1 }).format(value)} kg`;
@@ -45,9 +39,7 @@ export default async function ClientDashboardPage() {
   monday.setHours(0, 0, 0, 0);
 
   const [program, todayLog, recentLogs, logDates, latestMeasurement, latestCheckin, latestMessage, unreadMessages] = await Promise.all([
-    client.assignedProgramId
-      ? prisma.program.findUnique({ where: { id: client.assignedProgramId }, include: { weeks: { orderBy: { weekNumber: "asc" }, include: { workouts: { orderBy: { dayNumber: "asc" }, include: { exercises: { orderBy: { order: "asc" }, include: { exercise: true } } } } } } } })
-      : Promise.resolve(null),
+    client.assignedProgramId ? prisma.program.findUnique({ where: { id: client.assignedProgramId }, include: { weeks: { orderBy: { weekNumber: "asc" }, include: { workouts: { orderBy: { dayNumber: "asc" }, include: { exercises: { orderBy: { order: "asc" }, include: { exercise: true } } } } } } } }) : Promise.resolve(null),
     prisma.workoutLog.findFirst({ where: { clientId: client.id, date: { gte: startOfToday } }, include: { workout: true, sets: true }, orderBy: { date: "desc" } }).catch(() => null),
     prisma.workoutLog.findMany({ where: { clientId: client.id }, include: { workout: true, sets: true }, orderBy: { date: "desc" }, take: 60 }).catch(() => []),
     prisma.workoutLog.findMany({ where: { clientId: client.id }, select: { date: true }, orderBy: { date: "desc" } }).catch(() => []),
@@ -78,35 +70,25 @@ export default async function ClientDashboardPage() {
     return { label, count, isToday: day.toDateString() === now.toDateString() };
   });
 
-  const workoutCards = (workouts.length ? workouts : [{ id: "empty-1", name: "Tu próximo entrenamiento", estimatedMin: null, exercises: [] }, { id: "empty-2", name: "Movilidad & recuperación", estimatedMin: null, exercises: [] }, { id: "empty-3", name: "Sesión de cardio", estimatedMin: null, exercises: [] }]).slice(0, 4);
+  const workoutCards = (workouts.length ? workouts : [
+    { id: "empty-1", name: "Tu próximo entrenamiento", estimatedMin: null, exercises: [] },
+    { id: "empty-2", name: "Movilidad & recuperación", estimatedMin: null, exercises: [] },
+    { id: "empty-3", name: "Sesión de cardio", estimatedMin: null, exercises: [] },
+  ]).slice(0, 4);
   const goalLabel = client.goal ? client.goal.replaceAll("_", " ").toLowerCase() : "rendimiento y salud";
 
   return (
     <div className="space-y-6 pb-8 text-white">
       <header className="flex flex-col gap-5 xl:flex-row xl:items-end xl:justify-between">
-        <div>
-          <p className="text-[10px] font-black uppercase tracking-[0.24em] text-zinc-600">{now.toLocaleDateString("es-AR", { weekday: "long", day: "numeric", month: "long" })} · Objetivo: <span className="text-primary">{goalLabel}</span></p>
-          <h1 className="mt-2 text-4xl font-display font-black tracking-tight sm:text-5xl"><TimeGreeting name={firstName} /></h1>
-          <p className="mt-2 text-sm text-zinc-500">Tu disciplina de hoy es tu resultado de mañana.</p>
-        </div>
-        <div className="hidden xl:flex items-center gap-3 rounded-2xl border border-white/[0.06] bg-white/[0.02] px-4 py-3 text-xs text-zinc-500"><span className="h-2 w-2 rounded-full bg-primary shadow-[0_0_12px_rgba(214,255,42,0.8)]" /> Sistema operativo · datos en tiempo real</div>
+        <div><p className="text-[10px] font-black uppercase tracking-[0.24em] text-zinc-600">{now.toLocaleDateString("es-AR", { weekday: "long", day: "numeric", month: "long" })} · Objetivo: <span className="text-primary">{goalLabel}</span></p><h1 className="mt-2 text-4xl font-display font-black tracking-tight sm:text-5xl"><TimeGreeting name={firstName} /></h1><p className="mt-2 text-sm text-zinc-500">Tu disciplina de hoy es tu resultado de mañana.</p></div>
+        <div className="hidden items-center gap-3 rounded-2xl border border-white/[0.06] bg-white/[0.02] px-4 py-3 text-xs text-zinc-500 xl:flex"><span className="h-2 w-2 rounded-full bg-primary shadow-[0_0_12px_rgba(214,255,42,0.8)]" /> Sistema operativo · datos en tiempo real</div>
       </header>
 
       <section className="grid gap-5 xl:grid-cols-[minmax(0,1fr)_320px]">
         <div className="relative min-h-[390px] overflow-hidden rounded-[30px] border border-primary/15 bg-gradient-to-br from-[#111316] via-[#0A0D10] to-[#08090B] p-7 shadow-[0_24px_80px_rgba(0,0,0,0.32)] sm:p-9">
-          <div className="absolute -right-24 -top-28 h-80 w-80 rounded-full bg-primary/10 blur-3xl" />
-          <div className="absolute -bottom-32 left-1/3 h-72 w-72 rounded-full bg-primary/[0.05] blur-3xl" />
-          <div className="absolute inset-0 bg-[radial-gradient(circle_at_74%_34%,rgba(214,255,42,0.10),transparent_33%),linear-gradient(135deg,rgba(255,255,255,0.025),transparent_50%)]" />
-          <div className="relative flex h-full flex-col">
-            <div className="flex items-center justify-between gap-4">
-              <span className="inline-flex items-center gap-2 rounded-full border border-primary/20 bg-primary/10 px-3.5 py-1.5 text-[10px] font-black uppercase tracking-[0.20em] text-primary"><span className="h-1.5 w-1.5 rounded-full bg-primary animate-pulse" /> {todayLog ? "Entrenamiento completado" : "Entrenamiento de hoy"}</span>
-              <span className="flex items-center gap-1.5 text-xs font-bold text-zinc-500"><Clock3 size={14} /> {todayLog?.durationMin || nextWorkout?.estimatedMin || 60} min</span>
-            </div>
-            <div className="mt-6 max-w-2xl">
-              <p className="text-xs font-bold uppercase tracking-[0.2em] text-zinc-600">Tu sesión</p>
-              <h2 className="mt-2 text-4xl font-display font-black leading-[1.05] tracking-tight sm:text-5xl">{todayLog?.workout?.name || nextWorkout?.name || "Tu coach está preparando tu plan"}</h2>
-              <p className="mt-3 max-w-lg text-sm leading-6 text-zinc-500">{todayLog ? "Sesión registrada. Revisá el detalle y mantené el ritmo." : nextWorkout ? `${nextWorkout.exercises.length} ejercicios seleccionados para tu plan.` : "Cuando tu coach asigne un programa, aparecerá acá."}</p>
-            </div>
+          <div className="absolute -right-24 -top-28 h-80 w-80 rounded-full bg-primary/10 blur-3xl" /><div className="absolute -bottom-32 left-1/3 h-72 w-72 rounded-full bg-primary/[0.05] blur-3xl" /><div className="absolute inset-0 bg-[radial-gradient(circle_at_74%_34%,rgba(214,255,42,0.10),transparent_33%),linear-gradient(135deg,rgba(255,255,255,0.025),transparent_50%)]" />
+          <div className="relative flex h-full flex-col"><div className="flex items-center justify-between gap-4"><span className="inline-flex items-center gap-2 rounded-full border border-primary/20 bg-primary/10 px-3.5 py-1.5 text-[10px] font-black uppercase tracking-[0.20em] text-primary"><span className="h-1.5 w-1.5 rounded-full bg-primary animate-pulse" /> {todayLog ? "Entrenamiento completado" : "Entrenamiento de hoy"}</span><span className="flex items-center gap-1.5 text-xs font-bold text-zinc-500"><Clock3 size={14} /> {todayLog?.durationMin || nextWorkout?.estimatedMin || 60} min</span></div>
+            <div className="mt-6 max-w-2xl"><p className="text-xs font-bold uppercase tracking-[0.2em] text-zinc-600">Tu sesión</p><h2 className="mt-2 text-4xl font-display font-black leading-[1.05] tracking-tight sm:text-5xl">{todayLog?.workout?.name || nextWorkout?.name || "Tu coach está preparando tu plan"}</h2><p className="mt-3 max-w-lg text-sm leading-6 text-zinc-500">{todayLog ? "Sesión registrada. Revisá el detalle y mantené el ritmo." : nextWorkout ? `${nextWorkout.exercises.length} ejercicios seleccionados para tu plan.` : "Cuando tu coach asigne un programa, aparecerá acá."}</p></div>
             {nextWorkout && !todayLog && <div className="mt-6 max-w-xl space-y-2">{nextWorkout.exercises.slice(0, 3).map((exercise, index) => <div key={exercise.id} className="flex items-center gap-3 rounded-2xl border border-white/[0.05] bg-black/30 px-3.5 py-2.5 backdrop-blur-sm"><span className="flex h-7 w-7 items-center justify-center rounded-full bg-primary/10 text-[11px] font-black text-primary">{index + 1}</span><span className="min-w-0 flex-1 truncate text-sm font-semibold text-white">{exercise.exercise.name}</span><span className="text-xs font-bold tabular-nums text-zinc-500">{exercise.sets} × {exercise.reps}</span></div>)}</div>}
             <div className="mt-auto pt-7"><Link href={todayLog ? `/client/workout/${todayLog.workoutId}` : nextWorkout ? `/client/workout/${nextWorkout.id}` : "/client/workout"} className="block"><Button variant="accent" className="h-14 w-full rounded-2xl text-base font-black tracking-wide shadow-[0_10px_42px_rgba(214,255,42,0.18)]">{todayLog ? "VER ENTRENAMIENTO" : "COMENZAR ENTRENAMIENTO"}<ArrowRight size={18} className="ml-2" /></Button></Link></div>
           </div>
@@ -119,21 +101,11 @@ export default async function ClientDashboardPage() {
       </section>
 
       <section className="grid grid-cols-2 overflow-hidden rounded-[26px] border border-white/[0.06] bg-white/[0.025] lg:grid-cols-4">
-        {[
-          ["Volumen semanal", Math.round(weekVolume).toLocaleString("es-AR"), "kg", ActivityIcon],
-          ["Entrenamiento", weekSessions.toString(), "sesiones", Dumbbell],
-          ["Peso actual", currentWeight ? currentWeight.toFixed(1) : "—", "kg", Scale],
-          ["Racha", streak.toString(), "días", Flame],
-        ].map(([label, value, unit, Icon], index) => <div key={String(label)} className={`p-5 sm:p-6 ${index > 0 ? "border-l border-white/[0.06]" : ""} ${index > 1 ? "border-t border-white/[0.06] lg:border-t-0" : ""}`}><div className="flex items-center gap-2 text-[10px] font-black uppercase tracking-[0.16em] text-zinc-600"><Icon size={13} />{label}</div><p className="mt-2 text-3xl font-display font-black tabular-nums">{String(value)} <span className="text-xs font-bold text-zinc-600">{String(unit)}</span></p><MiniSparkline active={weekSessions > 0} /></div>)}
+        {[["Volumen semanal", Math.round(weekVolume).toLocaleString("es-AR"), "kg", TrendingUp], ["Entrenamiento", weekSessions.toString(), "sesiones", Dumbbell], ["Peso actual", currentWeight ? currentWeight.toFixed(1) : "—", "kg", Scale], ["Racha", streak.toString(), "días", Flame]].map(([label, value, unit, Icon], index) => <div key={String(label)} className={`p-5 sm:p-6 ${index > 0 ? "border-l border-white/[0.06]" : ""} ${index > 1 ? "border-t border-white/[0.06] lg:border-t-0" : ""}`}><div className="flex items-center gap-2 text-[10px] font-black uppercase tracking-[0.16em] text-zinc-600"><Icon size={13} />{label}</div><p className="mt-2 text-3xl font-display font-black tabular-nums">{String(value)} <span className="text-xs font-bold text-zinc-600">{String(unit)}</span></p><MiniSparkline active={weekSessions > 0} /></div>)}
       </section>
 
       <section className="grid gap-5 xl:grid-cols-[minmax(0,1fr)_320px]">
-        <div className="rounded-[26px] border border-white/[0.06] bg-white/[0.025] p-5 sm:p-6">
-          <div className="mb-5 flex items-center justify-between"><div><p className="text-xs font-black uppercase tracking-[0.18em] text-zinc-600">Esta semana</p><h3 className="mt-1 text-xl font-display font-black">Tus entrenamientos</h3></div><Link href="/client/workout" className="text-xs font-bold text-primary">Ver todos</Link></div>
-          <div className="grid gap-3 md:grid-cols-2 2xl:grid-cols-4">
-            {workoutCards.map((workout, index) => { const done = recentLogs.some((log) => log.workoutId === workout.id); return <Link key={workout.id} href={workout.id.startsWith("empty-") ? "/client/workout" : `/client/workout/${workout.id}`} className="group overflow-hidden rounded-2xl border border-white/[0.06] bg-black/20 transition hover:-translate-y-0.5 hover:border-primary/25"><div className="flex aspect-[1.65/1] items-end bg-gradient-to-br from-[#1A1F21] via-[#0F1417] to-[#090B0D] p-3"><span className="rounded-lg bg-primary px-2 py-1 text-[9px] font-black uppercase tracking-wider text-black">{done ? "Completado" : index === 0 ? "Hoy" : "Plan"}</span></div><div className="p-3.5"><div className="flex items-start justify-between gap-2"><p className="min-h-10 flex-1 text-sm font-black leading-5 text-white">{workout.name}</p><ArrowRight size={15} className="mt-0.5 text-zinc-700 transition group-hover:translate-x-0.5 group-hover:text-primary" /></div><p className="mt-1 text-xs text-zinc-600">{workout.estimatedMin || 45} min · {workout.exercises?.length || 0} ejercicios</p></div></Link>; })}
-          </div>
-        </div>
+        <div className="rounded-[26px] border border-white/[0.06] bg-white/[0.025] p-5 sm:p-6"><div className="mb-5 flex items-center justify-between"><div><p className="text-xs font-black uppercase tracking-[0.18em] text-zinc-600">Esta semana</p><h3 className="mt-1 text-xl font-display font-black">Tus entrenamientos</h3></div><Link href="/client/workout" className="text-xs font-bold text-primary">Ver todos</Link></div><div className="grid gap-3 md:grid-cols-2 2xl:grid-cols-4">{workoutCards.map((workout, index) => { const done = recentLogs.some((log) => log.workoutId === workout.id); return <Link key={workout.id} href={workout.id.startsWith("empty-") ? "/client/workout" : `/client/workout/${workout.id}`} className="group overflow-hidden rounded-2xl border border-white/[0.06] bg-black/20 transition hover:-translate-y-0.5 hover:border-primary/25"><div className="flex aspect-[1.65/1] items-end bg-gradient-to-br from-[#1A1F21] via-[#0F1417] to-[#090B0D] p-3"><span className="rounded-lg bg-primary px-2 py-1 text-[9px] font-black uppercase tracking-wider text-black">{done ? "Completado" : index === 0 ? "Hoy" : "Plan"}</span></div><div className="p-3.5"><div className="flex items-start justify-between gap-2"><p className="min-h-10 flex-1 text-sm font-black leading-5 text-white">{workout.name}</p><ArrowRight size={15} className="mt-0.5 text-zinc-700 transition group-hover:translate-x-0.5 group-hover:text-primary" /></div><p className="mt-1 text-xs text-zinc-600">{workout.estimatedMin || 45} min · {workout.exercises?.length || 0} ejercicios</p></div></Link>; })}</div></div>
         <div className="rounded-[26px] border border-white/[0.06] bg-white/[0.025] p-5 sm:p-6"><div className="flex items-center justify-between"><div><p className="text-xs font-black uppercase tracking-[0.18em] text-zinc-600">Progreso</p><h3 className="mt-1 text-xl font-display font-black">Tu semana</h3></div><TrendingUp size={19} className="text-primary" /></div><div className="mt-6 space-y-4">{weekDays.map((day) => <div key={day.label} className="flex items-center gap-3"><span className={`w-5 text-center text-[10px] font-black ${day.isToday ? "text-primary" : "text-zinc-600"}`}>{day.label}</span><div className="h-2 flex-1 overflow-hidden rounded-full bg-white/[0.05]"><div className="h-full rounded-full bg-primary transition-all" style={{ width: `${Math.min(100, day.count * 100)}%` }} /></div><span className="w-4 text-right text-[10px] font-bold text-zinc-600">{day.count}</span></div>)}</div><div className="mt-7 grid grid-cols-2 gap-3"><div className="rounded-2xl border border-white/[0.05] bg-black/20 p-3"><p className="text-[10px] uppercase tracking-wider text-zinc-600">Adherencia</p><p className="mt-1 text-xl font-black text-primary">{adherence}%</p></div><div className="rounded-2xl border border-white/[0.05] bg-black/20 p-3"><p className="text-[10px] uppercase tracking-wider text-zinc-600">Racha</p><p className="mt-1 text-xl font-black">{streak} d</p></div></div></div>
       </section>
 
@@ -146,12 +118,7 @@ export default async function ClientDashboardPage() {
 
       <section className="rounded-[26px] border border-primary/10 bg-gradient-to-r from-primary/[0.06] via-transparent to-transparent p-5 sm:p-6"><div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between"><div className="flex items-center gap-3"><span className="flex h-11 w-11 items-center justify-center rounded-xl bg-primary/10 text-primary"><HeartPulse size={20} /></span><div><p className="text-sm font-black">{BRAND.shortName} AI</p><p className="text-xs text-zinc-600">Analizá tu semana, ajustá tu estrategia y entrená con contexto.</p></div></div><Link href="/client/dashboard#coach-ai" className="inline-flex h-10 items-center justify-center rounded-xl border border-primary/30 px-4 text-xs font-black text-primary">Abrir coach IA <ArrowRight size={14} className="ml-1" /></Link></div></section>
 
-      <div id="coach-ai" className="pt-1"><AiCoachChat /></div>
-      <div className="sr-only" aria-hidden="true"><Footprints /></div>
+      <div id="coach-ai"><AiCoachChat /></div>
     </div>
   );
-}
-
-function ActivityIcon({ size = 13 }: { size?: number }) {
-  return <TrendingUp size={size} />;
 }
