@@ -41,3 +41,4 @@ backups/
 # Uploads (keep structure, ignore content)
 public/uploads/*
 !public/uploads/.gitkeep
+# .env.production no debe commitearse
