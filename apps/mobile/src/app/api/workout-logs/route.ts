@@ -3,13 +3,14 @@ import { prisma } from "@/lib/db";
 import { getSession } from "@/lib/auth";
 import { assertTrainerOwnsClient } from "@/lib/authorization";
 
+const IMPORT_SOURCES = new Set(["hevy", "strong"]);
+
 export async function POST(req: Request){
   const s = await getSession();
   if(!s) return NextResponse.json({error:"No auth"},{status:401});
   const body = await req.json().catch(() => null);
   if(!body) return NextResponse.json({error:"Cuerpo requerido"},{status:400});
 
-  // Resolve client
   let clientId: string | null = null;
   let assignedProgramId: string | null = null;
   if(s.role === "CLIENT"){
@@ -17,45 +18,40 @@ export async function POST(req: Request){
     clientId = client?.id || null;
     assignedProgramId = client?.assignedProgramId || null;
   } else if(body.clientId && s.role === "TRAINER"){
-    // P0 Security: TRAINER solo puede crear logs para sus propios clientes
     const ownsClient = await assertTrainerOwnsClient(s.id, body.clientId);
-    if(!ownsClient){
-      return NextResponse.json({error:"Cliente no encontrado"}, {status:404});
-    }
+    if(!ownsClient) return NextResponse.json({error:"Cliente no encontrado"}, {status:404});
     clientId = body.clientId;
   }
 
-  // Validar el workoutId SIN sustituirlo: si no existe o no pertenece al
-  // programa asignado del atleta, se rechaza el guardado (antes se guardaba
-  // contra el primer workout de la base, atribuyendo el entrenamiento a un
-  // plan que el atleta nunca recibió).
-  const workoutId = body.workoutId;
-  if(!workoutId || typeof workoutId !== "string"){
+  const importSource = typeof body.importSource === "string" ? body.importSource.toLowerCase() : null;
+  const isExternalImport = Boolean(importSource && IMPORT_SOURCES.has(importSource));
+  const workoutId = typeof body.workoutId === "string" && body.workoutId.trim() ? body.workoutId : null;
+
+  let workout: { id: string; name: string; week: { programId: string } } | null = null;
+  if(workoutId){
+    workout = await prisma.workout.findUnique({
+      where: { id: workoutId },
+      include: { week: { select: { programId: true } } },
+    });
+    if(!workout) return NextResponse.json({error:"El entrenamiento no existe"}, {status:404});
+    if(s.role === "CLIENT" && workout.week.programId !== assignedProgramId){
+      return NextResponse.json({error:"Ese entrenamiento no pertenece a tu programa asignado"}, {status:403});
+    }
+  } else if(!isExternalImport){
     return NextResponse.json({error:"Falta el ID del entrenamiento"}, {status:400});
   }
-  const workout = await prisma.workout.findUnique({
-    where: { id: workoutId },
-    include: { week: { select: { programId: true } } },
-  });
-  if(!workout){
-    return NextResponse.json({error:"El entrenamiento no existe"}, {status:404});
-  }
-  if(s.role === "CLIENT" && workout.week.programId !== assignedProgramId){
-    return NextResponse.json({error:"Ese entrenamiento no pertenece a tu programa asignado"}, {status:403});
-  }
 
-  // Prepare sets if provided
   const setsData = Array.isArray(body.sets) ? body.sets.map((st: {
-    exerciseName: string;
-    setNumber: number;
-    weight?: number;
-    reps?: number;
-    rir?: number;
-    rpe?: number;
+    exerciseName?: string;
+    setNumber?: number;
+    weight?: number | null;
+    reps?: number | null;
+    rir?: number | null;
+    rpe?: number | null;
     completed?: boolean;
   })=>({
-    exerciseName: st.exerciseName || "Ejercicio",
-    setNumber: Number(st.setNumber) || 1,
+    exerciseName: String(st.exerciseName || "Ejercicio").slice(0, 200),
+    setNumber: Math.max(1, Number(st.setNumber) || 1),
     weight: st.weight !== undefined && st.weight !== null ? Number(st.weight) : null,
     reps: st.reps !== undefined && st.reps !== null ? Number(st.reps) : null,
     rir: st.rir !== undefined && st.rir !== null ? Number(st.rir) : null,
@@ -63,34 +59,33 @@ export async function POST(req: Request){
     completed: st.completed ?? true,
   })) : [];
 
+  const rawDate = body.date ? new Date(body.date) : new Date();
+  const date = Number.isNaN(rawDate.getTime()) ? new Date() : rawDate;
+  const workoutName = workout?.name || (typeof body.workoutName === "string" && body.workoutName.trim() ? body.workoutName.trim().slice(0, 200) : `Importado desde ${importSource || "fuente externa"}`);
+
   const log = await prisma.workoutLog.create({
     data:{
       userId: s.id,
-      clientId: clientId,
-      workoutId: workoutId,
-      workoutName: workout.name,
-      durationMin: body.durationMin ? Number(body.durationMin) : null,
-      comment: body.comment || null,
+      clientId,
+      workoutId,
+      workoutName,
+      date,
+      durationMin: body.durationMin !== undefined && body.durationMin !== null ? Number(body.durationMin) : null,
+      comment: body.comment ? String(body.comment).slice(0, 1000) : null,
       completed: body.completed ?? true,
-      sets: setsData.length ? {
-        create: setsData
-      } : undefined
+      sets: setsData.length ? { create: setsData } : undefined
     },
-    include: {
-      sets: true,
-      workout: true
-    }
+    include: { sets: true, workout: true }
   });
 
-  // If client finished a workout, create a notification for trainer
-  if(s.role === "CLIENT"){
-    const trainer = await prisma.user.findFirst({where:{role:"TRAINER"}});
-    if(trainer){
+  if(s.role === "CLIENT" && clientId){
+    const client = await prisma.client.findUnique({ where: { id: clientId }, select: { trainerId: true } });
+    if(client?.trainerId){
       await prisma.notification.create({
         data:{
-          userId: trainer.id,
+          userId: client.trainerId,
           title: `${s.name} completó un entrenamiento`,
-          body: `${workout.name} (${log.durationMin || 0} min)`,
+          body: `${workoutName} (${log.durationMin || 0} min)`,
           type: "workout",
           link: `/trainer/clients/${clientId}`
         }
@@ -110,12 +105,7 @@ export async function GET(req: Request){
   if(s.role === "CLIENT"){
     const client = await prisma.client.findFirst({where:{OR:[{userId:s.id},{email:s.email}]}});
     const logs = await prisma.workoutLog.findMany({
-      where: {
-        OR: [
-          { userId: s.id },
-          ...(client?.id ? [{ clientId: client.id }] : [])
-        ]
-      },
+      where: { OR: [{ userId: s.id }, ...(client?.id ? [{ clientId: client.id }] : [])] },
       include: { sets: true, workout: true },
       orderBy: { date: "desc" },
       take: 50
@@ -123,13 +113,9 @@ export async function GET(req: Request){
     return NextResponse.json(logs);
   }
 
-  // Trainer
   if(targetClientId){
-    // P0 Security: TRAINER solo puede ver logs de sus propios clientes
     const ownsClient = await assertTrainerOwnsClient(s.id, targetClientId);
-    if(!ownsClient){
-      return NextResponse.json({error:"Cliente no encontrado"}, {status:404});
-    }
+    if(!ownsClient) return NextResponse.json({error:"Cliente no encontrado"}, {status:404});
     const logs = await prisma.workoutLog.findMany({
       where: { clientId: targetClientId },
       include: { sets: true, workout: true },
@@ -139,8 +125,8 @@ export async function GET(req: Request){
     return NextResponse.json(logs);
   }
 
-  // All recent workouts for trainer
   const logs = await prisma.workoutLog.findMany({
+    where: { client: { trainerId: s.id } },
     include: { sets: true, workout: true, client: true, user: true },
     orderBy: { date: "desc" },
     take: 50
