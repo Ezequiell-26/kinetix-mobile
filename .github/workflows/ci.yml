@@ -46,6 +46,15 @@ jobs:
       - name: Typecheck mobile
         run: npm run typecheck -w apps/mobile
 
+      - name: Lint mobile
+        run: npm run lint -w apps/mobile
+
+      - name: Typecheck web
+        run: npm run typecheck --prefix apps/web
+
+      - name: Lint web
+        run: npm run lint --prefix apps/web
+
       - name: Esperar Postgres efímero
         run: |
           for i in $(seq 1 30); do
