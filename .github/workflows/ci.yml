@@ -1,12 +1,8 @@
 name: CI
 
-# Gate anti-ruptura (V8 §80 + PARALLEL_PROTOCOL §4).
-# Ningún PR a develop/main se fusiona en rojo.
-# Árbol único: install en RAÍZ (workspaces), gates con -w apps/mobile.
-# DB de CI: Postgres efímero (services), NO sqlite (el schema es postgresql
-# desde 2026-09-13). Sin secrets: el servicio vive dentro del runner.
-# NOTA: no hay job de lint porque apps/mobile no tiene config de ESLint
-# (Next 15 lo pediría interactivo). `next build` ya valida tipos+compilación.
+# Gates del monorepo. apps/mobile usa el lock raíz; apps/web conserva su
+# lock independiente para no mezclar dos árboles de dependencias de Next/React.
+# PostgreSQL efímero es la base de CI y coincide con el schema PostgreSQL.
 
 on:
   push:
@@ -41,33 +37,37 @@ jobs:
           cache: npm
           cache-dependency-path: package-lock.json
 
-      - name: Install (árbol único raíz)
+      - name: Install raíz (lock reproducible)
         run: npm ci
 
-      - name: Typecheck (0 errores)
+      - name: Install web (lock independiente)
+        run: npm ci --prefix apps/web
+
+      - name: Typecheck mobile
         run: npm run typecheck -w apps/mobile
 
       - name: Esperar Postgres efímero
         run: |
           for i in $(seq 1 30); do
             if echo "SELECT 1;" | npx prisma db execute --stdin --schema apps/mobile/prisma/schema.prisma >/dev/null 2>&1; then
-              echo "Postgres listo"; break
+              echo "Postgres listo"
+              exit 0
             fi
             sleep 3
           done
+          echo "Postgres no respondió a tiempo"
+          exit 1
 
-      - name: Migrate + seed (Postgres efímero de CI)
+      - name: Migrate + seed
         run: |
-          npx prisma migrate deploy --schema apps/mobile/prisma/schema.prisma || {
-            echo "Error en migraciones. Verificando estado..."
-            # Si falla, intentamos resetear y aplicar de nuevo para CI
-            npx prisma migrate reset --schema apps/mobile/prisma/schema.prisma --force --skip-seed
-            npx prisma migrate deploy --schema apps/mobile/prisma/schema.prisma
-          }
+          npx prisma migrate deploy --schema apps/mobile/prisma/schema.prisma
           npm run db:seed -w apps/mobile
 
-      - name: Tests
+      - name: Tests mobile
         run: npm run test -w apps/mobile
 
-      - name: Build
+      - name: Build mobile
         run: npm run build -w apps/mobile
+
+      - name: Build web
+        run: npm run build --prefix apps/web
