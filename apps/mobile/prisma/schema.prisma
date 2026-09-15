@@ -99,8 +99,6 @@ model Client {
   id            String       @id @default(cuid())
   userId        String?      @unique
   user          User?        @relation(fields: [userId], references: [id], onDelete: SetNull)
-  // Ownership multi-trainer (P0): un trainer solo opera sus clientes.
-  // Los clientes existentes (trainerId null) los adopta el seed/QA.
   trainerId     String?
   trainer       User?        @relation("TrainerClients", fields: [trainerId], references: [id], onDelete: SetNull)
   name          String
@@ -231,8 +229,6 @@ model WorkoutLog {
   user       User? @relation(fields: [userId], references: [id], onDelete: SetNull)
   clientId   String?
   client     Client? @relation(fields: [clientId], references: [id], onDelete: SetNull)
-  // Opcional con SetNull: editar la estructura de un programa no borra el
-  // historial del atleta; workoutName preserva el nombre original de la sesión.
   workoutId  String?
   workout    Workout? @relation(fields: [workoutId], references: [id], onDelete: SetNull)
   workoutName String?
@@ -380,12 +376,20 @@ model Payment {
   date      DateTime @default(now())
   description String?
   @@index([clientId])
+  @@index([date])
+  @@index([status])
 }
 
-// Recuperación de contraseña persistente (reemplaza el Map en memoria, que
-// se perdía en cada reinicio del server y no funcionaba con más de una
-// instancia). Se guarda un HASH del token (sha256), nunca el token en
-// texto plano, por si la base de datos se filtra alguna vez.
+model PaymentWebhookEvent {
+  id        String   @id @default(cuid())
+  provider  String
+  eventId   String
+  createdAt DateTime @default(now())
+
+  @@unique([provider, eventId])
+  @@index([createdAt])
+}
+
 model PasswordResetToken {
   id        String   @id @default(cuid())
   email     String
@@ -415,30 +419,22 @@ model Session {
   @@index([revoked])
 }
 
-// Preferencias de notificaciones del usuario
 model NotificationPreference {
   id        String   @id @default(cuid())
   userId    String   @unique
   user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  
-  // Canales habilitados
   emailEnabled     Boolean @default(true)
   pushEnabled      Boolean @default(true)
   smsEnabled       Boolean @default(false)
   whatsappEnabled  Boolean @default(false)
-  
-  // Tipos de notificaciones
   workoutReminders    Boolean @default(true)
   nutritionTips       Boolean @default(true)
   progressUpdates     Boolean @default(true)
   messageNotifications Boolean @default(true)
   paymentReminders    Boolean @default(true)
-  
-  // Configuración de schedule
   timezone       String  @default("America/Argentina/Buenos_Aires")
-  quietStart     String  @default("22:00") // Hora de inicio de modo no molestar
-  quietEnd       String  @default("08:00") // Hora de fin de modo no molestar
-  
+  quietStart     String  @default("22:00")
+  quietEnd       String  @default("08:00")
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
