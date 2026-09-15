@@ -9,7 +9,6 @@ permissions:
 
 jobs:
   cleanup:
-    if: github.event.head_commit.message != 'chore: remove dashboard tool discovery'
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
@@ -17,9 +16,10 @@ jobs:
         with:
           fetch-depth: 0
 
-      - name: Remove dashboard discovery and expose tool categories in sidebar
-        shell: python
+      - name: Patch dashboard and sidebar
+        shell: bash
         run: |
+          python3 <<'PY'
           from pathlib import Path
 
           dashboard_path = Path("apps/mobile/src/app/(client)/client/dashboard/page.tsx")
@@ -27,12 +27,10 @@ jobs:
 
           start_marker = '      {/* ── 6 · DESCUBRIMIENTO'
           end_marker = '      </FadeIn>\n    </div>\n  );\n}'
-
           start = dashboard.find(start_marker)
           end = dashboard.rfind(end_marker)
           if start == -1 or end == -1 or end < start:
-              raise SystemExit("Dashboard discovery block not found; refusing to modify")
-
+              raise SystemExit("Dashboard discovery block not found")
           dashboard = dashboard[:start] + dashboard[end + len(end_marker):]
           dashboard = dashboard.replace(
               'import { Gamepad2, HeartPulse, Footprints, BarChart3, Users, Settings2 } from "lucide-react";\n',
@@ -47,13 +45,18 @@ jobs:
           sidebar_path = Path("apps/mobile/src/components/web-sidebar.tsx")
           sidebar = sidebar_path.read_text(encoding="utf-8")
 
-          sidebar = sidebar.replace('import Link from "next/link";\n', 'import Link from "next/link";\nimport { useSearchParams } from "next/navigation";\n', 1)
+          if 'import { useSearchParams } from "next/navigation";\n' not in sidebar:
+              sidebar = sidebar.replace(
+                  'import Link from "next/link";\n',
+                  'import Link from "next/link";\nimport { useSearchParams } from "next/navigation";\n',
+                  1,
+              )
           sidebar = sidebar.replace('  CalendarDays,\n', '', 1)
 
           old_client_start = sidebar.find('const clientNavGroups: NavGroup[] = [')
           old_trainer_start = sidebar.find('const trainerNavGroups: NavGroup[] = [')
           if old_client_start == -1 or old_trainer_start == -1 or old_trainer_start <= old_client_start:
-              raise SystemExit("Sidebar navigation groups not found; refusing to modify")
+              raise SystemExit("Sidebar navigation groups not found")
 
           new_client = '''const clientNavGroups: NavGroup[] = [
   {
@@ -104,7 +107,6 @@ jobs:
 ];
 
 '''
-
           sidebar = sidebar[:old_client_start] + new_client + sidebar[old_trainer_start:]
 
           old_active = '''  const isActive = (href: string) => {
@@ -130,26 +132,23 @@ jobs:
   };
 '''
           if old_active not in sidebar:
-              raise SystemExit("Sidebar active-state helper not found; refusing to modify")
+              raise SystemExit("Sidebar active-state helper not found")
           sidebar = sidebar.replace(old_active, new_active, 1)
 
           import_anchor = '  Activity,\n'
-          icons_to_add = '  BarChart3,\n  Gamepad2,\n  HeartPulse,\n  Footprints,\n  Settings2,\n'
+          icons_to_add = '  Gamepad2,\n  HeartPulse,\n  Footprints,\n  Settings2,\n'
           if '  Gamepad2,\n' not in sidebar:
               sidebar = sidebar.replace(import_anchor, import_anchor + icons_to_add, 1)
 
           sidebar_path.write_text(sidebar, encoding="utf-8")
+          PY
 
-          # The temporary workflow removes itself in the same commit.
-          workflow_path = Path(".github/workflows/one-time-dashboard-nav-cleanup.yml")
-          workflow_path.unlink()
-
-      - name: Commit cleanup
+      - name: Commit and remove temporary workflow
         shell: bash
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add -A
-          git diff --cached --quiet && exit 0
+          git rm .github/workflows/one-time-dashboard-nav-cleanup.yml
+          git add apps/mobile/src/app/'(client)'/client/dashboard/page.tsx apps/mobile/src/components/web-sidebar.tsx
           git commit -m "chore: remove dashboard tool discovery"
           git push origin main
