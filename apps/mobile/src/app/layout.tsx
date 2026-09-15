@@ -11,15 +11,15 @@ export const metadata: Metadata = {
   metadataBase: new URL(
     process.env.NEXT_PUBLIC_APP_URL || "https://kinetixfitt-world-ia.vercel.app"
   ),
-  title: "EZEQUIEL COACHING — Entrenamiento Personalizado Online",
+  title: "KinetixFitt — Entrenamiento inteligente y coaching fitness",
   description:
-    "Programa a medida, seguimiento real y contacto directo con tu coach. Entrenamiento, nutrición y progreso desde tu celular.",
-  applicationName: "EZEQUIEL COACHING",
+    "KinetixFitt conecta entrenamiento, seguimiento, progreso, nutrición y coaching en una experiencia fitness premium para atletas y entrenadores.",
+  applicationName: "KinetixFitt",
   manifest: "/manifest.json",
   appleWebApp: {
     capable: true,
     statusBarStyle: "black-translucent",
-    title: "EZEQUIEL COACHING",
+    title: "KinetixFitt",
   },
   formatDetection: { telephone: false },
   icons: {
@@ -34,8 +34,8 @@ export const metadata: Metadata = {
     ],
   },
   openGraph: {
-    title: "EZEQUIEL COACHING — Tu mejor versión, cada día",
-    description: "Entrenamiento personalizado online con seguimiento real.",
+    title: "KinetixFitt — Entrenamiento inteligente y coaching fitness",
+    description: "Entrenamiento, seguimiento y progreso en una plataforma fitness unificada.",
     type: "website",
     locale: "es_AR",
     images: [
@@ -43,7 +43,7 @@ export const metadata: Metadata = {
         url: "/og-image.jpg",
         width: 1200,
         height: 630,
-        alt: "EZEQUIEL COACHING — Tu mejor versión, cada día",
+        alt: "KinetixFitt — Entrenamiento inteligente y coaching fitness",
       },
     ],
   },
@@ -53,18 +53,17 @@ export const viewport: Viewport = {
   themeColor: "#0A0F14",
   width: "device-width",
   initialScale: 1,
-  // Sin maximumScale: bloquear pinch-zoom rompe accesibilidad móvil.
   viewportFit: "cover",
 };
 
-export default function RootLayout({children}:{children:React.ReactNode}){
+export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="es" suppressHydrationWarning>
       <head>
         <link rel="apple-touch-icon" href="/icons/apple-touch-icon.png" />
         <meta name="apple-mobile-web-app-capable" content="yes" />
         <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
-        <script dangerouslySetInnerHTML={{__html: `(function(){try{var t=localStorage.getItem('ec-theme')||'dark';document.documentElement.classList.add(t);document.documentElement.setAttribute('data-theme',t);}catch(e){}})()`}} />
+        <script dangerouslySetInnerHTML={{ __html: `(function(){try{var t=localStorage.getItem('ec-theme')||'dark';document.documentElement.classList.add(t);document.documentElement.setAttribute('data-theme',t);}catch(e){}})()` }} />
       </head>
       <body className={`${inter.variable} ${grotesk.variable} min-h-screen bg-[#080808] text-zinc-100 antialiased selection:bg-primary selection:text-black`}>
         <ThemeProvider>
