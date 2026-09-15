@@ -26,7 +26,7 @@ import {
 type ExercisePreview = {
   id: string;
   sets: number;
-  reps: number;
+  reps: string | number;
   rir: number | null;
   exercise: { name: string; muscleGroup: string | null };
 };
