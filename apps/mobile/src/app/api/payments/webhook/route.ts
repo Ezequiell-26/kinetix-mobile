@@ -28,21 +28,22 @@ function verifyMpSignature(req: Request, dataId: string | null, secret: string) 
   return constantTimeHexEqual(digest, v1);
 }
 
-async function claimEvent(provider: "stripe" | "mercadopago", eventId: string) {
-  const inserted = await prisma.$queryRaw<Array<{ id: string }>>(Prisma.sql`
+async function isClaimed(provider: "stripe" | "mercadopago", eventId: string) {
+  const existing = await prisma.$queryRaw<Array<{ id: string }>>(Prisma.sql`
+    SELECT "id" FROM "PaymentWebhookEvent"
+    WHERE "provider" = ${provider} AND "eventId" = ${eventId}
+    LIMIT 1
+  `);
+  return existing.length > 0;
+}
+
+async function recordEvent(provider: "stripe" | "mercadopago", eventId: string) {
+  await prisma.$queryRaw<Array<{ id: string }>>(Prisma.sql`
     INSERT INTO "PaymentWebhookEvent" ("id", "provider", "eventId")
     VALUES (${crypto.randomUUID()}, ${provider}, ${eventId})
     ON CONFLICT ("provider", "eventId") DO NOTHING
     RETURNING "id"
   `);
-  return inserted.length > 0;
-}
-
-function subscriptionStatus(status: string) {
-  if (status === "active" || status === "trialing") return "ACTIVA" as const;
-  if (status === "canceled") return "CANCELADA" as const;
-  if (status === "past_due" || status === "unpaid" || status === "incomplete_expired") return "VENCIDA" as const;
-  return "PENDIENTE" as const;
 }
 
 async function settlePayment(input: {
@@ -53,17 +54,42 @@ async function settlePayment(input: {
   externalDescription: string;
   amount?: number | null;
 }) {
-  const where = input.paymentId ? { id: input.paymentId } : input.clientId ? { clientId: input.clientId, status: "PENDIENTE" as const } : null;
-  if (!where) return;
-  await prisma.payment.updateMany({ where, data: { status: input.status, method: input.method, ...(input.amount && Number.isFinite(input.amount) && input.amount > 0 ? { amount: input.amount } : {}), description: input.externalDescription.slice(0, 500) } });
-  if (input.status === "PAGADO" && input.clientId) {
+  const where = input.paymentId
+    ? { id: input.paymentId, status: { not: "PAGADO" as const } }
+    : input.clientId
+      ? { clientId: input.clientId, status: "PENDIENTE" as const }
+      : null;
+  if (!where) return false;
+
+  const updated = await prisma.payment.updateMany({
+    where,
+    data: {
+      status: input.status,
+      method: input.method,
+      ...(input.amount && Number.isFinite(input.amount) && input.amount > 0 ? { amount: input.amount } : {}),
+      description: input.externalDescription.slice(0, 500),
+    },
+  });
+
+  // Solo el primer paso pendiente -> pagado puede renovar el período.
+  // Esto evita doble extensión cuando Stripe emite dos eventos para el mismo cobro.
+  if (updated.count > 0 && input.status === "PAGADO" && input.clientId) {
     const subscription = await prisma.subscription.findUnique({ where: { clientId: input.clientId } });
     if (subscription) {
       const nextPayment = new Date();
       nextPayment.setDate(nextPayment.getDate() + 30);
-      await prisma.subscription.update({ where: { clientId: input.clientId }, data: { status: "ACTIVA", nextPayment, ...(input.amount ? { price: input.amount } : {}) } });
+      await prisma.subscription.update({
+        where: { clientId: input.clientId },
+        data: {
+          status: "ACTIVA",
+          nextPayment,
+          ...(input.amount ? { price: input.amount } : {}),
+        },
+      });
     }
   }
+
+  return updated.count > 0;
 }
 
 export async function POST(req: Request) {
@@ -78,28 +104,63 @@ export async function POST(req: Request) {
       const Stripe = (await import("stripe")).default;
       const stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
       let event: import("stripe").default.Event;
-      try { event = stripe.webhooks.constructEvent(body, stripeSignature, process.env.STRIPE_WEBHOOK_SECRET); } catch { return NextResponse.json({ error: "Invalid signature" }, { status: 400 }); }
-      if (!(await claimEvent("stripe", event.id))) return NextResponse.json({ received: true, duplicate: true });
+      try {
+        event = stripe.webhooks.constructEvent(body, stripeSignature, process.env.STRIPE_WEBHOOK_SECRET);
+      } catch {
+        return NextResponse.json({ error: "Invalid signature" }, { status: 400 });
+      }
+
+      if (await isClaimed("stripe", event.id)) return NextResponse.json({ received: true, duplicate: true });
       const payload = event.data.object as unknown as Record<string, any>;
       switch (event.type) {
         case "checkout.session.completed":
         case "checkout.session.async_payment_succeeded":
-          await settlePayment({ paymentId: typeof payload.metadata?.paymentId === "string" ? payload.metadata.paymentId : null, clientId: typeof payload.metadata?.clientId === "string" ? payload.metadata.clientId : null, status: "PAGADO", method: "STRIPE", externalDescription: `Pago vía Stripe · ${event.id}`, amount: typeof payload.amount_total === "number" ? payload.amount_total / 100 : null });
+          await settlePayment({
+            paymentId: typeof payload.metadata?.paymentId === "string" ? payload.metadata.paymentId : null,
+            clientId: typeof payload.metadata?.clientId === "string" ? payload.metadata.clientId : null,
+            status: "PAGADO",
+            method: "STRIPE",
+            externalDescription: `Pago vía Stripe · ${event.id}`,
+            amount: typeof payload.amount_total === "number" ? payload.amount_total / 100 : null,
+          });
           break;
         case "payment_intent.succeeded":
-          await settlePayment({ paymentId: typeof payload.metadata?.paymentId === "string" ? payload.metadata.paymentId : null, clientId: typeof payload.metadata?.clientId === "string" ? payload.metadata.clientId : null, status: "PAGADO", method: "STRIPE", externalDescription: `PaymentIntent · ${event.id}`, amount: typeof payload.amount_received === "number" ? payload.amount_received / 100 : null });
+          await settlePayment({
+            paymentId: typeof payload.metadata?.paymentId === "string" ? payload.metadata.paymentId : null,
+            clientId: typeof payload.metadata?.clientId === "string" ? payload.metadata.clientId : null,
+            status: "PAGADO",
+            method: "STRIPE",
+            externalDescription: `PaymentIntent · ${event.id}`,
+            amount: typeof payload.amount_received === "number" ? payload.amount_received / 100 : null,
+          });
           break;
         case "payment_intent.payment_failed":
-          await settlePayment({ paymentId: typeof payload.metadata?.paymentId === "string" ? payload.metadata.paymentId : null, clientId: typeof payload.metadata?.clientId === "string" ? payload.metadata.clientId : null, status: "VENCIDO", method: "STRIPE", externalDescription: `Pago rechazado · ${event.id}` });
+          await settlePayment({
+            paymentId: typeof payload.metadata?.paymentId === "string" ? payload.metadata.paymentId : null,
+            clientId: typeof payload.metadata?.clientId === "string" ? payload.metadata.clientId : null,
+            status: "VENCIDO",
+            method: "STRIPE",
+            externalDescription: `Pago rechazado · ${event.id}`,
+          });
           break;
         case "customer.subscription.updated":
         case "customer.subscription.deleted": {
           const clientId = typeof payload.metadata?.clientId === "string" ? payload.metadata.clientId : null;
-          if (clientId) await prisma.subscription.updateMany({ where: { clientId }, data: { status: subscriptionStatus(String(payload.status || (event.type.endsWith("deleted") ? "canceled" : "unknown"))), ...(typeof payload.current_period_end === "number" ? { nextPayment: new Date(payload.current_period_end * 1000) } : {}) } });
+          if (clientId) {
+            await prisma.subscription.updateMany({
+              where: { clientId },
+              data: {
+                status: subscriptionStatus(String(payload.status || (event.type.endsWith("deleted") ? "canceled" : "unknown"))),
+                ...(typeof payload.current_period_end === "number" ? { nextPayment: new Date(payload.current_period_end * 1000) } : {}),
+              },
+            });
+          }
           break;
         }
-        default: break;
+        default:
+          break;
       }
+      await recordEvent("stripe", event.id);
       return NextResponse.json({ received: true });
     }
 
@@ -108,20 +169,34 @@ export async function POST(req: Request) {
       const dataId = url.searchParams.get("data.id") || url.searchParams.get("data_id");
       if (!verifyMpSignature(req, dataId, MP_WEBHOOK_SECRET)) return NextResponse.json({ error: "Invalid MP signature" }, { status: 401 });
       let data: Record<string, any>;
-      try { data = JSON.parse(body); } catch { return NextResponse.json({ error: "Invalid JSON" }, { status: 400 }); }
-      const eventId = data.id != null ? String(data.id) : `${data.type || "unknown"}:${dataId || "unknown"}:${data.action || "unknown"}`;
-      if (!(await claimEvent("mercadopago", eventId))) return NextResponse.json({ received: true, duplicate: true });
-      if (data.type === "payment" && dataId && MP_ACCESS_TOKEN) {
-        const response = await fetch(`https://api.mercadopago.com/v1/payments/${encodeURIComponent(dataId)}`, { headers: { Authorization: `Bearer ${MP_ACCESS_TOKEN}` }, cache: "no-store" });
-        if (response.ok) {
-          const payment = await response.json() as Record<string, any>;
-          const externalReference = typeof payment.external_reference === "string" ? payment.external_reference : null;
-          const status = payment.status === "approved" ? "PAGADO" : payment.status === "pending" || payment.status === "in_process" ? "PENDIENTE" : "VENCIDO";
-          await settlePayment({ paymentId: externalReference, status, method: "MERCADOPAGO", externalDescription: `Mercado Pago · ${dataId}`, amount: typeof payment.transaction_amount === "number" ? payment.transaction_amount : null });
-        }
+      try {
+        data = JSON.parse(body);
+      } catch {
+        return NextResponse.json({ error: "Invalid JSON" }, { status: 400 });
       }
+      const eventId = data.id != null ? String(data.id) : `${data.type || "unknown"}:${dataId || "unknown"}:${data.action || "unknown"}`;
+      if (await isClaimed("mercadopago", eventId)) return NextResponse.json({ received: true, duplicate: true });
+      if (data.type === "payment" && dataId && MP_ACCESS_TOKEN) {
+        const response = await fetch(`https://api.mercadopago.com/v1/payments/${encodeURIComponent(dataId)}`, {
+          headers: { Authorization: `Bearer ${MP_ACCESS_TOKEN}` },
+          cache: "no-store",
+        });
+        if (!response.ok) return NextResponse.json({ error: "No se pudo verificar el pago con Mercado Pago" }, { status: 502 });
+        const payment = await response.json() as Record<string, any>;
+        const externalReference = typeof payment.external_reference === "string" ? payment.external_reference : null;
+        const status = payment.status === "approved" ? "PAGADO" : payment.status === "pending" || payment.status === "in_process" ? "PENDIENTE" : "VENCIDO";
+        await settlePayment({
+          paymentId: externalReference,
+          status,
+          method: "MERCADOPAGO",
+          externalDescription: `Mercado Pago · ${dataId}`,
+          amount: typeof payment.transaction_amount === "number" ? payment.transaction_amount : null,
+        });
+      }
+      await recordEvent("mercadopago", eventId);
       return NextResponse.json({ received: true });
     }
+
     return NextResponse.json({ received: true });
   } catch (error) {
     console.error("[WEBHOOK] processing failed", error);
@@ -129,4 +204,13 @@ export async function POST(req: Request) {
   }
 }
 
-export async function GET() { return NextResponse.json({ status: "ok", providers: ["stripe", "mercadopago"] }); }
+function subscriptionStatus(status: string) {
+  if (status === "active" || status === "trialing") return "ACTIVA" as const;
+  if (status === "canceled") return "CANCELADA" as const;
+  if (status === "past_due" || status === "unpaid" || status === "incomplete_expired") return "VENCIDA" as const;
+  return "PENDIENTE" as const;
+}
+
+export async function GET() {
+  return NextResponse.json({ status: "ok", providers: ["stripe", "mercadopago"] });
+}
