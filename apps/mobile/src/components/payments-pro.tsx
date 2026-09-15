@@ -1,6 +1,7 @@
 "use client";
 
-import { FormEvent, useMemo, useState } from "react";
+import { useMemo, useState } from "react";
+import type { FormEvent } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -122,92 +123,44 @@ export function PaymentsPro({ clients = [] }: PaymentsProProps) {
             <div className="space-y-4">
               <div>
                 <Label htmlFor="payment-client">Cliente</Label>
-                <select
-                  id="payment-client"
-                  value={clientId}
-                  onChange={(event) => { setClientId(event.target.value); setMessage(null); setError(null); }}
-                  className="mt-1.5 h-11 w-full rounded-xl border border-white/[0.08] bg-[#081119] px-3 text-sm text-white outline-none transition focus:border-primary/40 focus:ring-2 focus:ring-primary/10"
-                >
-                  {clients.map((client) => (
-                    <option key={client.id} value={client.id}>
-                      {client.name}{client.plan ? ` · ${client.plan}` : ""}
-                    </option>
-                  ))}
+                <select id="payment-client" value={clientId} onChange={(event) => { setClientId(event.target.value); setMessage(null); setError(null); }} className="mt-1.5 h-11 w-full rounded-xl border border-white/[0.08] bg-[#081119] px-3 text-sm text-white outline-none transition focus:border-primary/40 focus:ring-2 focus:ring-primary/10">
+                  {clients.map((client) => <option key={client.id} value={client.id}>{client.name}{client.plan ? ` · ${client.plan}` : ""}</option>)}
                 </select>
                 {selectedClient?.email && <p className="mt-1.5 text-[11px] text-zinc-600">{selectedClient.email}</p>}
               </div>
 
               <div>
                 <Label htmlFor="payment-amount">Importe (ARS)</Label>
-                <Input
-                  id="payment-amount"
-                  type="number"
-                  min="1"
-                  max="1000000"
-                  step="1"
-                  inputMode="numeric"
-                  value={amount}
-                  onChange={(event) => { setAmount(event.target.value); setMessage(null); setError(null); }}
-                  className="mt-1.5 h-11"
-                />
+                <Input id="payment-amount" type="number" min="1" max="1000000" step="1" inputMode="numeric" value={amount} onChange={(event) => { setAmount(event.target.value); setMessage(null); setError(null); }} className="mt-1.5 h-11" />
                 <div className="mt-2 flex flex-wrap gap-2">
-                  {PLANS.map((plan) => (
-                    <button
-                      key={plan.id}
-                      type="button"
-                      onClick={() => choosePlan(plan.price)}
-                      className="rounded-full border border-white/[0.07] bg-white/[0.025] px-3 py-1.5 text-[11px] font-semibold text-zinc-400 transition hover:border-primary/30 hover:text-primary"
-                    >
-                      {plan.name} · ${formatARS(plan.price)}
-                    </button>
-                  ))}
+                  {PLANS.map((plan) => <button key={plan.id} type="button" onClick={() => choosePlan(plan.price)} className="rounded-full border border-white/[0.07] bg-white/[0.025] px-3 py-1.5 text-[11px] font-semibold text-zinc-400 transition hover:border-primary/30 hover:text-primary">{plan.name} · ${formatARS(plan.price)}</button>)}
                 </div>
               </div>
 
               <div>
                 <Label htmlFor="payment-description">Descripción</Label>
-                <Input
-                  id="payment-description"
-                  value={description}
-                  onChange={(event) => setDescription(event.target.value)}
-                  placeholder="Mensualidad, plan premium, renovación..."
-                  maxLength={500}
-                  className="mt-1.5 h-11"
-                />
+                <Input id="payment-description" value={description} onChange={(event) => setDescription(event.target.value)} placeholder="Mensualidad, plan premium, renovación..." maxLength={500} className="mt-1.5 h-11" />
               </div>
             </div>
 
             <div className="space-y-4 rounded-2xl border border-white/[0.06] bg-white/[0.02] p-4">
               <div>
                 <Label htmlFor="payment-method">Método</Label>
-                <select
-                  id="payment-method"
-                  value={method}
-                  onChange={(event) => setMethod(event.target.value as (typeof METHODS)[number]["value"])}
-                  className="mt-1.5 h-11 w-full rounded-xl border border-white/[0.08] bg-[#081119] px-3 text-sm text-white outline-none transition focus:border-primary/40 focus:ring-2 focus:ring-primary/10"
-                >
+                <select id="payment-method" value={method} onChange={(event) => setMethod(event.target.value as (typeof METHODS)[number]["value"])} className="mt-1.5 h-11 w-full rounded-xl border border-white/[0.08] bg-[#081119] px-3 text-sm text-white outline-none transition focus:border-primary/40 focus:ring-2 focus:ring-primary/10">
                   {METHODS.map((item) => <option key={item.value} value={item.value}>{item.label}</option>)}
                 </select>
               </div>
 
               <div>
                 <Label htmlFor="payment-status">Estado</Label>
-                <select
-                  id="payment-status"
-                  value={status}
-                  onChange={(event) => setStatus(event.target.value as "PAGADO" | "PENDIENTE")}
-                  className="mt-1.5 h-11 w-full rounded-xl border border-white/[0.08] bg-[#081119] px-3 text-sm text-white outline-none transition focus:border-primary/40 focus:ring-2 focus:ring-primary/10"
-                >
+                <select id="payment-status" value={status} onChange={(event) => setStatus(event.target.value as "PAGADO" | "PENDIENTE")} className="mt-1.5 h-11 w-full rounded-xl border border-white/[0.08] bg-[#081119] px-3 text-sm text-white outline-none transition focus:border-primary/40 focus:ring-2 focus:ring-primary/10">
                   <option value="PAGADO">Pagado</option>
                   <option value="PENDIENTE">Pendiente</option>
                 </select>
               </div>
 
               <div className="rounded-xl border border-primary/15 bg-primary/[0.035] p-3">
-                <div className="flex items-center gap-2 text-xs font-bold text-white">
-                  <CreditCard size={14} className="text-primary" />
-                  Cobro seguro
-                </div>
+                <div className="flex items-center gap-2 text-xs font-bold text-white"><CreditCard size={14} className="text-primary" />Cobro seguro</div>
                 <p className="mt-1 text-[11px] leading-5 text-zinc-500">No se guardan datos de tarjeta. Los cobros online deben confirmarse por webhook del proveedor.</p>
               </div>
 
