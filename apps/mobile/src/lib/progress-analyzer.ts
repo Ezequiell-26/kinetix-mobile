@@ -1,5 +1,5 @@
 /**
- * EZEQUIEL COACHING - AI Progress Analyzer
+ * KINETIXFITT - AI Progress Analyzer
  * Sistema inteligente de análisis de progreso con comparaciones multi-período
  * y generación de insights personalizados
  */

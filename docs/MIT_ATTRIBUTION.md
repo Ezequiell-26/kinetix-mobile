@@ -7,7 +7,7 @@ Este proyecto integra patrones e ideas de los siguientes repositorios MIT, con a
 - **Repo:** https://github.com/jessedelira/gym-tracker
 - **Licencia:** MIT — https://github.com/jessedelira/gym-tracker/blob/main/LICENSE
 - **Autor:** Jesse De Lira — jessedelira1@gmail.com
-- **Uso en EZEQUIEL COACHING:**
+- **Uso en KINETIXFITT:**
   - Patrón `ActiveSession` / `CompletedSession` para tracking de entreno en curso vs completado (adaptado a `WorkoutLog` con `status` y `startedAt`)
   - Componente `ChangelogNotification` (adaptado a `VersionBadge` + `/trainer/changelog`)
   - `ActivityGraph` inspirado para `analytics-charts.tsx` (Recharts)
@@ -294,7 +294,7 @@ Calendario 30 días con rachas, verde = entrenaste, gris = descanso, streak 7d.
 wger nutrition plans + Cronometer timing de macros por comida: distribución % por ventana horaria, no solo macros diarios.
 **Repo:** https://github.com/wger-project/wger (AGPL servidor, pero datasets y fórmulas MIT) + https://github.com/cronometer (MIT patterns)
 **Licencia:** MIT (datasets y lógica pública — no copia AGPL de servidor)
-**Uso en EZEQUIEL COACHING:**
+**Uso en KINETIXFITT:**
   - Patrón wger de NutritionPlan → Meal → MealItem para distribuir macros por comida con % y horarios
   - Lógica Cronometer de micros/timing por comida adaptada a 3 presets (4 comidas 25/35/15/25, 5 peri-entreno 20/30/15/15/20, 3 comidas 30/40/30)
   - Cálculo por comida: kcal% + proteína/carbs/grasa proporcionales con ajuste peri-entreno (+20% carbs pre/post en volumen)
@@ -305,7 +305,7 @@ wger nutrition plans + Cronometer timing de macros por comida: distribución % p
 TensorFlow.js regresión logística para predicción de racha — habit streak maintenance prediction local sin cloud.
 **Repo:** https://github.com/tensorflow/tfjs (Apache 2.0/MIT) + https://github.com/HabitRPG/habitica (MIT streaks)
 **Licencia:** MIT/Apache 2.0 — https://github.com/tensorflow/tfjs/blob/master/LICENSE
-**Uso en EZEQUIEL COACHING:**
+**Uso en KINETIXFITT:**
   - Modelo inspirado en tf.sequential + sigmoid: 4 features normalizadas [racha/14, entrenos7d/7, adherencia/100, díasSin/7] con pesos [0.9,1.1,1.4,-1.2] y bias -0.6
   - Sigmoid(W·x+b) para P(mantener racha 7d) — sin importar tfjs para BUILD 0, JS puro que mimics TensorFlow.js
   - Controles interactivos: racha, entrenos 7d, adherencia, días sin — gauge % + label (segura/en riesgo/alto) + tip accionable
@@ -316,7 +316,7 @@ TensorFlow.js regresión logística para predicción de racha — habit streak m
 - **Repos:** https://github.com/shadcn-ui/ui (MIT) — https://github.com/shadcn-ui/ui/blob/main/LICENSE.md | https://github.com/radix-ui/primitives (MIT) — https://github.com/radix-ui/primitives/blob/main/LICENSE
 - **Licencia:** MIT — Permiso para usar, copiar, modificar, fusionar, publicar, distribuir, sublicenciar y/o vender copias.
 - **Autores:** shadcn (shadcn) + Radix UI team (WorkOS)
-- **Uso en EZEQUIEL COACHING:**
+- **Uso en KINETIXFITT:**
   - Patrón `Skeleton` + `shimmer` de shadcn/ui para `PremiumSkeleton`, `SkeletonCard`, `SkeletonList`, `SkeletonDashboard` con animate-pulse + gradiente shimmer
   - Primitivas accesibles sin estilo de Radix (Dialog/Tooltip/Popover primitives) para `PressableCard` focus-visible, `HoverLift`, `PulseDot`, `FadeIn`/`Stagger*` microinteractions
   - Sistema `cn()` + Tailwind + `Card`/`Badge` ya usado, ahora con microinteractions framer-motion (hover y tap spring 400/18)
@@ -335,7 +335,7 @@ TensorFlow.js regresión logística para predicción de racha — habit streak m
 - **Licencia:** MIT — https://github.com/tihawk/fitnotes2fit/blob/master/LICENSE
 - **Autores:** tihawk + mylesverdon + stoyanov-x (comunidad FitNotes open-source)
 - **Inspiración:** FitNotes Android — el tracker más usado para gimnasio: workout notes (notas globales), exercise notes (por ejercicio), set notes (por serie con `> Note`), RPE 6-10 / RIR por set, isWarmup flag (warmup excluido de stats), templates/routines (guardar workout como rutina, categorías, duplicar, export/import JSON + texto `weight x reps`), copy previous sets, rest timer, plate calculator
-- **Uso en EZEQUIEL COACHING:**
+- **Uso en KINETIXFITT:**
   - Patrón FitNotes de 3 niveles de notas: `workout.notes` (global), `exercise.notes` (por ejercicio), `set.notes` + `set.rpe` + `set.isWarmup` — adaptado a `FitTemplate` → `FitExercise` → `FitSet` con textarea por nivel y taps RPE 6-10
   - Escala RPE 6-10 de FitNotes (6 fácil 4RIR → 10 fallo 0RIR) con colores y conversión automática RPE→RIR (`RIR = 10 - RPE`) al aplicar al gestor
   - Patrón `Templates` de FitNotes: guardar rutina como template por categoría (Pecho/Espalda/Pierna...), duplicar, filtrar por categoría, localStorage `fitnotes-pro-templates-v1`, aplicar 1-click al gestor de semanas/días/ejercicios preservando notas y RPE
@@ -348,7 +348,7 @@ TensorFlow.js regresión logística para predicción de racha — habit streak m
 - **Licencia:** MIT — https://github.com/wrkout/wrkout/blob/master/LICENSE — Permiso para usar, copiar, modificar, fusionar, publicar, distribuir, sublicenciar y/o vender copias del Software.
 - **Autores:** wrkout (Joey) + Strong community + Lyftr (Cawlumm) + Simple (basarsubasi)
 - **Inspiración:** Strong App — el tracker #1 (10M+ descargas): workout template library por carpeta (Folders), duplicar template, iniciar workout desde template con 1 tap, rest timer circular auto (30-180s, pausa/+15s/saltar, beep + vibración), PR detection instantánea con fórmula Epley `1RM = w × (1 + r/30)`, volumen total, superset, progresión +2.5%/sem. wrkout es el clone MIT open-source más fiel a Strong (Flutter, template→exercise→set, timer, gráficos), complementado por Lyftr Gym Mode (one-exercise-at-a-time + timer) y Simple scheduling.
-- **Uso en EZEQUIEL COACHING:**
+- **Uso en KINETIXFITT:**
   - Patrón Strong `Template` → `TemplateExercise` → `Set` con `folder` (Fuerza/Plantillas), `sets/reps/weight/restSec/superset/note` — 4 templates demo (Push, Pull, Legs, Full Body) con carga realista, colores por template, folder filter, lastUsed, duplicate (copia con sufijo), start 1-click
   - Rest timer premium circular: auto-start tras log set (90-180s por ejercicio), countdown 00:00, pausa/play, +15s incremental, saltar, beep Web Audio 880/980Hz + vibración [60,30,60], cambia a siguiente ejercicio/serie automáticamente — inspirado en Strong 90s default + Lyftr Gym Mode timer
   - PR engine Epley puro JS (sin librería para BUILD 0): `epley(w,r)=w*(1+r/30)` vs historial `PrRecord[]`, tolerancia 0.5%, banner animado «¡Nuevo PR!» con confetti vibración, 1RM por set en inputs, métricas `bestPr` y volumen total `Σ w×r /1000 t`, persistencia en memoria + celebración 1.2kHz
@@ -363,7 +363,7 @@ TensorFlow.js regresión logística para predicción de racha — habit streak m
 - **Licencia:** MIT — https://github.com/Cawlumm/lyftr/blob/main/LICENSE | https://github.com/basarsubasi/simplefitnessapp/blob/main/LICENSE | https://github.com/HabitRPG/habitica/blob/develop/LICENSE — Permiso para usar, copiar, modificar, fusionar, publicar, distribuir, sublicenciar y/o vender copias.
 - **Autores:** Lyftr (Cawlumm) + Simple (basarsubasi) + Habitica + wger community + Twenty + Trainerize UX (inspiración comercial, no código)
 - **Inspiración:** Trainerize unifica 6 dominios en 1 vista por cliente sin cambiar de pestaña: (1) Workouts: programa actual, semana/día, adherencia, próximo entreno (2) Nutrición: kcal/P/C/G, comidas, agua (3) Hábitos: agua/sueño/pasos/proteína + racha streak (4) Mensajes: unread + última conversación + respuesta rápida (5) Progreso: peso/delta/fotos/PR/volumen semanal (6) Pagos: plan/estado/próximo cobro/MRR — con switcher de cliente y quick actions (asignar, mensaje, check-in, cobrar)
-- **Uso en EZEQUIEL COACHING:**
+- **Uso en KINETIXFITT:**
   - Patrón Trainerize de client switcher horizontal (4 clientes avatar + plan + adherencia + unread dot) con estado activo #D6FF2A — adaptado a `ClientAllInOne` con 6 dominios mock realistas (Martín 92%, Sofía 68% en riesgo, Lucas 84%, Valentina 95%)
   - Grid 6 dominios (2×3 → md 3 cols): workouts (programa + próximo + adherencia + Progress), nutrition (kcal/P/C/G + comidas/water), habits (4 habits con Progress + streak), messaging (último mensaje + input rápida), progress (peso/volumen/PR/photos), payments (plan/status/nextBilling)
   - Quick actions bar Trainerize-style: Asignar entreno + Mensaje + Check-in + Cobro + MRR summary — 1-click sin navegar
@@ -377,7 +377,7 @@ TensorFlow.js regresión logística para predicción de racha — habit streak m
 - **Licencia:** MIT — https://github.com/shadcn-ui/ui/blob/main/LICENSE.md | https://github.com/Cawlumm/lyftr/blob/main/LICENSE — Permiso para usar, copiar, modificar, fusionar, publicar, distribuir, sublicenciar y/o vender copias.
 - **Autores:** shadcn + Lyftr (Cawlumm) + Simple (basarsubasi) + FitBook + wrkout + Everfit/TrueCoach UX (inspiración comercial)
 - **Inspiración:** Everfit builder: biblioteca izquierda (search + filtro músculo + drag handle + +1-click Add) → canvas centro con semanas → días → ejercicios con drag&drop HTML5 nativo entre días, inputs sets/reps/peso/RIR/rest/tempo/note, superset toggle, duplicate/move/delete, grip drag, drop zone highlight #D6FF2A/[0.03] — auto-progression bar top (toggle + 3 reglas: doble progresión / lineal +2.5% / RIR-based + preview), assignment bottom (multi-select clients + date + 1-click Asignar) — TrueCoach aporta simple 1:1 library sin fricción (sin 10 clicks para agregar 1 ejercicio)
-- **Uso en EZEQUIEL COACHING:**
+- **Uso en KINETIXFITT:**
   - Patrón Everfit de biblioteca 12 ejercicios (Pecho/Pierna/Espalda/Hombro/Glúteo/Brazo) con search + muscleFilter + draggable `onDragStart` HTML5 + `onDrop` on day, fallback + button para BUILD 0 sin dnd-kit — adaptado a `LibraryItem` → `BuilderExercise` via `makeEx`
   - Canvas semanas/días/ejercicios con `BuilderWeek` → `BuilderDay` → `BuilderExercise` (sets/reps/weight/rir/restSec/tempo/superset/note) — inputs inline, GripVertical drag, ArrowUp/Down move, Copy duplicate, Trash delete, superset badge, drop highlight
   - Auto-progression engine (OptiLifts + TrueCoach simple): toggle + 3 reglas con preview dinámico — `linear` = +2.5% next week, `double` = si toca tope reps 2 sesiones → +2.5kg, `rir` = si RIR≤1 2× → +2.5kg, si RIR≥4 mantener — sin librería ML para BUILD 0, JS puro
@@ -391,9 +391,9 @@ TensorFlow.js regresión logística para predicción de racha — habit streak m
 - **Repos MIT base:** https://github.com/shadcn-ui/ui (MIT) — theming via CSS variables + color system https://github.com/shadcn-ui/ui/blob/main/LICENSE.md | https://github.com/calcom/cal.com (MIT) — white-label booking: colores, logo, dominio custom, app marca propia | https://github.com/plausible/analytics (MIT) — white-label via dominio custom + branding | https://github.com/ToolJet/ToolJet (MIT) — app branding + custom domain + logo
 - **Licencia:** MIT — https://github.com/shadcn-ui/ui/blob/main/LICENSE.md | https://github.com/calcom/cal.com/blob/main/LICENSE | https://github.com/plausible/analytics/blob/master/LICENSE — Permiso para usar, copiar, modificar, fusionar, publicar, distribuir, sublicenciar y/o vender copias del Software.
 - **Autores:** shadcn (shadcn) + Cal.com team + Plausible team + ToolJet team — FitBudd UX (inspiración comercial, no código)
-- **Inspiración:** FitBudd white-label completo: (1) Colores: primario + fondo app con picker + 4 presets (Ezequiel #D6FF2A, Obsidian violeta, Ignite rojo, Ocean teal) — como Cal.com brand colors (2) Logo: letra + icono + preview live (3) Dominio: ezequielcoaching.com por defecto + customDomain opcional con validación regex + CNAME → cname.ezequielcoaching.com + SSL auto — como Plausible/Cal.com custom domain (4) App marca propia: PWA manifest dinámico + theme-color + listing App Store con tu nombre — sin "Ezequiel Coaching" visible en root (5) Preview phone mockup 200px con notch + live update de colores/nombre — como ToolJet app preview
+- **Inspiración:** FitBudd white-label completo: (1) Colores: primario + fondo app con picker + 4 presets (Ezequiel #D6FF2A, Obsidian violeta, Ignite rojo, Ocean teal) — como Cal.com brand colors (2) Logo: letra + icono + preview live (3) Dominio: kinetixfitt.com por defecto + customDomain opcional con validación regex + CNAME → cname.kinetixfitt.com + SSL auto — como Plausible/Cal.com custom domain (4) App marca propia: PWA manifest dinámico + theme-color + listing App Store con tu nombre — sin "KinetixFitt" visible en root (5) Preview phone mockup 200px con notch + live update de colores/nombre — como ToolJet app preview
 - **Mejora MIT + Trainwell + Caliber:** Trainwell human touch (tu voz, no plantilla) + Caliber science-based (RIR, volumen, progresión) integrados bajo tu marca — el cliente ve "TU APP", no una plataforma genérica. 100% local con localStorage `fitbudd-branding-v1` + CSS variable `--brand-primary`, sin comisión por cliente, offline-first, sin dependencia cloud
-- **Uso en EZEQUIEL COACHING:**
+- **Uso en KINETIXFITT:**
   - Patrón Cal.com/Shadcn de theming: `Branding` type con `appName/tagline/primary/accent/logoLetter/domain/customDomain` + 4 presets + `localStorage` persist + `document.documentElement.style.setProperty("--brand-primary")` — adaptado a `FitBuddBranding` con color inputs + preset grid + validación dominio
   - PhonePreview mockup 200px con notch + notch + preview sections (entrenamiento de hoy + progreso/chat) usando `style={{background: b.accent}}` + `style={{background: b.primary}}` live — inspirado en FitBudd App Store screenshots + ToolJet preview
   - Dominio SEO card: dominio efectivo + manifest path `/{slug}.json` + theme-color + CNAME/SSL info — como Plausible custom domain docs
@@ -408,7 +408,7 @@ TensorFlow.js regresión logística para predicción de racha — habit streak m
 - **Autores:** Habitica (HabitRPG) + FitBook (brandonp2412) + open-wearables community + VitaFlex-AI (syeda434am) — Future UX (inspiración comercial, no código)
 - **Inspiración:** Future premium flow: (1) Apple Watch 3 rings SVG animados con `strokeDasharray` — adaptado a Fuerza/Nutri/Descanso (73%/92%/45%) con colores #D6FF2A/#22c55e/#38bdf8 + bg 12% + Progress bars (2) Daily check-in 30s: mood 1-5 (pink), energy 1-5 (amber), sleep 3-12h stepper, soreness 1-5 (sky), note 240 char — como Habitica dailies + FitBook daily log (3) Human coach vibe: chat bubbles Ezequiel (47m response) ↔ cliente, con "responde en <2h" + avatar E + checkmarks — como Future + Trainwell human touch (4) Watch sync badge "Watch conectado • sync 2m" + métricas 8.4k pasos/142 lpm/320 kcal — como python-garminconnect (5) 7-day streak dots con % + Progress mini — como Habitica streaks + FitBook adherence (6) Caliber science: "Racha 5 días • volumen + RIR controlados" + overall adherence `0.5*Fuerza+0.3*Nutri+0.2*Descanso`
 - **Mejora MIT:** Sin Watch funciona manual igual — localStorage `future-premium-checkin-v1` con `{today,sent,at}`, sin suscripción $199/mes, sin límite, offline-first, 100% en app. Supera Future al integrar Caliber fuerza (RIR/volumen) y Habitica gamificación en mismo dashboard
-- **Uso en EZEQUIEL COACHING:**
+- **Uso en KINETIXFITT:**
   - Patrón activity-rings SVG: `Ring` component con `r=(size-stroke)/2`, `c=2πr`, `dash=(value/100)*c`, `strokeDasharray={`${dash} ${c}`}` + `-rotate-90` + `strokeLinecap="round"` + `transition-all duration-700` — 3 rings 84px + 64px compact, colores y bg dinámicos
   - Check-in state `CheckinToday` con 4 controles (mood/energy/soreness botones 1-5, sleep stepper ±0.5h) + textarea 240 + Send → localStorage + `sent` toast 2.5s — como Habitica daily + FitBook log
   - Human coach card con 2 bubbles (Ezequiel #D6FF2A + cliente sky) + sparkles "Future vibe" + 7-day `WEEK_DOTS` with border states + overall score
@@ -422,7 +422,7 @@ TensorFlow.js regresión logística para predicción de racha — habit streak m
 - **Autores:** Twenty (Twenty CRM) + Habitica + Cal.com + PT Distinction + My PT Hub (inspiración comercial, UX/trigger design) + Granite
 - **Inspiración:** PT Distinction es #1 en automatizaciones: onboarding sequence D0/D1/D3/D7 sin tocar nada, check-in pending ≥3d → auto-reminder, 5d sin `WorkoutLog` → auto-mensaje retención personalizado con scoring de riesgo. My PT Hub aporta el negocio: CRM stage `En Riesgo` + pagos link + scheduling + tareas si no responde 48h — combinar ambos da trainer 0 trabajo manual.
 - **Mejora sobre PT Distinction/My PT Hub:** Antes (My PT Hub $59/mes, PT Distinction £19.99/mes): automatizaciones en cloud propietario, sin código, triggers fijos 5d/3d, sin local/privado, sin integración con progresión/RIR/volumen. Ahora: 100% local, triggers configurables (3d check-in, 5d retención), auto-toggle ON/OFF, preview de mensaje con `{name}/{plan}/{adherence}`, log local, integrado con `WorkoutLog`/`CheckIn`/`Client` reales, sin costo por cliente, sin copia AGPL, BUILD 0. En prod: `/api/cron/auto-messages` con Vercel Cron + `prisma.client` real + push/Notifications API — no solo mock.
-- **Uso en EZEQUIEL COACHING:**
+- **Uso en KINETIXFITT:**
   - Patrón PT Distinction `OnboardingSequence` D0 bienvenida+guía / D1 técnica+hábitos / D3 primer check-in / D7 ajuste programa — adaptado a `PtDistinctionAuto` con `MOCK_CLIENTS` (createdDaysAgo, onboardingStage 0-4), progress 62%, preview template `¡Hola {name}!... plan {plan}...` + status enviado/pendiente + auto-programado 2h
   - Pattern check-in reminder: `checkinPendingDays ≥3` → queue con avatar, adherencia, último entreno, msg `"Hola {name}, te falta el check-in hace {d}d..."` + badge auto ON/OFF + 1-click Enviar
   - Pattern retención 5d: `lastWorkoutDaysAgo === null || ≥5` → lista riesgo con severity (high ≥8d/<65%, mid ≥5d), msg personalizado `"llevás {days}d sin entrenar ({adherence}%)..."` + severity color + auto-programado 1h + bonus My PT Hub: si no responde 48h → tarea CRM + link pago retenido
@@ -436,7 +436,7 @@ TensorFlow.js regresión logística para predicción de racha — habit streak m
 - **Autor:** Fitbod Inc (UX/IA) + community fitness MIT (clones open source) + recovery research (piernas 72h, brazos 36h, core 24h)
 - **Inspiración:** Fitbod evita sobrecarga y mantiene balance: cada ejercicio → músculo (PECHO/ESPALDA/PIERNAS/HOMBROS/BRAZOS/CORE/GLUTEOS); calcula `horas desde último entreno` por músculo → freshness 0-100%: <24h fatigado 22% (swap), 24-48h recovering 58% (-1 set), 48-72h 82%, ≥72h fresco 100% (prioriza +2.5%/+1 rep). Detecta desbalance (grupo poco vs mucho entrenado) y prioriza el débil. Adapta workout planeado ejercicio por ejercicio sin copiar Fitbod — JS puro local.
 - **Mejora sobre Fitbod:** Antes (Fitbod $12.99/mes): IA en cloud, sin control trainer, sin integración check-in/RIR, sin desbalance coaching, solo cliente. Ahora: IA local por cliente seleccionable, fresca en dashboard trainer (Push/Pull/Legs), freshness grid 7 músculos con Progress bar + status fresco/recuperando/fatigado + hours, adaptación visual por ejercicio (mantener/reducir/swapear/priorizar con badge + alt), desbalance detection automático, aplicar/deshacer, sin cloud, sin costo, integra con historial 7d + volumen, BUILD 0. En prod: alimenta `prisma.workoutLogs` + `ExerciseSetLog` reales por `muscleGroup`.
-- **Uso en EZEQUIEL COACHING:**
+- **Uso en KINETIXFITT:**
   - Lógica Fitbod `freshnessFor(muscle, history)` con `hoursSince(dateStr)` (mock 2026-09-09 18:00) — mapping histórico `MOCK_HISTORY` 5 entries (pecho/brazos, piernas/gluteos, espalda/brazos, hombros/core) → `pct` 22/58/82/100 + status fatigued/recovering/fresh (piernas/gluteos penalizados 68% si 48-72h)
   - Grid recuperación 7 músculos (PECHO ESPALDA PIERNAS HOMBROS BRAZOS CORE GLUTEOS) con emoji, hours/d, Progress, % y badge status + leyenda ≥72h/24-72h/<24h
   - Adaptación workout: `PLANNED_WORKOUTS` Push/Pull/Legs (4 ex c/u con muscle/sets/reps/weight/alt) → `adapted` por freshness: fatigado→swapear/alt, recovering <70%→reducir -1 set/-10%, fresco 100%→priorizar +2.5% — visual warn/ok/high con icons (RefreshCw/Flame/Zap/CheckCircle2) + note `"FRESCO 100% hace 3d+ → prioriza"` / `"Fatigado 22% <24h → cambia a ..."`

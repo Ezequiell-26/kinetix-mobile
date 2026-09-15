@@ -2,8 +2,13 @@ import { prisma } from "@/lib/db";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { PaymentsPro } from "@/components/payments-pro";
 import { Badge } from "@/components/ui/badge";
+import { BRAND } from "@/constants/branding";
 import { Button } from "@/components/ui/button";
 import { Lock } from "lucide-react";
+
+export const dynamic = 'force-dynamic';
+export const revalidate = 0;
+
 
 export default async function PaymentsPage() {
   const subs = (await prisma.subscription.findMany({ include: { client: true } }).catch(() => [])) as Array<{
@@ -30,14 +35,14 @@ export default async function PaymentsPage() {
       {/* Plan cards */}
       <div className="grid sm:grid-cols-3 gap-3">
         {[
-          { plan: "BÁSICO", price: "$12.000 ARS", desc: "Seguimiento básico" },
-          { plan: "PERSONALIZADO", price: "$18.000 ARS", desc: "Programa a medida", featured: true },
-          { plan: "PREMIUM", price: "$25.000 ARS", desc: "Coaching 1:1 + ajustes semanales" },
+          { plan: "BÁSICO", price: 12000, desc: "Seguimiento básico" },
+          { plan: "PERSONALIZADO", price: 18000, desc: "Programa a medida", featured: true },
+          { plan: "PREMIUM", price: 25000, desc: "Coaching 1:1 + ajustes semanales" },
         ].map((p) => (
-          <Card key={p.plan} className={p.featured ? "border-primary/30 bg-primary/[0.04]" : ""}>
+          <Card key={p.plan} className={p.featured ? "border-primary/30" : ""} style={p.featured ? { borderColor: BRAND.colors.lime, backgroundColor: `${BRAND.colors.lime}0A` } : undefined}>
             <CardHeader>
               <CardTitle className="text-sm">{p.plan}</CardTitle>
-              <p className="text-2xl font-black">{p.price}</p>
+              <p className="text-2xl font-black">${(p.price as number).toLocaleString("es-AR")} ARS</p>
               <p className="text-xs text-zinc-500">{p.desc}</p>
             </CardHeader>
             <CardContent>

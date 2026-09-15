@@ -22,21 +22,52 @@ export default function LoginPage() {
     e.preventDefault();
     setLoading(true);
     setErr("");
-    const res = await fetch("/api/auth/login", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ email, password }),
-    });
-    const j = await res.json();
-    if (!res.ok) {
-      setErr(j.error || "Error");
+    try {
+      const res = await fetch("/api/auth/login", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email, password }),
+      });
+      const j = (await res.json()) as { ok?: boolean; role?: string; error?: string };
+      if (!res.ok || !j.ok) {
+        setErr((j.error as string) || "Error");
+        setLoading(false);
+        return;
+      }
+      if (j.role === "TRAINER") {
+        r.push("/trainer/dashboard");
+      } else {
+        // FTUE: si onboarding incompleto, va al wizard; si no, dashboard.
+        try {
+          const ob = await fetch("/api/onboarding");
+          if (ob.ok) {
+            const oj = (await ob.json()) as { profile?: { onboardingCompleted?: boolean } };
+            if (oj?.profile && oj.profile.onboardingCompleted === false) {
+              r.push("/client/onboarding");
+            } else if (oj?.profile && oj.profile.onboardingCompleted === true) {
+              r.push("/client/dashboard");
+            } else {
+              // perfil nuevo sin onboarding -> iniciar FTUE
+              r.push("/client/onboarding");
+            }
+          } else {
+            r.push("/client/onboarding");
+          }
+        } catch {
+          r.push("/client/dashboard");
+        }
+      }
+      r.refresh();
+    } catch {
+      setErr("Error de conexión");
       setLoading(false);
-      return;
     }
-    if (j.role === "TRAINER") r.push("/trainer/dashboard");
-    else r.push("/client/dashboard");
-    r.refresh();
   }
+
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    void submit(e);
+  };
 
   return (
     <div className="min-h-[100dvh] flex items-center justify-center p-4 bg-[#080808] relative overflow-hidden">
@@ -69,7 +100,7 @@ export default function LoginPage() {
             </motion.div>
 
             <div className="space-y-1">
-              <CardTitle className="text-2xl tracking-tight">EZEQUIEL COACHING</CardTitle>
+              <CardTitle className="text-2xl tracking-tight">KINETIXFITT</CardTitle>
               <CardDesc>Entrenamiento personalizado online</CardDesc>
             </div>
 
@@ -87,7 +118,7 @@ export default function LoginPage() {
                 <Star size={12} fill="currentColor" />
                 <Star size={12} fill="currentColor" />
               </span>
-              Atletas entrenando cada semana con Ezequiel
+              Atletas entrenando cada semana con KinetixFitt
             </motion.div>
 
             {/* Demo accounts */}
@@ -95,7 +126,7 @@ export default function LoginPage() {
               <button
                 type="button"
                 onClick={() => {
-                  setEmail("ezequiel@ezequielcoaching.com");
+                  setEmail("ezequiel@kinetixfitt.com");
                   setPassword("Admin123!");
                 }}
                 className="group text-[11px] font-bold px-3.5 py-2 rounded-full bg-zinc-900/80 text-zinc-400 hover:text-white hover:bg-zinc-800 border border-zinc-800 hover:border-zinc-700 min-h-[36px] transition-all flex items-center gap-1.5"
@@ -118,7 +149,7 @@ export default function LoginPage() {
           </CardHeader>
 
           <CardContent className="pb-8 pt-4">
-            <form onSubmit={submit} className="space-y-4">
+            <form onSubmit={handleSubmit} className="space-y-4">
               <div className="space-y-2">
                 <Label htmlFor="email">Email</Label>
                 <Input
@@ -212,7 +243,7 @@ export default function LoginPage() {
 
         {/* Footer */}
         <p className="text-center text-[11px] text-zinc-600 mt-4">
-          EZEQUIEL COACHING © 2026 · Tu mejor versión, cada día
+          KINETIXFITT © 2026 · Tu mejor versión, cada día
         </p>
       </motion.div>
     </div>

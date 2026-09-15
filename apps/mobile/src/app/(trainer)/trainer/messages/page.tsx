@@ -1,4 +1,5 @@
 "use client";
+import Image from "next/image";
 import { useState, useEffect, useRef } from "react";
 import { useSearchParams } from "next/navigation";
 import { Card } from "@/components/ui/card";
@@ -230,7 +231,7 @@ export default function TrainerMessagesPage(){
                         <div className={`max-w-[82%] sm:max-w-[70%] px-3.5 py-2.5 rounded-2xl text-xs shadow-sm ${isMe ? "bg-primary text-black rounded-br-md font-medium" : "bg-zinc-900 text-white border border-zinc-800 rounded-bl-md"}`}>
                           {m.content.startsWith("/uploads/") || m.content.startsWith("/api/uploads/") ? (
                             /\.(jpg|jpeg|png|webp|gif)$/i.test(m.content) ? (
-                              <img src={m.content} alt="Adjunto" className="rounded-xl max-w-[220px] max-h-[220px] object-cover" />
+                              <Image src={m.content} alt="Adjunto" width={220} height={220} className="rounded-xl max-w-[220px] max-h-[220px] object-cover" unoptimized />
                             ) : (
                               <a href={m.content} target="_blank" rel="noreferrer" className="underline font-bold flex items-center gap-1"><Paperclip size={12}/> Ver archivo ↗</a>
                             )

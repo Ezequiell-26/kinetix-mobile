@@ -17,7 +17,7 @@ export function ExportCenter({ type="client" }:{ type?: "client"|"trainer"}){
 
   function exportCsv(){
     const csv="fecha,ejercicio,peso,reps,rir\n2026-09-09,Press Banca,60,8,2\n2026-09-07,Sentadilla,80,6,1\n";
-    download("ezequiel_coaching_historial.csv", csv, "text/csv");
+    download("kinetixfitt_historial.csv", csv, "text/csv");
   }
 
   function exportIcal(){
@@ -27,7 +27,7 @@ export function ExportCenter({ type="client" }:{ type?: "client"|"trainer"}){
 
   function exportPdf(){
     // Mock: en prod sería jsPDF
-    download("reporte_progreso.txt", "EZEQUIEL COACHING — Reporte de Progreso\n\nPeso: 81.2kg (-1.2kg)\nAdherencia: 88%\nVolumen: 42.000kg\n", "text/plain");
+    download("reporte_progreso.txt", "KINETIXFITT — Reporte de Progreso\n\nPeso: 81.2kg (-1.2kg)\nAdherencia: 88%\nVolumen: 42.000kg\n", "text/plain");
   }
 
   return (

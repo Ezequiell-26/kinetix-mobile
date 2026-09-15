@@ -1,6 +1,6 @@
 # Changelog
 
-Todas las versiones notables de EZEQUIEL COACHING.
+Todas las versiones notables de KINETIXFITT.
 
 ## [1.0.1] - 2026-09-10 — Lote 1: persistencia de programas y asignación
 

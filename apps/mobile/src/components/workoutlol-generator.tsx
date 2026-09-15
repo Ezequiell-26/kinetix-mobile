@@ -7,7 +7,7 @@ import { Sparkles, RefreshCw, Dumbbell } from "lucide-react";
 /**
  * Generador de sesiones al estilo workout.lol (MIT): elegís músculos y
  * equipamiento, y arma una sesión con ejercicios reales de la biblioteca
- * local (/api/exercises). Es una sugerencia: el plan asignado por Ezequiel
+ * local (/api/exercises). Es una sugerencia: el plan asignado por tu coach
  * siempre manda.
  */
 

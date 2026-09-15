@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   OnboardingData,
   OnboardingStep,
@@ -27,6 +27,7 @@ import {
   Settings,
   Sparkles,
 } from "lucide-react";
+import { trackOnboardingStarted, trackOnboardingStep, trackOnboardingCompleted, capture } from "@/lib/posthog";
 
 interface OnboardingWizardProps {
   onComplete: (data: OnboardingData) => void;
@@ -44,23 +45,29 @@ export function OnboardingWizard({ onComplete }: OnboardingWizardProps) {
   const progress = getOnboardingProgress(data);
   const isLastStep = currentStepIndex === steps.length - 1;
 
+  useEffect(()=>{ trackOnboardingStarted({ source: "onboarding_wizard", total_steps: steps.length }); }, []);
+  useEffect(()=>{ if(currentStep) trackOnboardingStep(currentStepIndex + 1, { step_id: currentStep.id, step_title: currentStep.titleES }); }, [currentStepIndex]);
+
   const updateData = (updates: Partial<OnboardingData>) => {
     setData((prev) => ({ ...prev, ...updates }));
   };
 
   const nextStep = () => {
     if (isLastStep) {
+      trackOnboardingCompleted({ ...data, total_steps: steps.length, source: "onboarding_wizard" } as any);
       setShowConfetti(true);
       setTimeout(() => {
         onComplete({ ...data, completedAt: new Date() });
       }, 2000);
     } else {
+      capture("onboarding_next", { from_step: currentStepIndex + 1, to_step: currentStepIndex + 2, step_id: currentStep.id } as any);
       setCurrentStepIndex((prev) => prev + 1);
     }
   };
 
   const prevStep = () => {
     if (currentStepIndex > 0) {
+      capture("onboarding_back", { from_step: currentStepIndex + 1, to_step: currentStepIndex } as any);
       setCurrentStepIndex((prev) => prev - 1);
     }
   };
@@ -191,9 +198,9 @@ export function OnboardingWizard({ onComplete }: OnboardingWizardProps) {
           </div>
         </FadeInUp>
 
-        {/* EZEQUIEL COACHING branding */}
+        {/* KINETIXFITT branding */}
         <p className="text-center text-zinc-600 text-sm mt-6">
-          Powered by <span className="text-primary font-bold">EZEQUIEL COACHING</span>
+          Powered by <span className="text-primary font-bold">KINETIXFITT</span>
         </p>
       </div>
     </div>

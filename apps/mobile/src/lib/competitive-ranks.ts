@@ -1,5 +1,5 @@
 /**
- * EZEQUIEL COACHING - Competitive Ranking System
+ * KINETIXFITT - Competitive Ranking System
  * Sistema de rangos competitivos con distribución percentil
  * Inspira motivación mostrando exclusividad (top 1%, 5%, etc)
  */
@@ -107,8 +107,8 @@ export const COMPETITIVE_RANKS: CompetitiveRank[] = [
     icon: "🔰",
     emoji: "🔰",
     benefits: ["Acceso básico a la plataforma", "Tracking de entrenamientos"],
-    description: "Welcome to EZEQUIEL COACHING. Your journey begins here.",
-    descriptionES: "Bienvenido a EZEQUIEL COACHING. Tu viaje comienza aquí.",
+    description: "Welcome to KINETIXFITT. Your journey begins here.",
+    descriptionES: "Bienvenido a KINETIXFITT. Tu viaje comienza aquí.",
     motivation: "Complete 5 workouts to rank up!",
     motivationES: "¡Completa 5 entrenamientos para subir de rango!",
   },
@@ -412,7 +412,7 @@ export const COMPETITIVE_RANKS: CompetitiveRank[] = [
       "Pro athlete status",
       "Badge con corona animada dorada/púrpura",
       "Perfil legendary",
-      "Partnership oficial EZEQUIEL COACHING",
+      "Partnership oficial KINETIXFITT",
       "Ambassador program",
       "Revenue share",
       "Immortalized en app",

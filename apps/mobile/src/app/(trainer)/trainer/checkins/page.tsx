@@ -217,7 +217,7 @@ export default function TrainerCheckinsPage(){
             <p className="font-bold text-base text-white">No hay datos todavía</p>
             <p className="text-xs text-zinc-500 max-w-sm mx-auto">
               {filter === "PENDING"
-                ? "No tienes check-ins pendientes de responder."
+                ? "No tenés check-ins pendientes de responder."
                 : "Aún no se han registrado check-ins en la plataforma."}
             </p>
           </CardContent>

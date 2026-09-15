@@ -1,4 +1,4 @@
-# RESUMEN EJECUTIVO — Revisión Completa EZEQUIEL COACHING
+# RESUMEN EJECUTIVO — Revisión Completa KINETIXFITT
 
 **Fecha:** 12 de septiembre de 2026  
 **Versión actual:** 1.0.1  

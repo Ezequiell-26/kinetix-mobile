@@ -4,6 +4,10 @@ import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
 import { RevenueAnalytics } from "@/components/revenue-analytics";
 
+export const dynamic = 'force-dynamic';
+export const revalidate = 0;
+
+
 export default async function AnalyticsPage() {
   /* ── Real data queries ── */
   const now = new Date();

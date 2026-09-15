@@ -8,7 +8,7 @@ export function ExportActions(){
     const blob = new Blob([csv], {type:"text/csv"});
     const url = URL.createObjectURL(blob);
     const a = document.createElement("a");
-    a.href = url; a.download = "progreso-ezequiel.csv"; a.click();
+    a.href = url; a.download = "progreso-kinetixfitt.csv"; a.click();
   }
   function printPDF(){ window.print(); }
   return (
@@ -21,7 +21,7 @@ export function ExportActions(){
           size="sm"
           className="flex-1 min-h-[44px]"
           onClick={async ()=>{
-            const data = {title:"Mi progreso", text:"Mira mi progreso en EZEQUIEL COACHING"};
+            const data = {title:"Mi progreso", text:"Mira mi progreso en KINETIXFITT"};
             try{
               if(navigator.share){
                 await navigator.share(data);

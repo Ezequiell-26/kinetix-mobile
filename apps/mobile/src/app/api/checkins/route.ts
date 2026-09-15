@@ -118,6 +118,16 @@ export async function PATCH(req: Request){
 
     if(!id) return NextResponse.json({error:"ID requerido"},{status:400});
 
+    // P0 Security: ownership check — trainer solo puede editar checkins de sus clientes
+    const existing = await prisma.checkIn.findUnique({where:{id}, select:{clientId:true, userId:true}});
+    if(!existing) return NextResponse.json({error:"No encontrado"},{status:404});
+    if(existing.clientId){
+      const owns = await assertTrainerOwnsClient(s.id, existing.clientId);
+      if(!owns) return NextResponse.json({error:"No encontrado"},{status:404});
+    } else {
+      if(existing.userId !== s.id) return NextResponse.json({error:"No encontrado"},{status:404});
+    }
+
     const updated = await prisma.checkIn.update({
       where: { id },
       data: {
@@ -136,7 +146,7 @@ export async function PATCH(req: Request){
       await prisma.notification.create({
         data: {
           userId: clientUserId,
-          title: "Ezequiel respondió tu check-in",
+          title: "Tu coach respondió tu check-in",
           body: trainerReply.slice(0, 80),
           type: "checkin_reply",
           link: "/client/checkins"

@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="theme-color" content="#0A0F14" />
+  <title>Sin conexión — KINETIXFITT</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      font-family: 'Inter', system-ui, -apple-system, sans-serif;
+      background: #080808;
+      color: #f4f4f5;
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 24px;
+      text-align: center;
+    }
+    .container { max-width: 420px; width: 100%; }
+    .logo {
+      width: 64px; height: 64px;
+      background: #34D399;
+      border-radius: 16px;
+      display: flex; align-items: center; justify-content: center;
+      font-weight: 900; font-size: 28px; color: #000;
+      margin: 0 auto 24px;
+    }
+    h1 { font-size: 22px; font-weight: 900; letter-spacing: -0.02em; margin-bottom: 8px; }
+    p { color: #a1a1aa; font-size: 14px; line-height: 1.6; margin-bottom: 24px; }
+    .actions { display: flex; flex-direction: column; gap: 12px; }
+    .btn-primary {
+      display: inline-flex; align-items: center; justify-content: center;
+      background: #34D399; color: #000; font-weight: 800; font-size: 14px;
+      padding: 14px 24px; border-radius: 999px; text-decoration: none; border: none; cursor: pointer;
+    }
+    .btn-secondary {
+      display: inline-flex; align-items: center; justify-content: center;
+      background: transparent; color: #fff; font-weight: 700; font-size: 14px;
+      padding: 14px 24px; border-radius: 999px; text-decoration: none;
+      border: 1px solid #27272a;
+    }
+    .cached {
+      margin-top: 24px; padding: 16px; background: #111; border: 1px solid #27272a;
+      border-radius: 16px; text-align: left;
+    }
+    .cached h2 { font-size: 12px; font-weight: 800; letter-spacing: 0.08em; color: #71717a; margin-bottom: 10px; text-transform: uppercase; }
+    .cached ul { list-style: none; display: flex; flex-direction: column; gap: 8px; }
+    .cached a { color: #34D399; text-decoration: none; font-size: 13px; font-weight: 600; }
+    .cached a:hover { text-decoration: underline; }
+    .status { margin-top: 16px; font-size: 12px; color: #71717a; }
+    .dot { display: inline-block; width: 8px; height: 8px; border-radius: 50%; background: #ef4444; margin-right: 6px; vertical-align: middle; }
+    .dot.online { background: #22c55e; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="logo">K</div>
+    <h1>Sin conexión</h1>
+    <p>No hay internet ahora mismo. Seguís pudiendo abrir tus entrenos, ejercicios y progreso guardados. Reconectaremos automáticamente.</p>
+    <div class="actions">
+      <button class="btn-primary" onclick="window.location.reload()">Reintentar conexión</button>
+      <a class="btn-secondary" href="/client/dashboard">Ir al inicio offline</a>
+    </div>
+    <div class="cached">
+      <h2>Disponible offline</h2>
+      <ul>
+        <li><a href="/">Inicio</a></li>
+        <li><a href="/login">Login</a></li>
+        <li><a href="/client/dashboard">Dashboard</a></li>
+        <li><a href="/client/workout">Mi Entreno</a></li>
+        <li><a href="/client/progress">Progreso</a></li>
+        <li><a href="/client/nutrition">Nutrición</a></li>
+        <li><a href="/client/timers">Cronómetros</a></li>
+        <li><a href="/funciones">Funciones</a></li>
+      </ul>
+    </div>
+    <p class="status"><span class="dot" id="dot"></span><span id="status-text">Sin conexión</span> — KINETIXFITT offline-first</p>
+  </div>
+  <script>
+    function updateStatus() {
+      var online = navigator.onLine;
+      var dot = document.getElementById('dot');
+      var txt = document.getElementById('status-text');
+      if (online) {
+        dot.className = 'dot online';
+        txt.textContent = 'Conectado — recargando...';
+        setTimeout(function(){ window.location.reload(); }, 800);
+      } else {
+        dot.className = 'dot';
+        txt.textContent = 'Sin conexión';
+      }
+    }
+    window.addEventListener('online', updateStatus);
+    window.addEventListener('offline', updateStatus);
+    updateStatus();
+  </script>
+</body>
+</html>

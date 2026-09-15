@@ -1,25 +1,30 @@
 import type { Metadata, Viewport } from "next";
 import { Inter, Space_Grotesk } from "next/font/google";
+import { headers } from "next/headers";
 import "./globals.css";
 import { PwaRegister } from "@/components/pwa-register";
 import { ThemeProvider } from "@/components/theme-provider";
+import { Toaster } from "@/components/ui/toast";
+import { PostHogProvider } from "@/components/posthog-provider";
+import { OfflineIndicator } from "@/components/offline-indicator";
+import { BRAND } from "@/constants/branding";
 
 const inter = Inter({ subsets: ["latin"], variable: "--font-inter", display: "swap" });
 const grotesk = Space_Grotesk({ subsets: ["latin"], variable: "--font-display", display: "swap", weight: ["500", "600", "700"] });
 
 export const metadata: Metadata = {
   metadataBase: new URL(
-    process.env.NEXT_PUBLIC_APP_URL || "https://kinetixfitt-world-ia.vercel.app"
+    process.env.NEXT_PUBLIC_APP_URL || BRAND.app.appUrl
   ),
-  title: "EZEQUIEL COACHING — Entrenamiento Personalizado Online",
+  title: `${BRAND.name} — Entrenamiento Personalizado Online`,
   description:
     "Programa a medida, seguimiento real y contacto directo con tu coach. Entrenamiento, nutrición y progreso desde tu celular.",
-  applicationName: "EZEQUIEL COACHING",
+  applicationName: BRAND.name,
   manifest: "/manifest.json",
   appleWebApp: {
     capable: true,
     statusBarStyle: "black-translucent",
-    title: "EZEQUIEL COACHING",
+    title: BRAND.name,
   },
   formatDetection: { telephone: false },
   icons: {
@@ -34,7 +39,7 @@ export const metadata: Metadata = {
     ],
   },
   openGraph: {
-    title: "EZEQUIEL COACHING — Tu mejor versión, cada día",
+    title: `${BRAND.name} — Tu mejor versión, cada día`,
     description: "Entrenamiento personalizado online con seguimiento real.",
     type: "website",
     locale: "es_AR",
@@ -43,34 +48,50 @@ export const metadata: Metadata = {
         url: "/og-image.jpg",
         width: 1200,
         height: 630,
-        alt: "EZEQUIEL COACHING — Tu mejor versión, cada día",
+        alt: `${BRAND.name} — Tu mejor versión, cada día`,
       },
     ],
   },
+  keywords: ["entrenamiento", "fitness", "coach", "nutrición", "gym", "ejercicios", "salud"],
+  authors: [{ name: BRAND.name }],
+  robots: "index, follow",
 };
 
 export const viewport: Viewport = {
-  themeColor: "#0A0F14",
+  themeColor: BRAND.colors.dark,
   width: "device-width",
   initialScale: 1,
   // Sin maximumScale: bloquear pinch-zoom rompe accesibilidad móvil.
   viewportFit: "cover",
 };
 
-export default function RootLayout({children}:{children:React.ReactNode}){
+export default async function RootLayout({children}:{children:React.ReactNode}){
+  // CSP nonce por request (PR2): el middleware genera nonce y lo pasa vía header x-nonce
+  // El script inline del theme debe llevar nonce para que CSP `script-src 'nonce-...'` lo permita
+  let nonce: string | undefined;
+  try {
+    const h = await headers();
+    nonce = h.get("x-nonce") || h.get("x-csp-nonce") || undefined;
+  } catch {
+    nonce = undefined;
+  }
   return (
     <html lang="es" suppressHydrationWarning>
       <head>
         <link rel="apple-touch-icon" href="/icons/apple-touch-icon.png" />
         <meta name="apple-mobile-web-app-capable" content="yes" />
         <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
-        <script dangerouslySetInnerHTML={{__html: `(function(){try{var t=localStorage.getItem('ec-theme')||'dark';document.documentElement.classList.add(t);document.documentElement.setAttribute('data-theme',t);}catch(e){}})()`}} />
+        <script nonce={nonce} dangerouslySetInnerHTML={{__html: `(function(){try{var t=localStorage.getItem('ec-theme')||'dark';document.documentElement.classList.add(t);document.documentElement.setAttribute('data-theme',t);}catch(e){}})()`}} />
       </head>
-      <body className={`${inter.variable} ${grotesk.variable} min-h-screen bg-[#080808] text-zinc-100 antialiased selection:bg-primary selection:text-black`}>
-        <ThemeProvider>
-          {children}
-          <PwaRegister />
-        </ThemeProvider>
+      <body className={`${inter.variable} ${grotesk.variable} min-h-screen text-zinc-100 antialiased selection:bg-primary selection:text-black`} style={{ backgroundColor: BRAND.colors.dark }}>
+        <PostHogProvider>
+          <ThemeProvider>
+            <OfflineIndicator />
+            {children}
+            <PwaRegister />
+            <Toaster position="top-right" richColors closeButton />
+          </ThemeProvider>
+        </PostHogProvider>
       </body>
     </html>
   );

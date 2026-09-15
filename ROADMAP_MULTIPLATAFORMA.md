@@ -1,4 +1,4 @@
-# ROADMAP MULTIPLATAFORMA — EZEQUIEL COACHING
+# ROADMAP MULTIPLATAFORMA — KINETIXFITT
 
 ## 🎯 Estado Actual (Sept 2026)
 
@@ -353,5 +353,5 @@ Sí, Xcode solo corre en macOS. Alternativas:
 ---
 
 **Última actualización:** 12 sept 2026  
-**Owner:** Equipo Ezequiel Coaching  
+**Owner:** Equipo KinetixFitt  
 **Próxima revisión:** 1 oct 2026

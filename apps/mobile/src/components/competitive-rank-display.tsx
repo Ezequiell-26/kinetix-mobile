@@ -1,6 +1,7 @@
 "use client";
 
 import React from "react";
+import Image from "next/image";
 import {
   CompetitiveRank,
   COMPETITIVE_RANKS,
@@ -243,12 +244,15 @@ export function RankLeaderboard({ topUsers, currentUserId }: RankLeaderboardProp
                   </div>
 
                   {/* Avatar or Rank Badge */}
-                  <div className="w-10 h-10 rounded-lg overflow-hidden">
+                  <div className="w-10 h-10 rounded-lg overflow-hidden relative">
                     {user.avatar ? (
-                      <img
+                      <Image
                         src={user.avatar}
                         alt={user.name}
-                        className="w-full h-full object-cover"
+                        fill
+                        sizes="40px"
+                        className="object-cover"
+                        unoptimized
                       />
                     ) : (
                       <div

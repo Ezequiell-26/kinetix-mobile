@@ -250,7 +250,7 @@ export default function ClientProfilePage(){
           <div className="flex justify-between items-center p-3 rounded-xl bg-zinc-950 border border-zinc-800">
             <div>
               <p className="font-bold text-white text-sm">Plan {profile?.plan || "Personalizado"}</p>
-              <p className="text-zinc-500">Coaching 1:1 con Ezequiel</p>
+              <p className="text-zinc-500">Coaching 1:1 con tu coach</p>
             </div>
             <Badge variant="success">Activa</Badge>
           </div>

@@ -1,18 +1,18 @@
 import Link from "next/link";
-import dynamic from "next/dynamic";
+import nextDynamic from "next/dynamic";
 import { prisma } from "@/lib/db";
 import { getClientForSession } from "@/lib/getClient";
 import { Button } from "@/components/ui/button";
-const AiCoachChat = dynamic(() => import("@/components/ai-coach-chat").then((m) => m.AiCoachChat), {
+const AiCoachChat = nextDynamic(() => import("@/components/ai-coach-chat").then((m) => m.AiCoachChat), {
   loading: () => <div className="rounded-3xl border border-subtle bg-surface/40 p-6 text-xs text-zinc-500">Cargando coach IA…</div>,
 });
-const PostWorkoutCoach = dynamic(
+const PostWorkoutCoach = nextDynamic(
   () => import("@/components/post-workout-coach").then((m) => m.PostWorkoutCoach),
   {
     loading: () => <div className="rounded-3xl border border-subtle bg-surface/40 p-6 text-xs text-zinc-500">Cargando análisis…</div>,
   }
 );
-const AdaptiveProgram = dynamic(
+const AdaptiveProgram = nextDynamic(
   () => import("@/components/adaptive-program").then((m) => m.AdaptiveProgram),
   {
     loading: () => <div className="rounded-3xl border border-subtle bg-surface/40 p-6 text-xs text-zinc-500">Cargando programa…</div>,
@@ -28,6 +28,7 @@ import { lastSessionLoads, computeStreak, computeAdherence } from "@/lib/stats";
 import { WeeklyProgress } from "@/components/weekly-progress";
 import { SmartwatchWidget } from "@/components/smartwatch-widget";
 import { Tilt3D, Tilt3DSubtle } from "@/components/tilt-3d";
+import { BRAND } from "@/constants/branding";
 import {
   Dumbbell,
   CheckCircle2,
@@ -38,6 +39,10 @@ import {
   TrendingUp,
   Activity,
 } from "lucide-react";
+
+export const dynamic = 'force-dynamic';
+export const revalidate = 0;
+
 
 // Grupos musculares de la biblioteca → etiqueta corta en español
 const MUSCLE_ES: Record<string, string> = {
@@ -65,7 +70,7 @@ export default async function ClientDashboardPage() {
     return (
       <div className="space-y-8 pt-4">
         <header className="space-y-2">
-          <p className="text-[10px] font-bold tracking-[0.2em] text-zinc-500 uppercase">Ezequiel Coaching</p>
+          <p className="text-[10px] font-bold tracking-[0.2em] text-zinc-500 uppercase">{BRAND.name}</p>
           <h1 className="text-4xl font-display font-black text-white tracking-tight">Hola, {firstName}</h1>
           <p className="text-sm text-zinc-400">Bienvenido a tu equipo de entrenamiento.</p>
         </header>
@@ -75,13 +80,13 @@ export default async function ClientDashboardPage() {
           </div>
           <p className="font-display font-bold text-lg text-white">Tu cuenta está en preparación</p>
           <p className="text-sm text-zinc-500 max-w-sm mx-auto">
-            Ezequiel está configurando tu ficha de atleta y tu primer programa de entrenamiento.
+            Tu coach está configurando tu ficha de atleta y tu primer programa de entrenamiento.
           </p>
           <Link
             href="/client/messages"
             className="inline-flex items-center justify-center font-black h-12 px-6 rounded-xl bg-primary text-black hover:brightness-110 transition"
           >
-            Escribir a Ezequiel →
+            Escribir a tu coach →
           </Link>
         </div>
       </div>
@@ -93,7 +98,7 @@ export default async function ClientDashboardPage() {
   const startOfToday = new Date(now.getFullYear(), now.getMonth(), now.getDate());
 
   // Carga paralela. Sin fallback: un atleta sin programa asignado ve el estado
-  // "Ezequiel está diseñando tu plan", nunca el primer programa de la base.
+  // "Tu coach está diseñando tu plan", nunca el primer programa de la base.
   const [
     program,
     todayWorkoutLog,
@@ -403,7 +408,7 @@ export default async function ClientDashboardPage() {
                 <div className="w-14 h-14 rounded-2xl bg-primary/10 border border-primary/20 flex items-center justify-center text-primary">
                   <Dumbbell size={26} />
                 </div>
-                <p className="font-display font-black text-2xl text-white">Ezequiel está diseñando tu plan</p>
+                <p className="font-display font-black text-2xl text-white">Tu coach está diseñando tu plan</p>
                 <p className="text-sm text-zinc-500 max-w-xs">
                   Está preparando las semanas y ejercicios ideales para tu objetivo. Te avisa en cuanto esté listo.
                 </p>
@@ -512,8 +517,8 @@ export default async function ClientDashboardPage() {
               </p>
               <p className="text-xs text-zinc-500 truncate mt-0.5">
                 {latestCheckin
-                  ? `Último: ${new Date(latestCheckin.date).toLocaleDateString("es-AR", { day: "numeric", month: "short" })} · ${latestCheckin.reviewed ? "revisado por Ezequiel" : "en revisión"}`
-                  : "Contale a Ezequiel cómo vino tu semana"}
+                  ? `Último: ${new Date(latestCheckin.date).toLocaleDateString("es-AR", { day: "numeric", month: "short" })} · ${latestCheckin.reviewed ? "revisado por tu coach" : "en revisión"}`
+                  : "Contale a tu coach cómo vino tu semana"}
               </p>
             </div>
             <ArrowRight size={16} className="text-zinc-600 group-hover:text-primary group-hover:translate-x-0.5 transition-all shrink-0" />
@@ -528,7 +533,7 @@ export default async function ClientDashboardPage() {
                 E
               </div>
               <div className="flex-1 min-w-0">
-                <p className="font-bold text-sm text-white">Mensaje de Ezequiel</p>
+                <p className="font-bold text-sm text-white">Mensaje de tu coach</p>
                 <p className="text-xs text-zinc-500 truncate mt-0.5 italic">
                   &quot;{latestMessage.content}&quot;
                 </p>

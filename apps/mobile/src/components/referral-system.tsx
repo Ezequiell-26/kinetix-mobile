@@ -9,7 +9,7 @@ import { copyText } from "@/lib/clipboard";
 // Inspirado en ReferralCandy + GrowSurf MIT — sistema de referidos
 export function ReferralSystem(){
   const [copied,setCopied]=useState(false);
-  const link="https://ezequielcoaching.com/r/martin-f";
+  const link="https://kinetixfitt.com/r/martin-f";
   async function copy(){
     const ok = await copyText(link);
     setCopied(ok);
@@ -28,7 +28,7 @@ export function ReferralSystem(){
           <div className="bg-zinc-900 border border-zinc-800 rounded-xl p-2"><Star size={14} className="mx-auto text-amber-400"/><p className="font-black">2</p><p className="text-[11px] text-zinc-500">Convertidos</p></div>
           <div className="bg-emerald-500/10 border border-emerald-500/20 rounded-xl p-2"><Gift size={14} className="mx-auto text-emerald-400"/><p className="font-black text-emerald-400">2 meses</p><p className="text-[11px] text-zinc-500">Ganados</p></div>
         </div>
-        <Button variant="outline" className="w-full" onClick={()=>{ if(navigator.share) navigator.share({title:"EZEQUIEL COACHING", text:"Entrena con Ezequiel — 1 mes gratis con mi link", url:link}).catch(()=>{}); else copy(); }}><Share2 size={14} className="mr-2"/> Compartir link</Button>
+        <Button variant="outline" className="w-full" onClick={()=>{ if(navigator.share) navigator.share({title:"KINETIXFITT", text:"Entrena con KinetixFitt — 1 mes gratis con mi link", url:link}).catch(()=>{}); else copy(); }}><Share2 size={14} className="mr-2"/> Compartir link</Button>
       </CardContent>
     </Card>
   );

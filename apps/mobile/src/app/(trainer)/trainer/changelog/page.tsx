@@ -37,9 +37,9 @@ export default function ChangelogPage(){
       <Card>
         <CardHeader><CardTitle>Cómo publicar tu Git público</CardTitle></CardHeader>
         <CardContent className="space-y-2 text-sm">
-          <pre className="bg-zinc-900 border border-zinc-800 rounded-xl p-3 text-xs overflow-x-auto">{`git remote add origin https://github.com/ezequiel-coaching/ezequiel-coaching.git
+          <pre className="bg-zinc-900 border border-zinc-800 rounded-xl p-3 text-xs overflow-x-auto">{`git remote add origin https://github.com/kinetixfitt/kinetixfitt.git
 git push -u origin main
-# Ver en https://github.com/ezequiel-coaching/ezequiel-coaching`}</pre>
+# Ver en https://github.com/kinetixfitt/kinetixfitt`}</pre>
         </CardContent>
       </Card>
     </div>

@@ -102,7 +102,7 @@ export function TrainerNav() {
               </div>
               <div className="leading-none">
                 <span className="font-display font-bold text-white text-sm tracking-tight block">
-                  EZEQUIEL COACHING
+                  KINETIXFITT
                 </span>
                 <span className="text-[9px] text-zinc-500 font-bold tracking-[0.18em] uppercase hidden sm:block mt-0.5">
                   Panel de entrenador

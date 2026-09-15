@@ -1,4 +1,4 @@
-# 🎙️ GUÍA COMPLETA DE VOCES — EZEQUIEL COACHING
+# 🎙️ GUÍA COMPLETA DE VOCES — KINETIXFITT
 
 **Fecha:** 12 de septiembre de 2026  
 **Sistema:** Voice Engine con voces de Ezequiel  
@@ -113,7 +113,7 @@ public/audio/
 El sistema arma números dinámicamente combinando piezas. Necesitas grabar **39 archivos** para cubrir 0-100:
 
 ```
-public/audio/voices/ezequiel/numbers/
+public/audio/voices/kinetixfitt/numbers/
 ```
 
 #### Números básicos (0-29) — 30 archivos
@@ -182,7 +182,7 @@ coma.mp3        ❌ "coma" o "punto" (para decimales)
 Para nombres de ejercicios que no están en el diccionario, el sistema puede armarlos por sílabas.
 
 ```
-public/audio/voices/ezequiel/syllables/
+public/audio/voices/kinetixfitt/syllables/
 ```
 
 #### Sílabas comunes en nombres de ejercicios
@@ -206,7 +206,7 @@ crunch.mp3      ❌ "crunch"
 **O mejor: grabar nombres de ejercicios completos:**
 
 ```
-public/audio/voices/ezequiel/exercises/
+public/audio/voices/kinetixfitt/exercises/
 ```
 
 ```
@@ -324,10 +324,10 @@ Usa la guía de arriba para grabar con buena calidad.
 ### 2. Guardar en la ubicación correcta
 ```bash
 # Ejemplo: número "veinte"
-public/audio/voices/ezequiel/numbers/veinte.mp3
+public/audio/voices/kinetixfitt/numbers/veinte.mp3
 
 # Ejemplo: ejercicio "press de banca"
-public/audio/voices/ezequiel/exercises/press-de-banca.mp3
+public/audio/voices/kinetixfitt/exercises/press-de-banca.mp3
 ```
 
 ### 3. Actualizar el manifiesto
@@ -358,8 +358,8 @@ Edita `public/sw.js` y agrega las nuevas rutas al array `CORE`:
 ```javascript
 const CORE = [
   // ... rutas existentes
-  "/audio/voices/ezequiel/numbers/cero.mp3",
-  "/audio/voices/ezequiel/numbers/uno.mp3",
+  "/audio/voices/kinetixfitt/numbers/cero.mp3",
+  "/audio/voices/kinetixfitt/numbers/uno.mp3",
   // ... etc
 ];
 ```
@@ -569,7 +569,7 @@ npm run test:voice
 - [ ] Grabar 30,40,50,60,70,80,90 (7 archivos)
 - [ ] Grabar "cien" y "coma" (2 archivos)
 - [ ] Exportar todos a MP3 128kbps mono
-- [ ] Guardar en `public/audio/voices/ezequiel/numbers/`
+- [ ] Guardar en `public/audio/voices/kinetixfitt/numbers/`
 - [ ] Actualizar `voices.ts` con todas las claves
 - [ ] Actualizar `sw.js` con las rutas
 - [ ] Probar en workout real
@@ -578,12 +578,12 @@ npm run test:voice
 - [ ] Listar ejercicios de tu biblioteca actual
 - [ ] Grabar top 10 más usados
 - [ ] Exportar a MP3
-- [ ] Guardar en `public/audio/voices/ezequiel/exercises/`
+- [ ] Guardar en `public/audio/voices/kinetixfitt/exercises/`
 - [ ] Actualizar `voices.ts`
 - [ ] Probar combinaciones
 
 ---
 
 **Creado:** 12 septiembre 2026  
-**Para:** Ezequiel Coaching Voice System  
+**Para:** KinetixFitt Voice System  
 **Próxima actualización:** Después de grabar números

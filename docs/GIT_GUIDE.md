@@ -1,4 +1,4 @@
-# Guía Git Profesional — EZEQUIEL COACHING
+# Guía Git Profesional — KINETIXFITT
 
 ## Ramas
 
@@ -41,7 +41,7 @@ git push -u origin feat/nueva
 ## Publicar
 
 ```bash
-git remote add origin https://github.com/ezequiel-coaching/ezequiel-coaching.git
+git remote add origin https://github.com/kinetixfitt/kinetixfitt.git
 git push -u origin main
 git push -u origin develop
 ```

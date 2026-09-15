@@ -21,7 +21,7 @@ const ThemeContext = createContext<ThemeContextValue | undefined>(undefined);
 export function ThemeProvider({
   children,
   defaultTheme = "system",
-  storageKey = "ezequiel-coaching-theme",
+  storageKey = "kinetixfitt-theme",
 }: ThemeProviderProps) {
   const [theme, setThemeState] = useState<Theme>(defaultTheme);
   const [resolvedTheme, setResolvedTheme] = useState<"light" | "dark">("dark");

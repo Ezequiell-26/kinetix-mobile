@@ -1,6 +1,6 @@
 {
-  "appId": "com.ezequielcoaching.app",
-  "productName": "EZEQUIEL COACHING",
+  "appId": "com.kinetixfitt.app",
+  "productName": "KINETIXFITT",
   "files": [
     "electron/**/*",
     "public/icons/**/*"
@@ -17,7 +17,7 @@
   "nsis": {
     "oneClick": false,
     "allowToChangeInstallationDirectory": true,
-    "shortcutName": "EZEQUIEL COACHING"
+    "shortcutName": "KINETIXFITT"
   },
   "mac": {
     "target": [

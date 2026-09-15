@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { SiteNav } from "@/components/landing/site-nav";
 import { SiteFooter } from "@/components/landing/site-footer";
+import { BRAND } from "@/constants/branding";
 import {
   Dumbbell,
   ClipboardList,
@@ -21,7 +22,7 @@ export default async function Home() {
     {
       icon: ClipboardList,
       title: "Programa personalizado",
-      desc: "Tu plan armado por Ezequiel según tu objetivo, días y lugar de entreno.",
+      desc: `Tu plan armado por ${BRAND.name} según tu objetivo, días y lugar de entreno.`,
     },
     {
       icon: Dumbbell,
@@ -51,29 +52,29 @@ export default async function Home() {
   ];
 
   const plans = [
-    { name: "Básico", price: "$12.000", note: "Para arrancar con guía" },
+    { name: "Básico", price: 12000, note: "Para arrancar con guía" },
     {
       name: "Personalizado",
-      price: "$18.000",
+      price: 18000,
       note: "El más elegido",
       highlight: true,
     },
-    { name: "Premium", price: "$25.000", note: "Seguimiento total" },
+    { name: "Premium", price: 25000, note: "Seguimiento total" },
   ];
 
   return (
-    <div className="min-h-dvh bg-[#080808] text-white">
+    <div className="min-h-dvh text-white" style={{ backgroundColor: BRAND.colors.dark }}>
       <SiteNav />
 
       {/* Hero */}
       <section className="mx-auto max-w-5xl px-4 pt-16 sm:pt-24 pb-14 text-center">
-        <p className="inline-block text-[11px] font-black tracking-widest text-[#34D399] border border-[#34D399]/30 rounded-full px-4 py-1.5 mb-6">
+        <p className="inline-block text-[11px] font-black tracking-widest border rounded-full px-4 py-1.5 mb-6" style={{ color: BRAND.colors.lime, borderColor: `${BRAND.colors.lime}4D` }}>
           ENTRENAMIENTO PERSONALIZADO ONLINE
         </p>
         <h1 className="text-4xl sm:text-6xl font-black tracking-tight text-balance">
           Tu mejor versión,
           <br />
-          <span className="text-[#34D399]">cada día.</span>
+          <span style={{ color: BRAND.colors.lime }}>cada día.</span>
         </h1>
         <p className="mt-5 text-zinc-400 max-w-xl mx-auto text-balance">
           Programa a medida, seguimiento real y contacto directo con tu coach.
@@ -82,7 +83,7 @@ export default async function Home() {
         <div className="mt-8 flex flex-col sm:flex-row gap-3 justify-center">
           <Link
             href="/register"
-            className="min-h-[52px] inline-flex items-center justify-center gap-2 px-8 rounded-full bg-[#34D399] text-black font-black"
+            className="min-h-[52px] inline-flex items-center justify-center gap-2 px-8 rounded-full text-black font-black" style={{ backgroundColor: BRAND.colors.lime }}
           >
             Empezar ahora <ArrowRight size={18} />
           </Link>
@@ -120,7 +121,7 @@ export default async function Home() {
               key={f.title}
               className="rounded-2xl border border-zinc-800 bg-zinc-950 p-5"
             >
-              <f.icon size={22} className="text-[#34D399]" />
+              <f.icon size={22} style={{ color: BRAND.colors.lime }} />
               <p className="mt-3 font-bold">{f.title}</p>
               <p className="mt-1 text-sm text-zinc-500">{f.desc}</p>
             </div>
@@ -137,11 +138,11 @@ export default async function Home() {
           <ol className="mt-8 grid sm:grid-cols-3 gap-4">
             {[
               ["1", "Creá tu cuenta", "Registrate gratis en menos de un minuto."],
-              ["2", "Recibí tu programa", "Ezequiel arma tu plan según tu objetivo."],
+              ["2", "Recibí tu programa", `${BRAND.name} arma tu plan según tu objetivo.`],
               ["3", "Entrená y progresá", "Registrá, medí y ajustamos juntos."],
             ].map(([n, t, d]) => (
               <li key={n} className="rounded-2xl border border-zinc-800 p-5">
-                <span className="inline-flex w-9 h-9 items-center justify-center rounded-full bg-[#34D399] text-black font-black">
+                <span className="inline-flex w-9 h-9 items-center justify-center rounded-full text-black font-black" style={{ backgroundColor: BRAND.colors.lime }}>
                   {n}
                 </span>
                 <p className="mt-3 font-bold">{t}</p>
@@ -164,22 +165,14 @@ export default async function Home() {
           {plans.map((p) => (
             <div
               key={p.name}
-              className={`rounded-2xl border p-6 text-center ${
-                p.highlight
-                  ? "border-[#34D399] bg-[#34D399]/5"
-                  : "border-zinc-800 bg-zinc-950"
-              }`}
+              className={`rounded-2xl border p-6 text-center ${p.highlight ? "bg-primary/5" : "border-zinc-800 bg-zinc-950"}`} style={p.highlight ? { borderColor: BRAND.colors.lime, backgroundColor: `${BRAND.colors.lime}0D` } : undefined}
             >
               <p className="font-bold">{p.name}</p>
-              <p className="mt-2 text-3xl font-black">{p.price}</p>
+              <p className="mt-2 text-3xl font-black">${p.price.toLocaleString("es-AR")}</p>
               <p className="mt-1 text-xs text-zinc-500">por mes · {p.note}</p>
               <Link
                 href="/register"
-                className={`mt-5 min-h-[48px] flex items-center justify-center gap-1.5 rounded-full text-sm font-black ${
-                  p.highlight
-                    ? "bg-[#34D399] text-black"
-                    : "border border-zinc-700 text-white hover:border-zinc-500"
-                }`}
+                className={`mt-5 min-h-[48px] flex items-center justify-center gap-1.5 rounded-full text-sm font-black ${p.highlight ? "text-black" : "border border-zinc-700 text-white hover:border-zinc-500"}`} style={p.highlight ? { backgroundColor: BRAND.colors.lime } : undefined}
               >
                 <Check size={16} /> Elegir {p.name}
               </Link>
@@ -190,7 +183,7 @@ export default async function Home() {
 
       {/* CTA final */}
       <section className="mx-auto max-w-5xl px-4 pb-16">
-        <div className="rounded-3xl bg-[#34D399] text-black p-8 sm:p-12 text-center">
+        <div className="rounded-3xl text-black p-8 sm:p-12 text-center" style={{ backgroundColor: BRAND.colors.lime }}>
           <h2 className="text-2xl sm:text-4xl font-black tracking-tight text-balance">
             Empezá hoy. Tu yo de mañana te lo agradece.
           </h2>

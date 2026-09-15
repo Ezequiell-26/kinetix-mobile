@@ -40,8 +40,8 @@ npx cap init
 ```
 
 Configuración:
-- **App name:** EZEQUIEL COACHING
-- **App ID:** com.ezequielcoaching.app
+- **App name:** KINETIXFITT
+- **App ID:** com.kinetixfitt.app
 - **Web dir:** out (cambiaremos a 'out' para export estático)
 
 ### 3. Configurar Next.js para export estático
@@ -92,8 +92,8 @@ Crear en la raíz del proyecto:
 import { CapacitorConfig } from '@capacitor/cli';
 
 const config: CapacitorConfig = {
-  appId: 'com.ezequielcoaching.app',
-  appName: 'EZEQUIEL COACHING',
+  appId: 'com.kinetixfitt.app',
+  appName: 'KINETIXFITT',
   webDir: 'out',
   bundledWebRuntime: false,
   server: {
@@ -124,7 +124,7 @@ const config: CapacitorConfig = {
   android: {
     buildOptions: {
       keystorePath: 'capacitor-release-key.keystore', // Crear para producción
-      keystoreAlias: 'ezequiel-coaching',
+      keystoreAlias: 'kinetixfitt',
     },
   },
 };
@@ -146,8 +146,8 @@ npx cap open ios
 
 1. Seleccionar proyecto "App" en el navegador
 2. En **General** → **Identity**:
-   - Display Name: `EZEQUIEL COACHING`
-   - Bundle Identifier: `com.ezequielcoaching.app`
+   - Display Name: `KINETIXFITT`
+   - Bundle Identifier: `com.kinetixfitt.app`
    - Version: `1.0.0`
    - Build: `1`
 3. En **Signing & Capabilities**:
@@ -203,11 +203,11 @@ npx cap open android
 
 ```gradle
 android {
-    namespace "com.ezequielcoaching.app"
+    namespace "com.kinetixfitt.app"
     compileSdk 34
     
     defaultConfig {
-        applicationId "com.ezequielcoaching.app"
+        applicationId "com.kinetixfitt.app"
         minSdk 22  // Android 5.1+
         targetSdk 34
         versionCode 1
@@ -504,8 +504,8 @@ npx cap open android # Build → Generate Signed Bundle / APK
 1. **Crear app en App Store Connect**
    - https://appstoreconnect.apple.com
    - My Apps → + → New App
-   - SKU: `ezequiel-coaching-ios`
-   - Bundle ID: `com.ezequielcoaching.app`
+   - SKU: `kinetixfitt-ios`
+   - Bundle ID: `com.kinetixfitt.app`
 
 2. **Archivar en Xcode**
    - Product → Archive
@@ -524,14 +524,14 @@ npx cap open android # Build → Generate Signed Bundle / APK
 1. **Crear app en Google Play Console**
    - https://play.google.com/console
    - Create app
-   - Package name: `com.ezequielcoaching.app`
+   - Package name: `com.kinetixfitt.app`
 
 2. **Generar Signed APK/AAB**
    - Android Studio → Build → Generate Signed Bundle / APK
    - Crear keystore (guardar SEGURO):
      ```bash
      keytool -genkey -v -keystore capacitor-release-key.keystore \
-       -alias ezequiel-coaching -keyalg RSA -keysize 2048 -validity 10000
+       -alias kinetixfitt -keyalg RSA -keysize 2048 -validity 10000
      ```
 
 3. **Internal Testing**
@@ -555,7 +555,7 @@ No hardcodear URLs, usar variables de entorno:
 const config: CapacitorConfig = {
   // ...
   server: {
-    url: process.env.NEXT_PUBLIC_API_URL || 'https://api.ezequielcoaching.com',
+    url: process.env.NEXT_PUBLIC_API_URL || 'https://api.kinetixfitt.com',
   },
 };
 ```
@@ -611,7 +611,7 @@ export async function GET(req: Request) {
   const isCapacitor = origin?.startsWith('capacitor://');
   
   const headers = {
-    'Access-Control-Allow-Origin': isCapacitor ? origin : 'https://ezequielcoaching.com',
+    'Access-Control-Allow-Origin': isCapacitor ? origin : 'https://kinetixfitt.com',
     'Access-Control-Allow-Credentials': 'true',
   };
   

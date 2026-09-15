@@ -1,7 +1,7 @@
 {
-  "name": "EZEQUIEL COACHING",
-  "short_name": "EZEQUIEL COACHING",
-  "description": "Plataforma premium de entrenamiento y coaching fitness EZEQUIEL COACHING",
+  "name": "KINETIXFITT",
+  "short_name": "KINETIXFITT",
+  "description": "Plataforma premium de entrenamiento y coaching fitness KINETIXFITT",
   "start_url": "/login",
   "display": "standalone",
   "background_color": "#0A0F14",
@@ -9,15 +9,47 @@
   "orientation": "portrait",
   "scope": "/",
   "lang": "es",
-  "categories": [
-    "health",
-    "fitness",
-    "lifestyle"
-  ],
+  "categories": ["health", "fitness", "lifestyle"],
   "icons": [
+    {
+      "src": "/icons/icon-72.png",
+      "sizes": "72x72",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/icons/icon-96.png",
+      "sizes": "96x96",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/icons/icon-128.png",
+      "sizes": "128x128",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/icons/icon-144.png",
+      "sizes": "144x144",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/icons/icon-152.png",
+      "sizes": "152x152",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
     {
       "src": "/icons/icon-192.png",
       "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/icons/icon-384.png",
+      "sizes": "384x384",
       "type": "image/png",
       "purpose": "any maskable"
     },
@@ -26,18 +58,6 @@
       "sizes": "512x512",
       "type": "image/png",
       "purpose": "any maskable"
-    },
-    {
-      "src": "/icons/apple-touch-icon.png",
-      "sizes": "180x180",
-      "type": "image/png",
-      "purpose": "any"
-    },
-    {
-      "src": "/icons/icon.svg",
-      "sizes": "any",
-      "type": "image/svg+xml",
-      "purpose": "any"
     }
   ],
   "screenshots": [
@@ -58,44 +78,21 @@
     {
       "name": "Mi Entreno",
       "url": "/client/workout",
-      "icons": [
-        {
-          "src": "/icons/icon-192.png",
-          "sizes": "192x192"
-        }
-      ]
+      "icons": [{ "src": "/icons/icon-192.png", "sizes": "192x192" }]
     },
     {
       "name": "Progreso",
       "url": "/client/progress",
-      "icons": [
-        {
-          "src": "/icons/icon-192.png",
-          "sizes": "192x192"
-        }
-      ]
+      "icons": [{ "src": "/icons/icon-192.png", "sizes": "192x192" }]
     },
     {
       "name": "Mensajes",
       "url": "/client/messages",
-      "icons": [
-        {
-          "src": "/icons/icon-192.png",
-          "sizes": "192x192"
-        }
-      ]
+      "icons": [{ "src": "/icons/icon-192.png", "sizes": "192x192" }]
     }
   ],
-  "display_override": [
-    "window-controls-overlay",
-    "standalone",
-    "browser"
-  ],
-  "launch_handler": {
-    "client_mode": "navigate-existing"
-  },
+  "display_override": ["window-controls-overlay", "standalone", "browser"],
+  "launch_handler": { "client_mode": "navigate-existing" },
   "handle_links": "preferred",
-  "edge_side_panel": {
-    "preferred_width": 400
-  }
+  "edge_side_panel": { "preferred_width": 400 }
 }

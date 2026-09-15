@@ -14,6 +14,33 @@ import crypto from "crypto";
  * - MP_WEBHOOK_SECRET: Secret de notificaciones de MP
  */
 
+function verifyMpSignature(rawBody: string, headerVal: string | null, secret: string): boolean {
+  if (!headerVal || !secret) return false;
+  // MP envía x-signature: ts=TIMESTAMP,v1=HASH  (ver docs MP)
+  // Para test: también soporta hash plano
+  try {
+    const parts = Object.fromEntries(
+      headerVal.split(",").map((p) => {
+        const idx = p.indexOf("=");
+        if (idx === -1) return [p.trim(), ""] as [string, string];
+        return [p.slice(0, idx).trim(), p.slice(idx + 1).trim()] as [string, string];
+      })
+    );
+    const ts = parts["ts"];
+    const v1 = parts["v1"] || headerVal.trim();
+    if (!v1) return false;
+    // Construcción del payload firmado: si hay ts usamos "ts.rawBody", si no solo rawBody
+    const payload = ts ? `${ts}.${rawBody}` : rawBody;
+    const computed = crypto.createHmac("sha256", secret).update(payload).digest("hex");
+    const a = Buffer.from(computed, "utf8");
+    const b = Buffer.from(v1, "utf8");
+    if (a.length !== b.length) return false;
+    return crypto.timingSafeEqual(a, b);
+  } catch {
+    return false;
+  }
+}
+
 export async function POST(req: Request) {
   try {
     const body = await req.text();
@@ -113,8 +140,15 @@ export async function POST(req: Request) {
     
     // Verificar firma de Mercado Pago
     if (isMercadoPago) {
-      // Validar firma de MP (implementación simplificada)
-      // En producción: verificar hash HMAC con MP_WEBHOOK_SECRET
+      const secret = process.env.MP_WEBHOOK_SECRET;
+      if (!secret) {
+        console.error("[WEBHOOK] MP_WEBHOOK_SECRET no configurado");
+        return NextResponse.json({ error: "MP no configurado" }, { status: 500 });
+      }
+      if (!verifyMpSignature(body, mpSignature, secret)) {
+        console.error("[WEBHOOK] MP signature verification failed");
+        return NextResponse.json({ error: "Invalid MP signature" }, { status: 400 });
+      }
       
       const data = JSON.parse(body);
       

@@ -18,7 +18,7 @@ export function RunTracker(){
         </div>
         <div className="bg-zinc-900 border border-zinc-800 rounded-xl p-3 space-y-2">
           <div className="flex gap-2 items-center"><div className="w-6 h-6 rounded-full bg-white text-black flex items-center justify-center font-black text-[11px]">S</div><p className="text-xs"><span className="font-bold">Sofía:</span> ¡Qué ritmo! </p></div>
-          <div className="flex gap-2 items-center"><div className="w-6 h-6 rounded-full bg-primary text-black flex items-center justify-center font-black text-[11px]">E</div><p className="text-xs"><span className="font-bold">Ezequiel:</span> Excelente, subimos 500m la próxima.</p></div>
+          <div className="flex gap-2 items-center"><div className="w-6 h-6 rounded-full bg-primary text-black flex items-center justify-center font-black text-[11px]">E</div><p className="text-xs"><span className="font-bold">Tu coach:</span> Excelente, subimos 500m la próxima.</p></div>
           <div className="flex gap-2">
             <input placeholder="Comentar..." className="flex-1 h-8 px-3 bg-zinc-950 border border-zinc-800 rounded-full text-xs text-white placeholder:text-zinc-500" />
             <Button size="sm" variant="accent" className="h-8 w-8 p-0 rounded-full"><MessageCircle size={14}/></Button>

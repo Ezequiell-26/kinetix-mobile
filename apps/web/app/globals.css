@@ -1,0 +1,23 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --background: 9 9 11;
+  --foreground: 255 255 255;
+  --border: 39 39 42;
+}
+
+* { scrollbar-width: thin; scrollbar-color: #27272A transparent; }
+
+body {
+  color: rgb(var(--foreground));
+  background: #09090B;
+  font-feature-settings: "rlig" 1, "calt" 1;
+  -webkit-font-smoothing: antialiased;
+}
+
+@layer utilities {
+  .text-balance { text-wrap: balance; }
+  .glass { backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); }
+}

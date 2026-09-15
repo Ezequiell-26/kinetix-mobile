@@ -1,4 +1,4 @@
-# 🚀 ROADMAP DE FEATURES AVANZADAS — EZEQUIEL COACHING
+# 🚀 ROADMAP DE FEATURES AVANZADAS — KINETIXFITT
 
 **Fecha:** 12 de septiembre de 2026  
 **Sprint:** Mejoras premium y funcionalidades enterprise  
@@ -8,7 +8,7 @@
 
 ## 🎯 OBJETIVO
 
-Transformar EZEQUIEL COACHING de excelente app (9.5/10) a **plataforma enterprise-grade** (10/10) con:
+Transformar KINETIXFITT de excelente app (9.5/10) a **plataforma enterprise-grade** (10/10) con:
 - ✅ Gamificación completa
 - ✅ Animaciones premium
 - ✅ Git workflow profesional

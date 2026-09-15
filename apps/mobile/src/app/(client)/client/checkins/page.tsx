@@ -107,7 +107,7 @@ export default function ClientCheckinsPage(){
       <div className="flex justify-between items-center">
         <div>
           <h1 className="text-2xl font-display font-bold">Check-in Semanal</h1>
-          <p className="text-sm text-zinc-400">Revisión y feedback personalizado con Ezequiel</p>
+          <p className="text-sm text-zinc-400">Revisión y feedback personalizado con tu coach</p>
         </div>
         <Badge variant={sent ? "success" : "accent"}>
           {sent ? "Enviado" : "Semanal"}
@@ -117,7 +117,7 @@ export default function ClientCheckinsPage(){
       {sent && (
         <Card className="border-emerald-500/30 bg-emerald-500/10 animate-in fade-in">
           <CardContent className="py-4 text-center text-emerald-400 font-semibold text-sm flex items-center justify-center gap-2">
-            <CheckCircle2 size={18} /> ¡Check-in enviado con éxito! Ezequiel lo revisará y te responderá pronto.
+            <CheckCircle2 size={18} /> ¡Check-in enviado con éxito! Tu coach lo revisará y te responderá pronto.
           </CardContent>
         </Card>
       )}
@@ -132,7 +132,7 @@ export default function ClientCheckinsPage(){
               </div>
               <h2 className="font-bold text-lg text-white">¿Cómo estuvo tu semana de entrenamiento?</h2>
               <p className="text-xs text-zinc-400 max-w-sm mx-auto">
-                Completá tu reporte de energía, sueño, molestias y sensaciones para que Ezequiel ajuste tus cargas y volumen.
+                Completá tu reporte de energía, sueño, molestias y sensaciones para que tu coach ajuste tus cargas y volumen.
               </p>
               <Button
                 variant="accent"
@@ -156,7 +156,7 @@ export default function ClientCheckinsPage(){
                 <EmptyState
                   icon={ClipboardCheck}
                   title="Todavía no hay check-ins"
-                  description="Tus check-ins completados y las respuestas de Ezequiel aparecerán en este historial."
+                  description="Tus check-ins completados y las respuestas de tu coach aparecerán en este historial."
                   action={
                     <Button variant="accent" size="sm" onClick={() => setShowForm(true)}>
                       Hacer mi primer check-in →
@@ -201,7 +201,7 @@ export default function ClientCheckinsPage(){
                     {c.trainerReply && (
                       <div className="p-3 rounded-xl bg-primary/10 border border-primary/20 text-xs space-y-1">
                         <span className="font-bold text-primary flex items-center gap-1">
-                          <MessageSquare size={13} /> Devolución de Ezequiel:
+                          <MessageSquare size={13} /> Devolución de tu coach:
                         </span>
                         <p className="text-zinc-200">{c.trainerReply}</p>
                       </div>
@@ -280,7 +280,7 @@ export default function ClientCheckinsPage(){
                 <Textarea
                   value={form.comentario}
                   onChange={e => setForm({ ...form, comentario: e.target.value })}
-                  placeholder="Contale a Ezequiel con tus palabras cómo te sentiste, dificultades encontradas o logros..."
+                  placeholder="Contale a tu coach con tus palabras cómo te sentiste, dificultades encontradas o logros..."
                   className="min-h-[90px]"
                   required
                 />

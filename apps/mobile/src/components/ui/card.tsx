@@ -37,3 +37,11 @@ export function CardTitle({ className, ...p }: React.HTMLAttributes<HTMLHeadingE
 export function CardDesc({ className, ...p }: React.HTMLAttributes<HTMLParagraphElement>) {
   return <p className={cn("text-sm text-zinc-500 leading-relaxed", className)} {...p} />;
 }
+
+export function CardDescription({ className, ...p }: React.HTMLAttributes<HTMLParagraphElement>) {
+  return <p className={cn("text-xs text-zinc-500", className)} {...p} />;
+}
+
+export function CardFooter({ className, ...p }: React.HTMLAttributes<HTMLDivElement>) {
+  return <div className={cn("flex items-center p-6 pt-0", className)} {...p} />;
+}

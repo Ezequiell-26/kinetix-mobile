@@ -56,9 +56,11 @@ model User {
   messagesSent Message[] @relation("Sent")
   messagesReceived Message[] @relation("Received")
   notifications Notification[]
+  notificationPreference NotificationPreference?
   checkIns CheckIn[]
   workoutLogs WorkoutLog[]
   sessions Session[]
+  pushSubscriptions PushSubscription[]
   progressMeasurements ProgressMeasurement[]
   progressPhotos ProgressPhoto[]
 
@@ -67,18 +69,22 @@ model User {
 }
 
 model Profile {
-  id          String @id @default(cuid())
-  userId      String @unique
-  user        User   @relation(fields: [userId], references: [id], onDelete: Cascade)
-  age         Int?
-  goal        Goal?
-  experience  String?
-  availability Int?
-  equipment   String?
-  notes       String?
-  weight      Float?
-  height      Float?
-  bio         String?
+  id                  String  @id @default(cuid())
+  userId              String  @unique
+  user                User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  age                 Int?
+  goal                Goal?
+  experience          String?
+  availability        Int?
+  equipment           String?
+  notes               String?
+  weight              Float?
+  height              Float?
+  bio                 String?
+  onboardingCompleted Boolean @default(false)
+  onboardingStep      Int     @default(0)
+  xp                  Int     @default(0)
+  photoUrl            String?
 }
 
 model TrainerProfile {
@@ -239,6 +245,7 @@ model WorkoutLog {
   @@index([userId])
   @@index([clientId])
   @@index([date])
+  @@index([clientId, date])
 }
 
 model ExerciseSetLog {
@@ -313,6 +320,7 @@ model CheckIn {
   @@index([date])
   @@index([clientId])
   @@index([userId])
+  @@index([clientId, date])
 }
 
 model Message {
@@ -405,4 +413,48 @@ model Session {
   @@index([userId])
   @@index([token])
   @@index([revoked])
+}
+
+// Preferencias de notificaciones del usuario
+model NotificationPreference {
+  id        String   @id @default(cuid())
+  userId    String   @unique
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  // Canales habilitados
+  emailEnabled     Boolean @default(true)
+  pushEnabled      Boolean @default(true)
+  smsEnabled       Boolean @default(false)
+  whatsappEnabled  Boolean @default(false)
+  
+  // Tipos de notificaciones
+  workoutReminders    Boolean @default(true)
+  nutritionTips       Boolean @default(true)
+  progressUpdates     Boolean @default(true)
+  messageNotifications Boolean @default(true)
+  paymentReminders    Boolean @default(true)
+  
+  // Configuración de schedule
+  timezone       String  @default("America/Argentina/Buenos_Aires")
+  quietStart     String  @default("22:00") // Hora de inicio de modo no molestar
+  quietEnd       String  @default("08:00") // Hora de fin de modo no molestar
+  
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([userId])
+}
+
+model PushSubscription {
+  id        String   @id @default(cuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  endpoint  String   @unique
+  p256dh    String?
+  auth      String?
+  active    Boolean  @default(true)
+  createdAt DateTime @default(now())
+
+  @@index([userId])
+  @@index([active])
 }

@@ -29,7 +29,7 @@ export async function GET(
   if(!s) return NextResponse.json({error:"No auth"},{status:401});
   const { id } = await params;
 
-  // Un CLIENT solo puede leer el programa que Ezequiel le asignó.
+  // Un CLIENT solo puede leer el programa que tu coach le asignó.
   if(s.role === "CLIENT"){
     const client = await prisma.client.findFirst({ where: { OR: [{ userId: s.id }, { email: s.email }] } });
     if(!client || client.assignedProgramId !== id){

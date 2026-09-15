@@ -58,7 +58,12 @@ jobs:
 
       - name: Migrate + seed (Postgres efímero de CI)
         run: |
-          npx prisma migrate deploy --schema apps/mobile/prisma/schema.prisma
+          npx prisma migrate deploy --schema apps/mobile/prisma/schema.prisma || {
+            echo "Error en migraciones. Verificando estado..."
+            # Si falla, intentamos resetear y aplicar de nuevo para CI
+            npx prisma migrate reset --schema apps/mobile/prisma/schema.prisma --force --skip-seed
+            npx prisma migrate deploy --schema apps/mobile/prisma/schema.prisma
+          }
           npm run db:seed -w apps/mobile
 
       - name: Tests

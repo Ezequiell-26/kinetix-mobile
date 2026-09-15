@@ -1,4 +1,4 @@
-# APP_REORGANIZATION_PLAN.md — EZEQUIEL COACHING
+# APP_REORGANIZATION_PLAN.md — KINETIXFITT
 
 Fecha: 2026-09-10 · Estado: PLAN ACTIVO · Regla crítica: **no eliminar ninguna funcionalidad, solo reubicarla y agruparla.**
 

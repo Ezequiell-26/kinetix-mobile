@@ -1,15 +1,22 @@
 /**
- * Rate limiter simple para rutas de API en middleware.
+ * Rate limiter distribuido para rutas de API en middleware y route handlers.
  *
- * Estrategia: token bucket por IP en memoria. Funciona en un solo
- * proceso de Node (Edge runtime o Node server). Para múltiples
- * instancias reemplazar el store por Redis / KV.
+ * Estrategia:
+ *  - Primario: Upstash Redis (distribuido, funciona en Vercel serverless/Edge)
+ *    via @upstash/redis + @upstash/ratelimit (slidingWindow). Requiere
+ *    UPSTASH_REDIS_REST_URL y UPSTASH_REDIS_REST_TOKEN en env.
+ *  - Fallback: token bucket en memoria por proceso con TTL + cleanup periódico.
+ *    Se usa en dev/local o cuando Redis no está configurado / falla.
+ *    No es distribuido pero evita DoS local y mantiene compatibilidad.
  *
  * Uso:
  *   import { checkRateLimit } from "@/lib/rate-limiter";
- *   const result = checkRateLimit(ip, "login", { max: 5, windowMs: 60_000 });
+ *   const result = await checkRateLimit(ip, "login", { max: 5, windowMs: 60_000 });
  *   if (!result.success) return Response.json({ error: "Too many" }, { status: 429 });
  */
+
+import { Redis } from "@upstash/redis";
+import { Ratelimit } from "@upstash/ratelimit";
 
 export interface RateLimitConfig {
   /** Peticiones máximas permitidas en la ventana */
@@ -58,7 +65,7 @@ function scheduleCleanup() {
   }
 }
 
-export function checkRateLimit(
+function checkRateLimitMemory(
   ip: string,
   namespace: string,
   config: RateLimitConfig
@@ -68,6 +75,12 @@ export function checkRateLimit(
   const key = `${namespace}:${ip}`;
   const now = Date.now();
   let bucket = store.get(key);
+
+  // Lazy TTL: si el bucket es muy viejo, descartarlo (evita leak si setInterval no corre en serverless)
+  if (bucket && now - bucket.lastRefill > MAX_BUCKET_AGE_MS) {
+    store.delete(key);
+    bucket = undefined;
+  }
 
   if (!bucket) {
     bucket = { tokens: config.max - 1, lastRefill: now };
@@ -102,6 +115,101 @@ export function checkRateLimit(
     remaining: bucket.tokens,
     resetMs: Math.max(0, resetMs),
   };
+}
+
+// ──────────────────────────────────────────────────────────────────────────────
+// Upstash Redis distribuido (Edge-compatible)
+// ──────────────────────────────────────────────────────────────────────────────
+
+let redisClient: Redis | null = null;
+let redisInitFailed = false;
+const limiterCache = new Map<string, Ratelimit>();
+
+function getRedis(): Redis | null {
+  if (redisClient) return redisClient;
+  if (redisInitFailed) return null;
+  const url = process.env.UPSTASH_REDIS_REST_URL;
+  const token = process.env.UPSTASH_REDIS_REST_TOKEN;
+  if (!url || !token) return null;
+  try {
+    // Redis.fromEnv() lee UPSTASH_REDIS_REST_URL/TOKEN automáticamente
+    // Fallback a constructor explícito si fromEnv no está disponible
+    if (typeof (Redis as unknown as { fromEnv?: () => Redis }).fromEnv === "function") {
+      redisClient = (Redis as unknown as { fromEnv: () => Redis }).fromEnv();
+    } else {
+      redisClient = new Redis({ url, token });
+    }
+    return redisClient;
+  } catch (e) {
+    redisInitFailed = true;
+    console.warn("[rate-limiter] Upstash Redis init failed, fallback a memoria:", e);
+    return null;
+  }
+}
+
+function getLimiter(namespace: string, config: RateLimitConfig): Ratelimit | null {
+  const redis = getRedis();
+  if (!redis) return null;
+  const cacheKey = `${namespace}:${config.max}:${config.windowMs}`;
+  if (limiterCache.has(cacheKey)) return limiterCache.get(cacheKey)!;
+  try {
+    const windowSec = Math.max(1, Math.ceil(config.windowMs / 1000));
+    // @upstash/ratelimit espera string tipo "60 s", "1 m", etc. Usamos segundos.
+    const windowStr = `${windowSec} s`;
+    const limiter = new Ratelimit({
+      redis,
+      limiter: Ratelimit.slidingWindow(config.max, windowStr as `${number} s`),
+      prefix: `kinetix:ratelimit:${namespace}`,
+      analytics: false,
+    });
+    limiterCache.set(cacheKey, limiter);
+    return limiter;
+  } catch (e) {
+    console.warn("[rate-limiter] Ratelimit init failed, fallback a memoria:", e);
+    return null;
+  }
+}
+
+/**
+ * Verifica rate limit intentando primero Upstash Redis (distribuido).
+ * Si Redis no está configurado o falla, cae a memoria con TTL.
+ * SIEMPRE retorna un resultado válido — nunca lanza.
+ */
+export async function checkRateLimit(
+  ip: string,
+  namespace: string,
+  config: RateLimitConfig
+): Promise<RateLimitResult> {
+  const limiter = getLimiter(namespace, config);
+  if (limiter) {
+    try {
+      const identifier = `${namespace}:${ip}`;
+      const { success, remaining, reset } = await limiter.limit(identifier);
+      // `reset` es timestamp epoch ms según @upstash/ratelimit
+      const resetMs = typeof reset === "number" ? Math.max(0, reset - Date.now()) : config.windowMs;
+      return {
+        success,
+        remaining: typeof remaining === "number" ? remaining : success ? config.max - 1 : 0,
+        resetMs,
+      };
+    } catch (e) {
+      console.warn(`[rate-limiter] Upstash limit error ${namespace}:${ip}, fallback memoria:`, e);
+      // caemos a memoria
+    }
+  }
+  return checkRateLimitMemory(ip, namespace, config);
+}
+
+/**
+ * Alias síncrono solo para fallback en memoria (deprecado, usar checkRateLimit async).
+ * Se mantiene para compatibilidad si algún caller no puede ser async.
+ */
+export function checkRateLimitSync(
+  ip: string,
+  namespace: string,
+  config: RateLimitConfig
+): RateLimitResult {
+  return checkRateLimitMemory(ip, namespace, config);
 }
 
 /**

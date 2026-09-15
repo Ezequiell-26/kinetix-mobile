@@ -1,5 +1,5 @@
-/* eslint-disable @next/next/no-img-element */
 "use client";
+import Image from "next/image";
 import { Camera } from "lucide-react";
 import { useState } from "react";
 
@@ -33,7 +33,7 @@ export function PhotoCompare({
   if (beforeUrl && !afterUrl) {
     return (
       <div className="relative aspect-[4/3] bg-zinc-950 rounded-2xl overflow-hidden border border-zinc-800">
-        <img src={beforeUrl} alt={beforeLabel} className="w-full h-full object-cover" />
+        <Image src={beforeUrl} alt={beforeLabel} fill sizes="(max-width: 640px) 100vw, 50vw" className="object-cover" unoptimized={beforeUrl.startsWith("blob:") || beforeUrl.startsWith("data:") || beforeUrl.startsWith("/uploads/") || beforeUrl.startsWith("/api/uploads/")} />
         <div className="absolute bottom-3 left-3 bg-black/70 backdrop-blur px-3 py-1 rounded-full text-xs font-bold text-white">
           {beforeLabel}
         </div>
@@ -49,7 +49,7 @@ export function PhotoCompare({
       <div className="relative aspect-[4/3] bg-zinc-950 rounded-2xl overflow-hidden border border-zinc-800 select-none">
         {/* Before photo (base) */}
         <div className="absolute inset-0">
-          <img src={imgBefore} alt={beforeLabel} className="w-full h-full object-cover" />
+          <Image src={imgBefore} alt={beforeLabel} fill sizes="(max-width: 640px) 100vw, 50vw" className="object-cover" unoptimized={imgBefore.startsWith("blob:") || imgBefore.startsWith("data:") || imgBefore.startsWith("/uploads/") || imgBefore.startsWith("/api/uploads/")} />
           <span className="absolute bottom-3 left-3 bg-black/70 backdrop-blur px-2.5 py-1 rounded-full text-[11px] font-bold text-white z-10">
             {beforeLabel}
           </span>
@@ -60,7 +60,7 @@ export function PhotoCompare({
           className="absolute inset-0 overflow-hidden"
           style={{ clipPath: `inset(0 ${100 - pos}% 0 0)` }}
         >
-          <img src={imgAfter} alt={afterLabel} className="w-full h-full object-cover" />
+          <Image src={imgAfter} alt={afterLabel} fill sizes="(max-width: 640px) 100vw, 50vw" className="object-cover" unoptimized={imgAfter.startsWith("blob:") || imgAfter.startsWith("data:") || imgAfter.startsWith("/uploads/") || imgAfter.startsWith("/api/uploads/")} />
           <span className="absolute bottom-3 right-3 bg-primary text-black px-2.5 py-1 rounded-full text-[11px] font-black z-10">
             {afterLabel}
           </span>

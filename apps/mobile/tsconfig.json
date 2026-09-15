@@ -32,5 +32,13 @@
     "next-env.d.ts",
     ".next-dev/types/**/*.ts"
   ],
-  "exclude": ["node_modules", "capacitor.config.ts"]
+  "exclude": [
+    "node_modules",
+    "capacitor.config.ts",
+    "electron/main.js",
+    "eslint.config.mjs",
+    "next.config.mjs",
+    "postcss.config.mjs",
+    "scripts/"
+  ]
 }

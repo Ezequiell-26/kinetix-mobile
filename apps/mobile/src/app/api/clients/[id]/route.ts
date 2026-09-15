@@ -137,7 +137,7 @@ export async function PATCH(
         data: {
           userId: updated.userId,
           title: "Nuevo programa asignado",
-          body: `Ezequiel te asignó el programa ${updated.assignedProgram?.name || ""}`,
+          body: `Tu coach te asignó el programa ${updated.assignedProgram?.name || ""}`,
           type: "program",
           link: "/client/workout"
         }

@@ -1,0 +1,16 @@
+# robots.txt — KinetixFitt Web
+# Permite indexado general, bloquea áreas privadas y bots de scraping IA no deseados
+User-agent: *
+Allow: /
+Disallow: /api/
+Disallow: /dashboard/
+Disallow: /auth/
+Disallow: /_next/
+
+# Bloqueo GPTBot (opcional, SEO decide)
+User-agent: GPTBot
+Disallow: /
+
+# Sitemap
+Sitemap: https://kinetixfitt.com/sitemap.xml
+Host: https://kinetixfitt.com

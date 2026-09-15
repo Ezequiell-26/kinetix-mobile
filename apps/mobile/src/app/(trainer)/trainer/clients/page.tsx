@@ -6,6 +6,10 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Users, Plus, Search, Dumbbell } from "lucide-react";
 
+export const dynamic = 'force-dynamic';
+export const revalidate = 0;
+
+
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export default async function ClientsPage({
   searchParams
@@ -164,7 +168,7 @@ export default async function ClientsPage({
             <p className="text-xs text-zinc-500 max-w-sm mx-auto">
               {q || sp.status
                 ? "No se encontraron clientes con los filtros seleccionados."
-                : "Aún no tienes clientes registrados en tu plataforma."}
+                : "Aún no tenés clientes registrados en tu plataforma."}
             </p>
             <Link href="/trainer/clients/new" className="inline-block mt-2">
               <Button variant="accent" size="sm" className="font-bold">
