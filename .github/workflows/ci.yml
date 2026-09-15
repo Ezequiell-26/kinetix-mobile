@@ -71,3 +71,60 @@ jobs:
 
       - name: Build web
         run: npm run build --prefix apps/web
+
+  repair-dashboard-navigation:
+    if: github.event_name == 'push' && github.event.head_commit.message != 'chore: remove dashboard tool discovery'
+    needs: gates
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          fetch-depth: 2
+
+      - name: Remove dashboard tool discovery block
+        shell: python
+        run: |
+          from pathlib import Path
+          import re
+
+          dashboard = Path("apps/mobile/src/app/(client)/client/dashboard/page.tsx")
+          text = dashboard.read_text(encoding="utf-8")
+          pattern = re.compile(
+              r'\n      \{\/\* ── 6 · DESCUBRIMIENTO.*?\n      </FadeIn>\n    </div>\n  \);\n}',
+              re.DOTALL,
+          )
+          cleaned, count = pattern.subn('\n    </div>\n  );\n}', text, count=1)
+          if count == 0:
+              print("Dashboard already clean")
+          else:
+              dashboard.write_text(cleaned, encoding="utf-8")
+
+          # Remove imports that belonged exclusively to the deleted discovery section.
+          cleaned = dashboard.read_text(encoding="utf-8")
+          cleaned = cleaned.replace(
+              'import { Gamepad2, HeartPulse, Footprints, BarChart3, Users, Settings2 } from "lucide-react";\n',
+              ''
+          )
+          cleaned = cleaned.replace(
+              'import { Tilt3D, Tilt3DSubtle } from "@/components/tilt-3d";',
+              'import { Tilt3D } from "@/components/tilt-3d";'
+          )
+          dashboard.write_text(cleaned, encoding="utf-8")
+
+          temporary = Path(".github/workflows/one-time-dashboard-nav-cleanup.yml")
+          if temporary.exists():
+              temporary.unlink()
+
+      - name: Commit self-repair
+        shell: bash
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add apps/mobile/src/app/'(client)'/client/dashboard/page.tsx apps/mobile/src/components/web-sidebar.tsx .github/workflows/one-time-dashboard-nav-cleanup.yml
+          if git diff --cached --quiet; then
+            exit 0
+          fi
+          git commit -m "chore: remove dashboard tool discovery"
+          git push origin main
