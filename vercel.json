@@ -24,37 +24,14 @@
   },
   "headers": [
     {
-      "source": "/api/(.*)",
-      "headers": [
-        { "key": "Access-Control-Allow-Origin", "value": "*" },
-        { "key": "Access-Control-Allow-Methods", "value": "GET,POST,PUT,DELETE,OPTIONS" },
-        { "key": "Access-Control-Allow-Headers", "value": "Content-Type, Authorization, stripe-signature, x-mp-signature" }
-      ]
-    },
-    {
       "source": "/(.*)",
       "headers": [
         { "key": "X-Content-Type-Options", "value": "nosniff" },
         { "key": "X-Frame-Options", "value": "DENY" },
         { "key": "X-XSS-Protection", "value": "1; mode=block" },
-        { "key": "Referrer-Policy", "value": "strict-origin-when-cross-origin" }
+        { "key": "Referrer-Policy", "value": "strict-origin-when-cross-origin" },
+        { "key": "Permissions-Policy", "value": "camera=(self), microphone=(self), geolocation=(self), payment=(self)" }
       ]
-    }
-  ],
-  "rewrites": [
-    {
-      "source": "/api/stripe/webhook",
-      "destination": "/api/stripe/webhook"
-    },
-    {
-      "source": "/api/mercadopago/webhook",
-      "destination": "/api/mercadopago/webhook"
-    }
-  ],
-  "crons": [
-    {
-      "path": "/api/cron/sync-data",
-      "schedule": "0 2 * * *"
     }
   ],
   "github": {
@@ -62,8 +39,6 @@
     "autoJobCancelation": true
   },
   "functions": {
-    "app/api/**/*.ts": {
-      "maxDuration": 60
-    }
+    "app/api/**/*.ts": { "maxDuration": 60 }
   }
 }
