@@ -1,68 +1,64 @@
 import { NextResponse } from "next/server";
-import { backupService } from "@/lib/backups";
 import { getCurrentUser } from "@/lib/auth";
 import { join } from "path";
+import { tmpdir } from "os";
 
-/**
- * DELETE /api/backups/[id] - Elimina un backup específico
- * Solo accesible para TRAINER
- */
+function safeFilename(value: string) {
+  return value.startsWith("backup-") && value.endsWith(".sql.gz") && !value.includes("/") && !value.includes("\\") && !value.includes("..");
+}
+
+async function getBackupContext(id: string) {
+  const filename = decodeURIComponent(id);
+  if (!safeFilename(filename)) throw new Response(JSON.stringify({ error: "Nombre de backup inválido" }), { status: 400, headers: { "Content-Type": "application/json" } });
+  const backupDir = process.env.BACKUP_DIR || join(tmpdir(), "kinetix-backups");
+  return { filename, filePath: join(backupDir, filename) };
+}
+
 export async function DELETE(
-  req: Request,
+  _req: Request,
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    // Verificar autenticación y rol
     const user = await getCurrentUser();
-    if (!user) {
-      return NextResponse.json({ error: "No autorizado" }, { status: 401 });
-    }
-
-    // Solo trainers pueden eliminar backups
-    if (user.role !== "TRAINER") {
-      return NextResponse.json({ error: "Acceso denegado" }, { status: 403 });
-    }
-
-    const { id } = await params;
-    
-    // Decodificar el nombre del archivo (puede contener caracteres especiales)
-    const filename = decodeURIComponent(id);
-    
-    // Validar que el nombre del archivo sea seguro
-    if (!filename.startsWith("backup-") || !filename.endsWith(".sql.gz")) {
-      return NextResponse.json(
-        { error: "Nombre de backup inválido" },
-        { status: 400 }
-      );
-    }
-
+    if (!user) return NextResponse.json({ error: "No autorizado" }, { status: 401 });
+    if (user.role !== "TRAINER") return NextResponse.json({ error: "Acceso denegado" }, { status: 403 });
+    const { filename, filePath } = await getBackupContext((await params).id);
     const fs = await import("fs/promises");
-    const backupDir = process.env.BACKUP_DIR || require("os").tmpdir() + "/kinetix-backups";
-    const filePath = join(backupDir, filename);
-
-    // Verificar que el archivo existe
-    try {
-      await fs.access(filePath);
-    } catch {
-      return NextResponse.json(
-        { error: "Backup no encontrado" },
-        { status: 404 }
-      );
-    }
-
-    // Eliminar el archivo
+    try { await fs.access(filePath); } catch { return NextResponse.json({ error: "Backup no encontrado" }, { status: 404 }); }
     await fs.unlink(filePath);
+    return NextResponse.json({ success: true, message: "Backup eliminado exitosamente", filename });
+  } catch (error) {
+    if (error instanceof Response) return error;
+    console.error("[BACKUP API] Error deleting backup:", error);
+    return NextResponse.json({ error: "Error al eliminar backup" }, { status: 500 });
+  }
+}
 
-    return NextResponse.json({
-      success: true,
-      message: "Backup eliminado exitosamente",
-      filename,
+export async function GET(
+  _req: Request,
+  { params }: { params: Promise<{ id: string }> }
+) {
+  try {
+    const user = await getCurrentUser();
+    if (!user) return NextResponse.json({ error: "No autorizado" }, { status: 401 });
+    if (user.role !== "TRAINER") return NextResponse.json({ error: "Acceso denegado" }, { status: 403 });
+    const { filename, filePath } = await getBackupContext((await params).id);
+    const fs = await import("fs/promises");
+    try { await fs.access(filePath); } catch { return NextResponse.json({ error: "Backup no encontrado" }, { status: 404 }); }
+    const data = await fs.readFile(filePath);
+    return new NextResponse(data, {
+      status: 200,
+      headers: {
+        "Content-Type": "application/gzip",
+        "Content-Length": String(data.byteLength),
+        "Content-Disposition": `attachment; filename="${filename}"`,
+        "Cache-Control": "private, no-store",
+        "X-Content-Type-Options": "nosniff",
+      },
     });
   } catch (error) {
-    console.error("[BACKUP API] Error deleting backup:", error);
-    return NextResponse.json(
-      { error: "Error al eliminar backup", details: error instanceof Error ? error.message : "Unknown" },
-      { status: 500 }
-    );
+    if (error instanceof Response) return error;
+    console.error("[BACKUP API] Error downloading backup:", error);
+    return NextResponse.json({ error: "Error al descargar backup" }, { status: 500 });
   }
 }
