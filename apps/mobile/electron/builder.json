@@ -1,6 +1,6 @@
 {
-  "appId": "com.ezequielcoaching.app",
-  "productName": "EZEQUIEL COACHING",
+  "appId": "com.kinetixfitt.app",
+  "productName": "KinetixFitt",
   "files": [
     "electron/**/*",
     "public/icons/**/*"
@@ -9,27 +9,21 @@
     "output": "dist-electron"
   },
   "win": {
-    "target": [
-      "nsis"
-    ],
+    "target": ["nsis"],
     "icon": "public/icons/icon-512.png"
   },
   "nsis": {
     "oneClick": false,
     "allowToChangeInstallationDirectory": true,
-    "shortcutName": "EZEQUIEL COACHING"
+    "shortcutName": "KinetixFitt"
   },
   "mac": {
-    "target": [
-      "dmg"
-    ],
+    "target": ["dmg"],
     "icon": "public/icons/icon-512.png",
     "identity": null
   },
   "linux": {
-    "target": [
-      "AppImage"
-    ],
+    "target": ["AppImage"],
     "icon": "public/icons/icon-512.png"
   },
   "electronVersion": "44.3.0"
