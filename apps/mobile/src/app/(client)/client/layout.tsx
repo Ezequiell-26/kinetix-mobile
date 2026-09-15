@@ -8,11 +8,14 @@ export default async function ClientLayout({children}:{children:React.ReactNode}
   if(!s) redirect("/login");
   if(s.role!=="CLIENT") redirect("/trainer/dashboard");
   return (
-    <div className="min-h-screen bg-[#080808]">
+    <div className="flex min-h-screen bg-[#080808]">
+      {/* Sidebar fijo a la izquierda */}
       <WebSidebar role="CLIENT" userName={s.name} />
-      <OfflineIndicator />
-      <div className="lg:ml-0">
-        <main className="max-w-[1600px] mx-auto w-full px-4 lg:px-8 py-6">
+      
+      {/* Área principal de contenido a la derecha del sidebar */}
+      <div className="flex-1 flex flex-col min-w-0">
+        <OfflineIndicator />
+        <main className="flex-1 max-w-[1600px] mx-auto w-full px-4 lg:px-8 py-6">
           {children}
         </main>
       </div>
