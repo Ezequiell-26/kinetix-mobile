@@ -1,13 +1,11 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getSession, requireRole } from "@/lib/auth";
 import { prisma } from "@/lib/db";
-import { assertTrainerOwnsClient, validateClientIdForTrainer } from "@/lib/authorization";
+import { assertTrainerOwnsClient } from "@/lib/authorization";
 
 /**
- * POST /api/analytics — ingesta de eventos (fire-and-forget).
- * El userId se toma de la SESIÓN cuando existe; el `userId` del body se
- * ignora (antes se aceptaba arbitrario sin auth). Sin sesión se acepta
- * igual (endpoint de telemetría, no de datos) pero sin atribución.
+ * POST /api/analytics — telemetría no sensible.
+ * El usuario se obtiene de la sesión y nunca del body.
  */
 export async function POST(req: NextRequest) {
   try {
@@ -16,14 +14,9 @@ export async function POST(req: NextRequest) {
     const { event, properties, timestamp } = body;
 
     if (!event || !timestamp) {
-      return NextResponse.json(
-        { error: "Missing required fields" },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: "Missing required fields" }, { status: 400 });
     }
 
-    // Solo en desarrollo se loguea (no hay email real configurado).
-    // Nunca incluye secretos: event + userId de sesión + props.
     if (process.env.NODE_ENV === "development") {
       console.log("[Analytics Event]", {
         event,
@@ -35,19 +28,11 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ success: true });
   } catch (error) {
     console.error("Analytics API error:", error);
-    return NextResponse.json(
-      { error: "Internal server error" },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: "Internal server error" }, { status: 500 });
   }
 }
 
-/**
- * GET /api/analytics — agregados REALES (solo TRAINER).
- * Ahora con verificación de ownership: un trainer solo puede ver analytics
- * de sus propios clientes. Si se pasa clientId, se verifica que pertenezca
- * al trainer autenticado.
- */
+/** GET /api/analytics — agregados reales, solo TRAINER. */
 export async function GET(req: NextRequest) {
   const t = await requireRole(["TRAINER"]);
   if (!t) return NextResponse.json({ error: "No auth" }, { status: 401 });
@@ -55,28 +40,31 @@ export async function GET(req: NextRequest) {
   try {
     const { searchParams } = new URL(req.url);
     const clientId = searchParams.get("clientId");
-    const startDate = searchParams.get("startDate");
-    const endDate = searchParams.get("endDate");
+    const startDateParam = searchParams.get("startDate");
+    const endDateParam = searchParams.get("endDate");
 
-    // P0 Security: verificar ownership del clientId si se proporciona
     if (clientId) {
       const ownsClient = await assertTrainerOwnsClient(t.id, clientId);
-      if (!ownsClient) {
-        // 404 para no revelar si el cliente existe o no
-        return NextResponse.json(
-          { error: "Cliente no encontrado" },
-          { status: 404 }
-        );
-      }
+      if (!ownsClient) return NextResponse.json({ error: "Cliente no encontrado" }, { status: 404 });
     }
 
-    const date: { gte?: Date; lte?: Date } = {};
-    if (startDate) date.gte = new Date(startDate);
-    if (endDate) date.lte = new Date(endDate);
+    const startDate = startDateParam ? new Date(startDateParam) : null;
+    const endDate = endDateParam ? new Date(endDateParam) : null;
+    if ((startDate && Number.isNaN(startDate.getTime())) || (endDate && Number.isNaN(endDate.getTime()))) {
+      return NextResponse.json({ error: "Rango de fechas inválido" }, { status: 400 });
+    }
+    if (startDate && endDate && startDate > endDate) {
+      return NextResponse.json({ error: "startDate no puede ser posterior a endDate" }, { status: 400 });
+    }
+
+    // Siempre limitar por ownership. Con clientId, la comprobación anterior ya valida el acceso.
     const where = {
       completed: true,
+      client: { trainerId: t.id },
       ...(clientId ? { clientId } : {}),
-      ...(startDate || endDate ? { date } : {}),
+      ...(startDate || endDate
+        ? { date: { ...(startDate ? { gte: startDate } : {}), ...(endDate ? { lte: endDate } : {}) } }
+        : {}),
     };
 
     const [totalWorkouts, logs] = await Promise.all([
@@ -87,6 +75,7 @@ export async function GET(req: NextRequest) {
           durationMin: true,
           sets: { select: { exerciseName: true, weight: true, reps: true } },
         },
+        take: 5000,
       }),
     ]);
 
@@ -101,10 +90,7 @@ export async function GET(req: NextRequest) {
       }
       for (const set of log.sets) {
         totalVolume += (set.weight ?? 0) * (set.reps ?? 0);
-        byExercise.set(
-          set.exerciseName,
-          (byExercise.get(set.exerciseName) ?? 0) + 1
-        );
+        byExercise.set(set.exerciseName, (byExercise.get(set.exerciseName) ?? 0) + 1);
       }
     }
 
@@ -116,16 +102,11 @@ export async function GET(req: NextRequest) {
     return NextResponse.json({
       totalWorkouts,
       totalVolume: Math.round(totalVolume * 100) / 100,
-      averageDuration: durationN
-        ? Math.round((durationSum / durationN) * 10) / 10
-        : 0,
+      averageDuration: durationN ? Math.round((durationSum / durationN) * 10) / 10 : 0,
       mostPopularExercises,
     });
   } catch (error) {
     console.error("Analytics GET error:", error);
-    return NextResponse.json(
-      { error: "Internal server error" },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: "Internal server error" }, { status: 500 });
   }
 }
