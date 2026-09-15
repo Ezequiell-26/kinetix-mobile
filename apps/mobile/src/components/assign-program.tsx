@@ -2,8 +2,7 @@
 import { useState, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
-import { Dumbbell, Check } from "lucide-react";
+import { Dumbbell, Check, Loader2, AlertCircle } from "lucide-react";
 
 type ProgramOption = {
   id: string;
@@ -26,29 +25,32 @@ export function AssignProgram({
   const [selected, setSelected] = useState<string>(currentProgramId || "");
   const [loading, setLoading] = useState(false);
   const [assignedSuccess, setAssignedSuccess] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
+    let cancelled = false;
     async function loadPrograms(){
       try {
-        const res = await fetch("/api/programs");
-        if (res.ok) {
-          const data = await res.json();
-          if (Array.isArray(data)) {
-            setPrograms(data);
-            if (!selected && data.length > 0) {
-              setSelected(currentProgramId || data[0].id);
-            }
-          }
-        }
-      } catch {}
+        setError(null);
+        const res = await fetch("/api/programs", { cache: "no-store" });
+        if (!res.ok) throw new Error("No se pudieron cargar los programas.");
+        const data = await res.json();
+        if (cancelled || !Array.isArray(data)) return;
+        setPrograms(data);
+        setSelected((previous) => currentProgramId || previous || data[0]?.id || "");
+      } catch (cause) {
+        if (!cancelled) setError(cause instanceof Error ? cause.message : "No se pudieron cargar los programas.");
+      }
     }
     loadPrograms();
+    return () => { cancelled = true; };
   }, [currentProgramId]);
 
   async function handleAssign(){
-    if (!selected) return;
+    if (!selected || loading) return;
     setLoading(true);
     setAssignedSuccess(false);
+    setError(null);
 
     try {
       const res = await fetch(`/api/clients/${clientId}`, {
@@ -56,75 +58,76 @@ export function AssignProgram({
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ assignedProgramId: selected })
       });
-
-      if (res.ok) {
-        setAssignedSuccess(true);
-        setTimeout(() => setAssignedSuccess(false), 4000);
+      const payload = await res.json().catch(() => null);
+      if (!res.ok) {
+        throw new Error(payload?.error || "Error al asignar el programa.");
       }
-    } catch {
-      alert("Error al asignar programa");
+      setAssignedSuccess(true);
+    } catch (cause) {
+      setError(cause instanceof Error ? cause.message : "Error al asignar el programa.");
     } finally {
       setLoading(false);
     }
   }
 
   return (
-    <Card className="border-primary/30 bg-zinc-950">
+    <Card className="border-primary/30 bg-[#0B151E]">
       <CardHeader>
-        <CardTitle className="flex items-center gap-2 text-base">
+        <CardTitle className="flex items-center gap-2 text-base text-white">
           <Dumbbell size={18} className="text-primary" /> Asignar Programa
         </CardTitle>
-        <p className="text-xs text-zinc-400">
-          Asigná o cambiá el plan de entrenamiento para <span className="text-white font-medium">{clientName}</span>
+        <p className="text-xs text-[#8193A5]">
+          Asigná o cambiá el plan de entrenamiento para <span className="font-medium text-white">{clientName}</span>
         </p>
       </CardHeader>
       <CardContent className="space-y-3">
         {programs.length === 0 ? (
-          <p className="text-xs text-zinc-500 py-2">Cargando programas disponibles...</p>
+          <p className="py-2 text-xs text-[#8193A5]">Cargando programas disponibles...</p>
         ) : (
-          programs.map(p => {
-            const isCurrent = selected === p.id;
+          programs.map((program) => {
+            const isCurrent = selected === program.id;
             return (
               <button
-                key={p.id}
+                key={program.id}
                 type="button"
-                onClick={() => setSelected(p.id)}
-                className={`w-full text-left p-3 rounded-xl border transition flex justify-between items-center ${
-                  isCurrent
-                    ? "bg-primary text-black border-primary"
-                    : "bg-zinc-900 border-zinc-800 hover:border-zinc-700 text-white"
-                }`}
+                onClick={() => { setSelected(program.id); setAssignedSuccess(false); setError(null); }}
+                className={`w-full rounded-xl border p-3 text-left transition ${isCurrent ? "border-primary bg-primary text-black" : "border-white/[0.06] bg-white/[0.02] text-white hover:border-primary/30 hover:bg-white/[0.04]"}`}
               >
-                <div>
-                  <p className="font-bold text-sm">{p.name}</p>
-                  <p className={`text-xs ${isCurrent ? "text-black/70" : "text-zinc-500"}`}>
-                    {p.durationWeeks} semanas • {p.frequency} días/sem • {p.clients?.length || 0} clientes activos
-                  </p>
+                <div className="flex items-center justify-between gap-3">
+                  <div className="min-w-0">
+                    <p className="truncate text-sm font-bold">{program.name}</p>
+                    <p className={`text-xs ${isCurrent ? "text-black/70" : "text-[#8193A5]"}`}>
+                      {program.durationWeeks} semanas • {program.frequency} días/sem • {program.clients?.length || 0} clientes
+                    </p>
+                  </div>
+                  <span className={`flex h-5 w-5 shrink-0 items-center justify-center rounded-full border-2 ${isCurrent ? "border-black bg-black text-primary" : "border-white/15"}`}>
+                    {isCurrent && <Check size={12} strokeWidth={3} />}
+                  </span>
                 </div>
-                <span
-                  className={`w-5 h-5 rounded-full border-2 flex items-center justify-center ${
-                    isCurrent ? "bg-black border-black text-primary" : "border-zinc-700"
-                  }`}
-                >
-                  {isCurrent && <Check size={12} strokeWidth={3} />}
-                </span>
               </button>
             );
           })
         )}
 
+        {error && (
+          <div role="alert" className="flex items-start gap-2 rounded-xl border border-red-500/20 bg-red-500/5 p-3 text-xs text-red-200">
+            <AlertCircle size={15} className="mt-0.5 shrink-0" />
+            <span>{error}</span>
+          </div>
+        )}
+
         <Button
           variant={assignedSuccess ? "outline" : "accent"}
-          className="w-full h-11 font-bold text-sm"
+          className="h-11 w-full font-bold text-sm"
           onClick={handleAssign}
-          disabled={loading || !selected}
+          disabled={loading || !selected || programs.length === 0}
         >
-          {loading ? "Asignando..." : assignedSuccess ? "Programa asignado con éxito" : "ASIGNAR PROGRAMA"}
+          {loading ? <><Loader2 size={15} className="animate-spin" /> Asignando...</> : assignedSuccess ? <><Check size={15} /> Programa guardado</> : "ASIGNAR PROGRAMA"}
         </Button>
 
         {assignedSuccess && (
-          <p className="text-xs text-center text-emerald-400 font-medium animate-in fade-in">
-            Programa guardado en la base de datos. {clientName} tiene el entrenamiento disponible en su cuenta.
+          <p className="text-center text-xs font-medium text-primary" role="status">
+            {clientName} ya tiene el programa disponible en su cuenta.
           </p>
         )}
       </CardContent>
