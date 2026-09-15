@@ -1,320 +1,120 @@
-# ✅ Production Readiness Checklist - KinetixFitt
+# KinetixFitt — Production Readiness
 
-**Fecha:** Septiembre 2026  
-**Versión:** 1.0.0  
-**Estado:** ✅ LISTO PARA PRODUCCIÓN
+**Fecha:** 2026-09-16  
+**Versión de aplicación:** 1.0.0  
+**Rama objetivo:** `main`
 
----
+## Estado real
 
-## 📊 Resumen Ejecutivo
+El repositorio contiene la infraestructura y los controles necesarios para preparar un lanzamiento, pero este documento **no certifica un despliegue real**. Un lanzamiento de producción solo debe declararse después de ejecutar los gates de CI y configurar/verificar los servicios externos con credenciales reales.
 
-El proyecto KinetixFitt ha completado todas las verificaciones necesarias para su lanzamiento a producción. Este documento certifica que el código, la infraestructura y los procesos están listos para soportar usuarios reales.
+## Cambios de hardening realizados en `main`
 
----
+- El gate `npm run test` ejecuta las suites de estadísticas, voz, core, dominio y seguridad.
+- Se eliminó de Git el archivo `apps/mobile/.env.production`, que solo contenía placeholders y no debía estar trackeado.
+- `.env.example` distingue `DATABASE_URL` (pooler/runtime) de `DIRECT_URL` (conexión directa para Prisma).
+- Se agregó `scripts/verify-production-env.mjs` para bloquear configuraciones de producción incompletas y evitar imprimir secretos.
+- Se agregó `npm run verify:production` en `apps/mobile`.
+- El health endpoint ya no devuelve mensajes internos de excepciones al cliente.
+- CI usa health-check nativo de PostgreSQL antes de ejecutar migrations/seed/tests/build.
 
-## 🎯 Estado General del Proyecto
+## Gates obligatorios antes de lanzar
 
-| Categoría | Progreso | Estado |
-|-----------|----------|--------|
-| Funcionalidad Core | 100% | ✅ Completo |
-| Seguridad | 98% | ✅ Listo |
-| Testing | 85% | ✅ Aceptable |
-| Documentación | 100% | ✅ Completo |
-| Infraestructura | 100% | ✅ Listo |
-| Performance | 95% | ✅ Optimizado |
-| Accesibilidad | 95% | ✅ WCAG AA |
+### Código
 
-**Progreso Total: 97%** - **APROBADO PARA PRODUCCIÓN**
+- [ ] CI de `main` en verde.
+- [ ] `npm run typecheck` sin errores.
+- [ ] `npm run lint` sin errores bloqueantes.
+- [ ] `npm run test` en verde.
+- [ ] `npm run build` en verde para mobile/web.
+- [ ] `npm run test:e2e` ejecutado contra un entorno de staging real.
 
----
+### Base de datos
 
-## ✅ Checklist de Producción Completado
+- [ ] Crear/configurar PostgreSQL/Supabase de producción.
+- [ ] `DATABASE_URL` apunta al pooler/runtime correcto.
+- [ ] `DIRECT_URL` apunta al host directo de PostgreSQL.
+- [ ] Ejecutar `prisma migrate deploy` en producción.
+- [ ] Confirmar backups y restauración real.
+- [ ] Confirmar índices y límites de conexiones.
 
-### 🔐 Seguridad (15/15) ✅
+### Autenticación y seguridad
 
-- [x] Variables de entorno configuradas (.env.example completo)
-- [x] JWT_SECRET generado criptográficamente (32+ caracteres)
-- [x] HTTPS forzado en producción
-- [x] CORS configurado para dominios autorizados
-- [x] Rate limiting activo (100 req/15min)
-- [x] CSRF protection habilitado
-- [x] Security headers OWASP implementados (7/7)
-- [x] Input validation con Zod en todos los endpoints
-- [x] SQL injection prevenido (Prisma ORM)
-- [x] XSS prevention (CSP + sanitización)
-- [x] Password hashing bcrypt (cost 12)
-- [x] Logs sin información sensible
-- [x] Error messages genéricos en producción
-- [x] Webhook secrets configurados
-- [x] Vulnerabilidades críticas corregidas (0 críticas, 3 altas en dev-only)
+- [ ] `JWT_SECRET` aleatorio, único y >= 32 caracteres.
+- [ ] `TRUST_PROXY_HEADERS=true` solo si el proxy de producción sobrescribe de forma fiable los headers de IP.
+- [ ] Redis/Upstash configurado para rate limiting distribuido.
+- [ ] Verificar login, register, forgot-password, reset-password y logout en staging.
+- [ ] Verificar ownership/IDOR para trainer y athlete con usuarios separados.
+- [ ] Verificar uploads privados y URLs firmadas.
+- [ ] Rotar cualquier secreto que haya aparecido accidentalmente en historial Git.
 
-### 🏗️ Infraestructura (12/12) ✅
+### Pagos
 
-- [x] Docker Compose configurado y testeado
-- [x] Kubernetes manifests completos
-- [x] Backup automatizado a S3
-- [x] Database migrations configuradas
-- [x] Seed data disponible
-- [x] Health checks implementados
-- [x] Logging centralizado
-- [x] Monitoring hooks (Sentry-ready)
-- [x] CI/CD pipeline configurado
-- [x] Environment separation (dev/staging/prod)
-- [x] Secrets management definido
-- [x] Disaster recovery plan documentado
+- [ ] Stripe live configurado.
+- [ ] Webhook Stripe live configurado y firma verificada.
+- [ ] Mercado Pago configurado si se habilita en lanzamiento.
+- [ ] Probar checkout, webhook, idempotencia y conciliación en staging/live controlado.
 
-### 🧪 Testing (10/12) ⚠️
+### Email
 
-- [x] Tests unitarios implementados
-- [x] Tests de integración básicos
-- [ ] Tests E2E completos (pendiente post-launch)
-- [x] Tests de validación de schemas
-- [x] Mock de servicios externos
-- [x] Coverage > 60% en código crítico
-- [x] Manual testing checklist completado
-- [x] Cross-browser testing realizado
-- [x] Mobile responsive testing completado
-- [x] Performance testing básico
-- [ ] Load testing avanzado (pendiente post-launch)
-- [x] Error scenarios probados
+- [ ] RESEND o SMTP real configurado.
+- [ ] `EMAIL_FROM` usa un dominio verificado.
+- [ ] Probar recuperación de contraseña y correos transaccionales.
 
-### 📦 Código y Build (14/14) ✅
+### Storage / fotos / backups
 
-- [x] TypeScript compilation exitosa (0 errors)
-- [x] ESLint sin errors críticos
-- [x] Build de producción sin warnings críticos
-- [x] Bundle size optimizado (< 2MB initial)
-- [x] Code splitting implementado
-- [x] Tree shaking activo
-- [x] Imágenes optimizadas (WebP + lazy loading)
-- [x] Fonts optimizadas (preload + display swap)
-- [x] Service Worker registrado
-- [x] Offline-first functionality
-- [x] Push notifications configuradas
-- [x] Manifest.json válido
-- [x] PWA criteria cumplidos
-- [x] Electron build multiplataforma listo
+- [ ] Bucket privado de assets.
+- [ ] Bucket privado de backups.
+- [ ] Credenciales AWS/S3 con mínimo privilegio.
+- [ ] Upload y descarga autorizados por ownership.
+- [ ] Backup automático configurado.
+- [ ] Restauración de prueba completada.
 
-### 🎨 UI/UX (13/13) ✅
+### Observabilidad
 
-- [x] Skeletons loading implementados
-- [x] Empty states diseñados
-- [x] Error states manejados
-- [x] Loading states consistentes
-- [x] Responsive design (mobile, tablet, desktop)
-- [x] Dark mode soportado
-- [x] Animaciones performantes (GPU accelerated)
-- [x] Focus indicators visibles
-- [x] Aria-labels en elementos interactivos
-- [x] Contraste WCAG AA verificado
-- [x] Navegación por teclado funcional
-- [x] Screen reader compatible
-- [x] Branding consistente
+- [ ] Sentry configurado.
+- [ ] Logs sin tokens, contraseñas, secretos ni datos innecesarios.
+- [ ] Alertas para errores 5xx, base de datos, pagos y autenticación.
+- [ ] Health check monitorizado externamente.
 
-### 📚 Documentación (10/10) ✅
+### Dominio y distribución
 
-- [x] README.md completo
-- [x] DEPLOY.md con guía paso a paso
-- [x] SECURITY_AUDIT.md generado
-- [x] ERROR_FIXES.md documentado
-- [x] API documentation disponible
-- [x] Environment variables documentadas
-- [x] Troubleshooting guide incluido
-- [x] Contributing guidelines
-- [x] Changelog actualizado
-- [x] Roadmap futuro definido
+- [ ] Dominio de producción configurado.
+- [ ] HTTPS/SSL verificado.
+- [ ] `NEXT_PUBLIC_APP_URL` y `NEXT_PUBLIC_WEB_URL` apuntan al dominio real.
+- [ ] OpenGraph, favicon, manifest, robots y sitemap comprobados desde producción.
+- [ ] PWA instalada y probada en Android/iOS/desktop.
 
-### 🚀 Deploy y Release (10/10) ✅
+## Comandos de release
 
-- [x] Pre-deploy check script creado
-- [x] Migration scripts probados
-- [x] Rollback procedure documentado
-- [x] Blue-green deployment strategy definida
-- [x] Feature flags configurables
-- [x] A/B testing infrastructure lista
-- [x] Analytics integration preparada
-- [x] Error tracking (Sentry) configurado
-- [x] Uptime monitoring preparado
-- [x] Alert thresholds definidos
+Desde `apps/mobile`:
 
----
-
-## 📈 Métricas de Performance
-
-### Core Web Vitals (Objetivos vs Realidad)
-
-| Métrica | Objetivo | Medición | Estado |
-|---------|----------|----------|--------|
-| LCP (Largest Contentful Paint) | < 2.5s | ~1.8s | ✅ |
-| FID (First Input Delay) | < 100ms | ~45ms | ✅ |
-| CLS (Cumulative Layout Shift) | < 0.1 | ~0.05 | ✅ |
-| TTFB (Time to First Byte) | < 600ms | ~320ms | ✅ |
-| TTI (Time to Interactive) | < 3.8s | ~2.9s | ✅ |
-
-### Bundle Analysis
-
-| Tipo | Tamaño | Gzip | Estado |
-|------|--------|------|--------|
-| JavaScript inicial | 185 KB | 62 KB | ✅ |
-| CSS inicial | 24 KB | 6 KB | ✅ |
-| HTML | 12 KB | 4 KB | ✅ |
-| Total inicial | 221 KB | 72 KB | ✅ |
-| Bundle total (todas las rutas) | 1.8 MB | 580 KB | ✅ |
-
----
-
-## 🔍 Verificaciones Finales Realizadas
-
-### 1. Análisis de Dependencias
 ```bash
-npm audit
-# Resultado: 0 críticas, 3 altas (dev-only, no afectan producción)
-```
-
-### 2. Build de Producción
-```bash
-npm run build
-# Resultado: Build exitoso sin errors críticos
-```
-
-### 3. Type Checking
-```bash
-npm run type-check
-# Resultado: 0 errors TypeScript
-```
-
-### 4. Linting
-```bash
+npm run verify:production
+npm run typecheck
 npm run lint
-# Resultado: 0 errors ESLint
+npm run test
+npm run build
+npm run test:e2e
 ```
 
-### 5. Tests Unitarios
+En CI, las migrations deben desplegarse con:
+
 ```bash
-npm test
-# Resultado: 100% tests passing
+npx prisma migrate deploy --schema apps/mobile/prisma/schema.prisma
 ```
 
-### 6. Pre-Deploy Check
-```bash
-./scripts/pre-deploy-check.sh
-# Resultado: Todas las verificaciones aprobadas
-```
+No usar `prisma migrate dev` contra el entorno de producción.
 
----
+## Riesgos que siguen requiriendo verificación real
 
-## ⚠️ Consideraciones Post-Launch
+1. No se puede afirmar que el despliegue externo, DNS, Stripe, Mercado Pago, S3, Redis, email o Sentry estén correctamente configurados solo mirando el código.
+2. El conector utilizado para esta revisión no ejecuta el build completo del repositorio en una máquina de CI; por eso el estado final debe confirmarse con GitHub Actions.
+3. Los flujos E2E requieren credenciales/servicios y un entorno accesible para validación real.
+4. La aplicación usa un shell Electron además del despliegue web; la generación de instaladores debe probarse por sistema operativo.
 
-### Monitoreo Requerido (Primera Semana)
-1. **Error Rate:** Mantener < 1% de requests con error
-2. **Response Time:** Alertar si p95 > 500ms
-3. **Uptime:** Objetivo 99.9%
-4. **Database Connections:** Monitorear pool usage
-5. **Memory Usage:** Alertar si > 80% capacity
+## Regla de lanzamiento
 
-### Tareas Programadas
-- **Día 1:** Monitoreo intensivo, equipo en standby
-- **Semana 1:** Daily check-ins de métricas
-- **Mes 1:** Retrospectiva y planificación v1.1
-- **Mes 3:** Auditoría de seguridad externa
-- **Mes 6:** SOC 2 Type I initiation
+El release se considera **listo para lanzamiento técnico** cuando todos los gates marcados como obligatorios estén en verde y los servicios externos hayan sido verificados en staging o producción controlado.
 
-### Mejoras Pendientes (No Bloqueantes)
-- [ ] Tests E2E completos con Cypress/Playwright
-- [ ] Load testing con 1000+ usuarios concurrentes
-- [ ] Actualización Prisma (deepmerge-ts fix)
-- [ ] Bug bounty program
-- [ ] GDPR compliance audit (si aplica)
-- [ ] HIPAA compliance (si maneja datos de salud US)
-
----
-
-## 🎯 Criterios de Éxito (Primeros 30 Días)
-
-| Métrica | Objetivo Mínimo | Objetivo Ideal |
-|---------|-----------------|----------------|
-| Uptime | 99.5% | 99.9% |
-| Error Rate | < 2% | < 0.5% |
-| User Satisfaction | > 4.0/5 | > 4.5/5 |
-| Page Load Time | < 3s | < 2s |
-| Conversion Rate | > 2% | > 5% |
-| Support Tickets | < 50/semana | < 20/semana |
-
----
-
-## 📞 Plan de Respuesta a Incidentes
-
-### Severidad de Incidentes
-
-**Severidad 1 (Crítico):**
-- Servicio completamente caído
-- Pérdida de datos de usuarios
-- Brecha de seguridad confirmada
-- **Respuesta:** Inmediata (< 15 min)
-
-**Severidad 2 (Alto):**
-- Funcionalidad core degradada
-- Error rate > 5%
-- Performance críticamente lento
-- **Respuesta:** < 1 hora
-
-**Severidad 3 (Medio):**
-- Bugs no críticos
-- Features secundarias rotas
-- Performance ligeramente degradado
-- **Respuesta:** < 4 horas
-
-**Severidad 4 (Bajo):**
-- Issues cosméticos
-- Mejoras solicitadas
-- Bugs menores
-- **Respuesta:** < 24 horas
-
-### Escalación
-1. **On-Call Engineer** → Primer respondedor
-2. **Tech Lead** → Si no resuelto en 30 min
-3. **CTO** → Si afecta negocio críticamente
-4. **All Hands** → Si severidad 1 > 1 hora
-
----
-
-## ✅ Aprobaciones
-
-| Rol | Nombre | Fecha | Firma |
-|-----|--------|-------|-------|
-| Tech Lead | [Pendiente] | - | - |
-| Product Manager | [Pendiente] | - | - |
-| Security Officer | [Pendiente] | - | - |
-| DevOps Lead | [Pendiente] | - | - |
-| CEO/Founder | Ezequiell | Sep 2026 | ✅ |
-
----
-
-## 🚀 Autorización de Deploy
-
-**Este documento certifica que el proyecto KinetixFitt versión 1.0.0 está LISTO PARA PRODUCCIÓN.**
-
-### Condiciones:
-1. Variables de entorno configuradas correctamente ✅
-2. Database migrations ejecutadas en producción ✅
-3. Webhooks de pagos configurados en modo live ⏳ (manual)
-4. Dominio y SSL configurados ⏳ (manual)
-5. Monitoreo activo configurado ⏳ (post-deploy)
-
-### Autorización Final:
-**✅ APROBADO PARA DEPLOY INMEDIATO**
-
----
-
-*Documento generado: Septiembre 2026*  
-*Última actualización: Septiembre 2026*  
-*Próxima revisión: Octubre 2026 (post-launch retrospective)*
-
----
-
-## 📝 Notas Adicionales
-
-- Las 3 vulnerabilidades residuales de npm audit están en dependencias de desarrollo (Prisma CLI) y NO AFECTAN el runtime de producción.
-- El proyecto cumple con estándares industry para startups en etapa early-stage.
-- Se recomienda auditoría externa después de 3 meses de operación continua.
-- Todos los secretos deben ser rotados cada 90 días como best practice.
+El objetivo de este archivo es evitar que una documentación optimista sustituya a una verificación real.
