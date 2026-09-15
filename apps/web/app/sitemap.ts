@@ -6,6 +6,9 @@ export default function sitemap(): MetadataRoute.Sitemap {
 
   const routes: MetadataRoute.Sitemap = [
     { url: `${base}/`, lastModified: now, changeFrequency: 'weekly', priority: 1 },
+    // i18n landing alternates
+    { url: `${base}/es`, lastModified: now, changeFrequency: 'weekly', priority: 1 },
+    { url: `${base}/en`, lastModified: now, changeFrequency: 'weekly', priority: 1, alternates: { languages: { es: `${base}/es`, en: `${base}/en` } } as any },
     { url: `${base}/legal/privacidad`, lastModified: now, changeFrequency: 'monthly', priority: 0.6 },
     { url: `${base}/legal/terminos`, lastModified: now, changeFrequency: 'monthly', priority: 0.6 },
     { url: `${base}/legal/cookies`, lastModified: now, changeFrequency: 'monthly', priority: 0.5 },

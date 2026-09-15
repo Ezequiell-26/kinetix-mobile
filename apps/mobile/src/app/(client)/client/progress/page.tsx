@@ -1,5 +1,6 @@
 /* eslint-disable @next/next/no-img-element */
 "use client";
+import Image from "next/image";
 import { useState, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
@@ -590,7 +591,7 @@ export default function ProgressPage(){
                         {photos.map(p => (
                           <div key={p.id} className="space-y-1.5 group">
                             <div className="aspect-[3/4] bg-surface-elevated rounded-xl border border-subtle/40 overflow-hidden relative">
-                              <img src={p.url} alt="Progreso" className="w-full h-full object-cover group-hover:scale-105 transition" />
+                              <Image src={p.url} alt="Progreso" fill sizes="(max-width: 640px) 50vw, 33vw" className="object-cover group-hover:scale-105 transition" unoptimized />
                               <span className="absolute top-2 right-2 bg-black/70 backdrop-blur px-2 py-0.5 rounded text-[10px] text-zinc-300">
                                 Privada
                               </span>

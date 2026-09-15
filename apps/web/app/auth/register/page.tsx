@@ -239,7 +239,7 @@ export default function RegisterPage() {
 
           {/* Login Link */}
           <p className="mt-8 text-center text-sm text-slate-400">
-            ¿Ya tienes una cuenta?{' '}
+            ¿Ya tenés cuenta?{' '}
             <Link href="/auth/login" className="text-emerald-400 hover:text-emerald-300 font-medium transition-colors">
               Inicia sesión
             </Link>

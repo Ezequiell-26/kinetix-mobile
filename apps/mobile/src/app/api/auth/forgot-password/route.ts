@@ -38,10 +38,10 @@ export async function POST(req: Request) {
 
   const normalizedEmail = email.toLowerCase().trim();
 
-  // ── Rate limiting ──
+  // ── Rate limiting (Upstash Redis distribuido con fallback en memoria) ──
   const ip = getClientIpFromRequest(req);
 
-  const rlIp = checkRateLimit(ip, "forgot-password", { max: 5, windowMs: 15 * 60_000 });
+  const rlIp = await checkRateLimit(ip, "forgot-password", { max: 5, windowMs: 15 * 60_000 });
   if (!rlIp.success) {
     const retryAfter = Math.ceil(rlIp.resetMs / 1000);
     return NextResponse.json(
@@ -50,7 +50,7 @@ export async function POST(req: Request) {
     );
   }
 
-  const rlEmail = checkRateLimit(normalizedEmail, "forgot-password:email", {
+  const rlEmail = await checkRateLimit(normalizedEmail, "forgot-password:email", {
     max: 3,
     windowMs: 60 * 60_000,
   });

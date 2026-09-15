@@ -46,7 +46,7 @@ export default function LoginPage() {
             Bienvenido de nuevo
           </h1>
           <p className="text-slate-400 text-center mb-8">
-            Ingresa tus datos para continuar
+            Ingresá tus datos para continuar
           </p>
 
           <form onSubmit={handleSubmit} className="space-y-6">
@@ -147,7 +147,7 @@ export default function LoginPage() {
 
           {/* Sign Up Link */}
           <p className="mt-8 text-center text-sm text-slate-400">
-            ¿No tienes una cuenta?{' '}
+            ¿No tenés cuenta?{' '}
             <Link href="/auth/register" className="text-emerald-400 hover:text-emerald-300 font-medium transition-colors">
               Regístrate gratis
             </Link>

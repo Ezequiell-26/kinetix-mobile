@@ -2,10 +2,11 @@ import Link from "next/link";
 import type { Metadata } from "next";
 import { Check, ArrowRight } from "lucide-react";
 import { SiteNav } from "@/components/landing/site-nav";
+import { BRAND } from "@/constants/branding";
 import { SiteFooter } from "@/components/landing/site-footer";
 
 export const metadata: Metadata = {
-  title: "Planes — KINETIXFITT",
+  title: `Planes — ${BRAND.name}`,
   description:
     "Planes mensuales en pesos argentinos, sin permanencia. Elegí el tuyo y empezá hoy.",
 };
@@ -13,12 +14,12 @@ export const metadata: Metadata = {
 const plans = [
   {
     name: "Básico",
-    price: "$12.000",
+    price: 12000,
     items: ["Programa de entrenamiento", "Biblioteca de ejercicios", "Registro de progreso"],
   },
   {
     name: "Personalizado",
-    price: "$18.000",
+    price: 18000,
     highlight: true,
     items: [
       "Todo lo del Básico",
@@ -29,7 +30,7 @@ const plans = [
   },
   {
     name: "Premium",
-    price: "$25.000",
+    price: 25000,
     items: [
       "Todo lo del Personalizado",
       "Seguimiento prioritario",
@@ -46,7 +47,7 @@ const faqs = [
   },
   {
     q: "¿Cómo pago?",
-    a: "Coordinás el pago con KinetixFitt al registrarte. Aceptamos Mercado Pago.",
+    a: `Coordinás el pago con ${BRAND.name} al registrarte. Aceptamos Mercado Pago.`,
   },
   {
     q: "¿Necesito ir a un gimnasio?",
@@ -60,11 +61,11 @@ const faqs = [
 
 export default function PlanesPage() {
   return (
-    <div className="min-h-dvh bg-[#080808] text-white">
+    <div className="min-h-dvh text-white" style={{ backgroundColor: BRAND.colors.dark }}>
       <SiteNav />
       <main className="mx-auto max-w-5xl px-4 py-14">
         <h1 className="text-3xl sm:text-5xl font-black tracking-tight text-center">
-          Planes <span className="text-[#34D399]">mensuales</span>
+          Planes <span style={{ color: BRAND.colors.lime }}>mensuales</span>
         </h1>
         <p className="mt-4 text-center text-sm text-zinc-500">
           Precios en pesos argentinos. Sin permanencia.
@@ -73,30 +74,22 @@ export default function PlanesPage() {
           {plans.map((p) => (
             <article
               key={p.name}
-              className={`rounded-2xl border p-6 ${
-                p.highlight
-                  ? "border-[#34D399] bg-[#34D399]/5"
-                  : "border-zinc-800 bg-zinc-950"
-              }`}
+              className={`rounded-2xl border p-6 ${p.highlight ? "bg-primary/5" : "border-zinc-800 bg-zinc-950"}`} style={p.highlight ? { borderColor: BRAND.colors.lime, backgroundColor: `${BRAND.colors.lime}0D` } : undefined}
             >
               <h2 className="font-black text-lg">{p.name}</h2>
-              <p className="mt-2 text-3xl font-black">{p.price}</p>
+              <p className="mt-2 text-3xl font-black">${p.price.toLocaleString("es-AR")}</p>
               <p className="text-xs text-zinc-500">por mes</p>
               <ul className="mt-5 space-y-2.5 text-sm text-zinc-300">
                 {p.items.map((it) => (
                   <li key={it} className="flex gap-2">
-                    <Check size={16} className="text-[#34D399] shrink-0 mt-0.5" />
+                    <Check size={16} style={{ color: BRAND.colors.lime }} className="shrink-0 mt-0.5" />
                     {it}
                   </li>
                 ))}
               </ul>
               <Link
                 href="/register"
-                className={`mt-6 min-h-[48px] flex items-center justify-center rounded-full text-sm font-black ${
-                  p.highlight
-                    ? "bg-[#34D399] text-black"
-                    : "border border-zinc-700 hover:border-zinc-500"
-                }`}
+                className={`mt-6 min-h-[48px] flex items-center justify-center rounded-full text-sm font-black ${p.highlight ? "text-black" : "border border-zinc-700 hover:border-zinc-500"}`} style={p.highlight ? { backgroundColor: BRAND.colors.lime } : undefined}
               >
                 Elegir {p.name}
               </Link>
@@ -124,7 +117,7 @@ export default function PlanesPage() {
         <div className="mt-10 text-center">
           <Link
             href="/register"
-            className="min-h-[52px] inline-flex items-center gap-2 px-8 rounded-full bg-[#34D399] text-black font-black"
+            className="min-h-[52px] inline-flex items-center gap-2 px-8 rounded-full text-black font-black" style={{ backgroundColor: BRAND.colors.lime }}
           >
             Empezar ahora <ArrowRight size={18} />
           </Link>

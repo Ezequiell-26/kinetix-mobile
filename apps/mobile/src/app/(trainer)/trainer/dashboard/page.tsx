@@ -17,6 +17,7 @@ import { Button } from "@/components/ui/button";
 import { TourLauncher } from "@/components/guided-tour";
 import { TRAINER_TOUR, TRAINER_TOUR_KEY } from "@/lib/tours";
 import { Tilt3D, Tilt3DSubtle } from "@/components/tilt-3d";
+import { BRAND } from "@/constants/branding";
 import { 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
   Users, 
@@ -163,7 +164,7 @@ export default async function TrainerDashboard(){
             Panel del Entrenador
           </h1>
           <p className="text-sm text-zinc-400">
-            Resumen en tiempo real • Marca: <span className="text-primary font-bold">KINETIXFITT</span>
+            Resumen en tiempo real • Marca: <span className="text-primary font-bold">{BRAND.name}</span>
           </p>
         </div>
 
@@ -349,7 +350,7 @@ export default async function TrainerDashboard(){
             {/* Quick stats: MRR */}
             <div className="pt-3 border-t border-subtle space-y-2">
               <div className="flex justify-between items-baseline text-xs">
-                <span className="text-zinc-400">Ingresos Activos (MRR)</span>
+                <span className="text-zinc-400">Ingresos Activos (MRR) — {BRAND.name}</span>
                 <span className="font-black text-white text-sm">
                   ${realMrr.toLocaleString("es-AR")} ARS
                 </span>

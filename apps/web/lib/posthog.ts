@@ -24,7 +24,9 @@ export type PostHogEvent =
   | "payment_failed"
   | "feature_discovered"
   | "lead_captured"
-  | "pricing_viewed";
+  | "pricing_viewed"
+  | "$web_vitals"
+  | "web_vitals";
 
 let _initialized = false;
 
@@ -176,6 +178,54 @@ export function trackCheckin(params: { mood: number; fatigue: number; notes?: st
     mood_rating: params.mood,
     fatigue_rating: params.fatigue,
   });
+}
+
+// ── Web Vitals RUM ───────────────────────────────────────────────
+export type WebVitalMetric = {
+  name: "CLS" | "LCP" | "FCP" | "INP" | "TTFB" | string;
+  value: number;
+  rating: "good" | "needs-improvement" | "poor";
+  delta: number;
+  id: string;
+  navigationType: string;
+};
+
+export function trackWebVital(metric: WebVitalMetric): void {
+  const props = {
+    metric_name: metric.name,
+    metric_value: metric.value,
+    metric_rating: metric.rating,
+    metric_delta: metric.delta,
+    metric_id: metric.id,
+    navigation_type: metric.navigationType,
+    $web_vitals_score: metric.value,
+    $web_vitals_rating: metric.rating,
+    value: metric.value,
+    rating: metric.rating,
+  };
+  // PostHog recommends $web_vitals as event name for RUM dashboards
+  capture("$web_vitals", props as Record<string, unknown>);
+  capture("web_vitals", props as Record<string, unknown>);
+}
+
+export function initWebVitals(): void {
+  if (typeof window === "undefined") return;
+  // Lazy import web-vitals to avoid SSR issues
+  import("web-vitals")
+    .then((mod: unknown) => {
+      const m = mod as Record<string, (cb: (metric: WebVitalMetric) => void) => void>;
+      try {
+        if (m.onCLS) m.onCLS(trackWebVital);
+        if (m.onLCP) m.onLCP(trackWebVital);
+        if (m.onFID) m.onFID(trackWebVital);
+        if (m.onINP) m.onINP(trackWebVital);
+        if (m.onFCP) m.onFCP(trackWebVital);
+        if (m.onTTFB) m.onTTFB(trackWebVital);
+      } catch (e) {
+        if (process.env.NODE_ENV === "development") console.warn("[PostHog:web] WebVitals registration failed", e);
+      }
+    })
+    .catch(() => {});
 }
 
 export { posthog };

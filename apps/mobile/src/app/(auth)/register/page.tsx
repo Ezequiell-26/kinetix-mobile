@@ -5,6 +5,7 @@ import Link from "next/link";
 import { motion } from "framer-motion";
 import { Loader2, ArrowRight, UserPlus } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { BRAND } from "@/constants/branding";
 import { Input, Label } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle, CardDesc } from "@/components/ui/card";
 
@@ -40,7 +41,7 @@ export default function RegisterPage(){
   };
 
   return (
-    <div className="min-h-[100dvh] flex items-center justify-center p-4 bg-[#080808] relative overflow-hidden">
+    <div className="min-h-[100dvh] flex items-center justify-center p-4 relative overflow-hidden" style={{ backgroundColor: BRAND.colors.dark }}>
       {/* Background effects */}
       <div className="absolute inset-0 pointer-events-none">
         <div className="absolute top-1/4 left-1/3 w-[500px] h-[500px] bg-primary/[0.03] rounded-full blur-[120px]" />
@@ -70,7 +71,7 @@ export default function RegisterPage(){
 
             <div className="space-y-1">
               <CardTitle className="text-2xl tracking-tight">Crear cuenta</CardTitle>
-              <CardDesc>Únete a KINETIXFITT</CardDesc>
+              <CardDesc>Únete a {BRAND.name}</CardDesc>
             </div>
           </CardHeader>
 
@@ -126,7 +127,7 @@ export default function RegisterPage(){
               </div>
 
               <p className="text-xs text-zinc-500 rounded-xl border border-subtle bg-surface/40 px-3 py-2.5">
-                Tu cuenta es de <span className="font-bold text-zinc-200">atleta</span>. Si eres entrenador, escríbele a KinetixFitt para tu acceso.
+                Tu cuenta es de <span className="font-bold text-zinc-200">atleta</span>. Si sos entrenador, escribile a {BRAND.name} para tu acceso.
               </p>
 
               {err && (
@@ -155,7 +156,7 @@ export default function RegisterPage(){
               </Button>
 
               <p className="text-center text-xs text-zinc-500">
-                ¿Ya tienes cuenta?{" "}
+                ¿Ya tenés cuenta?{" "}
                 <Link href="/login" className="text-primary hover:underline font-bold">Ingresar</Link>
               </p>
             </form>
@@ -164,7 +165,7 @@ export default function RegisterPage(){
 
         {/* Footer */}
         <p className="text-center text-[11px] text-zinc-600 mt-4">
-          KINETIXFITT © 2026 · Tu mejor versión, cada día
+          {BRAND.name} © 2026 · Tu mejor versión, cada día
         </p>
       </motion.div>
     </div>

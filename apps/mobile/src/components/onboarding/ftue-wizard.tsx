@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState, useCallback } from "react";
+import Image from "next/image";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   Target,
@@ -57,28 +58,28 @@ const GOAL_OPTIONS: Array<{
     label: "Pérdida de grasa",
     desc: "Definir y bajar % graso",
     icon: Flame,
-    img: "https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?w=800&auto=format&fit=crop&q=60",
+    img: "/exercises/free/Ab_Roller.webp",
   },
   {
     value: "HIPERTROFIA",
     label: "Hipertrofia",
     desc: "Ganar músculo y volumen",
     icon: Dumbbell,
-    img: "https://images.unsplash.com/photo-1581009146145-b5ef050c2e1e?w=800&auto=format&fit=crop&q=60",
+    img: "/exercises/free/Barbell_Bench_Press_-_Medium_Grip.webp",
   },
   {
     value: "FUERZA",
     label: "Fuerza",
     desc: "Más kilos en básicos",
     icon: Trophy,
-    img: "https://images.unsplash.com/photo-1534438327276-14e5300c3a48?w=800&auto=format&fit=crop&q=60",
+    img: "/exercises/free/Barbell_Hip_Thrust.webp",
   },
   {
     value: "RECOMPOSICION",
     label: "Recomposición",
     desc: "Músculo + definición",
     icon: Sparkles,
-    img: "https://images.unsplash.com/photo-1534258936925-c58bed479fcb?w=800&auto=format&fit=crop&q=60",
+    img: "/exercises/free/Air_Bike.webp",
   },
 ];
 
@@ -102,21 +103,21 @@ const EQUIPMENT_OPTIONS: Array<{
     label: "Casa",
     desc: "Mancuernas, bandas, peso corporal",
     icon: Home,
-    img: "https://images.unsplash.com/photo-1571019614242-c5c5dee9f50b?w=800&auto=format&fit=crop&q=60",
+    img: "/exercises/free/Alternate_Hammer_Curl.webp",
   },
   {
     value: "Gym",
     label: "Gym",
     desc: "Máquinas y barra completa",
     icon: Building2,
-    img: "https://images.unsplash.com/photo-1534438327276-14e5300c3a48?w=800&auto=format&fit=crop&q=60",
+    img: "/exercises/free/Arnold_Dumbbell_Press.webp",
   },
   {
     value: "Mixto",
     label: "Mixto",
     desc: "Casa + gym según el día",
     icon: Dumbbell,
-    img: "https://images.unsplash.com/photo-1517836357463-d25dfeac3438?w=800&auto=format&fit=crop&q=60",
+    img: "/exercises/free/Arm_Circles.webp",
   },
 ];
 
@@ -425,10 +426,13 @@ export function FtueWizard({ onComplete }: { onComplete?: () => void }) {
             {step === 0 && (
               <Card className="overflow-hidden border-zinc-800 bg-zinc-900/50 backdrop-blur">
                 <div className="relative h-48 overflow-hidden">
-                  <img
+                  <Image
                     src={GOAL_OPTIONS.find((g) => g.value === data.goal)?.img ?? GOAL_OPTIONS[1].img}
                     alt="Objetivo fitness"
-                    className="w-full h-full object-cover opacity-60"
+                    fill
+                    sizes="(max-width: 640px) 100vw, 400px"
+                    className="object-cover opacity-60"
+                    priority
                   />
                   <div className="absolute inset-0 bg-gradient-to-t from-zinc-900 via-zinc-900/60 to-transparent" />
                   <div className="absolute bottom-4 left-4 right-4">
@@ -479,10 +483,12 @@ export function FtueWizard({ onComplete }: { onComplete?: () => void }) {
             {step === 1 && (
               <Card className="overflow-hidden border-zinc-800 bg-zinc-900/50">
                 <div className="relative h-44 overflow-hidden">
-                  <img
-                    src="https://images.unsplash.com/photo-1517832207067-4db24a2ae47c?w=800&auto=format&fit=crop&q=60"
+                  <Image
+                    src="/exercises/free/Ankle_On_The_Knee.webp"
                     alt="Nivel y frecuencia"
-                    className="w-full h-full object-cover opacity-50"
+                    fill
+                    sizes="(max-width: 640px) 100vw, 400px"
+                    className="object-cover opacity-50"
                   />
                   <div className="absolute inset-0 bg-gradient-to-t from-zinc-900 via-zinc-900/50 to-transparent" />
                   <div className="absolute bottom-4 left-4 right-4">
@@ -552,14 +558,16 @@ export function FtueWizard({ onComplete }: { onComplete?: () => void }) {
             {step === 2 && (
               <Card className="overflow-hidden border-zinc-800 bg-zinc-900/50">
                 <div className="relative h-44 overflow-hidden">
-                  <img
+                  <Image
                     src={
                       data.equipment
-                        ? EQUIPMENT_OPTIONS.find((e) => e.value === data.equipment)?.img
-                        : "https://images.unsplash.com/photo-1534258936925-c58bed479fcb?w=800&auto=format&fit=crop&q=60"
+                        ? EQUIPMENT_OPTIONS.find((e) => e.value === data.equipment)?.img!
+                        : "/exercises/free/Air_Bike.webp"
                     }
                     alt="Equipamiento"
-                    className="w-full h-full object-cover opacity-50"
+                    fill
+                    sizes="(max-width: 640px) 100vw, 400px"
+                    className="object-cover opacity-50"
                   />
                   <div className="absolute inset-0 bg-gradient-to-t from-zinc-900 via-zinc-900/50 to-transparent" />
                   <div className="absolute bottom-4 left-4 right-4">
@@ -606,10 +614,12 @@ export function FtueWizard({ onComplete }: { onComplete?: () => void }) {
             {step === 3 && (
               <Card className="overflow-hidden border-zinc-800 bg-zinc-900/50">
                 <div className="relative h-44 overflow-hidden">
-                  <img
-                    src="https://images.unsplash.com/photo-1583454110551-21f2fa2afe61?w=800&auto=format&fit=crop&q=60"
+                  <Image
+                    src="/exercises/free/Ab_Roller.webp"
                     alt="Foto inicial"
-                    className="w-full h-full object-cover opacity-50"
+                    fill
+                    sizes="(max-width: 640px) 100vw, 400px"
+                    className="object-cover opacity-50"
                   />
                   <div className="absolute inset-0 bg-gradient-to-t from-zinc-900 via-zinc-900/50 to-transparent" />
                   <div className="absolute bottom-4 left-4 right-4">
@@ -624,10 +634,13 @@ export function FtueWizard({ onComplete }: { onComplete?: () => void }) {
                   <div className="rounded-2xl border-2 border-dashed border-zinc-800 bg-zinc-950/50 p-4 flex flex-col items-center gap-3">
                     {uploadPreview ? (
                       <div className="relative w-full">
-                        <img
+                        <Image
                           src={uploadPreview}
                           alt="Preview"
+                          width={400}
+                          height={192}
                           className="w-full h-48 object-cover rounded-xl border border-zinc-800"
+                          unoptimized
                         />
                         <button
                           onClick={() => {
@@ -663,9 +676,8 @@ export function FtueWizard({ onComplete }: { onComplete?: () => void }) {
                               const url = URL.createObjectURL(file);
                               setUploadPreview(url);
                               // En prod subiría a Supabase Storage; acá persistimos preview como photoUrl (data URL o blob)
-                              // Para demo, usamos una Unsplash como placeholder + guardamos blob URL
-                              // Mejor: usar un placeholder Unsplash si no hay backend de uploads
-                              const placeholder = "https://images.unsplash.com/photo-1583454110551-21f2fa2afe61?w=600&auto=format&fit=crop&q=60";
+                              // Para demo, usamos un placeholder local + guardamos blob URL
+                              const placeholder = "/exercises/free/Ab_Roller.webp";
                               updateData({ photoUrl: placeholder, xp: data.xp + 0 });
                               // El bonus se aplica al finalizar
                             }}

@@ -3,12 +3,13 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
 import { Star } from "lucide-react";
+import { OptimizedImage } from "@/components/ui/optimized-image";
 
 const resources = [
-  {id:"1", title:"Guía de Técnica: Sentadilla Perfecta", type:"Video", duration:"8 min", premium:true, thumb:"https://images.unsplash.com/photo-1434608519340-334ff72da56d?w=400"},
-  {id:"2", title:"E-book: Nutrición para Hipertrofia", type:"PDF", duration:"24 pág", premium:true, thumb:"https://images.unsplash.com/photo-1490645935967-10de6ba17061?w=400"},
-  {id:"3", title:"Checklist: Preparación de Comidas", type:"Guía", duration:"5 min", premium:false, thumb:"https://images.unsplash.com/photo-1490818387583-1baba5e638af?w=400"},
-  {id:"4", title:"Audio: Motivación Pre-Entreno", type:"Audio", duration:"12 min", premium:true, thumb:"https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?w=400"},
+  {id:"1", title:"Guía de Técnica: Sentadilla Perfecta", type:"Video", duration:"8 min", premium:true, thumb:"/exercises/free/Barbell_Bench_Press_-_Medium_Grip.webp"},
+  {id:"2", title:"E-book: Nutrición para Hipertrofia", type:"PDF", duration:"24 pág", premium:true, thumb:"/exercises/free/Ab_Roller.webp"},
+  {id:"3", title:"Checklist: Preparación de Comidas", type:"Guía", duration:"5 min", premium:false, thumb:"/exercises/free/Air_Bike.webp"},
+  {id:"4", title:"Audio: Motivación Pre-Entreno", type:"Audio", duration:"12 min", premium:true, thumb:"/exercises/free/Alternate_Hammer_Curl.webp"},
 ];
 
 export default function ResourcesPage(){
@@ -30,9 +31,8 @@ export default function ResourcesPage(){
         {resources.map(r=>(
           <Card key={r.id} className="overflow-hidden hover:border-zinc-700 transition group">
             <div className="flex gap-3 p-3">
-              <div className="w-20 h-20 rounded-xl bg-zinc-900 border border-zinc-800 overflow-hidden shrink-0">
-                {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img src={r.thumb} alt={r.title} className="w-full h-full object-cover group-hover:scale-105 transition" />
+              <div className="w-20 h-20 rounded-xl bg-zinc-900 border border-zinc-800 overflow-hidden shrink-0 relative">
+                <OptimizedImage src={r.thumb} alt={r.title} fill className="w-full h-full" sizes="80px" quality={80} />
               </div>
               <div className="flex-1 min-w-0">
                 <div className="flex gap-2 items-center"><Badge variant={r.premium?"accent":"muted"}>{r.type}</Badge><span className="text-xs text-zinc-500">{r.duration}</span>{r.premium && <span className="text-xs text-primary">• VIP</span>}</div>

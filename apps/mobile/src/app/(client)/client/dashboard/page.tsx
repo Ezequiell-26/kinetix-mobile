@@ -28,6 +28,7 @@ import { lastSessionLoads, computeStreak, computeAdherence } from "@/lib/stats";
 import { WeeklyProgress } from "@/components/weekly-progress";
 import { SmartwatchWidget } from "@/components/smartwatch-widget";
 import { Tilt3D, Tilt3DSubtle } from "@/components/tilt-3d";
+import { BRAND } from "@/constants/branding";
 import {
   Dumbbell,
   CheckCircle2,
@@ -69,7 +70,7 @@ export default async function ClientDashboardPage() {
     return (
       <div className="space-y-8 pt-4">
         <header className="space-y-2">
-          <p className="text-[10px] font-bold tracking-[0.2em] text-zinc-500 uppercase">KinetixFitt</p>
+          <p className="text-[10px] font-bold tracking-[0.2em] text-zinc-500 uppercase">{BRAND.name}</p>
           <h1 className="text-4xl font-display font-black text-white tracking-tight">Hola, {firstName}</h1>
           <p className="text-sm text-zinc-400">Bienvenido a tu equipo de entrenamiento.</p>
         </header>

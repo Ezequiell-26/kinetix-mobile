@@ -381,7 +381,7 @@ export default function AuthPage() {
                 onClick={() => setIsLogin(!isLogin)}
                 className="text-xs font-bold text-zinc-400 hover:text-primary transition-colors group inline-flex items-center gap-1"
               >
-                {isLogin ? "¿No tienes cuenta?" : "¿Ya tienes cuenta?"}
+                {isLogin ? "¿No tenés cuenta?" : "¿Ya tenés cuenta?"}
                 <span className="group-hover:underline">{isLogin ? "Regístrate gratis" : "Inicia sesión"}</span>
               </button>
               <Link

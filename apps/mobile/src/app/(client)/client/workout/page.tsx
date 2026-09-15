@@ -30,7 +30,7 @@ export default async function WorkoutListPage(){
             </div>
             <p className="font-bold text-base">No hay datos todavía</p>
             <p className="text-xs text-zinc-500 max-w-sm mx-auto">
-              Aún no tienes un perfil de cliente activo. Contacta a tu coach para comenzar.
+              Aún no tenés un perfil de cliente activo. Contactá a tu coach para comenzar.
             </p>
           </CardContent>
         </Card>

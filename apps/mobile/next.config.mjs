@@ -47,48 +47,21 @@ const nextConfig = {
   /**
    * Headers de seguridad aplicados a todas las respuestas.
    * Basado en OWASP Secure Headers Project + mejores prácticas de Next.js.
-   * No rompen la app porque:
-   *  - CSP usa 'self' + Google Fonts + inline scripts del theme (nonce dinámico
-   *    no es viable sin middleware; el script inline es minúsculo y seguro).
-   *  - COEP se deja en modo report para no romper imágenes externas de avatars.
+   *
+   * Nota PR2 (CSP nonce): Content-Security-Policy ya NO se setea aquí con
+   * 'unsafe-inline'. El middleware (src/middleware.ts) genera un nonce
+   * criptográfico por request y setea CSP con `script-src 'nonce-...'` +
+   * strict-dynamic. Dejar CSP aquí causaría dos headers duplicados (el
+   * navegador hace intersección y rompería el nonce). Por eso aquí solo
+   * van los demás headers OWASP; CSP lo maneja el middleware.
    */
   async headers() {
-    // CSP: se permite inline para el script de tema en <head> del layout root.
-    // Si se agrega un nonce en el futuro, reemplazar 'unsafe-inline'.
-    const csp = [
-      "default-src 'self'",
-      "script-src 'self' 'unsafe-inline' https://www.googletagmanager.com https://www.google-analytics.com https://us.i.posthog.com https://us-assets.i.posthog.com https://eu.i.posthog.com https://app.posthog.com",
-      "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://cdn.jsdelivr.net",
-      "img-src 'self' data: blob: https: http:",
-      "font-src 'self' https://fonts.gstatic.com",
-      "connect-src 'self' https://*.sentry.io https://www.google-analytics.com https://us.i.posthog.com https://us.posthog.com https://eu.i.posthog.com https://app.posthog.com https://*.posthog.com",
-      "frame-src 'self' https://www.youtube.com https://www.youtube-nocookie.com",
-      "object-src 'none'",
-      "base-uri 'self'",
-      "form-action 'self'",
-    ].join("; ");
-
-    // En desarrollo Next.js (React Refresh) evalúa código al vuelo y el
-    // script-src sin 'unsafe-eval' deja la página en blanco (en consola:
-    // "EvalError ... violates ... Content Security Policy"). El CSP se
-    // aplica solo en producción.
-    const isDev = process.env.NODE_ENV === "development";
-    const cspHeader = isDev
-      ? []
-      : [
-          {
-            key: "Content-Security-Policy",
-            value: csp,
-          },
-        ];
-
     return [
       {
         // Aplicar a todas las rutas excepto archivos estáticos.
         source:
-          "/((?!_next/static|_next/image|favicon.ico|icons|manifest.json).* )",
+          "/((?!_next/static|_next/image|favicon.ico|icons|manifest.json).*)",
         headers: [
-          ...cspHeader,
           {
             // Evita clickjacking: impide que la app se embeba en iframes externos.
             key: "X-Frame-Options",

@@ -1,5 +1,5 @@
-/* eslint-disable @next/next/no-img-element */
 "use client";
+import Image from "next/image";
 import { useState, useEffect, useRef } from "react";
 import { Input } from "@/components/ui/input";
 import { MessageFileButton } from "@/components/file-upload";
@@ -97,7 +97,7 @@ export default function ClientMessagesPage(){
   function renderContent(c: string){
     if (c.startsWith("/uploads/") || c.startsWith("/api/uploads/")) {
       if (/\.(jpg|jpeg|png|webp|gif)$/i.test(c)) {
-        return <img src={c} alt="Adjunto" className="rounded-2xl max-w-[220px] max-h-[220px] object-cover" />;
+        return <Image src={c} alt="Adjunto" width={220} height={220} className="rounded-2xl max-w-[220px] max-h-[220px] object-cover" unoptimized />;
       }
       return (
         <a href={c} target="_blank" rel="noreferrer" className="underline font-bold text-xs flex items-center gap-1">

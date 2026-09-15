@@ -1,5 +1,6 @@
 "use client";
 import { useState } from "react";
+import Image from "next/image";
 import { Dumbbell } from "lucide-react";
 
 // Inspirado en Workout Guide MIT + Free Exercise DB + hasaneyldrm
@@ -88,14 +89,17 @@ export function ExerciseImage({ src, videoSrc, alt, muscleGroup, name, className
   return (
     <div className={`relative overflow-hidden bg-zinc-900 ${className}`}>
       {!loaded && <div className="absolute inset-0 animate-pulse bg-zinc-800" />}
-      {/* eslint-disable-next-line @next/next/no-img-element */}
-      <img
+      <Image
         src={src as string}
         alt={alt}
-        loading={priority ? "eager" : "lazy"}
+        fill
+        sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
+        priority={priority}
+        quality={80}
+        unoptimized={src?.startsWith("blob:") || src?.startsWith("data:") || false}
         onLoad={()=>setLoaded(true)}
         onError={()=>setFailed(true)}
-        className={`w-full h-full object-cover transition-opacity ${loaded?"opacity-100":"opacity-0"}`}
+        className={`object-cover transition-opacity ${loaded?"opacity-100":"opacity-0"}`}
         referrerPolicy="no-referrer"
       />
     </div>

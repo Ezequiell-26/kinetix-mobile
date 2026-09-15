@@ -204,14 +204,34 @@ export function generateStructuredData(type: 'Organization' | 'WebSite' | 'Produ
   return structuredData;
 }
 
-// Componente JSON-LD para insertar en el head
-export function JsonLdScript({ data }: { data: any }) {
+// Componente JSON-LD para insertar en el head — escapa </script> para evitar breakout XSS
+// JSON.stringify no escapa </script> ni <!-- ; un headline malicioso podría cerrar el tag
+export function JsonLdScript({ data, nonce }: { data: any; nonce?: string }) {
+  const json = JSON.stringify(data)
+    .replace(/</g, "\\u003c")
+    .replace(/>/g, "\\u003e")
+    .replace(/-->/g, "--\\u003e")
+    .replace(/\u2028/g, "\\u2028")
+    .replace(/\u2029/g, "\\u2029");
   return (
     <script
       type="application/ld+json"
-      dangerouslySetInnerHTML={{ __html: JSON.stringify(data) }}
+      nonce={nonce}
+      dangerouslySetInnerHTML={{ __html: json }}
     />
   );
+}
+
+/**
+ * Helper: escapa JSON-LD string ya serializado (por si se usa fuera del componente)
+ */
+export function escapeJsonLd(json: string): string {
+  return json
+    .replace(/</g, "\\u003c")
+    .replace(/>/g, "\\u003e")
+    .replace(/-->/g, "--\\u003e")
+    .replace(/\u2028/g, "\\u2028")
+    .replace(/\u2029/g, "\\u2029");
 }
 
 // Optimizaciones de performance

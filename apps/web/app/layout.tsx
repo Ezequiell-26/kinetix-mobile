@@ -2,14 +2,15 @@ import type { Metadata, Viewport } from 'next';
 import { Inter } from 'next/font/google';
 import './globals.css';
 import { PostHogProvider } from '../components/posthog-provider';
+import { BRAND } from '../lib/branding';
 
 const inter = Inter({ subsets: ['latin'] });
 
 export const metadata: Metadata = {
-  metadataBase: new URL('https://kinetixfitt.com'),
+  metadataBase: new URL(BRAND.app.url),
   title: {
-    default: 'KinetixFitt - Transforma tu Cuerpo, Domina tu Mente',
-    template: '%s | KinetixFitt'
+    default: `${BRAND.name} - ${BRAND.tagline}`,
+    template: `%s | ${BRAND.name}`
   },
   description: 'La plataforma todo-en-uno que combina ciencia del deporte, IA personalizada y comunidad para resultados que duran para siempre.',
   keywords: [
@@ -23,12 +24,12 @@ export const metadata: Metadata = {
     'IA entrenador',
     'ejercicios en casa',
     'rutinas personalizadas',
-    'KinetixFitt'
+    BRAND.name
   ],
-  authors: [{ name: 'KinetixFitt Team', url: 'https://kinetixfitt.com' }],
-  creator: 'KinetixFitt',
-  publisher: 'KinetixFitt Inc.',
-  applicationName: 'KinetixFitt',
+  authors: [{ name: `${BRAND.name} Team`, url: BRAND.app.url }],
+  creator: BRAND.name,
+  publisher: `${BRAND.name} Inc.`,
+  applicationName: BRAND.name,
   category: 'Health & Fitness',
   formatDetection: {
     email: false,
@@ -37,20 +38,26 @@ export const metadata: Metadata = {
   },
   manifest: '/manifest.json',
   alternates: {
-    canonical: 'https://kinetixfitt.com',
+    canonical: BRAND.app.url,
+    languages: {
+      'es': `${BRAND.app.url}/es`,
+      'en': `${BRAND.app.url}/en`,
+      'x-default': `${BRAND.app.url}/es`,
+    },
   },
   appleWebApp: {
     capable: true,
     statusBarStyle: 'black-translucent',
-    title: 'KinetixFitt',
+    title: BRAND.name,
   },
   openGraph: {
-    title: 'KinetixFitt - Transforma tu Cuerpo, Domina tu Mente',
+    title: `${BRAND.name} - ${BRAND.tagline}`,
     description: 'Únete a más de 12,000 atletas que ya están transformando sus vidas. 4.9★ en App Store.',
     type: 'website',
     locale: 'es_AR',
-    url: 'https://kinetixfitt.com',
-    siteName: 'KinetixFitt',
+    alternateLocale: ['en_US'],
+    url: BRAND.app.url,
+    siteName: BRAND.name,
     images: [
       {
         url: '/opengraph-image',
@@ -62,7 +69,7 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'KinetixFitt - Transforma tu Cuerpo, Domina tu Mente',
+    title: `${BRAND.name} - ${BRAND.tagline}`,
     description: 'La plataforma definitiva para transformar tu físico y mentalidad. 4.9★ 12k+ atletas.',
     images: ['/twitter-image'],
     creator: '@kinetixfitt',
@@ -87,8 +94,8 @@ export const metadata: Metadata = {
 
 export const viewport: Viewport = {
   themeColor: [
-    { media: '(prefers-color-scheme: light)', color: '#09090B' },
-    { media: '(prefers-color-scheme: dark)', color: '#09090B' },
+    { media: '(prefers-color-scheme: light)', color: BRAND.colors.dark },
+    { media: '(prefers-color-scheme: dark)', color: BRAND.colors.dark },
   ],
   width: 'device-width',
   initialScale: 1,
@@ -104,20 +111,20 @@ const jsonLd = {
   '@graph': [
     {
       '@type': 'Organization',
-      '@id': 'https://kinetixfitt.com/#organization',
-      name: 'KinetixFitt',
-      url: 'https://kinetixfitt.com',
+      '@id': `${BRAND.app.url}/#organization`,
+      name: BRAND.name,
+      url: BRAND.app.url,
       logo: {
         '@type': 'ImageObject',
-        url: 'https://kinetixfitt.com/icons/icon-512x512.png',
+        url: `${BRAND.app.url}/icons/icon-512x512.png`,
         width: 512,
         height: 512,
       },
       description:
-        'KinetixFitt es la plataforma todo-en-uno de fitness que combina ciencia del deporte, IA personalizada y comunidad para resultados que duran.',
+        `${BRAND.name} es la plataforma todo-en-uno de fitness que combina ciencia del deporte, IA personalizada y comunidad para resultados que duran.`,
       foundingDate: '2024',
-      slogan: 'Transforma tu Cuerpo, Domina tu Mente',
-      brand: 'KinetixFitt',
+      slogan: BRAND.tagline,
+      brand: BRAND.name,
       sameAs: [
         'https://www.instagram.com/kinetixfitt',
         'https://www.youtube.com/@kinetixfitt',
@@ -133,17 +140,17 @@ const jsonLd = {
     },
     {
       '@type': 'SoftwareApplication',
-      '@id': 'https://kinetixfitt.com/#software',
-      name: 'KinetixFitt',
+      '@id': `${BRAND.app.url}/#software`,
+      name: BRAND.name,
       operatingSystem: 'Web, iOS, Android',
       applicationCategory: 'HealthApplication',
       applicationSubCategory: 'FitnessApplication',
       description:
         'App de coaching fitness con IA: rutinas personalizadas, nutrición precisa, gamificación y seguimiento humano. 12k+ atletas activos.',
-      url: 'https://kinetixfitt.com',
-      image: 'https://kinetixfitt.com/opengraph-image',
-      author: { '@id': 'https://kinetixfitt.com/#organization' },
-      publisher: { '@id': 'https://kinetixfitt.com/#organization' },
+      url: BRAND.app.url,
+      image: `${BRAND.app.url}/opengraph-image`,
+      author: { '@id': `${BRAND.app.url}/#organization` },
+      publisher: { '@id': `${BRAND.app.url}/#organization` },
       offers: [
         {
           '@type': 'Offer',
@@ -191,7 +198,7 @@ const jsonLd = {
         'Check-ins Humanos',
         'Biblioteca 500+ Ejercicios',
       ],
-      screenshot: 'https://kinetixfitt.com/opengraph-image',
+      screenshot: `${BRAND.app.url}/opengraph-image`,
       softwareVersion: '1.0.0',
       datePublished: '2024-01-15',
       dateModified: new Date().toISOString().split('T')[0],
@@ -200,15 +207,15 @@ const jsonLd = {
     },
     {
       '@type': 'WebSite',
-      '@id': 'https://kinetixfitt.com/#website',
-      name: 'KinetixFitt',
-      url: 'https://kinetixfitt.com',
+      '@id': `${BRAND.app.url}/#website`,
+      name: BRAND.name,
+      url: BRAND.app.url,
       description: 'Plataforma de coaching fitness con IA, nutrición y comunidad.',
-      publisher: { '@id': 'https://kinetixfitt.com/#organization' },
+      publisher: { '@id': `${BRAND.app.url}/#organization` },
       inLanguage: 'es-AR',
       potentialAction: {
         '@type': 'SearchAction',
-        target: 'https://kinetixfitt.com/search?q={search_term_string}',
+        target: `${BRAND.app.url}/search?q={search_term_string}`,
         'query-input': 'required name=search_term_string',
       },
     },
@@ -234,8 +241,20 @@ export default function RootLayout({
 
         {/* PWA */}
         <link rel="manifest" href="/manifest.json" />
-        <meta name="theme-color" content="#D6FF2A" />
+        <meta name="theme-color" content={BRAND.colors.lime} />
         <link rel="apple-touch-icon" href="/icons/icon-192x192.png" />
+
+        {/* i18n: hreflang alternates */}
+        <link rel="alternate" hrefLang="es" href={`${BRAND.app.url}/es`} />
+        <link rel="alternate" hrefLang="en" href={`${BRAND.app.url}/en`} />
+        <link rel="alternate" hrefLang="x-default" href={`${BRAND.app.url}/es`} />
+
+        {/* Dynamic html lang based on pathname/cookie — client fallback for SEO crawlers that don't run middleware header */}
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `try{var p=location.pathname;var m=p.match(/^\\/(en|es)(\\/|$)/);var c=document.cookie.match(/(?:^|; )NEXT_LOCALE=(en|es)/);var l=m?m[1]:c?c[1]:((navigator.language||'es').slice(0,2));if(l!=='en'&&l!=='es')l='es';document.documentElement.lang=l;document.documentElement.setAttribute('data-locale',l);}catch(e){}`,
+          }}
+        />
 
         {/* JSON-LD Structured Data — Organization + SoftwareApplication */}
         <script

@@ -3,6 +3,23 @@ import { prisma } from "@/lib/db";
 import { getSession } from "@/lib/auth";
 import { assertTrainerOwnsClient } from "@/lib/authorization";
 
+/**
+ * Sanitiza contenido de mensajes para mitigar Stored XSS.
+ * React escapa por defecto, pero si el contenido se usa en email, PDF,
+ * notificaciones HTML o futuro dangerouslySetInnerHTML, el payload
+ * <img onerror=...> debe quedar neutralizado. Se escapan < y >.
+ * Límite duro 500 chars (PR2) para evitar DoS por payload gigante.
+ */
+const MAX_MESSAGE_LENGTH = 500;
+
+function stripHtml(input: string): string {
+  return input.replace(/</g, "&lt;").replace(/>/g, "&gt;");
+}
+
+function sanitizeMessageContent(input: string): string {
+  return stripHtml(input).slice(0, MAX_MESSAGE_LENGTH);
+}
+
 export async function GET(req: Request){
   const s = await getSession();
   if(!s) return NextResponse.json({error:"No auth"},{status:401});
@@ -71,7 +88,16 @@ export async function POST(req: Request){
   if(!body) return NextResponse.json({error:"Cuerpo requerido"},{status:400});
   const { content } = body;
   let { receiverId, clientId } = body;
-  if(!content) return NextResponse.json({error:"Faltan datos"},{status:400});
+  if (typeof content !== "string" || !content.trim()) {
+    return NextResponse.json({error:"Faltan datos"},{status:400});
+  }
+  const trimmed = content.trim();
+  if (trimmed.length > MAX_MESSAGE_LENGTH) {
+    return NextResponse.json({error:`Mensaje demasiado largo (máx ${MAX_MESSAGE_LENGTH})`},{status:400});
+  }
+  // Sanitización anti-XSS + límite duro
+  const safeContent = sanitizeMessageContent(trimmed);
+  if (!safeContent) return NextResponse.json({error:"Faltan datos"},{status:400});
   // Auto-resolve trainer for CLIENT if no receiverId
   if(s.role==="CLIENT" && !receiverId){
     const trainer = await prisma.user.findFirst({where:{role:"TRAINER"}});
@@ -89,14 +115,14 @@ export async function POST(req: Request){
     senderId: s.id,
     receiverId,
     clientId: clientId || null,
-    content,
+    content: safeContent,
     read: false,
   }});
-  // Notification for receiver
+  // Notification for receiver (también sanitizada + slice)
   await prisma.notification.create({data:{
     userId: receiverId,
     title: `Nuevo mensaje de ${s.name}`,
-    body: content.slice(0,80),
+    body: safeContent.slice(0,80),
     type: "message",
     link: s.role==="TRAINER" ? "/client/messages" : "/trainer/messages"
   }});

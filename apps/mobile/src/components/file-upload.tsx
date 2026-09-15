@@ -1,4 +1,5 @@
 "use client";
+import Image from "next/image";
 import { Paperclip, Check } from "lucide-react";
 import { useState, useRef } from "react";
 import { Button } from "@/components/ui/button";
@@ -35,8 +36,7 @@ export function FileUpload({ type="progress", onUploaded, accept="image/*", labe
       >
         {preview ? (
           <div className="space-y-2">
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img src={preview} alt="preview" className="w-24 h-24 object-cover rounded-xl mx-auto border border-zinc-800" />
+            <Image src={preview} alt="preview" width={96} height={96} className="w-24 h-24 object-cover rounded-xl mx-auto border border-zinc-800" unoptimized />
             <p className="text-xs text-emerald-400"><Check size={11} className="inline mr-0.5 -mt-0.5" />Subido</p>
           </div>
         ) : (

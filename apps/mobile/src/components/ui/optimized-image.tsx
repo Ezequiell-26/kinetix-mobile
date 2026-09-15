@@ -28,6 +28,7 @@ interface OptimizedImageProps {
   /** Soporte next/image placeholder blur (el agente de funciones lo usa así) */
   placeholder?: "empty" | "blur";
   blurDataURL?: string;
+  unoptimized?: boolean;
   onLoad?: () => void;
   onError?: () => void;
 }
@@ -43,6 +44,7 @@ export function OptimizedImage({
   quality = 85,
   sizes,
   objectFit = "cover",
+  unoptimized = false,
 }: OptimizedImageProps) {
   const [isLoading, setIsLoading] = useState(true);
   const [hasError, setHasError] = useState(false);
@@ -92,7 +94,8 @@ export function OptimizedImage({
         quality={quality}
         priority={priority}
         sizes={sizes}
-        onLoadingComplete={() => setIsLoading(false)}
+        unoptimized={unoptimized || src.startsWith("blob:") || src.startsWith("data:")}
+        onLoad={() => setIsLoading(false)}
         onError={() => {
           setIsLoading(false);
           setHasError(true);
