@@ -2,7 +2,7 @@
 import Link from "next/link";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { useEffect, useState } from "react";
-import { Activity, Apple, BarChart3, BookOpen, CreditCard, Dumbbell, FileText, Footprints, Gamepad2, HeartPulse, Home, LayoutDashboard, LayoutGrid, LogOut, Menu, MessageCircle, Search, Settings, Settings2, Timer, TrendingUp, Trophy, User, Users, Wrench, X, ClipboardCheck, Clock, Loader2 } from "lucide-react";
+import { Activity, Apple, BarChart3, BookOpen, CreditCard, Dumbbell, FileText, Footprints, Gamepad2, HeartPulse, Home, LayoutDashboard, LayoutGrid, LogOut, Menu, MessageCircle, Search, Settings, Settings2, Timer, TrendingUp, Trophy, User, Users, Wrench, X, ClipboardCheck, Clock, Loader2, CalendarDays } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 import { NotificationsBell } from "@/components/notifications-bell";
 import { OfflineIndicator } from "@/components/offline-indicator";
@@ -16,6 +16,7 @@ const clientNavGroups: NavGroup[] = [
   { label: "Principal", links: [
     { href: "/client/dashboard", label: "Dashboard", icon: Home },
     { href: "/client/workout", label: "Entrenamientos", icon: Dumbbell },
+    { href: "/client/calendar", label: "Calendario", icon: CalendarDays },
     { href: "/client/nutrition", label: "Nutrición", icon: Apple },
     { href: "/client/progress", label: "Progreso", icon: TrendingUp },
   ] },
