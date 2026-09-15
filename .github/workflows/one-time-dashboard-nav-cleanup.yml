@@ -1,0 +1,155 @@
+name: One-time dashboard navigation cleanup
+
+on:
+  push:
+    branches: [main]
+
+permissions:
+  contents: write
+
+jobs:
+  cleanup:
+    if: github.event.head_commit.message != 'chore: remove dashboard tool discovery'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v5
+        with:
+          fetch-depth: 0
+
+      - name: Remove dashboard discovery and expose tool categories in sidebar
+        shell: python
+        run: |
+          from pathlib import Path
+
+          dashboard_path = Path("apps/mobile/src/app/(client)/client/dashboard/page.tsx")
+          dashboard = dashboard_path.read_text(encoding="utf-8")
+
+          start_marker = '      {/* ── 6 · DESCUBRIMIENTO'
+          end_marker = '      </FadeIn>\n    </div>\n  );\n}'
+
+          start = dashboard.find(start_marker)
+          end = dashboard.rfind(end_marker)
+          if start == -1 or end == -1 or end < start:
+              raise SystemExit("Dashboard discovery block not found; refusing to modify")
+
+          dashboard = dashboard[:start] + dashboard[end + len(end_marker):]
+          dashboard = dashboard.replace(
+              'import { Gamepad2, HeartPulse, Footprints, BarChart3, Users, Settings2 } from "lucide-react";\n',
+              ''
+          )
+          dashboard = dashboard.replace(
+              'import { Tilt3D, Tilt3DSubtle } from "@/components/tilt-3d";',
+              'import { Tilt3D } from "@/components/tilt-3d";'
+          )
+          dashboard_path.write_text(dashboard, encoding="utf-8")
+
+          sidebar_path = Path("apps/mobile/src/components/web-sidebar.tsx")
+          sidebar = sidebar_path.read_text(encoding="utf-8")
+
+          sidebar = sidebar.replace('import Link from "next/link";\n', 'import Link from "next/link";\nimport { useSearchParams } from "next/navigation";\n', 1)
+          sidebar = sidebar.replace('  CalendarDays,\n', '', 1)
+
+          old_client_start = sidebar.find('const clientNavGroups: NavGroup[] = [')
+          old_trainer_start = sidebar.find('const trainerNavGroups: NavGroup[] = [')
+          if old_client_start == -1 or old_trainer_start == -1 or old_trainer_start <= old_client_start:
+              raise SystemExit("Sidebar navigation groups not found; refusing to modify")
+
+          new_client = '''const clientNavGroups: NavGroup[] = [
+  {
+    label: "Principal",
+    links: [
+      { href: "/client/dashboard", label: "Dashboard", icon: Home },
+      { href: "/client/workout", label: "Entrenamientos", icon: Dumbbell },
+      { href: "/client/nutrition", label: "Nutrición", icon: Apple },
+      { href: "/client/progress", label: "Progreso", icon: TrendingUp },
+    ],
+  },
+  {
+    label: "Seguimiento",
+    links: [
+      { href: "/client/checkins", label: "Check-ins", icon: ClipboardCheck },
+      { href: "/client/history", label: "Historial", icon: Clock },
+      { href: "/client/achievements", label: "Logros & XP", icon: Trophy },
+    ],
+  },
+  {
+    label: "Herramientas",
+    links: [
+      { href: "/client/tools", label: "Centro de herramientas", icon: LayoutGrid },
+      { href: "/client/tools?cat=gamificacion", label: "Juegos & XP", icon: Gamepad2 },
+      { href: "/client/tools?cat=salud", label: "Salud & Recuperación", icon: HeartPulse },
+      { href: "/client/tools?cat=cardio", label: "Cardio & Outdoor", icon: Footprints },
+      { href: "/client/tools?cat=datos", label: "Datos & Integraciones", icon: BarChart3 },
+      { href: "/client/tools?cat=social", label: "Social & Comunidad", icon: Users },
+      { href: "/client/tools?cat=educacion", label: "Educación", icon: BookOpen },
+      { href: "/client/tools?cat=sistema", label: "Sistema & App", icon: Settings2 },
+      { href: "/client/timers", label: "Cronómetros", icon: Timer, badge: "PRO" },
+      { href: "/client/resources", label: "Recursos VIP", icon: BookOpen },
+    ],
+  },
+  {
+    label: "Comunicación",
+    links: [
+      { href: "/client/messages", label: "Mensajes", icon: MessageCircle },
+    ],
+  },
+  {
+    label: "Cuenta",
+    links: [
+      { href: "/client/profile", label: "Mi Perfil", icon: User },
+      { href: "/client/settings", label: "Ajustes", icon: Settings },
+    ],
+  },
+];
+
+'''
+
+          sidebar = sidebar[:old_client_start] + new_client + sidebar[old_trainer_start:]
+
+          old_active = '''  const isActive = (href: string) => {
+    const [basePath] = href.split("?");
+    return pathname === basePath || pathname.startsWith(`${basePath}/`);
+  };
+'''
+          new_active = '''  const searchParams = useSearchParams();
+
+  const isActive = (href: string) => {
+    const [basePath, query] = href.split("?");
+    if (pathname !== basePath && !pathname.startsWith(`${basePath}/`)) return false;
+
+    if (!query) {
+      return pathname === basePath && searchParams.toString() === "";
+    }
+
+    const expected = new URLSearchParams(query);
+    for (const [key, value] of expected.entries()) {
+      if (searchParams.get(key) !== value) return false;
+    }
+    return true;
+  };
+'''
+          if old_active not in sidebar:
+              raise SystemExit("Sidebar active-state helper not found; refusing to modify")
+          sidebar = sidebar.replace(old_active, new_active, 1)
+
+          import_anchor = '  Activity,\n'
+          icons_to_add = '  BarChart3,\n  Gamepad2,\n  HeartPulse,\n  Footprints,\n  Settings2,\n'
+          if '  Gamepad2,\n' not in sidebar:
+              sidebar = sidebar.replace(import_anchor, import_anchor + icons_to_add, 1)
+
+          sidebar_path.write_text(sidebar, encoding="utf-8")
+
+          # The temporary workflow removes itself in the same commit.
+          workflow_path = Path(".github/workflows/one-time-dashboard-nav-cleanup.yml")
+          workflow_path.unlink()
+
+      - name: Commit cleanup
+        shell: bash
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -A
+          git diff --cached --quiet && exit 0
+          git commit -m "chore: remove dashboard tool discovery"
+          git push origin main
