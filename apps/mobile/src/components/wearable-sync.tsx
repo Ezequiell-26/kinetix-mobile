@@ -1,380 +1,118 @@
 "use client";
 
 import * as React from "react";
-import { Activity, TrendingUp, Zap, Award } from "lucide-react";
+import { Activity, Award, Link2, TrendingUp, Zap } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
 
-interface WearableData {
+export interface WearableData {
   steps?: number;
-  distance?: number; // km
+  distance?: number;
   calories?: number;
-  heartRate?: number; // bpm
+  heartRate?: number;
   sleepHours?: number;
   activeMinutes?: number;
   floors?: number;
 }
 
+type Provider = "apple-health" | "google-fit" | "garmin" | "fitbit" | "polar";
 interface WearableSyncProps {
-  provider: 'apple-health' | 'google-fit' | 'garmin' | 'fitbit' | 'polar';
+  provider: Provider;
   isConnected: boolean;
-  onConnect?: () => void;
-  onDisconnect?: () => void;
+  onConnect?: () => void | Promise<void>;
+  onDisconnect?: () => void | Promise<void>;
   onDataSync?: (data: WearableData) => void;
+  data?: WearableData | null;
   lastSync?: Date;
 }
 
-export function WearableSync({
-  provider,
-  isConnected,
-  onConnect,
-  onDisconnect,
-  onDataSync,
-  lastSync,
-}: WearableSyncProps) {
-  const [isSyncing, setIsSyncing] = React.useState(false);
-  const [wearableData, setWearableData] = React.useState<WearableData | null>(null);
+const configs: Record<Provider, { name: string; icon: string }> = {
+  "apple-health": { name: "Apple Health", icon: "Apple" },
+  "google-fit": { name: "Google Fit", icon: "Google" },
+  garmin: { name: "Garmin Connect", icon: "Garmin" },
+  fitbit: { name: "Fitbit", icon: "Fitbit" },
+  polar: { name: "Polar Flow", icon: "Polar" },
+};
+
+const percent = (value: number | undefined, goal: number) => value == null ? 0 : Math.min(100, Math.max(0, (value / goal) * 100));
+
+export function WearableSync({ provider, isConnected, onConnect, onDisconnect, onDataSync, data = null, lastSync }: WearableSyncProps) {
+  const [busy, setBusy] = React.useState(false);
   const [error, setError] = React.useState<string | null>(null);
+  const config = configs[provider];
 
-  const providerConfig = {
-    'apple-health': {
-      name: 'Apple Health',
-      color: 'bg-red-500',
-      icon: '🍎',
-    },
-    'google-fit': {
-      name: 'Google Fit',
-      color: 'bg-blue-500',
-      icon: '🔵',
-    },
-    garmin: {
-      name: 'Garmin Connect',
-      color: 'bg-cyan-600',
-      icon: '⌚',
-    },
-    fitbit: {
-      name: 'Fitbit',
-      color: 'bg-teal-500',
-      icon: '📊',
-    },
-    polar: {
-      name: 'Polar Flow',
-      color: 'bg-red-600',
-      icon: '❤️',
-    },
-  };
-
-  const config = providerConfig[provider];
-
-  const handleConnect = async () => {
+  async function connect() {
     if (!onConnect) {
-      // Simulación de conexión
-      await simulateConnection();
+      setError(`La conexión con ${config.name} todavía no está configurada en este entorno.`);
       return;
     }
-
-    try {
-      setIsSyncing(true);
-      await onConnect();
-      await fetchWearableData();
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'Error al conectar');
-    } finally {
-      setIsSyncing(false);
-    }
-  };
-
-  const handleDisconnect = async () => {
-    if (onDisconnect) {
-      await onDisconnect();
-    }
-    setWearableData(null);
-    setError(null);
-  };
-
-  const handleSync = async () => {
-    setIsSyncing(true);
-    setError(null);
-    
-    try {
-      await fetchWearableData();
-      
-      if (wearableData && onDataSync) {
-        onDataSync(wearableData);
-      }
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'Error al sincronizar');
-    } finally {
-      setIsSyncing(false);
-    }
-  };
-
-  const simulateConnection = async () => {
-    // Simular proceso de conexión OAuth
-    await new Promise(resolve => setTimeout(resolve, 2000));
-    
-    // En producción, esto sería una llamada real a la API del wearable
-    const mockData: WearableData = {
-      steps: Math.floor(Math.random() * 15000) + 5000,
-      distance: +(Math.random() * 15 + 3).toFixed(2),
-      calories: Math.floor(Math.random() * 1000) + 1800,
-      heartRate: Math.floor(Math.random() * 40) + 60,
-      sleepHours: +(Math.random() * 3 + 6).toFixed(1),
-      activeMinutes: Math.floor(Math.random() * 120) + 30,
-      floors: Math.floor(Math.random() * 20) + 5,
-    };
-    
-    setWearableData(mockData);
-  };
-
-  const fetchWearableData = async () => {
-    // Simulación - en producción llamar API real del wearable
-    await new Promise(resolve => setTimeout(resolve, 1500));
-    
-    const mockData: WearableData = {
-      steps: Math.floor(Math.random() * 15000) + 5000,
-      distance: +(Math.random() * 15 + 3).toFixed(2),
-      calories: Math.floor(Math.random() * 1000) + 1800,
-      heartRate: Math.floor(Math.random() * 40) + 60,
-      sleepHours: +(Math.random() * 3 + 6).toFixed(1),
-      activeMinutes: Math.floor(Math.random() * 120) + 30,
-      floors: Math.floor(Math.random() * 20) + 5,
-    };
-    
-    setWearableData(mockData);
-  };
-
-  const getStepGoal = () => 10000;
-  const getCaloriesGoal = () => 2500;
-  const getActiveMinutesGoal = () => 60;
-  const getSleepGoal = () => 8;
-
-  const stepProgress = wearableData?.steps 
-    ? Math.min((wearableData.steps / getStepGoal()) * 100, 100) 
-    : 0;
-  
-  const caloriesProgress = wearableData?.calories
-    ? Math.min((wearableData.calories / getCaloriesGoal()) * 100, 100)
-    : 0;
-  
-  const activeMinutesProgress = wearableData?.activeMinutes
-    ? Math.min((wearableData.activeMinutes / getActiveMinutesGoal()) * 100, 100)
-    : 0;
-  
-  const sleepProgress = wearableData?.sleepHours
-    ? Math.min((wearableData.sleepHours / getSleepGoal()) * 100, 100)
-    : 0;
-
-  if (!isConnected) {
-    return (
-      <Card className="w-full">
-        <CardHeader>
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-2">
-              <span className="text-2xl">{config.icon}</span>
-              <div>
-                <CardTitle className="text-lg">{config.name}</CardTitle>
-                <p className="text-xs text-zinc-500 mt-1">Conecta tu dispositivo wearable</p>
-              </div>
-            </div>
-          </div>
-        </CardHeader>
-        <CardContent>
-          <button
-            onClick={handleConnect}
-            disabled={isSyncing}
-            className={`w-full py-3 px-4 rounded-lg text-white font-medium transition-colors ${config.color} hover:opacity-90 disabled:opacity-50`}
-          >
-            {isSyncing ? 'Conectando...' : `Conectar con ${config.name}`}
-          </button>
-          <p className="mt-3 text-xs text-muted-foreground text-center">
-            Se te redirigirá para autorizar el acceso a tus datos de salud
-          </p>
-        </CardContent>
-      </Card>
-    );
+    setBusy(true); setError(null);
+    try { await onConnect(); } catch (cause) { setError(cause instanceof Error ? cause.message : "No se pudo conectar el dispositivo."); }
+    finally { setBusy(false); }
   }
 
-  return (
-    <Card className="w-full">
-      <CardHeader>
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <span className="text-2xl">{config.icon}</span>
-            <div>
-              <CardTitle className="text-lg">{config.name}</CardTitle>
-              <p className="text-xs text-zinc-500 mt-1">
-                {lastSync 
-                  ? `Sincronizado: ${lastSync.toLocaleTimeString()}`
-                  : 'Conectado'}
-              </p>
-            </div>
-          </div>
-          <Badge variant={isSyncing ? "muted" : "default"}>
-            {isSyncing ? 'Sincronizando' : 'Conectado'}
-          </Badge>
-        </div>
-      </CardHeader>
-      <CardContent className="space-y-4">
-        {error && (
-          <div className="text-sm text-destructive bg-destructive/10 p-3 rounded-lg">
-            {error}
-          </div>
-        )}
+  async function disconnect() {
+    if (!onDisconnect) return;
+    setBusy(true); setError(null);
+    try { await onDisconnect(); } catch (cause) { setError(cause instanceof Error ? cause.message : "No se pudo desconectar."); }
+    finally { setBusy(false); }
+  }
 
-        {wearableData && (
-          <>
-            {/* Steps */}
-            <div className="space-y-2">
-              <div className="flex items-center justify-between text-sm">
-                <div className="flex items-center gap-2">
-                  <Activity className="h-4 w-4 text-green-500" />
-                  <span>Pasos</span>
-                </div>
-                <span className="font-medium">
-                  {wearableData.steps?.toLocaleString()} / {getStepGoal().toLocaleString()}
-                </span>
-              </div>
-              <Progress value={stepProgress} className="h-2" />
-            </div>
+  async function sync() {
+    if (!onConnect) {
+      setError(`La sincronización con ${config.name} todavía no está configurada.`);
+      return;
+    }
+    setBusy(true); setError(null);
+    try {
+      await onConnect();
+      if (data && onDataSync) onDataSync(data);
+    } catch (cause) { setError(cause instanceof Error ? cause.message : "No se pudo sincronizar."); }
+    finally { setBusy(false); }
+  }
 
-            {/* Calories */}
-            <div className="space-y-2">
-              <div className="flex items-center justify-between text-sm">
-                <div className="flex items-center gap-2">
-                  <Zap className="h-4 w-4 text-yellow-500" />
-                  <span>Calorías Activas</span>
-                </div>
-                <span className="font-medium">
-                  {wearableData.calories?.toLocaleString()} / {getCaloriesGoal().toLocaleString()}
-                </span>
-              </div>
-              <Progress value={caloriesProgress} className="h-2" />
-            </div>
+  if (!isConnected) {
+    return <Card className="w-full border-white/[0.07] bg-[#0B151E]"><CardHeader><CardTitle className="flex items-center gap-2 text-base"><Link2 size={17} className="text-primary" /> {config.name}</CardTitle></CardHeader><CardContent className="space-y-3"><p className="text-sm text-[#8193A5]">Conectá una fuente de actividad para importar métricas reales. KinetixFitt no genera valores simulados.</p>{error && <div role="alert" className="rounded-xl border border-red-500/20 bg-red-500/5 p-3 text-xs text-red-200">{error}</div>}<button type="button" onClick={() => void connect()} disabled={busy} className="w-full rounded-xl bg-primary px-4 py-3 text-sm font-black text-black disabled:opacity-50">{busy ? "Conectando…" : `Conectar ${config.name}`}</button></CardContent></Card>;
+  }
 
-            {/* Active Minutes */}
-            <div className="space-y-2">
-              <div className="flex items-center justify-between text-sm">
-                <div className="flex items-center gap-2">
-                  <TrendingUp className="h-4 w-4 text-blue-500" />
-                  <span>Minutos Activos</span>
-                </div>
-                <span className="font-medium">
-                  {wearableData.activeMinutes} / {getActiveMinutesGoal()} min
-                </span>
-              </div>
-              <Progress value={activeMinutesProgress} className="h-2" />
-            </div>
+  const steps = data?.steps;
+  const calories = data?.calories;
+  const active = data?.activeMinutes;
+  const sleep = data?.sleepHours;
 
-            {/* Sleep */}
-            <div className="space-y-2">
-              <div className="flex items-center justify-between text-sm">
-                <div className="flex items-center gap-2">
-                  <Award className="h-4 w-4 text-purple-500" />
-                  <span>Sueño</span>
-                </div>
-                <span className="font-medium">
-                  {wearableData.sleepHours} / {getSleepGoal()} hrs
-                </span>
-              </div>
-              <Progress value={sleepProgress} className="h-2" />
-            </div>
-
-            {/* Additional Stats Grid */}
-            <div className="grid grid-cols-3 gap-3 pt-4 border-t">
-              <div className="text-center">
-                <p className="text-xs text-muted-foreground">Distancia</p>
-                <p className="text-lg font-semibold">{wearableData.distance} km</p>
-              </div>
-              <div className="text-center">
-                <p className="text-xs text-muted-foreground">Ritmo Cardíaco</p>
-                <p className="text-lg font-semibold">{wearableData.heartRate} bpm</p>
-              </div>
-              <div className="text-center">
-                <p className="text-xs text-muted-foreground">Pisos</p>
-                <p className="text-lg font-semibold">{wearableData.floors}</p>
-              </div>
-            </div>
-          </>
-        )}
-
-        {/* Sync Button */}
-        <button
-          onClick={handleSync}
-          disabled={isSyncing}
-          className="w-full py-2 px-4 border border-border rounded-lg hover:bg-muted transition-colors disabled:opacity-50 flex items-center justify-center gap-2"
-        >
-          <svg
-            className={`h-4 w-4 ${isSyncing ? 'animate-spin' : ''}`}
-            fill="none"
-            viewBox="0 0 24 24"
-            stroke="currentColor"
-          >
-            <path
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              strokeWidth={2}
-              d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"
-            />
-          </svg>
-          {isSyncing ? 'Sincronizando...' : 'Sincronizar Ahora'}
-        </button>
-
-        {/* Disconnect */}
-        <button
-          onClick={handleDisconnect}
-          className="w-full py-2 text-sm text-destructive hover:text-destructive/80 transition-colors"
-        >
-          Desconectar {config.name}
-        </button>
-      </CardContent>
-    </Card>
-  );
+  return <Card className="w-full border-white/[0.07] bg-[#0B151E]"><CardHeader><div className="flex items-center justify-between gap-3"><CardTitle className="flex items-center gap-2 text-base"><Link2 size={17} className="text-primary" /> {config.name}</CardTitle><Badge variant={busy ? "muted" : "success"}>{busy ? "Sincronizando" : "Conectado"}</Badge></div><p className="mt-1 text-xs text-[#8193A5]">{lastSync ? `Última sincronización: ${lastSync.toLocaleString("es-AR")}` : "Fuente conectada"}</p></CardHeader><CardContent className="space-y-4">{error && <div role="alert" className="rounded-xl border border-red-500/20 bg-red-500/5 p-3 text-xs text-red-200">{error}</div>}{!data && <div className="rounded-2xl border border-white/[0.07] bg-white/[0.02] p-4 text-sm text-[#8193A5]">Todavía no hay datos importados desde el dispositivo.</div>}{data && <><Metric icon={<Activity size={15} />} label="Pasos" value={steps == null ? "—" : steps.toLocaleString("es-AR")} progress={percent(steps, 10000)} /><Metric icon={<Zap size={15} />} label="Calorías" value={calories == null ? "—" : `${calories.toLocaleString("es-AR")} kcal`} progress={percent(calories, 2500)} /><Metric icon={<TrendingUp size={15} />} label="Minutos activos" value={active == null ? "—" : `${active} min`} progress={percent(active, 60)} /><Metric icon={<Award size={15} />} label="Sueño" value={sleep == null ? "—" : `${sleep} h`} progress={percent(sleep, 8)} /></>}{data && <div className="grid grid-cols-3 gap-2 border-t border-white/[0.06] pt-4 text-center"><Stat label="Distancia" value={data.distance == null ? "—" : `${data.distance} km`} /><Stat label="Frecuencia" value={data.heartRate == null ? "—" : `${data.heartRate} bpm`} /><Stat label="Pisos" value={data.floors == null ? "—" : String(data.floors)} /></div>}<button type="button" onClick={() => void sync()} disabled={busy} className="w-full rounded-xl border border-white/[0.08] bg-white/[0.02] px-4 py-2.5 text-sm font-bold text-white disabled:opacity-50">{busy ? "Sincronizando…" : "Sincronizar ahora"}</button><button type="button" onClick={() => void disconnect()} disabled={busy} className="w-full py-1 text-xs font-semibold text-red-300">Desconectar</button></CardContent></Card>;
 }
 
-// Hook para manejar múltiples wearables
+function Metric({ icon, label, value, progress }: { icon: React.ReactNode; label: string; value: string; progress: number }) { return <div className="space-y-2"><div className="flex items-center justify-between text-sm"><span className="flex items-center gap-2 text-[#9AAABB]">{icon}{label}</span><span className="font-bold text-white">{value}</span></div><Progress value={progress} className="h-1.5" /></div>; }
+function Stat({ label, value }: { label: string; value: string }) { return <div><p className="text-[10px] uppercase tracking-[0.12em] text-[#617384]">{label}</p><p className="mt-1 text-sm font-bold text-white">{value}</p></div>; }
+
 export function useWearableSync() {
-  const [connectedProviders, setConnectedProviders] = React.useState<Array<'apple-health' | 'google-fit' | 'garmin' | 'fitbit' | 'polar'>>([]);
+  const [connectedProviders, setConnectedProviders] = React.useState<Provider[]>([]);
   const [lastSyncDates, setLastSyncDates] = React.useState<Record<string, Date>>({});
   const [aggregatedData, setAggregatedData] = React.useState<WearableData | null>(null);
 
-  const connectProvider = async (provider: 'apple-health' | 'google-fit' | 'garmin' | 'fitbit' | 'polar') => {
-    // Simulación de conexión OAuth
-    await new Promise(resolve => setTimeout(resolve, 2000));
-    setConnectedProviders(prev => [...prev, provider]);
-    setLastSyncDates(prev => ({ ...prev, [provider]: new Date() }));
-  };
-
-  const disconnectProvider = async (provider: string) => {
-    setConnectedProviders(prev => prev.filter(p => p !== provider));
-    setLastSyncDates(prev => {
-      const updated = { ...prev };
-      delete updated[provider];
-      return updated;
-    });
-  };
-
-  const aggregateData = (dataSources: WearableData[]): WearableData => {
-    if (dataSources.length === 0) return {};
-    
+  const connectProvider = React.useCallback(async (_provider: Provider) => {
+    throw new Error("Este proveedor requiere integración OAuth/nativa real antes de conectarse.");
+  }, []);
+  const disconnectProvider = React.useCallback(async (provider: Provider) => {
+    setConnectedProviders((current) => current.filter((value) => value !== provider));
+    setLastSyncDates((current) => { const next = { ...current }; delete next[provider]; return next; });
+  }, []);
+  const aggregateData = React.useCallback((sources: WearableData[]): WearableData => {
+    if (!sources.length) return {};
+    const valid = <K extends keyof WearableData>(key: K) => sources.map((source) => source[key]).filter((value): value is number => typeof value === "number" && Number.isFinite(value));
+    const averages = valid("heartRate");
     return {
-      steps: Math.max(...dataSources.map(d => d.steps || 0)),
-      distance: Math.max(...dataSources.map(d => d.distance || 0)),
-      calories: Math.max(...dataSources.map(d => d.calories || 0)),
-      heartRate: dataSources.map(d => d.heartRate || 0).reduce((a, b) => a + b, 0) / dataSources.length,
-      sleepHours: Math.max(...dataSources.map(d => d.sleepHours || 0)),
-      activeMinutes: Math.max(...dataSources.map(d => d.activeMinutes || 0)),
-      floors: Math.max(...dataSources.map(d => d.floors || 0)),
+      steps: valid("steps").reduce((sum, value) => sum + value, 0),
+      distance: valid("distance").reduce((sum, value) => sum + value, 0),
+      calories: valid("calories").reduce((sum, value) => sum + value, 0),
+      heartRate: averages.length ? Math.round(averages.reduce((sum, value) => sum + value, 0) / averages.length) : undefined,
+      sleepHours: valid("sleepHours").reduce((sum, value) => sum + value, 0),
+      activeMinutes: valid("activeMinutes").reduce((sum, value) => sum + value, 0),
+      floors: valid("floors").reduce((sum, value) => sum + value, 0),
     };
-  };
+  }, []);
 
-  return {
-    connectedProviders,
-    lastSyncDates,
-    aggregatedData,
-    connectProvider,
-    disconnectProvider,
-    aggregateData,
-  };
+  return { connectedProviders, lastSyncDates, aggregatedData, connectProvider, disconnectProvider, aggregateData, setAggregatedData };
 }
