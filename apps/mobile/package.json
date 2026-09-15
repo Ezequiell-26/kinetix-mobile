@@ -11,6 +11,7 @@
     "lint:fix": "eslint . --ext .ts,.tsx --fix",
     "typecheck": "tsc --noEmit",
     "verify": "powershell -ExecutionPolicy Bypass -File ./scripts/verify-platforms.ps1",
+    "verify:production": "node ../../scripts/verify-production-env.mjs",
     "db:generate": "prisma generate",
     "db:migrate": "echo 'PROHIBIDO migrate dev (pooler sin shadow DB). Flujo en .env.example + scripts/ad-hoc/pg-apply.cjs' && exit 1",
     "db:push": "prisma db push",
