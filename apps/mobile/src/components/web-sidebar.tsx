@@ -38,10 +38,8 @@ type NavGroup = { label: string; links: NavLink[] };
 
 /**
  * Navegación canónica del panel.
- *
- * Regla: toda feature navegable de primer nivel debe tener una entrada aquí.
- * Las herramientas que viven como componentes dentro de /client/tools se
- * mantienen agrupadas en un único Centro de herramientas para no duplicar rutas.
+ * Toda feature navegable de primer nivel debe tener una entrada aquí.
+ * Las herramientas secundarias viven agrupadas en /client/tools por categoría.
  */
 const clientNavGroups: NavGroup[] = [
   {
@@ -65,9 +63,9 @@ const clientNavGroups: NavGroup[] = [
     label: "Herramientas",
     links: [
       { href: "/client/tools", label: "Centro de herramientas", icon: LayoutGrid },
+      { href: "/client/tools?cat=sistema", label: "Calendario & Sync", icon: CalendarDays },
       { href: "/client/timers", label: "Cronómetros", icon: Timer, badge: "PRO" },
       { href: "/client/resources", label: "Recursos VIP", icon: BookOpen },
-      { href: "/client/tools?tool=calendar", label: "Calendario & Sync", icon: CalendarDays },
     ],
   },
   {
@@ -241,9 +239,7 @@ export function WebSidebar({ role, userName, children }: WebSidebarProps) {
 
       <div className="flex min-h-[calc(100vh-64px)] min-w-0">
         <aside className="sticky top-16 hidden h-[calc(100vh-64px)] w-72 shrink-0 flex-col overflow-y-auto border-r border-subtle/40 bg-[#080D11]/70 backdrop-blur-sm lg:flex">
-          <div className="flex-1 px-3 py-5">
-            {renderNav()}
-          </div>
+          <div className="flex-1 px-3 py-5">{renderNav()}</div>
           <div className="border-t border-subtle/40 p-4">
             <div className="mb-3 flex min-w-0 items-center gap-3">
               <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full border border-primary/30 bg-primary/10 text-sm font-black text-primary">
