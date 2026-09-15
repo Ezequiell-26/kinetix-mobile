@@ -1,18 +1,15 @@
 import { CapacitorConfig } from "@capacitor/cli";
 
 /**
- * Capacitor — EZEQUIEL COACHING móvil (Android/iOS).
- *
- * WebView contra producción (misma sesión, misma Supabase). No hay export
- * estático: la app es dinámica (middleware + API + Prisma), así que el
- * nativo es un wrapper online, igual que Electron en desktop.
+ * Capacitor — KinetixFitt móvil (Android/iOS).
+ * La app nativa consume el mismo backend web dinámico en producción.
  */
 const config: CapacitorConfig = {
-  appId: "com.ezequielcoaching.app",
-  appName: "EZEQUIEL COACHING",
+  appId: "com.kinetixfitt.app",
+  appName: "KinetixFitt",
   webDir: "public",
   server: {
-    url: "https://kinetixfitt-world-ia.vercel.app",
+    url: process.env.CAPACITOR_SERVER_URL || "https://kinetixfitt-world-ia.vercel.app",
     cleartext: false,
   },
   android: {
