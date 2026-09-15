@@ -1,159 +1,122 @@
-# KinetixFitt - Índice de Documentación para IA
+# KinetixFitt — AI Governance Index
 
-Este archivo guía a los agentes de IA hacia la documentación relevante sin necesidad de leer todo el repositorio.
+**Version:** 3.0.0  
+**Status:** Mandatory navigation map  
+**Last updated:** 2026-09-15
 
----
+## Authority order
 
-## 📚 Jerarquía de Documentos
+When documents disagree, use this order:
 
-### Nivel 1: Autoridad Máxima (LEER SIEMPRE)
-- [`../AGENTS.md`](../AGENTS.md) - Reglas generales para todos los agentes
-- [`../QWEN.md`](../QWEN.md) - Configuración específica para Qwen
+1. `../AGENTS.md` — engineering constitution; highest repository-level authority.
+2. `.ai/DECISIONS/*` — accepted architectural decisions for their scope.
+3. Area contracts — normative rules for specific systems.
+4. `DEFINITION_OF_DONE.md` — completion gates.
+5. `EXECUTION_PROTOCOL.md` — required change workflow.
+6. `PROJECT_STATE.md` / `ROADMAP_STATE.md` — current state/context, updated as reality changes.
+7. README and feature docs — user/developer guidance.
 
-### Nivel 2: Estado del Proyecto (LEER PARA CONTEXTO)
-- [`PROJECT_STATE.md`](./PROJECT_STATE.md) - Estado actual, arquitectura, stack tecnológico
-- [`ROADMAP_STATE.md`](./ROADMAP_STATE.md) - Qué está completado, en progreso o pendiente
+If a conflict affects security, data, production behavior, or architecture, stop and resolve it through an ADR before taking a risky action.
 
-### Nivel 3: Contratos por Área (LEER SEGÚN TAREA)
+## Read before every task
 
-#### Arquitectura General
-- [`ARCHITECTURE_CONTRACT.md`](./ARCHITECTURE_CONTRACT.md) - Límites entre componentes
+- `../AGENTS.md`
+- `.ai/INDEX.md`
+- `.ai/PROJECT_STATE.md`
+- `.ai/DEFINITION_OF_DONE.md`
+- the contract(s) relevant to the task
+- relevant ADRs
 
-#### Diseño y UI
-- [`DESIGN_SYSTEM_CONTRACT.md`](./DESIGN_SYSTEM_CONTRACT.md) - Colores, tipografía, tokens
-- [`MOTION_CONTRACT.md`](./MOTION_CONTRACT.md) - Animaciones y transiciones
+## Contracts by area
 
-#### Performance y 3D
-- [`PERFORMANCE_CONTRACT.md`](./PERFORMANCE_CONTRACT.md) - Optimización, budgets
-- [`3D_CONTRACT.md`](./3D_CONTRACT.md) - Three.js, WebGPU, modelos 3D
+### Architecture
+- `ARCHITECTURE_CONTRACT.md`
 
-#### Backend y Datos
-- [`DATABASE_CONTRACT.md`](./DATABASE_CONTRACT.md) - Prisma, migraciones, queries
-- [`API_CONTRACT.md`](./API_CONTRACT.md) - Endpoints, validación, respuestas
+### UI / Design
+- `DESIGN_SYSTEM_CONTRACT.md`
+- `MOTION_CONTRACT.md`
 
-#### Tecnologías Especiales
-- [`RUST_CONTRACT.md`](./RUST_CONTRACT.md) - Cuándo y cómo usar Rust
-- [`NATIVE_PLATFORM_CONTRACT.md`](./NATIVE_PLATFORM_CONTRACT.md) - Swift, Kotlin
-- [`AI_CONTRACT.md`](./AI_CONTRACT.md) - Inteligencia Artificial, contexto
+### Performance / 3D
+- `PERFORMANCE_CONTRACT.md`
+- `3D_CONTRACT.md`
 
-#### Calidad y Seguridad
-- [`SECURITY_CONTRACT.md`](./SECURITY_CONTRACT.md) - Auth, encriptación, secretos
-- [`TESTING_CONTRACT.md`](./TESTING_CONTRACT.md) - Tests unitarios, integración, E2E
-- [`GIT_CONTRACT.md`](./GIT_CONTRACT.md) - Commits, branches, merges
+### Data / Backend
+- `DATABASE_CONTRACT.md`
+- `API_CONTRACT.md`
 
-### Nivel 4: Procesos y Definiciones
-- [`DEFINITION_OF_DONE.md`](./DEFINITION_OF_DONE.md) - Criterios de completitud
-- [`EXECUTION_PROTOCOL.md`](./EXECUTION_PROTOCOL.md) - Flujo de trabajo paso a paso
+### Security / Quality
+- `SECURITY_CONTRACT.md`
+- `TESTING_CONTRACT.md`
+- `GIT_CONTRACT.md`
 
-### Nivel 5: Decisiones Arquitectónicas
-- [`DECISIONS/`](./DECISIONS/) - Registro de decisiones técnicas (ADRs)
+### Platforms / Specialized systems
+- `RUST_CONTRACT.md`
+- `NATIVE_PLATFORM_CONTRACT.md`
+- `AI_CONTRACT.md`
 
----
+## Mandatory process documents
 
-## 🎯 Guía Rápida por Tipo de Tarea
+- `DEFINITION_OF_DONE.md`
+- `EXECUTION_PROTOCOL.md`
+- `DECISIONS/` — ADRs
 
-### Si vas a modificar UI/UX
-1. `AGENTS.md` (reglas generales)
-2. `DESIGN_SYSTEM_CONTRACT.md` (tokens visuales)
-3. `MOTION_CONTRACT.md` (animaciones)
-4. Código existente del componente
+## Task routing
 
-### Si vas a agregar feature nueva
-1. `AGENTS.md` (reglas generales)
-2. `ARCHITECTURE_CONTRACT.md` (dónde va el código)
-3. `PROJECT_STATE.md` (estado actual)
-4. `DEFINITION_OF_DONE.md` (criterios de aceptación)
+### Feature
+Read AGENTS → architecture → project state → relevant contracts → DoD → affected code/tests.
 
-### Si vas a optimizar performance
-1. `AGENTS.md` (reglas generales)
-2. `PERFORMANCE_CONTRACT.md` (estrategias y budgets)
-3. `3D_CONTRACT.md` (si involucra gráficos 3D)
-4. Tests de benchmark existentes
+### UI/UX
+Read AGENTS → design → motion → performance if heavy → affected components → visual/accessibility tests.
 
-### Si vas a tocar base de datos
-1. `AGENTS.md` (reglas generales)
-2. `DATABASE_CONTRACT.md` (reglas de migración)
-3. `ARCHITECTURE_CONTRACT.md` (límites)
-4. Schema de Prisma existente
+### Database
+Read AGENTS → database → architecture → API → relevant ADRs → schema/migrations/tests.
 
-### Si vas a implementar Rust/WASM
-1. `AGENTS.md` (reglas generales)
-2. `RUST_CONTRACT.md` (cuándo justifica usar Rust)
-3. `ARCHITECTURE_CONTRACT.md` (integración)
-4. Benchmarks existentes
+### API
+Read AGENTS → API → security → database if applicable → consumers → contract tests.
 
-### Si vas a trabajar con IA
-1. `AGENTS.md` (reglas generales)
-2. `AI_CONTRACT.md` (límites y seguridad)
-3. `ARCHITECTURE_CONTRACT.md` (integración)
-4. Contexto existente
+### Auth / Security / Payments / Storage
+Read AGENTS → security → architecture → affected contract(s) → dedicated security/integration tests.
 
-### Si vas a hacer cambios de seguridad
-1. `AGENTS.md` (reglas generales)
-2. `SECURITY_CONTRACT.md` (reglas estrictas)
-3. `ARCHITECTURE_CONTRACT.md` (impacto)
-4. Tests de seguridad existentes
+### AI
+Read AGENTS → AI → architecture → security → provider configuration → usage/error tests.
 
----
+### Performance / 3D
+Read AGENTS → performance → 3D → benchmarks → affected screens.
 
-## 📁 Ubicación de Archivos Clave
+### Mobile / Native / Desktop
+Read AGENTS → native platform contract → architecture → platform-specific code → target build/tests.
 
-### Código Fuente
-```
-/apps/mobile/          # App móvil
-/apps/web/             # Dashboard web
-/packages/shared/      # Código compartido
-/packages/core/rust/   # Core en Rust
-/packages/config/      # Configuraciones
+## Current repository map
+
+```text
+apps/        Product applications
+packages/    Shared/domain/infrastructure packages
+.ai/         AI governance, contracts, ADRs, project state
+docs/        General documentation
+.github/     CI/CD and repository automation
+infra/       Infrastructure configuration where present
 ```
 
-### Documentación
-```
-/docs/                 # Documentación general
-/.ai/                  # Gobernanza IA
-/.ai/DECISIONS/        # Decisiones arquitectónicas
-```
+The actual repository structure always wins over this illustrative map.
 
-### Infraestructura
-```
-/infra/                # Docker, K8s, Terraform
-.github/workflows/     # CI/CD
-```
+## Required search behavior
 
-### Configuración
-```
-package.json           # Raíz del monorepo
-apps/*/package.json    # Apps individuales
-packages/*/package.json # Packages compartidos
-```
+Before creating a new file/service/component:
 
----
+- search for existing names and equivalents;
+- inspect consumers;
+- inspect tests;
+- inspect exports;
+- inspect related API/DB contracts.
 
-## 🔍 Búsqueda Rápida
+Do not create parallel implementations merely because the existing one is inconvenient.
 
-### Para encontrar componentes existentes
-```bash
-# Buscar componente por nombre
-find /workspace -name "*.tsx" | grep -i "nombre"
+## State maintenance
 
-# Buscar imports de un módulo
-grep -r "from.*modulo" /workspace/apps /workspace/packages
+Update project-state documentation after material architectural, platform, data, security, or release changes.
 
-# Ver usos de una función
-grep -r "funcionNombre" /workspace --include="*.ts" --include="*.tsx"
-```
+Do not copy old claims into new documentation without verifying them.
 
-### Para verificar estado
-```bash
-git status
-git log --oneline -10
-npm run typecheck
-npm run lint
-npm run test
-npm run build
-```
+## Core principle
 
----
-
-**Última actualización**: 2024
-**Mantenimiento**: Actualizar cuando se agregue nueva documentación importante
+**The repository should become more capable without becoming more fragile.**
