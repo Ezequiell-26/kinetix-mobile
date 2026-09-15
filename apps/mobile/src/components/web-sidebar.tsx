@@ -67,12 +67,11 @@ const clientNavGroups: NavGroup[] = [
     links: [
       { href: "/client/tools", label: "Centro de herramientas", icon: LayoutGrid },
       { href: "/client/tools?cat=gamificacion", label: "Juegos & XP", icon: Gamepad2 },
-      { href: "/client/tools?cat=salud", label: "Salud & Recuperación", icon: HeartPulse },
-      { href: "/client/tools?cat=cardio", label: "Cardio & Outdoor", icon: Footprints },
-      { href: "/client/tools?cat=datos", label: "Datos & Integraciones", icon: BarChart3 },
-      { href: "/client/tools?cat=social", label: "Social & Comunidad", icon: Users },
-      { href: "/client/tools?cat=educacion", label: "Educación", icon: BookOpen },
-      { href: "/client/tools?cat=sistema", label: "Sistema & App", icon: Settings2 },
+      { href: "/client/tools?cat=salud", label: "Salud", icon: HeartPulse },
+      { href: "/client/tools?cat=cardio", label: "Cardio", icon: Footprints },
+      { href: "/client/tools?cat=datos", label: "Datos", icon: BarChart3 },
+      { href: "/client/tools?cat=social", label: "Social", icon: Users },
+      { href: "/client/tools?cat=sistema", label: "Sistema", icon: Settings2 },
       { href: "/client/timers", label: "Cronómetros", icon: Timer, badge: "PRO" },
       { href: "/client/resources", label: "Recursos VIP", icon: BookOpen },
     ],
@@ -154,9 +153,7 @@ export function WebSidebar({ role, userName, children }: WebSidebarProps) {
     const [basePath, query] = href.split("?");
     if (pathname !== basePath && !pathname.startsWith(`${basePath}/`)) return false;
 
-    if (!query) {
-      return pathname === basePath && searchParams.toString() === "";
-    }
+    if (!query) return pathname === basePath && searchParams.toString() === "";
 
     const expected = new URLSearchParams(query);
     for (const [key, value] of expected.entries()) {
@@ -190,11 +187,7 @@ export function WebSidebar({ role, userName, children }: WebSidebarProps) {
                     <link.icon size={18} strokeWidth={active ? 2.2 : 1.8} className="shrink-0" />
                     <span className="min-w-0 flex-1 truncate">{link.label}</span>
                     {link.badge && (
-                      <span
-                        className={`shrink-0 rounded-full px-1.5 py-0.5 text-[9px] font-bold ${
-                          link.badge === "NUEVO" ? "bg-violet-500 text-white" : "bg-primary text-black"
-                        }`}
-                      >
+                      <span className={`shrink-0 rounded-full px-1.5 py-0.5 text-[9px] font-bold ${link.badge === "NUEVO" ? "bg-violet-500 text-white" : "bg-primary text-black"}`}>
                         {link.badge}
                       </span>
                     )}
@@ -235,21 +228,14 @@ export function WebSidebar({ role, userName, children }: WebSidebarProps) {
               </div>
             </Link>
           </div>
-
           <div className="flex shrink-0 items-center gap-1.5 sm:gap-2">
             <ThemeToggle />
             <NotificationsBell />
             <div className="hidden items-center gap-2 border-l border-subtle/50 pl-3 md:flex">
-              <div className="flex h-8 w-8 items-center justify-center rounded-full border border-primary/30 bg-primary/10 text-xs font-black text-primary">
-                {avatarInitial}
-              </div>
+              <div className="flex h-8 w-8 items-center justify-center rounded-full border border-primary/30 bg-primary/10 text-xs font-black text-primary">{avatarInitial}</div>
               <span className="max-w-[120px] truncate text-xs font-semibold text-zinc-300">{userName}</span>
             </div>
-            <button
-              onClick={handleLogout}
-              className="ml-1 flex items-center gap-2 rounded-lg px-3 py-2 text-xs text-zinc-500 transition hover:bg-white/[0.04] hover:text-white"
-              title="Cerrar sesión"
-            >
+            <button onClick={handleLogout} className="ml-1 flex items-center gap-2 rounded-lg px-3 py-2 text-xs text-zinc-500 transition hover:bg-white/[0.04] hover:text-white" title="Cerrar sesión">
               <LogOut size={15} />
               <span className="hidden sm:inline">Salir</span>
             </button>
@@ -262,18 +248,13 @@ export function WebSidebar({ role, userName, children }: WebSidebarProps) {
           <div className="flex-1 px-3 py-5">{renderNav()}</div>
           <div className="border-t border-subtle/40 p-4">
             <div className="mb-3 flex min-w-0 items-center gap-3">
-              <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full border border-primary/30 bg-primary/10 text-sm font-black text-primary">
-                {avatarInitial}
-              </div>
+              <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full border border-primary/30 bg-primary/10 text-sm font-black text-primary">{avatarInitial}</div>
               <div className="min-w-0 flex-1">
                 <p className="truncate text-sm font-semibold text-white">{userName}</p>
                 <p className="truncate text-xs text-zinc-500">{role === "CLIENT" ? "Cliente" : "Entrenador"}</p>
               </div>
             </div>
-            <button
-              onClick={handleLogout}
-              className="flex w-full items-center justify-center gap-2 rounded-lg px-3 py-2.5 text-sm font-medium text-zinc-500 transition hover:bg-white/[0.04] hover:text-white"
-            >
+            <button onClick={handleLogout} className="flex w-full items-center justify-center gap-2 rounded-lg px-3 py-2.5 text-sm font-medium text-zinc-500 transition hover:bg-white/[0.04] hover:text-white">
               <LogOut size={16} /> Cerrar sesión
             </button>
           </div>
@@ -286,48 +267,22 @@ export function WebSidebar({ role, userName, children }: WebSidebarProps) {
 
       {mobileOpen && (
         <>
-          <button
-            type="button"
-            className="fixed inset-0 z-50 cursor-default bg-black/60 backdrop-blur-sm lg:hidden"
-            onClick={() => setMobileOpen(false)}
-            aria-label="Cerrar menú"
-          />
-          <aside
-            className="fixed inset-y-0 left-0 z-[51] w-[min(88vw,22rem)] overflow-y-auto border-r border-subtle/50 bg-[#080D11] shadow-2xl lg:hidden"
-            aria-label="Menú móvil"
-          >
+          <button type="button" className="fixed inset-0 z-50 cursor-default bg-black/60 backdrop-blur-sm lg:hidden" onClick={() => setMobileOpen(false)} aria-label="Cerrar menú" />
+          <aside className="fixed inset-y-0 left-0 z-[51] w-[min(88vw,22rem)] overflow-y-auto border-r border-subtle/50 bg-[#080D11] shadow-2xl lg:hidden" aria-label="Menú móvil">
             <div className="p-4 pt-5">
               <div className="mb-6 flex items-center justify-between">
-                <Link href={dashboardHref} onClick={() => setMobileOpen(false)} className="font-display font-bold text-white">
-                  KINETIXFITT
-                </Link>
-                <button
-                  onClick={() => setMobileOpen(false)}
-                  className="flex h-9 w-9 items-center justify-center rounded-lg border border-subtle/50 bg-white/[0.06] text-zinc-400 transition hover:text-white"
-                  aria-label="Cerrar menú"
-                >
-                  <X size={18} />
-                </button>
+                <Link href={dashboardHref} onClick={() => setMobileOpen(false)} className="font-display font-bold text-white">KINETIXFITT</Link>
+                <button onClick={() => setMobileOpen(false)} className="flex h-9 w-9 items-center justify-center rounded-lg border border-subtle/50 bg-white/[0.06] text-zinc-400 transition hover:text-white" aria-label="Cerrar menú"><X size={18} /></button>
               </div>
-
               <div className="mb-6 flex items-center gap-3 rounded-xl border border-subtle/30 bg-white/[0.03] p-3">
-                <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full border border-primary/30 bg-primary/10 text-sm font-black text-primary">
-                  {avatarInitial}
-                </div>
+                <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full border border-primary/30 bg-primary/10 text-sm font-black text-primary">{avatarInitial}</div>
                 <div className="min-w-0">
                   <p className="truncate text-sm font-semibold text-white">{userName}</p>
                   <p className="text-xs text-zinc-500">{role === "CLIENT" ? "Cliente" : "Entrenador"}</p>
                 </div>
               </div>
-
               {renderNav(true)}
-
-              <button
-                onClick={handleLogout}
-                className="mt-6 flex w-full items-center justify-center gap-2 rounded-lg px-4 py-3 text-sm font-medium text-zinc-500 transition hover:bg-white/[0.04] hover:text-white"
-              >
-                <LogOut size={16} /> Cerrar sesión
-              </button>
+              <button onClick={handleLogout} className="mt-6 flex w-full items-center justify-center gap-2 rounded-lg px-4 py-3 text-sm font-medium text-zinc-500 transition hover:bg-white/[0.04] hover:text-white"><LogOut size={16} /> Cerrar sesión</button>
             </div>
           </aside>
         </>
