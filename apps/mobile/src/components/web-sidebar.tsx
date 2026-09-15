@@ -1,16 +1,18 @@
 "use client";
 import Link from "next/link";
-import { usePathname, useRouter } from "next/navigation";
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { useState } from "react";
 import {
   Activity,
   Apple,
   BarChart3,
   BookOpen,
-  CalendarDays,
   CreditCard,
   Dumbbell,
   FileText,
+  Footprints,
+  Gamepad2,
+  HeartPulse,
   Home,
   LayoutDashboard,
   LayoutGrid,
@@ -18,6 +20,7 @@ import {
   Menu,
   MessageCircle,
   Settings,
+  Settings2,
   Timer,
   TrendingUp,
   Trophy,
@@ -38,8 +41,8 @@ type NavGroup = { label: string; links: NavLink[] };
 
 /**
  * Navegación canónica del panel.
- * Toda feature navegable de primer nivel debe tener una entrada aquí.
- * Las herramientas secundarias viven agrupadas en /client/tools por categoría.
+ * Las herramientas se exponen por categoría directamente en el sidebar para
+ * evitar duplicar su descubrimiento dentro del dashboard.
  */
 const clientNavGroups: NavGroup[] = [
   {
@@ -56,14 +59,20 @@ const clientNavGroups: NavGroup[] = [
     links: [
       { href: "/client/checkins", label: "Check-ins", icon: ClipboardCheck },
       { href: "/client/history", label: "Historial", icon: Clock },
-      { href: "/client/achievements", label: "Logros & XP", icon: Trophy, badge: "NUEVO" },
+      { href: "/client/achievements", label: "Logros & XP", icon: Trophy },
     ],
   },
   {
     label: "Herramientas",
     links: [
       { href: "/client/tools", label: "Centro de herramientas", icon: LayoutGrid },
-      { href: "/client/tools?cat=sistema", label: "Calendario & Sync", icon: CalendarDays },
+      { href: "/client/tools?cat=gamificacion", label: "Juegos & XP", icon: Gamepad2 },
+      { href: "/client/tools?cat=salud", label: "Salud & Recuperación", icon: HeartPulse },
+      { href: "/client/tools?cat=cardio", label: "Cardio & Outdoor", icon: Footprints },
+      { href: "/client/tools?cat=datos", label: "Datos & Integraciones", icon: BarChart3 },
+      { href: "/client/tools?cat=social", label: "Social & Comunidad", icon: Users },
+      { href: "/client/tools?cat=educacion", label: "Educación", icon: BookOpen },
+      { href: "/client/tools?cat=sistema", label: "Sistema & App", icon: Settings2 },
       { href: "/client/timers", label: "Cronómetros", icon: Timer, badge: "PRO" },
       { href: "/client/resources", label: "Recursos VIP", icon: BookOpen },
     ],
@@ -127,6 +136,7 @@ interface WebSidebarProps {
 
 export function WebSidebar({ role, userName, children }: WebSidebarProps) {
   const pathname = usePathname();
+  const searchParams = useSearchParams();
   const router = useRouter();
   const [mobileOpen, setMobileOpen] = useState(false);
   const navGroups = role === "CLIENT" ? clientNavGroups : trainerNavGroups;
@@ -141,8 +151,18 @@ export function WebSidebar({ role, userName, children }: WebSidebarProps) {
   const avatarInitial = (userName || "U").charAt(0).toUpperCase();
 
   const isActive = (href: string) => {
-    const [basePath] = href.split("?");
-    return pathname === basePath || pathname.startsWith(`${basePath}/`);
+    const [basePath, query] = href.split("?");
+    if (pathname !== basePath && !pathname.startsWith(`${basePath}/`)) return false;
+
+    if (!query) {
+      return pathname === basePath && searchParams.toString() === "";
+    }
+
+    const expected = new URLSearchParams(query);
+    for (const [key, value] of expected.entries()) {
+      if (searchParams.get(key) !== value) return false;
+    }
+    return true;
   };
 
   const renderNav = (mobile = false) => (
