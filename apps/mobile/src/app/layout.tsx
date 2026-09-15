@@ -2,6 +2,7 @@ import type { Metadata, Viewport } from "next";
 import { Inter, Space_Grotesk } from "next/font/google";
 import { headers } from "next/headers";
 import "./globals.css";
+import "./kinetix-reference-theme.css";
 import { PwaRegister } from "@/components/pwa-register";
 import { ThemeProvider } from "@/components/theme-provider";
 import { Toaster } from "@/components/ui/toast";
@@ -13,19 +14,12 @@ const inter = Inter({ subsets: ["latin"], variable: "--font-inter", display: "sw
 const grotesk = Space_Grotesk({ subsets: ["latin"], variable: "--font-display", display: "swap", weight: ["500", "600", "700"] });
 
 export const metadata: Metadata = {
-  metadataBase: new URL(
-    process.env.NEXT_PUBLIC_APP_URL || BRAND.app.appUrl
-  ),
+  metadataBase: new URL(process.env.NEXT_PUBLIC_APP_URL || BRAND.app.appUrl),
   title: `${BRAND.name} — Entrenamiento Personalizado Online`,
-  description:
-    "Programa a medida, seguimiento real y contacto directo con tu coach. Entrenamiento, nutrición y progreso desde tu celular.",
+  description: "Programa a medida, seguimiento real y contacto directo con tu coach. Entrenamiento, nutrición y progreso desde tu celular.",
   applicationName: BRAND.name,
   manifest: "/manifest.json",
-  appleWebApp: {
-    capable: true,
-    statusBarStyle: "black-translucent",
-    title: BRAND.name,
-  },
+  appleWebApp: { capable: true, statusBarStyle: "black-translucent", title: BRAND.name },
   formatDetection: { telephone: false },
   icons: {
     icon: [
@@ -33,24 +27,16 @@ export const metadata: Metadata = {
       { url: "/icons/icon-192.png", sizes: "192x192", type: "image/png" },
       { url: "/icons/icon-512.png", sizes: "512x512", type: "image/png" },
       { url: "/icons/icon.svg", type: "image/svg+xml" },
+      { url: "/brand/kinetixfitt-mark.svg", type: "image/svg+xml" },
     ],
-    apple: [
-      { url: "/icons/apple-touch-icon.png", sizes: "180x180", type: "image/png" },
-    ],
+    apple: [{ url: "/icons/apple-touch-icon.png", sizes: "180x180", type: "image/png" }],
   },
   openGraph: {
     title: `${BRAND.name} — Tu mejor versión, cada día`,
     description: "Entrenamiento personalizado online con seguimiento real.",
     type: "website",
     locale: "es_AR",
-    images: [
-      {
-        url: "/og-image.jpg",
-        width: 1200,
-        height: 630,
-        alt: `${BRAND.name} — Tu mejor versión, cada día`,
-      },
-    ],
+    images: [{ url: "/og-image.jpg", width: 1200, height: 630, alt: `${BRAND.name} — Tu mejor versión, cada día` }],
   },
   keywords: ["entrenamiento", "fitness", "coach", "nutrición", "gym", "ejercicios", "salud"],
   authors: [{ name: BRAND.name }],
@@ -61,13 +47,10 @@ export const viewport: Viewport = {
   themeColor: BRAND.colors.dark,
   width: "device-width",
   initialScale: 1,
-  // Sin maximumScale: bloquear pinch-zoom rompe accesibilidad móvil.
   viewportFit: "cover",
 };
 
-export default async function RootLayout({children}:{children:React.ReactNode}){
-  // CSP nonce por request (PR2): el middleware genera nonce y lo pasa vía header x-nonce
-  // El script inline del theme debe llevar nonce para que CSP `script-src 'nonce-...'` lo permita
+export default async function RootLayout({ children }: { children: React.ReactNode }) {
   let nonce: string | undefined;
   try {
     const h = await headers();
@@ -75,13 +58,14 @@ export default async function RootLayout({children}:{children:React.ReactNode}){
   } catch {
     nonce = undefined;
   }
+
   return (
     <html lang="es" suppressHydrationWarning>
       <head>
         <link rel="apple-touch-icon" href="/icons/apple-touch-icon.png" />
         <meta name="apple-mobile-web-app-capable" content="yes" />
         <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
-        <script nonce={nonce} dangerouslySetInnerHTML={{__html: `(function(){try{var t=localStorage.getItem('ec-theme')||'dark';document.documentElement.classList.add(t);document.documentElement.setAttribute('data-theme',t);}catch(e){}})()`}} />
+        <script nonce={nonce} dangerouslySetInnerHTML={{ __html: `(function(){try{var t=localStorage.getItem('ec-theme')||'dark';document.documentElement.classList.add(t);document.documentElement.setAttribute('data-theme',t);}catch(e){}})()` }} />
       </head>
       <body className={`${inter.variable} ${grotesk.variable} min-h-screen text-zinc-100 antialiased selection:bg-primary selection:text-black`} style={{ backgroundColor: BRAND.colors.dark }}>
         <PostHogProvider>
