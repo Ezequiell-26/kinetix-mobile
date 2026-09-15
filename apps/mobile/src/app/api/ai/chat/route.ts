@@ -12,7 +12,14 @@ const DEFAULT_BASE_URL = process.env.AI_BASE_URL || "https://api.openai.com/v1";
 const AI_API_KEY = process.env.AI_API_KEY || process.env.OPENAI_API_KEY || process.env.GLM_API_KEY;
 
 function sanitize(input: unknown, max = MAX_INPUT) {
-  return typeof input === "string" ? input.replace(/[\u0000-\u001F\u007F]/g, " ").trim().slice(0, max) : "";
+  if (typeof input !== "string") return "";
+  let output = "";
+  for (const char of input) {
+    const code = char.codePointAt(0) || 0;
+    output += code < 32 && code !== 9 && code !== 10 && code !== 13 ? " " : char;
+    if (output.length >= max) break;
+  }
+  return output.trim().slice(0, max);
 }
 
 export async function POST(req: Request) {
