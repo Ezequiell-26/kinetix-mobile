@@ -1,725 +1,539 @@
-# KinetixFitt — AI Agent Operating System
+# KinetixFitt — AI Engineering Constitution
 
-## Fuente única de verdad para agentes
-
-Este documento define las reglas obligatorias para cualquier agente de IA que modifique este repositorio.
-
-El objetivo no es simplemente producir código: es mantener KinetixFitt **estable, seguro, verificable y fácil de evolucionar**.
-
----
-
-# 1. REGLA DE ORO — NO FINGIR IMPLEMENTACIÓN
-
-NUNCA afirmes que una tarea está creada, corregida, migrada, integrada o terminada si no existe evidencia real.
-
-Solo puedes afirmar que algo está COMPLETO cuando:
-
-1. el código existe físicamente;
-2. los consumidores fueron revisados;
-3. la implementación está conectada de extremo a extremo;
-4. las validaciones relevantes pasan;
-5. los tests relevantes pasan;
-6. el build correspondiente pasa;
-7. no existe una regresión conocida.
-
-Si solo analizaste, propusiste o dejaste parcialmente implementado algo, dilo explícitamente.
+**Status:** NORMATIVE / MANDATORY  
+**Version:** 3.0.0  
+**Applies to:** Every human and AI agent modifying this repository  
+**Primary goal:** allow KinetixFitt to evolve continuously without sacrificing correctness, security, data integrity, performance, compatibility, or user experience.
 
 ---
 
-# 2. REGLA DE NO REGRESIÓN
+## 0. NON-NEGOTIABLE PRINCIPLE
 
-Antes de modificar cualquier módulo:
+An agent must leave the repository in a state that is **at least as safe as it was before the task**.
 
-1. localizar el archivo y sus consumidores;
-2. localizar imports/exports;
-3. localizar rutas/API relacionadas;
-4. revisar modelos Prisma y relaciones;
-5. revisar hooks/store/estado relacionados;
-6. revisar tests existentes;
-7. identificar dependencias directas e indirectas;
-8. implementar el cambio mínimo y seguro;
-9. ejecutar las verificaciones apropiadas.
+Never trade:
 
-Nunca cambies una pieza aislada sin revisar qué puede romper.
+- correctness for speed;
+- security for convenience;
+- stability for feature count;
+- real integration for a mock;
+- maintainability for a quick patch;
+- existing behavior for an unverified rewrite.
 
-Regla permanente:
-
-> BUG → FIX → REGRESSION TEST
-
-Toda corrección de un bug crítico debe dejar un test que impida que reaparezca.
+**No agent can guarantee that software will never break. These rules are designed to make accidental breakage difficult, detectable, reversible, and attributable.**
 
 ---
 
-# 3. FLUJO OBLIGATORIO DE TRABAJO
+## 1. SOURCE OF TRUTH
 
-Para cada tarea:
+The source of truth is, in order:
 
-## 3.1 INSPECCIONAR
+1. actual repository state;
+2. executable tests and checks;
+3. current architecture/contracts;
+4. deployment/runtime evidence;
+5. documentation;
+6. commit messages and agent claims.
 
-Primero entender el estado real del repositorio.
+Documentation can be stale. A commit message is not proof. A file existing is not proof of functionality.
 
-- git status
-- branch actual
-- commit actual
-- árbol de archivos
-- configuración
-- código relevante
-- tests relevantes
-
-No confiar ciegamente en README, comentarios o documentos antiguos.
-
-## 3.2 PLANIFICAR
-
-Identificar:
-
-- archivos a crear/modificar;
-- funcionalidades existentes que serán afectadas;
-- dependencias;
-- migraciones necesarias;
-- riesgos;
-- tests necesarios.
-
-NO duplicar una solución ya existente.
-
-## 3.3 IMPLEMENTAR
-
-Modificar únicamente lo necesario.
-
-Preferir cambios incrementales sobre reescrituras completas.
-
-## 3.4 VALIDAR
-
-Ejecutar como mínimo las verificaciones relevantes:
-
-- lint
-- typecheck
-- tests
-- build
-
-Para cambios de seguridad, DB, auth, pagos o API, ejecutar además sus suites específicas.
-
-## 3.5 REVISAR
-
-Buscar regresiones, imports rotos, rutas rotas, contratos incompatibles y efectos colaterales.
-
-## 3.6 REPORTAR
-
-Informar:
-
-- archivos creados;
-- archivos modificados;
-- tests ejecutados;
-- resultados reales;
-- errores restantes;
-- estado final.
-
-Nunca inventar resultados.
+Before any meaningful change, inspect the current branch, commit, working tree, affected code, dependencies, contracts, tests, and deployment constraints.
 
 ---
 
-# 4. DEFINICIÓN DE ESTADOS
+## 2. NO FALSE COMPLETION
 
-Toda funcionalidad debe poder clasificarse como:
+Never claim `COMPLETE`, `FIXED`, `SECURE`, `PRODUCTION READY`, `REAL`, or `VERIFIED` without evidence.
 
-- COMPLETE
-- PARTIAL
-- MOCK
-- BROKEN
-- NOT_IMPLEMENTED
+A feature is COMPLETE only when all applicable layers are connected and validated:
 
-Una pantalla existente NO implica que la funcionalidad esté completa.
+`UI → API/Application → Authorization → Domain → Data → External Services → Persistence → UI state`
 
-Una API existente NO implica que el flujo end-to-end esté completo.
+plus relevant tests, build, documentation, and regression review.
 
-Un test unitario NO implica que producción esté validada.
+Use these states honestly:
 
----
-
-# 5. ARQUITECTURA Y LÍMITES
-
-Mantener separación clara entre:
-
-PRESENTATION
-→ APPLICATION/API
-→ DOMAIN
-→ DATA
-→ EXTERNAL SERVICES
-
-Reglas:
-
-- UI en `apps/`;
-- lógica compartida en `packages/` cuando corresponda;
-- acceso a infraestructura sensible únicamente desde servidor;
-- no duplicar reglas de negocio entre múltiples APIs/componentes;
-- centralizar autorización, validación y manejo de errores;
-- reutilizar servicios existentes antes de crear otros paralelos.
-
-No introducir una nueva arquitectura por preferencia personal del agente.
+- `COMPLETE`
+- `PARTIAL`
+- `MOCK`
+- `BROKEN`
+- `BLOCKED_EXTERNAL`
+- `NOT_IMPLEMENTED`
 
 ---
 
-# 6. BASE DE DATOS
+## 3. MANDATORY CHANGE LOOP
 
-PostgreSQL/Supabase es la fuente persistente real.
+For every task:
 
-NO:
+`READ → SEARCH → MAP IMPACT → PLAN → CHANGE → TEST → REVIEW DIFF → RE-TEST → DOCUMENT → COMMIT → VERIFY`
 
-- usar localStorage como sustituto permanente de DB;
-- modificar producción manualmente sin control;
-- crear cambios de schema sin migration;
-- borrar migraciones existentes;
-- ignorar archivos de migración mediante `.gitignore`;
-- usar `db push` como sustituto de un flujo de migraciones controlado en producción.
+### READ
+Read `AGENTS.md`, `.ai/INDEX.md`, `.ai/PROJECT_STATE.md`, and the relevant contract before coding.
 
-Flujo requerido para cambios de schema:
+### SEARCH
+Search for existing implementations, consumers, routes, schemas, hooks, tests, and utilities before creating anything new.
 
-SCHEMA CHANGE
-→ MIGRATION
-→ LOCAL TEST
-→ CI
-→ PREVIEW/STAGING
-→ PRODUCTION
+### MAP IMPACT
+Identify direct and indirect dependencies. Think about data, API contracts, authentication, permissions, caches, stores, native platforms, build configuration, and external integrations.
 
-Revisar siempre:
+### PLAN
+Define the smallest safe change, expected files, tests, migration requirements, and rollback strategy when risk is non-trivial.
 
-- foreign keys;
-- índices;
-- unique constraints;
-- cascade behavior;
-- transactions;
-- connection pooling;
-- compatibilidad hacia atrás.
+### CHANGE
+Prefer incremental edits. Do not rewrite large areas unless the rewrite itself is justified and staged safely.
 
-Para migraciones complejas preferir estrategias expand/contract antes que cambios destructivos inmediatos.
+### TEST
+Run the smallest relevant tests first, then the broader required gates.
 
----
+### REVIEW DIFF
+Review the actual diff for accidental changes, deletions, formatting churn, secret exposure, API breakage, dependency changes, and unrelated edits.
 
-# 7. AUTORIZACIÓN MULTI-TRAINER
+### RE-TEST
+Run checks again after corrections.
 
-La autorización se valida en servidor.
+### DOCUMENT
+Update contracts/state/ADR when architecture or behavior changed.
 
-Nunca confiar en IDs enviados por el cliente.
+### COMMIT
+Use an atomic Conventional Commit.
 
-Un trainer solo puede acceder a recursos que realmente le pertenecen o a los que tiene permiso.
-
-Validar ownership para:
-
-- clients
-- profiles
-- programs
-- workouts
-- workout logs
-- measurements
-- photos
-- check-ins
-- messages
-- payments
-- subscriptions
-- analytics
-- uploads
-- documents
-
-Prueba mínima:
-
-Trainer A → Client A ✅
-Trainer A → Client B ❌
-Trainer B → Client B ✅
-Trainer B → Client A ❌
-
-Toda corrección relacionada con ownership debe incluir pruebas cruzadas.
+### VERIFY
+Confirm the committed tree, CI/preview status where available, and final branch state.
 
 ---
 
-# 8. AUTH Y SESIONES
+## 4. STOP CONDITIONS
 
-Nunca debilitar:
+An agent MUST stop making unrelated changes and report a blocker when it encounters:
 
-- password hashing;
-- secure cookies;
-- httpOnly;
-- sameSite;
-- session expiration;
-- session revocation;
-- rate limiting;
-- input validation.
+- secret exposure;
+- data-loss risk;
+- migration ambiguity affecting production data;
+- cross-user or cross-trainer authorization bypass;
+- authentication regression;
+- payment integrity problem;
+- destructive command with unclear scope;
+- failing build that cannot be safely diagnosed within the current task;
+- conflicting architecture rules that cannot be resolved from existing ADRs/contracts.
 
-Password reset debe utilizar tokens suficientemente aleatorios, almacenamiento seguro del token y consumo atómico/one-time.
-
-Nunca almacenar secrets innecesarios.
+Do not hide a blocker by weakening tests or removing validation.
 
 ---
 
-# 9. SEGURIDAD Y SECRETOS
+## 5. PROTECTED SYSTEMS
 
-PROHIBIDO subir a Git:
+Treat these as high-risk surfaces. Changes require dedicated tests and extra review:
 
-- `.env` reales;
-- passwords;
+- authentication/session management;
+- authorization/ownership;
+- PostgreSQL/Prisma/Supabase schema and migrations;
+- payments/subscriptions/webhooks;
+- file storage/uploads;
+- secrets/configuration;
+- offline sync/conflict resolution;
+- AI provider routing and safety limits;
+- native bridges (Swift/Kotlin/Capacitor/Electron);
+- service workers/PWA caching;
+- CI/CD and deployment configuration.
+
+Never make speculative refactors in these areas while doing an unrelated feature.
+
+---
+
+## 6. AUTHORIZATION IS SERVER-SIDE
+
+Never trust IDs, roles, prices, plan names, ownership flags, or permissions supplied by the client.
+
+Every protected resource must be authorized on the server.
+
+For multi-trainer data, validate ownership on every read/write/delete path where applicable. Cross-trainer access is a release blocker.
+
+Minimum security fixture:
+
+- Trainer A owns Client A;
+- Trainer B owns Client B;
+- A can access A and cannot access B;
+- B can access B and cannot access A.
+
+---
+
+## 7. DATABASE RULES
+
+PostgreSQL/Supabase is authoritative for persistent application data.
+
+Never:
+
+- use localStorage as a permanent database substitute;
+- silently fall back to an in-memory store for production persistence;
+- change production schema without a tracked migration;
+- delete or rewrite an existing migration to repair history;
+- create a destructive migration without a data-safety plan;
+- commit ignored/untracked migrations accidentally.
+
+Preferred migration strategy for risky changes:
+
+`ADD → BACKFILL → DUAL COMPATIBILITY → SWITCH → CLEANUP`
+
+Every schema change must account for indexes, foreign keys, uniqueness, nullability, cascading behavior, transactions, connection pooling, rollback implications, and existing data.
+
+---
+
+## 8. API CONTRACTS
+
+Every important endpoint must have:
+
+- validated input;
+- authorization policy;
+- stable response/error shape;
+- predictable status codes;
+- idempotency where needed;
+- timeout/retry behavior where relevant;
+- tests for success and failure.
+
+Do not introduce a breaking API change without updating every known consumer or introducing a compatibility path.
+
+---
+
+## 9. PAYMENTS
+
+Payment success must originate from the trusted payment provider/webhook flow, not from frontend state.
+
+Never trust client-provided amount, currency, product, price, or subscription state.
+
+No fake checkout, fake success, timeout-based payment simulation, or success alert may exist in production flows.
+
+Webhooks must verify signatures and handle duplicate delivery safely.
+
+Payment state transitions must be persistent and auditable.
+
+---
+
+## 10. SECRETS
+
+Never commit:
+
+- `.env` files containing secrets;
 - API keys;
-- Stripe secrets;
-- Mercado Pago secrets;
-- Supabase service-role keys;
+- database passwords;
 - JWT secrets;
-- SMTP passwords;
-- tokens privados.
+- payment secrets;
+- service-role credentials;
+- private tokens;
+- SMTP passwords.
 
-Antes de un commit sensible revisar el diff.
+Use environment variables and secret managers.
 
-Si se detecta un secret expuesto:
-
-1. detener la distribución del secret;
-2. rotarlo/revocarlo;
-3. eliminarlo del árbol actual;
-4. comprobar exposición en historial cuando corresponda;
-5. sustituir por environment variables.
-
-Nunca utilizar un secret real en tests o documentación.
+If a secret is discovered in Git, immediately rotate it and remove the secret from active use. Removing the file alone is not enough.
 
 ---
 
-# 10. API CONTRACTS
+## 11. DEPENDENCIES
 
-Cada API crítica debe tener:
+Before adding a dependency:
 
-- input validation;
-- output contract;
-- auth rules;
-- ownership rules;
-- stable error behavior.
+1. search the existing repo for an equivalent;
+2. justify why it is required;
+3. check maintenance/security/license/size;
+4. check platform compatibility;
+5. update the correct lockfile;
+6. run install/typecheck/test/build.
 
-No cambiar contratos públicos sin revisar todos sus consumidores.
-
-Si el cambio rompe consumidores, migrarlos coordinadamente.
-
-Nunca ocultar breaking changes.
+Never upgrade a large dependency set opportunistically during an unrelated task.
 
 ---
 
-# 11. PAGOS
+## 12. PERFORMANCE BUDGETS
 
-No usar pagos falsos en producción.
+Performance is a feature.
 
-PROHIBIDO:
+Avoid unnecessary:
 
-- `setTimeout()` como simulación de checkout;
-- `alert()` como simulación de pago;
-- fake success;
-- fake webhook.
+- client components;
+- JavaScript shipped to the browser;
+- re-renders;
+- polling;
+- large images;
+- 3D canvases;
+- animations running continuously;
+- duplicated network requests;
+- N+1 database queries.
 
-Stripe/Mercado Pago deben validar en servidor:
+Use lazy loading and code splitting for heavy features.
 
-- plan;
-- precio;
-- moneda;
-- usuario;
-- firma/webhook;
-- idempotencia.
-
-Nunca confiar en el precio enviado directamente por el cliente.
+Measure before and after for meaningful performance work.
 
 ---
 
-# 12. AI
+## 13. 3D / MEDIA
 
-La AI debe reflejar su estado real.
+3D, video, audio, and high-resolution media are expensive resources.
 
-NO afirmar que un provider está conectado cuando no lo está.
+They must have:
 
-No exponer API keys al cliente.
+- lazy loading;
+- loading/error states;
+- memory cleanup;
+- device fallback where needed;
+- reduced-motion behavior;
+- mobile-safe defaults.
 
-Preferir una capa de provider/adapters para permitir cambiar de modelo sin reescribir el producto.
-
-Los fallbacks deben ser explícitos.
-
----
-
-# 13. STORAGE
-
-El filesystem efímero no es el almacenamiento definitivo de producción.
-
-Para archivos de usuario usar storage durable y controles de acceso.
-
-Validar:
-
-- MIME;
-- magic bytes;
-- tamaño;
-- nombre seguro;
-- ownership;
-- URLs firmadas cuando corresponda.
+Never load a heavy 3D scene globally if the current route does not need it.
 
 ---
 
-# 14. NUTRITION Y RECOVERY
+## 14. OFFLINE / SYNC
 
-No presentar datos mock o calculados como si fueran mediciones reales del usuario.
+Offline behavior must fail safely.
 
-Distinguir siempre:
+Every sync system needs:
 
-USER DATA
-DERIVED DATA
-DEVICE DATA
-DEMO DATA
+- deterministic queued operations;
+- retry limits/backoff;
+- conflict policy;
+- idempotency or deduplication;
+- observable failure state;
+- recovery after reconnect.
 
-El escaneo de alimentos, wearable integrations u otras integraciones solo se consideran reales cuando existe conexión y validación real.
+Never silently overwrite newer server data with stale offline data.
 
 ---
 
-# 15. UI / UX
+## 15. AI AGENT RULES
 
-KinetixFitt debe mantener una identidad:
+AI agents must operate as maintainers, not as autonomous rewrite engines.
 
-- premium;
-- profesional;
-- sport-tech;
-- consistente;
-- rápida;
-- accesible.
+Before changing architecture, they must inspect existing contracts and ADRs.
 
-Usar tokens y componentes compartidos.
+An agent must not:
 
-No crear sistemas visuales paralelos.
+- invent APIs;
+- invent database fields without checking schema;
+- duplicate existing services;
+- create parallel auth/state/payment systems;
+- remove existing functionality to simplify a task;
+- rename public contracts casually;
+- disable lint/type errors to pass a gate;
+- delete tests because they are inconvenient;
+- create fake production integrations;
+- claim external verification it did not perform.
 
-Toda vista importante debe contemplar:
+When uncertain, preserve the existing behavior and choose the smallest reversible change.
+
+---
+
+## 16. CROSS-PLATFORM COMPATIBILITY
+
+A change affecting shared code must be evaluated for:
+
+- web;
+- PWA;
+- Android;
+- iOS;
+- desktop;
+- server/runtime;
+- build-time execution.
+
+Do not import browser-only, Node-only, native-only, or server-only APIs into shared code without an explicit boundary.
+
+---
+
+## 17. UI / UX CONSISTENCY
+
+Do not create a second design system.
+
+Use existing design tokens, primitives, typography, spacing, motion, and accessibility patterns.
+
+Every interactive feature needs appropriate:
 
 - loading;
 - empty;
 - error;
 - success;
-- responsive;
-- accesibilidad básica.
+- disabled;
+- retry/fallback states.
 
-No agregar animaciones o 3D que comprometan funcionalidad o rendimiento sin necesidad.
-
----
-
-# 16. PERFORMANCE
-
-Antes de agregar librerías nuevas evaluar:
-
-- bundle size;
-- runtime cost;
-- memory;
-- mobile impact;
-- maintenance cost.
-
-Preferir:
-
-- code splitting;
-- lazy loading;
-- dynamic imports;
-- server rendering cuando corresponda;
-- queries eficientes;
-- imágenes optimizadas;
-- carga bajo demanda de Three.js.
-
-No optimizar a costa de romper UX.
+Accessibility is part of correctness, not optional polish.
 
 ---
 
-# 17. TESTING
+## 18. TESTING POLICY
 
-Tipos de test esperados:
+Test proportional to risk.
 
-1. Unit
-2. Domain
-3. Integration
-4. API
-5. Security
-6. E2E
+### Required by risk
 
-Objetivos mínimos cualitativos:
+**Pure logic:** unit tests.
 
-- toda lógica crítica debe tener tests;
-- toda API sensible debe tener autorización probada;
-- bugs críticos deben tener regression tests;
-- journeys principales deben estar cubiertos por E2E.
+**Domain behavior:** unit + integration tests.
 
-No bajar cobertura o eliminar tests solo para hacer pasar CI.
+**API:** integration/API tests.
 
----
+**Auth/authorization/payments/storage:** security + integration tests.
 
-# 18. CI / QUALITY GATES
+**Critical user journeys:** E2E tests.
 
-El CI debe validar como mínimo:
+**DB schema changes:** migration + integration tests.
 
-- install
-- lint
-- typecheck
-- tests
-- security tests
-- build
-
-Un cambio que falle cualquiera de estos gates no está listo para integrarse.
-
-No ignorar errores de CI sin documentar la razón.
+Every fixed critical bug should gain a regression test.
 
 ---
 
-# 19. GIT Y RAMAS
+## 19. QUALITY GATES
 
-Estrategia recomendada:
+For affected projects, run:
 
-feature/*
-→ desarrollo aislado
-→ PR / validación
-→ integración
-→ `main`
+- lint;
+- typecheck;
+- relevant unit/integration tests;
+- security tests when applicable;
+- build;
+- E2E for affected critical journeys when applicable.
 
-`main` representa una versión estable.
-
-NO force push a `main`.
-NO reescribir historia de `main` sin una razón excepcional y explícita.
-NO usar `main` como rama experimental.
-
-Regla actual de integración:
-
-> Todo trabajo que haya sido realmente verificado debe quedar integrado en `main`.
-
-Esto sustituye cualquier regla anterior que prohibiera la integración de trabajo verificado a `main`.
+A red gate must not be hidden by changing scripts to skip the failing test.
 
 ---
 
-# 20. COMMITS
+## 20. GIT AND BRANCHING
 
-Usar Conventional Commits:
+Use feature branches for normal development.
+
+Recommended flow:
+
+`feature/* → PR → CI → review → main`
+
+`develop` may remain the integration/development branch only when it is explicitly used as such by current repository configuration.
+
+`main` is a stable release/integration target. Do not force-push it.
+
+Normal work should not be developed directly on `main`.
+
+Every commit must be atomic and understandable.
+
+Use Conventional Commits:
 
 - `feat:`
 - `fix:`
 - `refactor:`
 - `perf:`
-- `docs:`
 - `test:`
+- `docs:`
+- `build:`
+- `ci:`
 - `chore:`
-- `security:` cuando corresponda.
-
-Preferir commits atómicos.
-
-No mezclar cambios no relacionados.
 
 ---
 
-# 21. RELEASE Y ROLLBACK
+## 21. PR / CHANGE REVIEW
 
-Cada cambio importante debe poder rastrearse a un commit/release.
+Every significant change must answer:
 
-Mantener capacidad de rollback.
+1. What changed?
+2. Why?
+3. What can it affect?
+4. What tests prove it?
+5. What is the rollback path?
+6. Did the public API/schema change?
+7. Did security boundaries change?
+8. Did dependency/build configuration change?
 
-Para cambios DB destructivos definir estrategia antes del deploy.
-
-Nunca eliminar la última versión estable sin una alternativa recuperable.
-
----
-
-# 22. BACKUPS Y RECOVERY
-
-Los backups deben ser reales, automáticos y restaurables.
-
-No afirmar que existe disaster recovery sin haber probado un restore en un entorno seguro.
-
-Documentar cuando corresponda:
-
-- RPO
-- RTO
-- retención
-- procedimiento de restore.
+Do not merge large unrelated changes together.
 
 ---
 
-# 23. OBSERVABILIDAD
+## 22. ROLLBACK
 
-Los cambios importantes deben dejar suficientes señales para diagnosticar problemas.
+For production-sensitive changes, define rollback before rollout.
 
-Usar donde corresponda:
+Application rollback and database rollback are separate problems. Never assume reverting application code automatically reverts a database migration.
 
-- Sentry;
-- structured logging;
-- audit logs;
-- performance metrics;
-- request IDs.
-
-NO registrar passwords, tokens o secrets.
+Use additive, backward-compatible migration strategies for high-risk changes whenever possible.
 
 ---
 
-# 24. DEPENDENCIAS
+## 23. OBSERVABILITY
 
-Antes de agregar una dependencia:
+Production-critical flows must be diagnosable without exposing secrets.
 
-1. comprobar si ya existe solución interna;
-2. evaluar bundle size;
-3. evaluar compatibilidad;
-4. evaluar mantenimiento;
-5. evaluar impacto en mobile/web/desktop.
+Use structured logs, error tracking, request/correlation identifiers where appropriate, and audit logs for sensitive state transitions.
 
-Preferir APIs nativas y código TypeScript propio cuando la funcionalidad sea trivial.
-
-No actualizar grandes grupos de dependencias sin pruebas de compatibilidad.
+Never log passwords, raw tokens, secret keys, or full payment credentials.
 
 ---
 
-# 25. PLATAFORMAS
+## 24. DOCUMENTATION / ADR
 
-No declarar una plataforma “lista” solo porque existe configuración.
+Architecture changes require an ADR under `.ai/DECISIONS/`.
 
-Validar realmente:
+State changes require `.ai/PROJECT_STATE.md` updates when material.
 
-- Web
-- PWA
-- Android
-- iOS
-- Desktop
+Behavioral contracts belong in `.ai/*_CONTRACT.md`.
 
-Los cambios compartidos deben revisarse para efectos específicos de cada plataforma.
+Do not leave contradictory documentation behind.
 
 ---
 
-# 26. WEB Y APPS DUPLICADAS
+## 25. “IMPROVE, DO NOT JUST EXPAND”
 
-Si existen implementaciones paralelas (`apps/mobile`, `apps/web` u otras), identificar claramente cuál es oficial, cuál es legacy y cuál es experimental.
+Every feature addition should consider whether it can simultaneously improve:
 
-No mantener dos fuentes de verdad para la misma funcionalidad sin una razón documentada.
+- reliability;
+- performance;
+- accessibility;
+- maintainability;
+- security;
+- observability;
+- testability;
+- user experience.
 
-Antes de eliminar una implementación aparentemente duplicada, comprobar referencias y consumers.
+But do not use “improvement” as an excuse for unrelated scope expansion.
 
----
-
-# 27. DOCUMENTACIÓN
-
-Cuando cambie arquitectura o comportamiento importante, actualizar la documentación relevante.
-
-Especialmente:
-
-- `.ai/PROJECT_STATE.md`
-- `.ai/PROJECT_REALITY.md`
-- `.ai/INDEX.md`
-- `DEPLOY.md`
-- `SECURITY_AUDIT.md`
-- `PRODUCTION_READINESS.md`
-
-La documentación debe reflejar el estado real, no el estado deseado.
+Prefer small compounding improvements over massive rewrites.
 
 ---
 
-# 28. REGLAS ESPECIALES PARA AGENTES DE IA
+## 26. CLEAN REPOSITORY
 
-Antes de escribir código:
+Do not commit:
 
-READ
-→ SEARCH
-→ UNDERSTAND
+- generated caches;
+- local logs;
+- temporary debug files;
+- OS artifacts;
+- editor files;
+- local secrets;
+- unreviewed generated code;
+- giant binaries unless intentionally managed.
 
-Antes de commit:
+Do not change `.gitignore` without understanding what files should actually be tracked.
 
-TEST
-→ REVIEW
-→ CHECK DIFF
-
-Después:
-
-COMMIT
-→ VERIFY
-→ INTEGRATE
-
-Nunca:
-
-- borrar por conveniencia;
-- reescribir sin necesidad;
-- introducir sistemas paralelos;
-- desactivar checks;
-- falsificar funcionalidades;
-- ocultar errores;
-- inventar resultados.
-
-Cuando no tengas suficiente información, inspecciona el repositorio antes de asumir.
+Database migrations, source files, and deployment configuration that are part of the product must remain versioned.
 
 ---
 
-# 29. CRITICAL CHANGE PROTOCOL
+## 27. FINAL REPORT MUST BE EVIDENCE-BASED
 
-Para cambios en:
+At task completion report:
 
-- authentication
-- authorization
-- database schema
-- payments
-- storage
-- AI infrastructure
-- deployment
-- CI/CD
+- branch;
+- commit;
+- files changed;
+- tests executed;
+- build result;
+- deployment/preview result when applicable;
+- known limitations;
+- follow-up work.
 
-es obligatorio:
-
-1. revisar dependencias;
-2. implementar incrementalmente;
-3. tests específicos;
-4. build;
-5. revisar diff;
-6. actualizar documentación si corresponde;
-7. integrar solo después de verificación.
+Use exact statuses. Never fabricate a green result.
 
 ---
 
-# 30. DEFINITION OF DONE
+## 28. GOLDEN RULE
 
-Una tarea está COMPLETA solo cuando:
+> **Preserve first. Verify second. Improve third. Expand fourth.**
 
-- [ ] código real implementado;
-- [ ] consumidores revisados;
-- [ ] imports/exports correctos;
-- [ ] validación correcta;
-- [ ] autorización correcta;
-- [ ] persistencia correcta si aplica;
-- [ ] loading/error/empty states cuando aplica;
-- [ ] tests relevantes pasan;
-- [ ] lint pasa;
-- [ ] typecheck pasa;
-- [ ] build pasa;
-- [ ] no existe regresión conocida;
-- [ ] documentación actualizada cuando aplica;
-- [ ] cambios integrados en `main` cuando están verificados.
+KinetixFitt must become more capable over time without becoming less reliable.
 
 ---
 
-# 31. SI ALGO FALLA
-
-No esconder el fallo.
-
-Procedimiento:
-
-1. capturar error exacto;
-2. diagnosticar;
-3. aislar causa;
-4. aplicar corrección segura;
-5. volver a ejecutar validaciones;
-6. documentar cualquier bloqueo restante.
-
-Nunca marcar como verde algo que sigue rojo.
-
----
-
-# 32. OBJETIVO FINAL
-
-Cada interacción de una IA debe dejar KinetixFitt:
-
-- más estable;
-- más seguro;
-- más rápido;
-- más claro;
-- más testeado;
-- más fácil de mantener.
-
-La meta es que una nueva IA pueda entrar mañana al repositorio, comprender las reglas y agregar una funcionalidad importante **sin romper funcionalidades existentes**.
-
-KinetixFitt debe evolucionar de forma incremental y controlada.
-
-**ESTABILIDAD > VELOCIDAD DE CAMBIO**
-**EVIDENCIA > AFIRMACIONES**
-**SEGURIDAD > COMODIDAD**
-**DATOS REALES > MOCKS**
-**CAMBIOS INCREMENTALES > REESCRITURAS**
-
----
-
-**Versión:** 2.0.0
-**Estado:** Activo
+**This file is normative. If another project document contradicts it, stop and resolve the contradiction through an ADR before making a risky architectural change.**
