@@ -4,114 +4,37 @@ import { prisma } from "@/lib/db";
 import { readFile } from "fs/promises";
 import { join } from "path";
 import { existsSync } from "fs";
+import { isUploadType } from "@/lib/security";
 
-/**
- * Serve archivos subidos con validación de ownership.
- * 
- * Seguridad:
- * - Requiere autenticación
- * - Verifica ownership del archivo
- * - Path fijo sin interpolación peligrosa
- * - Headers seguros (no ejecución)
- */
-export async function GET(req: Request) {
-  const s = await getSession();
-  if (!s) return NextResponse.json({ error: "No auth" }, { status: 401 });
+const MIME_BY_EXT: Record<string,string> = { jpg:"image/jpeg", jpeg:"image/jpeg", png:"image/png", gif:"image/gif", webp:"image/webp", mp4:"video/mp4", pdf:"application/pdf" };
 
-  try {
-    const { searchParams } = new URL(req.url);
-    const type = searchParams.get("type");
-    const filename = searchParams.get("filename");
+export async function GET(req:Request){
+  const session=await getSession(); if(!session) return NextResponse.json({error:"No auth"},{status:401});
+  try{
+    const {searchParams}=new URL(req.url); const type=searchParams.get("type"); const filename=searchParams.get("filename");
+    if(!type||!filename||!isUploadType(type)) return NextResponse.json({error:"Parámetros inválidos"},{status:400});
+    if(!/^[a-z]+-\d+-[a-z0-9-]+\.(jpg|jpeg|png|gif|webp|mp4|pdf)$/.test(filename)) return NextResponse.json({error:"Nombre inválido"},{status:400});
+    const filePath=join(process.cwd(),"storage","uploads",type,filename);
+    if(!existsSync(filePath)) return NextResponse.json({error:"Archivo no encontrado"},{status:404});
 
-    if (!type || !filename) {
-      return NextResponse.json({ error: "Parámetros inválidos" }, { status: 400 });
-    }
-
-    // Validar tipo contra whitelist
-    const allowedTypes = ["progress", "avatar", "document"];
-    if (!allowedTypes.includes(type)) {
-      return NextResponse.json({ error: "Tipo inválido" }, { status: 400 });
-    }
-
-    // Sanitizar filename (solo alphanumeric, guiones, puntos)
-    const sanitizedFilename = filename.replace(/[^a-zA-Z0-9._-]/g, "");
-    if (!sanitizedFilename || sanitizedFilename !== filename) {
-      return NextResponse.json({ error: "Nombre inválido" }, { status: 400 });
-    }
-
-    // Construir path seguro
-    const uploadDir = join(process.cwd(), "storage", "uploads", type);
-    const filepath = join(uploadDir, sanitizedFilename);
-
-    // Verificar que el archivo existe
-    if (!existsSync(filepath)) {
-      return NextResponse.json({ error: "Archivo no encontrado" }, { status: 404 });
-    }
-
-    // Verificar ownership en DB para fotos de progreso
-    if (type === "progress") {
-      const photo = await prisma.progressPhoto.findFirst({
-        where: { url: { contains: filename } },
-      });
-
-      if (!photo) {
-        return NextResponse.json({ error: "No autorizado" }, { status: 403 });
+    let allowed=false;
+    if(type==="progress"){
+      const photo=await prisma.progressPhoto.findFirst({where:{url:{contains:filename}},select:{userId:true,clientId:true}});
+      if(photo){
+        allowed=photo.userId===session.id;
+        if(!allowed && photo.clientId) allowed=await prisma.client.findFirst({where:{id:photo.clientId,OR:[{userId:session.id},{trainerId:session.id}]},select:{id:true}}).then(Boolean);
       }
-
-      // Verificar que el usuario es dueño o tiene acceso
-      const isOwner = photo.userId === s.id;
-      const isClientOwner = photo.clientId ? Boolean(await prisma.client.findFirst({
-        where: { id: photo.clientId, userId: s.id },
-      })) : false;
-
-      // Los trainers SOLO pueden ver fotos de sus propios clientes (P0 IDOR)
-      const isTrainerWithAccess =
-        s.role === "TRAINER" && photo.clientId
-          ? Boolean(
-              await prisma.client.findFirst({
-                where: { id: photo.clientId, trainerId: s.id },
-              })
-            )
-          : false;
-
-      if (!isOwner && !isClientOwner && !isTrainerWithAccess) {
-        return NextResponse.json({ error: "No autorizado" }, { status: 403 });
-      }
+    } else if(type==="checkin"){
+      const checkin=await prisma.checkIn.findFirst({where:{fotos:{contains:filename}},select:{userId:true,clientId:true}});
+      if(checkin){ allowed=checkin.userId===session.id; if(!allowed&&checkin.clientId) allowed=await prisma.client.findFirst({where:{id:checkin.clientId,OR:[{userId:session.id},{trainerId:session.id}]},select:{id:true}}).then(Boolean); }
+    } else if(type==="message"){
+      const message=await prisma.message.findFirst({where:{content:{contains:filename},OR:[{senderId:session.id},{receiverId:session.id}]},select:{id:true}}); allowed=Boolean(message);
     }
+    if(!allowed) return NextResponse.json({error:"No autorizado"},{status:403});
 
-    // Leer archivo
-    const buffer = await readFile(filepath);
-
-    // Determinar MIME type por extensión
-    const ext = sanitizedFilename.split(".").pop()?.toLowerCase() || "";
-    const mimeTypes: Record<string, string> = {
-      jpg: "image/jpeg",
-      jpeg: "image/jpeg",
-      png: "image/png",
-      gif: "image/gif",
-      webp: "image/webp",
-      mp4: "video/mp4",
-      pdf: "application/pdf",
-    };
-    const mimeType = mimeTypes[ext] || "application/octet-stream";
-
-    // Headers seguros
-    const headers = new Headers();
-    headers.set("Content-Type", mimeType);
-    headers.set("Cache-Control", "private, max-age=3600");
-    headers.set("X-Content-Type-Options", "nosniff");
-    
-    // Prevenir ejecución de scripts en imágenes
-    if (mimeType.startsWith("image/")) {
-      headers.set("Content-Security-Policy", "default-src 'none'");
-    }
-
-    return new NextResponse(buffer, {
-      status: 200,
-      headers,
-    });
-  } catch (error) {
-    console.error("[UPLOAD-SERVE] Error:", error);
-    return NextResponse.json({ error: "Error al servir archivo" }, { status: 500 });
-  }
+    const buffer=await readFile(filePath); const ext=filename.split(".").pop()?.toLowerCase()||""; const mime=MIME_BY_EXT[ext]||"application/octet-stream";
+    const headers=new Headers({"Content-Type":mime,"Cache-Control":"private, max-age=3600","X-Content-Type-Options":"nosniff","Content-Disposition":mime==="application/pdf"?`inline; filename="${filename}"`:"inline"});
+    if(mime.startsWith("image/")) headers.set("Content-Security-Policy","default-src 'none'; img-src 'self' data:;");
+    return new NextResponse(buffer,{status:200,headers});
+  }catch(error){ console.error("[UPLOAD-SERVE]",error); return NextResponse.json({error:"Error al servir archivo"},{status:500}); }
 }
