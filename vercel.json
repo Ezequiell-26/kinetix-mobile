@@ -1,0 +1,59 @@
+{
+  "$schema": "https://openapi.vercel.sh/vercel.json",
+  "framework": "nextjs",
+  "installCommand": "npm install",
+  "buildCommand": "npm run build --workspace=@kinetix/web",
+  "outputDirectory": "apps/web/.next",
+  "regions": ["sfo1"],
+  "env": {
+    "NEXT_PUBLIC_APP_URL": "@next_public_app_url",
+    "NEXT_PUBLIC_STRIPE_PUBLIC_KEY": "@next_public_stripe_public_key",
+    "NEXT_PUBLIC_MERCADO_PAGO_PUBLIC_KEY": "@next_public_mercado_pago_public_key",
+    "NEXT_PUBLIC_POSTHOG_KEY": "@next_public_posthog_key",
+    "NEXT_PUBLIC_POSTHOG_HOST": "@next_public_posthog_host",
+    "STRIPE_SECRET_KEY": "@stripe_secret_key",
+    "MERCADO_PAGO_ACCESS_TOKEN": "@mercado_pago_access_token",
+    "STRIPE_WEBHOOK_SECRET": "@stripe_webhook_secret",
+    "MERCADO_PAGO_WEBHOOK_SECRET": "@mercado_pago_webhook_secret",
+    "SUPABASE_URL": "@supabase_url",
+    "SUPABASE_ANON_KEY": "@supabase_anon_key",
+    "SUPABASE_SERVICE_ROLE_KEY": "@supabase_service_role_key",
+    "DATABASE_URL": "@database_url",
+    "DIRECT_URL": "@direct_url"
+  },
+  "headers": [
+    {
+      "source": "/api/(.*)",
+      "headers": [
+        { "key": "Access-Control-Allow-Origin", "value": "*" },
+        { "key": "Access-Control-Allow-Methods", "value": "GET,POST,PUT,DELETE,OPTIONS" },
+        { "key": "Access-Control-Allow-Headers", "value": "Content-Type, Authorization, stripe-signature, x-mp-signature" }
+      ]
+    },
+    {
+      "source": "/(.*)",
+      "headers": [
+        { "key": "X-Content-Type-Options", "value": "nosniff" },
+        { "key": "X-Frame-Options", "value": "DENY" },
+        { "key": "X-XSS-Protection", "value": "1; mode=block" },
+        { "key": "Referrer-Policy", "value": "strict-origin-when-cross-origin" }
+      ]
+    }
+  ],
+  "rewrites": [
+    {
+      "source": "/api/stripe/webhook",
+      "destination": "/api/stripe/webhook"
+    },
+    {
+      "source": "/api/mercadopago/webhook",
+      "destination": "/api/mercadopago/webhook"
+    }
+  ],
+  "crons": [
+    {
+      "path": "/api/cron/sync-data",
+      "schedule": "0 2 * * *"
+    }
+  ]
+}

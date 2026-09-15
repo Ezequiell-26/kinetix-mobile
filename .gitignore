@@ -1,6 +1,31 @@
 ```
-# Documentation and guide files
-LAUNCH_CHECKLIST.md
-RESUMEN_EJECUTIVO_FINAL.md
-VERCEL_DEPLOY_GUIDE.md
+# Dependencies
+node_modules/
+
+# Build outputs
+dist/
+build/
+.next/
+out/
+
+# Environment variables
+.env
+.env.local
+*.env.*
+
+# Logs
+*.log
+
+# Temporary files
+*.tmp
+*.swp
+*~
+
+# OS generated files
+.DS_Store
+Thumbs.db
+
+# IDE specific
+.vscode/
+.idea/
 ```
