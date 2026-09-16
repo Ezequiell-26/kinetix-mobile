@@ -72,7 +72,6 @@ model User {
   progressMeasurements ProgressMeasurement[]
   progressPhotos ProgressPhoto[]
 
-  @@index([email])
   @@index([role])
 }
 
@@ -389,6 +388,7 @@ model Payment {
   method    String?
   date      DateTime @default(now())
   description String?
+  checkoutIdempotencyKey String? @unique
 
   @@index([clientId])
   @@index([date])
