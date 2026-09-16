@@ -49,10 +49,16 @@ async function settlePayment(input: {
   externalDescription: string;
   amount?: number | null;
 }) {
+  let clientId = input.clientId ?? null;
+  if (input.paymentId && !clientId) {
+    const payment = await prisma.payment.findUnique({ where: { id: input.paymentId }, select: { clientId: true } });
+    clientId = payment?.clientId ?? null;
+  }
+
   const where = input.paymentId
     ? { id: input.paymentId, status: { not: "PAGADO" as const } }
-    : input.clientId
-      ? { clientId: input.clientId, status: "PENDIENTE" as const }
+    : clientId
+      ? { clientId, status: "PENDIENTE" as const }
       : null;
   if (!where) return false;
 
@@ -66,13 +72,13 @@ async function settlePayment(input: {
     },
   });
 
-  if (updated.count > 0 && input.status === "PAGADO" && input.clientId) {
-    const subscription = await prisma.subscription.findUnique({ where: { clientId: input.clientId } });
+  if (updated.count > 0 && input.status === "PAGADO" && clientId) {
+    const subscription = await prisma.subscription.findUnique({ where: { clientId } });
     if (subscription) {
       const nextPayment = new Date();
       nextPayment.setDate(nextPayment.getDate() + 30);
       await prisma.subscription.update({
-        where: { clientId: input.clientId },
+        where: { clientId },
         data: {
           status: "ACTIVA",
           nextPayment,
@@ -165,8 +171,6 @@ export async function POST(req: Request) {
             break;
         }
       } catch (processingError) {
-        // Keep the event claimed only if processing completed. Delete the claim on failure
-        // so Stripe can retry safely; the payment update itself remains guarded by status.
         await prisma.$executeRaw(Prisma.sql`DELETE FROM "PaymentWebhookEvent" WHERE "provider" = ${"stripe"} AND "eventId" = ${event.id}`);
         throw processingError;
       }
@@ -175,6 +179,7 @@ export async function POST(req: Request) {
 
     if (mpSignature) {
       if (!MP_WEBHOOK_SECRET) return NextResponse.json({ error: "Mercado Pago no configurado" }, { status: 500 });
+      if (!MP_ACCESS_TOKEN) return NextResponse.json({ error: "Mercado Pago no configurado" }, { status: 500 });
       const dataId = url.searchParams.get("data.id") || url.searchParams.get("data_id");
       if (!verifyMpSignature(req, dataId, MP_WEBHOOK_SECRET)) return NextResponse.json({ error: "Invalid MP signature" }, { status: 401 });
       let data: Record<string, unknown>;
@@ -186,7 +191,7 @@ export async function POST(req: Request) {
       const eventId = data.id != null ? String(data.id) : `${data.type || "unknown"}:${dataId || "unknown"}:${data.action || "unknown"}`;
       if (!(await claimEvent("mercadopago", eventId))) return NextResponse.json({ received: true, duplicate: true });
       try {
-        if (data.type === "payment" && dataId && MP_ACCESS_TOKEN) {
+        if (data.type === "payment" && dataId) {
           const response = await fetch(`https://api.mercadopago.com/v1/payments/${encodeURIComponent(dataId)}`, {
             headers: { Authorization: `Bearer ${MP_ACCESS_TOKEN}` },
             cache: "no-store",
