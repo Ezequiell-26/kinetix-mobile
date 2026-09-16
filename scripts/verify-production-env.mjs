@@ -21,6 +21,8 @@ const recommended = [
   "BACKUP_S3_BUCKET",
   "ASSETS_S3_BUCKET",
   "SENTRY_DSN",
+  "KINETIX_INTERNAL_API_SECRET",
+  "BACKUP_ADMIN_USER_IDS",
 ];
 
 function fail(message) {
@@ -55,8 +57,12 @@ if (process.env.JWT_SECRET && process.env.JWT_SECRET.length < 32) {
   fail("JWT_SECRET debe tener al menos 32 caracteres");
 }
 
+if (process.env.KINETIX_INTERNAL_API_SECRET && process.env.KINETIX_INTERNAL_API_SECRET.length < 32) {
+  fail("KINETIX_INTERNAL_API_SECRET debe tener al menos 32 caracteres");
+}
+
 if (process.env.NODE_ENV === "production" && process.env.TRUST_PROXY_HEADERS !== "true") {
-  fail("TRUST_PROXY_HEADERS debe ser true en producción para que el rate limiting use la IP real detrás del proxy configurado");
+  fail("TRUST_PROXY_HEADERS debe ser true en producción solo cuando el proxy de borde sobrescribe de forma fiable los headers de IP");
 }
 
 assertUrl("NEXT_PUBLIC_APP_URL");
