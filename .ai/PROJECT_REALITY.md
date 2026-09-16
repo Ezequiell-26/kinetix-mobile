@@ -6,18 +6,24 @@ Este archivo es un mapa operativo, no una promesa de producción. El código, la
 
 ## Estado global
 
-- `main` es la rama operativa solicitada para cambios.
+- `main` es la rama operativa para los cambios de lanzamiento solicitados.
 - Prisma usa PostgreSQL (`DATABASE_URL` + `DIRECT_URL`).
-- Monorepo con `apps/mobile`, `apps/web` y `packages/shared`.
-- KinetixFitt usa la identidad `#C6F91E / #081119 / #0B151E` como base visual.
+- Monorepo con `apps/mobile`, `apps/web` y paquetes compartidos.
+- KinetixFitt usa la identidad visual `#C6F91E / #081119 / #0B151E`.
 - No afirmar `PRODUCTION READY`, `VERIFIED`, `AI-powered` o `COMPLETE` sin evidencia actual.
+
+## Deployment
+
+- `apps/web` se despliega como proyecto Vercel independiente usando el `vercel.json` de la raíz.
+- `apps/mobile` contiene la app dinámica y API y tiene `apps/mobile/vercel.json` para un proyecto Vercel independiente.
+- La web y el backend no deben depender de previews entre sí en producción.
+- El estado actual de GitHub muestra fallos de Vercel por `build-rate-limit`; esto es una limitación externa de la cuenta/entorno de despliegue, no evidencia suficiente de un fallo de TypeScript o de la aplicación.
 
 ## Web
 
-- Landing principal, `/es` y `/en`: implementadas con navegación, CTA, metadata, sitemap, robots y OG dinámico.
-- Homepage debe mantener una propuesta factual: no usar ratings, usuarios, retención, rankings o escasez inventados.
-- La landing usa `https://app.kinetixfitt.com` como URL de producto.
-- `apps/web` es una aplicación real del repositorio; no documentarla como “untracked” o inexistente.
+- Landing principal, `/es` y `/en` implementadas con navegación, CTA, metadata, sitemap, robots y OG dinámico.
+- La homepage debe mantener una propuesta factual: no usar ratings, usuarios, retención, rankings o escasez inventados.
+- `apps/web` es una aplicación real del repositorio.
 
 ## Auth / Seguridad
 
@@ -26,7 +32,10 @@ Este archivo es un mapa operativo, no una promesa de producción. El código, la
 - `getSession()` valida firma y sesión persistente.
 - Logout revoca sesión; logout global revoca todas.
 - Password reset usa `PasswordResetToken`, SHA-256, expiración y consumo atómico.
-- Rate limiting soporta Upstash Redis con fallback local.
+- Rate limiting intenta Upstash Redis distribuido y usa fallback local para desarrollo/degradación.
+- `getClientIp()` solo confía en forwarded headers con `TRUST_PROXY_HEADERS=true`.
+- Registro usa la misma resolución de IP y persistencia de sesión que el resto de auth.
+- Health/readiness no devuelven mensajes internos de excepciones.
 - Uploads usan allowlists y sanitización centralizada.
 - `.env` NO debe versionarse. Solo `.env.example`.
 - Toda API que use `clientId` debe verificar ownership server-side.
@@ -74,19 +83,21 @@ Este archivo es un mapa operativo, no una promesa de producción. El código, la
 - Control Center consume clientes y workout logs reales.
 - Asignación masiva usa API real y ownership.
 - Analytics API está restringida a TRAINER y a su cartera.
-- Pendiente ampliar Trainer Command Center con automatizaciones, cohortes, MRR/LTV y operaciones masivas completas.
+- Automatizaciones avanzadas, cohortes, MRR/LTV y operaciones masivas completas siguen parciales.
 
 ## Notifications / Messaging
 
 - Mensajes limitados al coach asignado y cliente propietario.
 - Check-ins y workout completions notifican al `trainerId` real.
-- Push subscriptions y preferencias existen; entrega end-to-end aún requiere pruebas por plataforma.
+- Push subscriptions y preferencias existen; entrega end-to-end requiere pruebas por plataforma.
 
 ## Native / PWA / 3D
 
 - PWA existe.
 - Capacitor/Electron existen como wrappers.
-- Packaging Android/iOS/macOS/Windows end-to-end: UNVERIFIED hasta generar y probar artefactos.
+- `CAPACITOR_SERVER_URL` controla la URL pública de los builds nativos; ya no hay un preview URL hardcodeado en `capacitor.config.ts`.
+- `.github/workflows/android-release.yml` genera AAB firmado cuando existen los cuatro secrets Android.
+- Packaging Android/iOS/macOS/Windows end-to-end sigue UNVERIFIED hasta generar y probar artefactos reales.
 - 3D usa Three.js/WebGL y geometría procedural. No afirmar WebGPU, Web Workers de cálculo u OffscreenCanvas real sin implementación y medición.
 
 ## Quality gates
@@ -97,9 +108,10 @@ Este archivo es un mapa operativo, no una promesa de producción. El código, la
 
 ## Riesgos abiertos reales
 
-1. Vercel puede estar limitado por cuota/build-rate-limit aunque el código compile correctamente.
+1. Vercel actualmente reporta `build-rate-limit` en los status checks del commit candidato.
 2. Integraciones externas de Stripe/Mercado Pago, email, push, storage S3/R2 y AI requieren credenciales reales para E2E.
 3. Falta completar la pirámide E2E de journeys completos.
 4. Falta terminar sincronización offline real y resolución de conflictos.
 5. Community, automatizaciones y varias capacidades avanzadas de IA siguen parciales.
 6. Native packaging y releases de stores siguen sin verificación end-to-end.
+7. CI de GitHub Actions del commit candidato todavía no tiene una ejecución asociada visible mediante el conector usado para esta revisión.
