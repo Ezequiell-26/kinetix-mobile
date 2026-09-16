@@ -1,6 +1,18 @@
 import { PrismaClient } from "@prisma/client";
 import bcrypt from "bcryptjs";
+
 const prisma = new PrismaClient();
+
+/**
+ * El seed actual reconstruye fixtures completas para desarrollo/CI.
+ * Por seguridad, un proceso configurado como producción nunca puede ejecutar
+ * el borrado destructivo accidentalmente.
+ */
+if (process.env.NODE_ENV === "production") {
+  console.error("Refusing to run destructive Prisma seed with NODE_ENV=production.");
+  process.exit(1);
+}
+
 async function main(){
   const hashedTrainer = await bcrypt.hash("Admin123!",10);
   const hashedClient = await bcrypt.hash("cliente123",10);
