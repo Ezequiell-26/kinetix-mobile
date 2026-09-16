@@ -1,120 +1,124 @@
 # KinetixFitt — Production Readiness
 
 **Fecha:** 2026-09-16  
-**Versión de aplicación:** 1.0.0  
-**Rama objetivo:** `main`
+**Versión:** 1.0.0  
+**Rama operativa:** `main`
 
 ## Estado real
 
-El repositorio contiene la infraestructura y los controles necesarios para preparar un lanzamiento, pero este documento **no certifica un despliegue real**. Un lanzamiento de producción solo debe declararse después de ejecutar los gates de CI y configurar/verificar los servicios externos con credenciales reales.
+El código contiene los controles y automatizaciones necesarios para preparar un lanzamiento. Este documento no certifica que Vercel, PostgreSQL, Stripe, Mercado Pago, email, storage, Redis, Sentry, Apple o Google estén configurados con credenciales reales.
 
-## Cambios de hardening realizados en `main`
+## Cambios aplicados en `main`
 
-- El gate `npm run test` ejecuta las suites de estadísticas, voz, core, dominio y seguridad.
-- Se eliminó de Git el archivo `apps/mobile/.env.production`, que solo contenía placeholders y no debía estar trackeado.
-- `.env.example` distingue `DATABASE_URL` (pooler/runtime) de `DIRECT_URL` (conexión directa para Prisma).
-- Se agregó `scripts/verify-production-env.mjs` para bloquear configuraciones de producción incompletas y evitar imprimir secretos.
-- Se agregó `npm run verify:production` en `apps/mobile`.
-- El health endpoint ya no devuelve mensajes internos de excepciones al cliente.
-- CI usa health-check nativo de PostgreSQL antes de ejecutar migrations/seed/tests/build.
+- Vercel web ahora instala y construye explícitamente `apps/web` sin depender de un workspace raíz que no la incluye.
+- Existe una configuración Vercel separada para `apps/mobile`, que aloja la app dinámica y API.
+- Registro usa la resolución centralizada de IP y ya no consume `X-Forwarded-For` directamente.
+- Registro ya no devuelve errores internos de infraestructura al cliente.
+- Capacitor dejó de depender de un preview URL hardcodeado y usa `CAPACITOR_SERVER_URL`.
+- Se añadió workflow de Android para generar AAB firmado con secrets de GitHub.
+- `DEPLOYMENT_CHECKLIST.md` y `docs/RELEASE_RUNBOOK.md` fueron actualizados para la arquitectura de dos proyectos.
+- `apps/mobile/.env.production` permanece fuera de Git.
 
-## Gates obligatorios antes de lanzar
+## Gates obligatorios
 
-### Código
+### Código / CI
 
-- [ ] CI de `main` en verde.
+- [ ] CI de `main` en verde para el commit candidato.
+- [ ] `npm ci` reproducible.
 - [ ] `npm run typecheck` sin errores.
 - [ ] `npm run lint` sin errores bloqueantes.
 - [ ] `npm run test` en verde.
-- [ ] `npm run build` en verde para mobile/web.
-- [ ] `npm run test:e2e` ejecutado contra un entorno de staging real.
+- [ ] `npm run web:build` en verde.
+- [ ] `npm run mobile:build` en verde.
+- [ ] E2E de journeys críticos ejecutado contra staging real.
+
+### Arquitectura / Vercel
+
+- [ ] Proyecto Vercel web creado con `vercel.json` raíz.
+- [ ] Proyecto Vercel app/API creado usando `apps/mobile/vercel.json`.
+- [ ] Los dos proyectos tienen dominios estables y no dependen de previews.
+- [ ] Cambios relevantes de `apps/mobile` disparan el deployment del backend.
+- [ ] Variables públicas y privadas están separadas entre proyectos.
 
 ### Base de datos
 
-- [ ] Crear/configurar PostgreSQL/Supabase de producción.
-- [ ] `DATABASE_URL` apunta al pooler/runtime correcto.
-- [ ] `DIRECT_URL` apunta al host directo de PostgreSQL.
-- [ ] Ejecutar `prisma migrate deploy` en producción.
-- [ ] Confirmar backups y restauración real.
-- [ ] Confirmar índices y límites de conexiones.
+- [ ] PostgreSQL/Supabase de producción creado.
+- [ ] `DATABASE_URL` usa el pooler/runtime apropiado.
+- [ ] `DIRECT_URL` usa conexión directa.
+- [ ] `prisma migrate deploy` ejecutado.
+- [ ] Backup automático activo.
+- [ ] Restore de prueba completado.
+- [ ] Pool y límites de conexiones revisados.
 
-### Autenticación y seguridad
+### Auth / seguridad
 
-- [ ] `JWT_SECRET` aleatorio, único y >= 32 caracteres.
-- [ ] `TRUST_PROXY_HEADERS=true` solo si el proxy de producción sobrescribe de forma fiable los headers de IP.
-- [ ] Redis/Upstash configurado para rate limiting distribuido.
-- [ ] Verificar login, register, forgot-password, reset-password y logout en staging.
-- [ ] Verificar ownership/IDOR para trainer y athlete con usuarios separados.
-- [ ] Verificar uploads privados y URLs firmadas.
-- [ ] Rotar cualquier secreto que haya aparecido accidentalmente en historial Git.
+- [ ] `JWT_SECRET` único, aleatorio y fuera de Git.
+- [ ] `TRUST_PROXY_HEADERS=true` solo detrás de un proxy que sobrescriba headers del cliente.
+- [ ] Upstash Redis operativo.
+- [ ] Login/register/reset/logout probados.
+- [ ] Ownership/IDOR probado entre cuentas separadas.
+- [ ] Upload/download probado con propietario y usuario ajeno.
+- [ ] Respuestas 4xx/5xx no exponen secretos, stack traces ni errores internos.
+- [ ] Revisión de secretos en historial completada.
 
 ### Pagos
 
 - [ ] Stripe live configurado.
-- [ ] Webhook Stripe live configurado y firma verificada.
-- [ ] Mercado Pago configurado si se habilita en lanzamiento.
-- [ ] Probar checkout, webhook, idempotencia y conciliación en staging/live controlado.
+- [ ] Stripe webhook validado con firma real.
+- [ ] Mercado Pago live configurado si se habilita.
+- [ ] Mercado Pago webhook validado con firma real.
+- [ ] Idempotencia probada con reenvío del mismo evento.
+- [ ] Checkout → webhook → estado de suscripción verificado.
 
-### Email
+### Email / Push / Storage
 
-- [ ] RESEND o SMTP real configurado.
-- [ ] `EMAIL_FROM` usa un dominio verificado.
-- [ ] Probar recuperación de contraseña y correos transaccionales.
+- [ ] Dominio de email verificado.
+- [ ] Reset de contraseña entrega correo real.
+- [ ] Push probado en dispositivo real.
+- [ ] Buckets S3/R2 privados.
+- [ ] Ownership de assets verificado.
+- [ ] Backups privados y restaurables.
 
-### Storage / fotos / backups
+### IA
 
-- [ ] Bucket privado de assets.
-- [ ] Bucket privado de backups.
-- [ ] Credenciales AWS/S3 con mínimo privilegio.
-- [ ] Upload y descarga autorizados por ownership.
-- [ ] Backup automático configurado.
-- [ ] Restauración de prueba completada.
+- [ ] Provider de IA configurado en staging.
+- [ ] `/api/ai/chat` requiere sesión válida.
+- [ ] El sistema responde explícitamente cuando el provider no está configurado.
+- [ ] No se presentan métricas o scores ficticios.
+- [ ] Form Check no se declara “biomecánico” hasta tener modelo real de pose validado.
+- [ ] Costes y límites del provider monitorizados antes de abrir acceso amplio.
 
-### Observabilidad
+### Native / PWA
 
-- [ ] Sentry configurado.
-- [ ] Logs sin tokens, contraseñas, secretos ni datos innecesarios.
-- [ ] Alertas para errores 5xx, base de datos, pagos y autenticación.
-- [ ] Health check monitorizado externamente.
+- [ ] PWA probada en Android, iOS y desktop.
+- [ ] Android AAB firmado y probado mediante release interno.
+- [ ] Bundle ID Android `com.kinetixfitt.app` coincide con Play Console.
+- [ ] iOS archive/IPA firmado y probado en TestFlight.
+- [ ] Desktop Windows/macOS probado.
+- [ ] Firma/notarización desktop configurada antes de distribución pública.
 
-### Dominio y distribución
+### Dominio / Observabilidad
 
-- [ ] Dominio de producción configurado.
-- [ ] HTTPS/SSL verificado.
-- [ ] `NEXT_PUBLIC_APP_URL` y `NEXT_PUBLIC_WEB_URL` apuntan al dominio real.
-- [ ] OpenGraph, favicon, manifest, robots y sitemap comprobados desde producción.
-- [ ] PWA instalada y probada en Android/iOS/desktop.
+- [ ] DNS y HTTPS verificados.
+- [ ] robots/sitemap/OG/favicons comprobados.
+- [ ] Sentry activo.
+- [ ] Alertas 5xx, auth, DB y pagos activas.
+- [ ] `GET /api/health` monitorizado externamente.
+- [ ] Procedimiento de rollback probado.
 
-## Comandos de release
+## Lo que ya NO debe considerarse bloqueante de código
 
-Desde `apps/mobile`:
+La separación de despliegues web/backend, la URL nativa configurable, el control de IP de registro y el workflow Android ya están representados en `main`.
 
-```bash
-npm run verify:production
-npm run typecheck
-npm run lint
-npm run test
-npm run build
-npm run test:e2e
-```
+## Lo que sigue requiriendo intervención externa
 
-En CI, las migrations deben desplegarse con:
-
-```bash
-npx prisma migrate deploy --schema apps/mobile/prisma/schema.prisma
-```
-
-No usar `prisma migrate dev` contra el entorno de producción.
-
-## Riesgos que siguen requiriendo verificación real
-
-1. No se puede afirmar que el despliegue externo, DNS, Stripe, Mercado Pago, S3, Redis, email o Sentry estén correctamente configurados solo mirando el código.
-2. El conector utilizado para esta revisión no ejecuta el build completo del repositorio en una máquina de CI; por eso el estado final debe confirmarse con GitHub Actions.
-3. Los flujos E2E requieren credenciales/servicios y un entorno accesible para validación real.
-4. La aplicación usa un shell Electron además del despliegue web; la generación de instaladores debe probarse por sistema operativo.
+1. Credenciales reales de servicios.
+2. Configuración de dominios/DNS.
+3. Base de datos, backups y restore real.
+4. E2E contra staging/producción controlada.
+5. Cuentas y certificados Apple/Google.
+6. Validación de proveedores de pago, email, push, storage e IA.
 
 ## Regla de lanzamiento
 
-El release se considera **listo para lanzamiento técnico** cuando todos los gates marcados como obligatorios estén en verde y los servicios externos hayan sido verificados en staging o producción controlado.
-
-El objetivo de este archivo es evitar que una documentación optimista sustituya a una verificación real.
+El release se considera técnicamente candidato cuando el código y CI pasan todos los gates. Se considera listo para usuarios únicamente cuando además las integraciones externas y los journeys reales han sido verificados.
