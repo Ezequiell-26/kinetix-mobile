@@ -52,6 +52,12 @@ jobs:
       - name: AI repository static guard
         run: npm run ai:audit:strict
 
+      - name: AI change manifest guard
+        run: npm run ai:change:manifest
+
+      - name: AI API contract heuristic audit
+        run: npm run ai:api:audit
+
       - name: AI evidence regression snapshot
         run: |
           mkdir -p "$RUNNER_TEMP/kinetix-evidence"
@@ -116,6 +122,12 @@ jobs:
           BASE_URL: http://127.0.0.1:3001
           TRUST_PROXY_HEADERS: "false"
         run: npm run test:security -w apps/mobile
+
+      - name: Product E2E (Playwright)
+        if: ${{ hashFiles('apps/mobile/playwright.config.*', 'apps/mobile/tests/e2e/**', 'apps/web/playwright.config.*', 'apps/web/tests/e2e/**') != '' }}
+        env:
+          BASE_URL: http://127.0.0.1:3001
+        run: npm run test:e2e -w apps/mobile --if-present
 
       - name: Stop mobile server
         if: always()
