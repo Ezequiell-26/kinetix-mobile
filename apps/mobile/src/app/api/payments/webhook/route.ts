@@ -6,6 +6,8 @@ import { prisma } from "@/lib/db";
 const MP_ACCESS_TOKEN = process.env.MP_ACCESS_TOKEN || process.env.MERCADO_PAGO_ACCESS_TOKEN;
 const MP_WEBHOOK_SECRET = process.env.MP_WEBHOOK_SECRET || process.env.MERCADO_PAGO_WEBHOOK_SECRET;
 
+type Provider = "stripe" | "mercadopago";
+
 function constantTimeHexEqual(a: string, b: string) {
   const aa = Buffer.from(a, "utf8");
   const bb = Buffer.from(b, "utf8");
@@ -28,22 +30,15 @@ function verifyMpSignature(req: Request, dataId: string | null, secret: string) 
   return constantTimeHexEqual(digest, v1);
 }
 
-async function isClaimed(provider: "stripe" | "mercadopago", eventId: string) {
-  const existing = await prisma.$queryRaw<Array<{ id: string }>>(Prisma.sql`
-    SELECT "id" FROM "PaymentWebhookEvent"
-    WHERE "provider" = ${provider} AND "eventId" = ${eventId}
-    LIMIT 1
-  `);
-  return existing.length > 0;
-}
-
-async function recordEvent(provider: "stripe" | "mercadopago", eventId: string) {
-  await prisma.$queryRaw<Array<{ id: string }>>(Prisma.sql`
+/** Claims an event atomically. Returns false for duplicates/races. */
+async function claimEvent(provider: Provider, eventId: string) {
+  const claimed = await prisma.$queryRaw<Array<{ id: string }>>(Prisma.sql`
     INSERT INTO "PaymentWebhookEvent" ("id", "provider", "eventId")
     VALUES (${crypto.randomUUID()}, ${provider}, ${eventId})
     ON CONFLICT ("provider", "eventId") DO NOTHING
     RETURNING "id"
   `);
+  return claimed.length > 0;
 }
 
 async function settlePayment(input: {
@@ -117,58 +112,64 @@ export async function POST(req: Request) {
         return NextResponse.json({ error: "Invalid signature" }, { status: 400 });
       }
 
-      if (await isClaimed("stripe", event.id)) return NextResponse.json({ received: true, duplicate: true });
-      const payload = event.data.object as unknown as Record<string, unknown>;
-      const metadata = payload.metadata && typeof payload.metadata === "object" ? payload.metadata as Record<string, unknown> : {};
-      switch (event.type) {
-        case "checkout.session.completed":
-        case "checkout.session.async_payment_succeeded":
-          await settlePayment({
-            paymentId: typeof metadata.paymentId === "string" ? metadata.paymentId : null,
-            clientId: typeof metadata.clientId === "string" ? metadata.clientId : null,
-            status: "PAGADO",
-            method: "STRIPE",
-            externalDescription: `Pago vía Stripe · ${event.id}`,
-            amount: typeof payload.amount_total === "number" ? payload.amount_total / 100 : null,
-          });
-          break;
-        case "payment_intent.succeeded":
-          await settlePayment({
-            paymentId: typeof metadata.paymentId === "string" ? metadata.paymentId : null,
-            clientId: typeof metadata.clientId === "string" ? metadata.clientId : null,
-            status: "PAGADO",
-            method: "STRIPE",
-            externalDescription: `PaymentIntent · ${event.id}`,
-            amount: typeof payload.amount_received === "number" ? payload.amount_received / 100 : null,
-          });
-          break;
-        case "payment_intent.payment_failed":
-          await settlePayment({
-            paymentId: typeof metadata.paymentId === "string" ? metadata.paymentId : null,
-            clientId: typeof metadata.clientId === "string" ? metadata.clientId : null,
-            status: "VENCIDO",
-            method: "STRIPE",
-            externalDescription: `Pago rechazado · ${event.id}`,
-          });
-          break;
-        case "customer.subscription.updated":
-        case "customer.subscription.deleted": {
-          const clientId = typeof metadata.clientId === "string" ? metadata.clientId : null;
-          if (clientId) {
-            await prisma.subscription.updateMany({
-              where: { clientId },
-              data: {
-                status: subscriptionStatus(String(payload.status || (event.type.endsWith("deleted") ? "canceled" : "unknown"))),
-                ...(typeof payload.current_period_end === "number" ? { nextPayment: new Date(payload.current_period_end * 1000) } : {}),
-              },
+      if (!(await claimEvent("stripe", event.id))) return NextResponse.json({ received: true, duplicate: true });
+      try {
+        const payload = event.data.object as unknown as Record<string, unknown>;
+        const metadata = payload.metadata && typeof payload.metadata === "object" ? payload.metadata as Record<string, unknown> : {};
+        switch (event.type) {
+          case "checkout.session.completed":
+          case "checkout.session.async_payment_succeeded":
+            await settlePayment({
+              paymentId: typeof metadata.paymentId === "string" ? metadata.paymentId : null,
+              clientId: typeof metadata.clientId === "string" ? metadata.clientId : null,
+              status: "PAGADO",
+              method: "STRIPE",
+              externalDescription: `Pago vía Stripe · ${event.id}`,
+              amount: typeof payload.amount_total === "number" ? payload.amount_total / 100 : null,
             });
+            break;
+          case "payment_intent.succeeded":
+            await settlePayment({
+              paymentId: typeof metadata.paymentId === "string" ? metadata.paymentId : null,
+              clientId: typeof metadata.clientId === "string" ? metadata.clientId : null,
+              status: "PAGADO",
+              method: "STRIPE",
+              externalDescription: `PaymentIntent · ${event.id}`,
+              amount: typeof payload.amount_received === "number" ? payload.amount_received / 100 : null,
+            });
+            break;
+          case "payment_intent.payment_failed":
+            await settlePayment({
+              paymentId: typeof metadata.paymentId === "string" ? metadata.paymentId : null,
+              clientId: typeof metadata.clientId === "string" ? metadata.clientId : null,
+              status: "VENCIDO",
+              method: "STRIPE",
+              externalDescription: `Pago rechazado · ${event.id}`,
+            });
+            break;
+          case "customer.subscription.updated":
+          case "customer.subscription.deleted": {
+            const clientId = typeof metadata.clientId === "string" ? metadata.clientId : null;
+            if (clientId) {
+              await prisma.subscription.updateMany({
+                where: { clientId },
+                data: {
+                  status: subscriptionStatus(String(payload.status || (event.type.endsWith("deleted") ? "canceled" : "unknown"))),
+                  ...(typeof payload.current_period_end === "number" ? { nextPayment: new Date(payload.current_period_end * 1000) } : {}),
+                },
+              });
+            }
+            break;
           }
-          break;
+          default:
+            break;
         }
-        default:
-          break;
+      } catch (processingError) {
+        // Keep the event claimed only if processing completed. Delete the claim on failure
+        // so Stripe can retry safely; the payment update itself remains guarded by status.
+        await prisma.$executeRaw(Prisma.sql`DELETE FROM "PaymentWebhookEvent" WHERE "provider" = ${"stripe"} AND "eventId" = ${event.id}`);
+        throw processingError;
       }
-      await recordEvent("stripe", event.id);
       return NextResponse.json({ received: true });
     }
 
@@ -183,25 +184,29 @@ export async function POST(req: Request) {
         return NextResponse.json({ error: "Invalid JSON" }, { status: 400 });
       }
       const eventId = data.id != null ? String(data.id) : `${data.type || "unknown"}:${dataId || "unknown"}:${data.action || "unknown"}`;
-      if (await isClaimed("mercadopago", eventId)) return NextResponse.json({ received: true, duplicate: true });
-      if (data.type === "payment" && dataId && MP_ACCESS_TOKEN) {
-        const response = await fetch(`https://api.mercadopago.com/v1/payments/${encodeURIComponent(dataId)}`, {
-          headers: { Authorization: `Bearer ${MP_ACCESS_TOKEN}` },
-          cache: "no-store",
-        });
-        if (!response.ok) return NextResponse.json({ error: "No se pudo verificar el pago con Mercado Pago" }, { status: 502 });
-        const payment = await response.json() as Record<string, unknown>;
-        const externalReference = typeof payment.external_reference === "string" ? payment.external_reference : null;
-        const status = payment.status === "approved" ? "PAGADO" : payment.status === "pending" || payment.status === "in_process" ? "PENDIENTE" : "VENCIDO";
-        await settlePayment({
-          paymentId: externalReference,
-          status,
-          method: "MERCADOPAGO",
-          externalDescription: `Mercado Pago · ${dataId}`,
-          amount: typeof payment.transaction_amount === "number" ? payment.transaction_amount : null,
-        });
+      if (!(await claimEvent("mercadopago", eventId))) return NextResponse.json({ received: true, duplicate: true });
+      try {
+        if (data.type === "payment" && dataId && MP_ACCESS_TOKEN) {
+          const response = await fetch(`https://api.mercadopago.com/v1/payments/${encodeURIComponent(dataId)}`, {
+            headers: { Authorization: `Bearer ${MP_ACCESS_TOKEN}` },
+            cache: "no-store",
+          });
+          if (!response.ok) throw new Error("Mercado Pago payment lookup failed");
+          const payment = await response.json() as Record<string, unknown>;
+          const externalReference = typeof payment.external_reference === "string" ? payment.external_reference : null;
+          const status = payment.status === "approved" ? "PAGADO" : payment.status === "pending" || payment.status === "in_process" ? "PENDIENTE" : "VENCIDO";
+          await settlePayment({
+            paymentId: externalReference,
+            status,
+            method: "MERCADOPAGO",
+            externalDescription: `Mercado Pago · ${dataId}`,
+            amount: typeof payment.transaction_amount === "number" ? payment.transaction_amount : null,
+          });
+        }
+      } catch (processingError) {
+        await prisma.$executeRaw(Prisma.sql`DELETE FROM "PaymentWebhookEvent" WHERE "provider" = ${"mercadopago"} AND "eventId" = ${eventId}`);
+        throw processingError;
       }
-      await recordEvent("mercadopago", eventId);
       return NextResponse.json({ received: true });
     }
 
