@@ -2,9 +2,9 @@ import { NextResponse } from "next/server";
 import { checkDatabaseConnection } from "@/lib/db";
 
 /**
- * Endpoint de readiness para Kubernetes.
- * Indica si la aplicación está lista para recibir tráfico.
- * Verifica dependencias críticas antes de marcar como ready.
+ * Endpoint de readiness para Kubernetes/Vercel.
+ * Solo informa si las dependencias críticas están listas; nunca expone secretos
+ * ni detalles de excepciones al cliente.
  */
 export async function GET() {
   try {
@@ -17,31 +17,22 @@ export async function GET() {
       },
     };
 
-    // 1. Verificar variables de entorno críticas
     const requiredEnvVars = ["DATABASE_URL", "JWT_SECRET"];
-    const missingVars = requiredEnvVars.filter(
-      (varName) => !process.env[varName]
-    );
+    const missingVars = requiredEnvVars.filter((varName) => !process.env[varName]);
 
     if (missingVars.length === 0) {
       checks.checks.environment = true;
     } else {
       checks.ready = false;
-      checks.checks.environment = false;
-      console.warn("Missing environment variables:", missingVars);
+      console.error("[readiness] critical environment is incomplete");
     }
 
-    // 2. Verificar conexión a base de datos
     const dbConnected = await checkDatabaseConnection();
     if (dbConnected) {
       checks.checks.database = true;
     } else {
       checks.ready = false;
-      checks.checks.database = false;
     }
-
-    // Determinar estado HTTP
-    const statusCode = checks.ready ? 200 : 503;
 
     return NextResponse.json(
       {
@@ -50,27 +41,27 @@ export async function GET() {
         checks: checks.checks,
       },
       {
-        status: statusCode,
+        status: checks.ready ? 200 : 503,
         headers: {
           "Cache-Control": "no-cache, no-store, must-revalidate",
           "X-Content-Type-Options": "nosniff",
         },
-      }
+      },
     );
   } catch (error) {
-    console.error("Readiness check failed:", error);
+    console.error("[readiness] check failed", error);
     return NextResponse.json(
       {
         ready: false,
         timestamp: new Date().toISOString(),
-        error: error instanceof Error ? error.message : "Unknown error",
       },
       {
         status: 503,
         headers: {
           "Cache-Control": "no-cache, no-store, must-revalidate",
+          "X-Content-Type-Options": "nosniff",
         },
-      }
+      },
     );
   }
 }
