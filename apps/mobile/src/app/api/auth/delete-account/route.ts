@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
-import { getSession, verifyPassword } from "@/lib/auth";
+import { clearAuthCookie, getSession, verifyPassword } from "@/lib/auth";
 
 /**
  * Eliminación definitiva de cuenta.
@@ -15,7 +15,7 @@ export async function POST(request: Request) {
     const body = await request.json().catch(() => null) as { password?: unknown; confirmation?: unknown } | null;
     const password = typeof body?.password === "string" ? body.password : "";
     const confirmation = typeof body?.confirmation === "string" ? body.confirmation : "";
-    if (!password || confirmation !== "ELIMINAR" ) {
+    if (!password || confirmation !== "ELIMINAR") {
       return NextResponse.json({ error: "Confirmación inválida" }, { status: 400 });
     }
 
@@ -27,25 +27,19 @@ export async function POST(request: Request) {
     await prisma.$transaction(async (tx) => {
       if (user.role === "CLIENT") {
         const client = await tx.client.findFirst({ where: { userId: user.id }, select: { id: true } });
-        if (client) {
-          await tx.client.delete({ where: { id: client.id } });
-        }
-        // La relación User→WorkoutLog/CheckIn/Measurement/Photo usa SetNull,
-        // por lo que eliminamos también los registros directamente vinculados
-        // por userId que pudieran existir sin Client (legacy/importaciones).
+        if (client) await tx.client.delete({ where: { id: client.id } });
         await tx.workoutLog.deleteMany({ where: { userId: user.id } });
         await tx.checkIn.deleteMany({ where: { userId: user.id } });
         await tx.progressMeasurement.deleteMany({ where: { userId: user.id } });
         await tx.progressPhoto.deleteMany({ where: { userId: user.id } });
         await tx.privateAsset.deleteMany({ where: { userId: user.id } });
       } else {
-        // Al borrar un trainer no borramos clientes de terceros: quedan
-        // temporalmente sin coach y pueden reasignarse administrativamente.
         await tx.client.updateMany({ where: { trainerId: user.id }, data: { trainerId: null } });
       }
       await tx.user.delete({ where: { id: user.id } });
     });
 
+    await clearAuthCookie();
     return NextResponse.json({ ok: true });
   } catch (error) {
     console.error("[DELETE-ACCOUNT] failed", error);
