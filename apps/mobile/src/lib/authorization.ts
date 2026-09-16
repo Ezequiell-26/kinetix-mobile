@@ -1,139 +1,52 @@
 /**
- * authorization.ts — Funciones centrales de autorización para ownership.
- * 
- * Un TRAINER solo puede operar sobre clientes que le pertenecen.
- * Nunca confiar únicamente en un clientId enviado por el cliente.
+ * authorization.ts — funciones centrales de autorización multi-trainer.
  */
 
 import { prisma } from "./db";
-import type { JWTPayload } from "./auth";
 
-/**
- * Verifica que un trainer es dueño de un cliente específico.
- * Ownership REAL por Client.trainerId (multi-trainer). Un trainerId null
- * en el cliente = sin dueño = nadie opera (fail-closed, ver seed).
- */
-export async function assertTrainerOwnsClient(
-  trainerId: string,
-  clientId: string
-): Promise<boolean> {
+export async function assertTrainerOwnsClient(trainerId: string, clientId: string): Promise<boolean> {
   if (!trainerId || !clientId) return false;
-
-  const client = await prisma.client.findUnique({
-    where: { id: clientId },
-    select: { trainerId: true },
-  });
-
+  const client = await prisma.client.findUnique({ where: { id: clientId }, select: { trainerId: true } });
   return client?.trainerId === trainerId;
 }
 
-/**
- * Obtiene el clientId asociado a un usuario CLIENT.
- * Retorna null si el usuario no es CLIENT o no tiene cliente asociado.
- */
-export async function getClientIdForUser(userId: string): Promise<string | null> {
+/** Obtiene el clientId por la relación estable userId; email solo es fallback legacy. */
+export async function getClientIdForUser(userId: string, email?: string): Promise<string | null> {
+  if (!userId) return null;
   const client = await prisma.client.findFirst({
-    where: { OR: [{ userId }, { email: userId }] },
+    where: {
+      OR: [
+        { userId },
+        ...(email ? [{ email: email.toLowerCase().trim() }] : []),
+      ],
+    },
     select: { id: true },
   });
   return client?.id ?? null;
 }
 
-/**
- * Verifica que un archivo subido pertenece a un cliente que el trainer posee.
- * Usado para validar acceso a uploads.
- */
 export async function assertFileOwnership(
   userId: string,
   role: "TRAINER" | "CLIENT",
-  url: string
+  url: string,
 ): Promise<boolean> {
-  // Extraer tipo y filename de la URL (/api/uploads/{type}/{filename})
   const parts = url.split("/");
   const type = parts[parts.length - 2];
   const filename = parts[parts.length - 1];
-
   if (!type || !filename) return false;
 
-  // CLIENT solo puede ver sus propios archivos
-  if (role === "CLIENT") {
-    const clientId = await getClientIdForUser(userId);
-    if (!clientId) return false;
+  const asset = await prisma.privateAsset.findUnique({
+    where: { filename },
+    select: { userId: true, clientId: true, type: true },
+  });
+  if (!asset || asset.type !== type) return false;
 
-    if (type === "progress") {
-      const photo = await prisma.progressPhoto.findFirst({
-        where: { url, clientId },
-        select: { id: true },
-      });
-      return !!photo;
-    }
-
-    if (type === "checkin") {
-      const checkin = await prisma.checkIn.findFirst({
-        where: { fotos: { contains: url }, clientId },
-        select: { id: true },
-      });
-      return !!checkin;
-    }
-
-    if (type === "message") {
-      const msg = await prisma.message.findFirst({
-        where: { image: url, OR: [{ senderId: userId }, { receiverId: userId }] },
-        select: { id: true },
-      });
-      return !!msg;
-    }
-
-    return false;
-  }
-
-  // TRAINER puede ver archivos de sus clientes
-  // (la verificación de ownership del cliente se hace en el caller)
-  if (type === "progress") {
-    const photo = await prisma.progressPhoto.findFirst({
-      where: { url },
-      include: { client: { select: { id: true } } },
-    });
-    if (!photo) return false;
-    if (!photo.clientId) return photo.userId === userId;
-    // Verificar que el cliente pertenece al trainer
-    return assertTrainerOwnsClient(userId, photo.clientId);
-  }
-
-  if (type === "checkin") {
-    const checkin = await prisma.checkIn.findFirst({
-      where: { fotos: { contains: url } },
-      include: { client: { select: { id: true } } },
-    });
-    if (!checkin) return false;
-    if (!checkin.clientId) return checkin.userId === userId;
-    return assertTrainerOwnsClient(userId, checkin.clientId);
-  }
-
-  if (type === "message") {
-    const msg = await prisma.message.findFirst({
-      where: { image: url },
-      select: { senderId: true, receiverId: true },
-    });
-    if (!msg) return false;
-    return msg.senderId === userId || msg.receiverId === userId;
-  }
-
-  return false;
+  if (role === "CLIENT") return asset.userId === userId || Boolean(asset.clientId && await prisma.client.findFirst({ where: { id: asset.clientId, userId }, select: { id: true } }));
+  if (asset.userId === userId) return true;
+  return Boolean(asset.clientId && await assertTrainerOwnsClient(userId, asset.clientId));
 }
 
-/**
- * Versión que lanza error o retorna null para uso directo en handlers.
- * Retorna el clientId si es válido, null si no.
- */
-export async function validateClientIdForTrainer(
-  trainerId: string,
-  clientId: string | null
-): Promise<string | null> {
+export async function validateClientIdForTrainer(trainerId: string, clientId: string | null): Promise<string | null> {
   if (!clientId) return null;
-  
-  const owns = await assertTrainerOwnsClient(trainerId, clientId);
-  if (!owns) return null;
-  
-  return clientId;
+  return await assertTrainerOwnsClient(trainerId, clientId) ? clientId : null;
 }

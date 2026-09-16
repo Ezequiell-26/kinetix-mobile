@@ -1,59 +1,34 @@
 import { NextResponse } from "next/server";
 import { checkDatabaseConnection } from "@/lib/db";
 
-/**
- * Endpoint de health check para Kubernetes y monitoreo.
- * Verifica:
- * - Estado de la aplicación
- * - Variables de entorno críticas
- * - Conexión a base de datos (opcional)
- */
+/** Public liveness/readiness probe with minimal information disclosure. */
 export async function GET() {
   try {
-    // Verificaciones básicas
-    const checks = {
-      status: "healthy",
-      timestamp: new Date().toISOString(),
-      version: process.env.npm_package_version || "1.0.0",
-      environment: process.env.NODE_ENV || "development",
-      database: "unknown",
-      uptime: process.uptime(),
-    };
-
-    // Verificar conexión a base de datos
-    const dbConnected = await checkDatabaseConnection();
-    checks.database = dbConnected ? "connected" : "disconnected";
-
-    // Determinar estado general
-    const isHealthy = dbConnected;
-    
+    const database = await checkDatabaseConnection();
     return NextResponse.json(
       {
-        ...checks,
-        status: isHealthy ? "healthy" : "degraded",
+        status: database ? "healthy" : "degraded",
+        timestamp: new Date().toISOString(),
       },
-      { 
-        status: isHealthy ? 200 : 503,
+      {
+        status: database ? 200 : 503,
         headers: {
-          "Cache-Control": "no-cache, no-store, must-revalidate",
+          "Cache-Control": "no-store, max-age=0",
           "X-Content-Type-Options": "nosniff",
-        }
-      }
+        },
+      },
     );
   } catch (error) {
-    console.error("Health check failed:", error);
+    console.error("[health] check failed", error);
     return NextResponse.json(
+      { status: "unhealthy", timestamp: new Date().toISOString() },
       {
-        status: "unhealthy",
-        timestamp: new Date().toISOString(),
-        error: error instanceof Error ? error.message : "Unknown error",
-      },
-      { 
         status: 503,
         headers: {
-          "Cache-Control": "no-cache, no-store, must-revalidate",
-        }
-      }
+          "Cache-Control": "no-store, max-age=0",
+          "X-Content-Type-Options": "nosniff",
+        },
+      },
     );
   }
 }

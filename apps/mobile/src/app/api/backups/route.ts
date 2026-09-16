@@ -1,26 +1,30 @@
 import { NextResponse } from "next/server";
 import { backupService } from "@/lib/backups";
-import { getCurrentUser, requireRole } from "@/lib/auth";
+import { getCurrentUser } from "@/lib/auth";
 
-/**
- * GET /api/backups - Lista todos los backups disponibles
- * Solo accesible para TRAINER con rol de admin
- */
+function isBackupAdmin(userId: string) {
+  const configured = process.env.BACKUP_ADMIN_USER_IDS || "";
+  const ids = configured.split(",").map((id) => id.trim()).filter(Boolean);
+  return ids.length > 0 && ids.includes(userId);
+}
+
+function serverError(message: string) {
+  return NextResponse.json({ error: message }, { status: 500 });
+}
+
+async function authorize() {
+  const user = await getCurrentUser();
+  if (!user) return { response: NextResponse.json({ error: "No autorizado" }, { status: 401 }) };
+  if (!isBackupAdmin(user.id)) return { response: NextResponse.json({ error: "Acceso denegado" }, { status: 403 }) };
+  return { user };
+}
+
+/** GET /api/backups - Lista backups. Requiere BACKUP_ADMIN_USER_IDS. */
 export async function GET() {
+  const access = await authorize();
+  if (access.response) return access.response;
   try {
-    // Verificar autenticación y rol
-    const user = await getCurrentUser();
-    if (!user) {
-      return NextResponse.json({ error: "No autorizado" }, { status: 401 });
-    }
-
-    // Solo trainers pueden ver backups
-    if (user.role !== "TRAINER") {
-      return NextResponse.json({ error: "Acceso denegado" }, { status: 403 });
-    }
-
     const backups = await backupService.listBackups();
-
     return NextResponse.json({
       success: true,
       count: backups.length,
@@ -33,39 +37,20 @@ export async function GET() {
     });
   } catch (error) {
     console.error("[BACKUP API] Error listing backups:", error);
-    return NextResponse.json(
-      { error: "Error al listar backups", details: error instanceof Error ? error.message : "Unknown" },
-      { status: 500 }
-    );
+    return serverError("Error al listar backups");
   }
 }
 
-/**
- * POST /api/backups - Crea un nuevo backup
- * Solo accesible para TRAINER con rol de admin
- */
+/** POST /api/backups - Crea un backup. Requiere BACKUP_ADMIN_USER_IDS. */
 export async function POST() {
+  const access = await authorize();
+  if (access.response) return access.response;
   try {
-    // Verificar autenticación y rol
-    const user = await getCurrentUser();
-    if (!user) {
-      return NextResponse.json({ error: "No autorizado" }, { status: 401 });
-    }
-
-    // Solo trainers pueden crear backups
-    if (user.role !== "TRAINER") {
-      return NextResponse.json({ error: "Acceso denegado" }, { status: 403 });
-    }
-
     const result = await backupService.createBackup();
-
     if (!result.success) {
-      return NextResponse.json(
-        { error: "Error al crear backup", details: result.error },
-        { status: 500 }
-      );
+      console.error("[BACKUP API] Backup service failed", result.error);
+      return serverError("Error al crear backup");
     }
-
     return NextResponse.json({
       success: true,
       message: "Backup creado exitosamente",
@@ -74,14 +59,10 @@ export async function POST() {
         sizeBytes: result.sizeBytes,
         sizeMB: result.sizeBytes ? (result.sizeBytes / (1024 * 1024)).toFixed(2) : "0",
         s3Url: result.s3Url,
-        localPath: result.filePath,
       },
     });
   } catch (error) {
     console.error("[BACKUP API] Error creating backup:", error);
-    return NextResponse.json(
-      { error: "Error al crear backup", details: error instanceof Error ? error.message : "Unknown" },
-      { status: 500 }
-    );
+    return serverError("Error al crear backup");
   }
 }

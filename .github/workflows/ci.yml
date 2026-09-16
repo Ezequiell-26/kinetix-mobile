@@ -1,8 +1,7 @@
 name: CI
 
-# Gates del monorepo. apps/mobile usa el lock raíz; apps/web conserva su
-# lock independiente para no mezclar dos árboles de dependencias de Next/React.
-# PostgreSQL efímero es la base de CI y coincide con el schema PostgreSQL.
+# Quality gates del monorepo. La base efímera coincide con apps/mobile Prisma.
+# La suite de seguridad HTTP se ejecuta contra un servidor Next real levantado en CI.
 
 on:
   push:
@@ -22,11 +21,22 @@ jobs:
           POSTGRES_DB: postgres
         ports:
           - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U postgres -d postgres"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 20
 
     env:
       DATABASE_URL: postgresql://postgres:postgres@localhost:5432/postgres
       DIRECT_URL: postgresql://postgres:postgres@localhost:5432/postgres
       JWT_SECRET: ci-only-insecure-32chars-minimum
+      NODE_ENV: test
+      NEXT_PUBLIC_APP_URL: http://127.0.0.1:3001
+      NEXT_PUBLIC_WEB_URL: http://127.0.0.1:3001
+      TRUST_PROXY_HEADERS: "false"
+      KINETIX_INTERNAL_API_SECRET: ci-only-internal-secret-32chars-minimum
+      BACKUP_ADMIN_USER_IDS: "ci-backup-admin"
 
     steps:
       - uses: actions/checkout@v5
@@ -55,28 +65,48 @@ jobs:
       - name: Lint web
         run: npm run lint --prefix apps/web
 
-      - name: Esperar Postgres efímero
-        run: |
-          for i in $(seq 1 30); do
-            if echo "SELECT 1;" | npx prisma db execute --stdin --schema apps/mobile/prisma/schema.prisma >/dev/null 2>&1; then
-              echo "Postgres listo"
-              exit 0
-            fi
-            sleep 3
-          done
-          echo "Postgres no respondió a tiempo"
-          exit 1
-
       - name: Migrate + seed
         run: |
           npx prisma migrate deploy --schema apps/mobile/prisma/schema.prisma
           npm run db:seed -w apps/mobile
 
-      - name: Tests mobile
-        run: npm run test -w apps/mobile
+      - name: Unit tests mobile
+        run: npm run test:unit -w apps/mobile
 
       - name: Build mobile
         run: npm run build -w apps/mobile
+
+      - name: Start mobile server for security E2E
+        shell: bash
+        run: |
+          set -euo pipefail
+          nohup npm run start -w apps/mobile > "$RUNNER_TEMP/kinetix-next.log" 2>&1 &
+          echo $! > "$RUNNER_TEMP/kinetix-next.pid"
+          for i in {1..60}; do
+            if curl --fail --silent --show-error http://127.0.0.1:3001/api/health >/dev/null; then
+              exit 0
+            fi
+            sleep 2
+          done
+          cat "$RUNNER_TEMP/kinetix-next.log"
+          exit 1
+
+      - name: Security HTTP E2E
+        env:
+          BASE_URL: http://127.0.0.1:3001
+          TRUST_PROXY_HEADERS: "false"
+        run: npm run test:security -w apps/mobile
+
+      - name: Stop mobile server
+        if: always()
+        shell: bash
+        run: |
+          if [ -f "$RUNNER_TEMP/kinetix-next.pid" ]; then
+            kill "$(cat "$RUNNER_TEMP/kinetix-next.pid")" || true
+          fi
+          if [ -f "$RUNNER_TEMP/kinetix-next.log" ]; then
+            tail -n 200 "$RUNNER_TEMP/kinetix-next.log" || true
+          fi
 
       - name: Build web
         run: npm run build --prefix apps/web

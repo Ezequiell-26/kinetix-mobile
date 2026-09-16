@@ -72,7 +72,6 @@ model User {
   progressMeasurements ProgressMeasurement[]
   progressPhotos ProgressPhoto[]
 
-  @@index([email])
   @@index([role])
 }
 
@@ -125,8 +124,8 @@ model Client {
   experience    String?
   availability  Int?
   equipment     String?
-  createdAt     DateTime @default(now())
-  updatedAt     DateTime @updatedAt
+  createdAt     DateTime     @default(now())
+  updatedAt     DateTime     @updatedAt
   assignedProgramId String?
   assignedProgram Program? @relation(fields: [assignedProgramId], references: [id], onDelete: SetNull)
   workoutLogs   WorkoutLog[]
@@ -389,16 +388,19 @@ model Payment {
   method    String?
   date      DateTime @default(now())
   description String?
+  checkoutIdempotencyKey String? @unique
+  providerCheckoutId String?
 
   @@index([clientId])
   @@index([date])
   @@index([status])
+  @@index([providerCheckoutId])
 }
 
 model PaymentWebhookEvent {
   id        String   @id @default(cuid())
   provider  String
-  eventId   String
+  eventId   String   
   createdAt DateTime @default(now())
 
   @@unique([provider, eventId])
@@ -468,4 +470,18 @@ model PushSubscription {
 
   @@index([userId])
   @@index([active])
+}
+
+model PrivateAsset {
+  id          String   @id @default(cuid())
+  userId      String
+  clientId    String?
+  type        String
+  filename    String   @unique
+  contentType String
+  sizeBytes   Int
+  createdAt   DateTime @default(now())
+
+  @@index([userId, type, createdAt])
+  @@index([clientId, type, createdAt])
 }

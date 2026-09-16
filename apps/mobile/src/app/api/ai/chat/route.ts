@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 import { getSession } from "@/lib/auth";
 import { prisma } from "@/lib/db";
 import { assertTrainerOwnsClient } from "@/lib/authorization";
-import { checkRateLimit } from "@/lib/rate-limiter";
+import { checkRateLimit, getClientIp } from "@/lib/rate-limiter";
 
 const MAX_INPUT = 1200;
 const MAX_CONTEXT_LOGS = 12;
@@ -26,16 +26,26 @@ export async function POST(req: Request) {
   const session = await getSession();
   if (!session) return NextResponse.json({ error: "No auth" }, { status: 401 });
 
-  const ip = req.headers.get("x-real-ip") || req.headers.get("x-forwarded-for")?.split(",")[0]?.trim() || "unknown";
+  const ip = getClientIp({ headers: req.headers, ip: (req as Request & { ip?: string }).ip });
   const limit = await checkRateLimit(ip, `ai-chat:${session.id}`, { max: 20, windowMs: 60 * 60 * 1000 });
-  if (!limit.success) return NextResponse.json({ error: "Límite de IA alcanzado. Probá nuevamente más tarde." }, { status: 429, headers: { "Retry-After": String(Math.ceil(limit.resetMs / 1000)) } });
+  if (!limit.success) {
+    return NextResponse.json(
+      { error: "Límite de IA alcanzado. Probá nuevamente más tarde." },
+      { status: 429, headers: { "Retry-After": String(Math.max(1, Math.ceil(limit.resetMs / 1000))) } },
+    );
+  }
 
   const body = await req.json().catch(() => null) as { message?: unknown; clientId?: unknown } | null;
   const message = sanitize(body?.message);
   if (!message) return NextResponse.json({ error: "Escribí una consulta." }, { status: 400 });
   if (typeof body?.clientId !== "undefined" && typeof body.clientId !== "string") return NextResponse.json({ error: "clientId inválido" }, { status: 400 });
 
-  if (!AI_API_KEY) return NextResponse.json({ configured: false, answer: "KinetixFitt AI todavía no tiene un proveedor configurado en este entorno. La app sigue funcionando sin inventar una respuesta de IA." });
+  if (!AI_API_KEY) {
+    return NextResponse.json({
+      configured: false,
+      answer: "KinetixFitt AI todavía no tiene un proveedor configurado en este entorno. La app sigue funcionando sin inventar una respuesta de IA.",
+    });
+  }
 
   let context = `Rol: ${session.role === "TRAINER" ? "coach" : "atleta"}.`;
   const clientId = typeof body?.clientId === "string" && body.clientId ? body.clientId : null;
@@ -54,7 +64,7 @@ export async function POST(req: Request) {
     if (!(await assertTrainerOwnsClient(session.id, clientId))) return NextResponse.json({ error: "Cliente no encontrado" }, { status: 404 });
     scopedClientId = clientId;
     const client = await prisma.client.findUnique({ where: { id: clientId }, select: { name: true, goal: true, plan: true, weight: true, height: true, experience: true, assignedProgramId: true } });
-    if (client) context = `Rol: coach. Cliente seleccionado: ${client.name}. Objetivo: ${client.goal}. Plan: ${client.plan}. Experiencia: ${client.experience || "no indicada"}. Peso: ${client.weight ?? "no registrado"} kg. Altura: ${client.height ?? "no registrada"} cm. Programa asignado: ${client.assignedProgramId ? "sí" : "no"}.`;
+    if (client) context = `Rol: coach. Cliente seleccionado: ${sanitize(client.name, 160)}. Objetivo: ${client.goal}. Plan: ${client.plan}. Experiencia: ${client.experience || "no indicada"}. Peso: ${client.weight ?? "no registrado"} kg. Altura: ${client.height ?? "no registrada"} cm. Programa asignado: ${client.assignedProgramId ? "sí" : "no"}.`;
   }
 
   let trainingContext = "";
