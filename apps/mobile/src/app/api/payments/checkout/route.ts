@@ -42,36 +42,40 @@ export async function POST(req: Request) {
   const provider = String(body?.provider || "").toLowerCase();
   const description = typeof body?.description === "string" ? body.description.trim().slice(0, 500) : "";
   const idempotencyKey = normalizeIdempotencyKey(req.headers.get("idempotency-key"));
+  const method = provider === "stripe" ? "STRIPE" : "MERCADOPAGO";
 
-  if (!clientId || !Number.isFinite(amount) || amount <= 0 || amount > 1_000_000) {
-    return NextResponse.json({ error: "Cliente e importe válidos son obligatorios" }, { status: 400 });
-  }
-  if (provider !== "stripe" && provider !== "mercadopago") {
-    return NextResponse.json({ error: "Proveedor de checkout inválido" }, { status: 400 });
-  }
+  if (!clientId || !Number.isFinite(amount) || amount <= 0 || amount > 1_000_000) return NextResponse.json({ error: "Cliente e importe válidos son obligatorios" }, { status: 400 });
+  if (provider !== "stripe" && provider !== "mercadopago") return NextResponse.json({ error: "Proveedor de checkout inválido" }, { status: 400 });
   if (!(await assertTrainerOwnsClient(session.id, clientId))) return NextResponse.json({ error: "Cliente no encontrado" }, { status: 404 });
 
   const client = await prisma.client.findUnique({ where: { id: clientId }, select: { id: true, name: true, email: true, plan: true } });
   if (!client) return NextResponse.json({ error: "Cliente no encontrado" }, { status: 404 });
 
-  if (idempotencyKey) {
-    const existing = await prisma.payment.findUnique({ where: { checkoutIdempotencyKey: idempotencyKey }, select: { id: true, clientId: true, amount: true, method: true, status: true, currency: true, description: true } });
-    if (existing) {
-      if (existing.clientId !== client.id || existing.method !== (provider === "stripe" ? "STRIPE" : "MERCADOPAGO") || existing.amount !== amount) {
-        return NextResponse.json({ error: "La clave de idempotencia ya fue utilizada para una operación diferente" }, { status: 409 });
-      }
-      return NextResponse.json({
-        provider,
-        paymentId: existing.id,
-        status: existing.status,
-        reused: true,
-      });
-    }
-  }
-
   const webOrigin = configuredOrigin("web");
   const apiOrigin = configuredOrigin("api");
   if (!webOrigin || !apiOrigin) return NextResponse.json({ error: "La configuración de URLs públicas de pagos está incompleta" }, { status: 503 });
+
+  if (idempotencyKey) {
+    const existing = await prisma.payment.findUnique({ where: { checkoutIdempotencyKey: idempotencyKey }, select: { id: true, clientId: true, amount: true, method: true, status: true, currency: true, description: true, providerCheckoutId: true } });
+    if (existing) {
+      if (existing.clientId !== client.id || existing.method !== method || existing.amount !== amount) return NextResponse.json({ error: "La clave de idempotencia ya fue utilizada para una operación diferente" }, { status: 409 });
+      if (existing.providerCheckoutId) {
+        const successUrl = `${webOrigin}/trainer/payments?checkout=success&payment=${encodeURIComponent(existing.id)}`;
+        const cancelUrl = `${webOrigin}/trainer/payments?checkout=cancel&payment=${encodeURIComponent(existing.id)}`;
+        if (provider === "stripe") {
+          if (!process.env.STRIPE_SECRET_KEY) return NextResponse.json({ error: "Stripe no está configurado" }, { status: 503 });
+          const Stripe = (await import("stripe")).default;
+          const stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
+          const checkout = await stripe.checkout.sessions.retrieve(existing.providerCheckoutId);
+          if (checkout.url) return NextResponse.json({ provider, url: checkout.url, checkoutId: checkout.id, paymentId: existing.id, status: existing.status, reused: true });
+        } else if (MP_ACCESS_TOKEN) {
+          // Mercado Pago preference URLs are returned by the API response only at creation time;
+          // keep the stored reference and let the caller use the payment state page on retry.
+          return NextResponse.json({ provider, checkoutId: existing.providerCheckoutId, paymentId: existing.id, status: existing.status, reused: true, url: `${webOrigin}/trainer/payments?checkout=pending&payment=${encodeURIComponent(existing.id)}` });
+        }
+      }
+    }
+  }
 
   const localPayment = await prisma.payment.create({
     data: {
@@ -80,13 +84,13 @@ export async function POST(req: Request) {
       amount,
       currency: provider === "mercadopago" ? "ARS" : String(process.env.STRIPE_CHECKOUT_CURRENCY || "ARS").toUpperCase(),
       status: "PENDIENTE",
-      method: provider === "stripe" ? "STRIPE" : "MERCADOPAGO",
+      method,
       description: description || `${PLAN_LABELS[client.plan] || "Plan"} · checkout ${provider}`,
       ...(idempotencyKey ? { checkoutIdempotencyKey: idempotencyKey } : {}),
     },
-  }).catch((error: unknown) => {
-    if (idempotencyKey) return prisma.payment.findUnique({ where: { checkoutIdempotencyKey: idempotencyKey } });
-    throw error;
+  }).catch(async (error: unknown) => {
+    if (!idempotencyKey) throw error;
+    return prisma.payment.findUnique({ where: { checkoutIdempotencyKey: idempotencyKey } });
   });
 
   if (!localPayment) return NextResponse.json({ error: "No se pudo crear el pago" }, { status: 500 });
@@ -114,6 +118,7 @@ export async function POST(req: Request) {
         },
         idempotencyKey ? { idempotencyKey } : undefined,
       );
+      await prisma.payment.update({ where: { id: localPayment.id }, data: { providerCheckoutId: checkout.id } });
       return NextResponse.json({ provider, url: checkout.url, checkoutId: checkout.id, paymentId: localPayment.id, reused: false });
     }
 
@@ -139,6 +144,7 @@ export async function POST(req: Request) {
       await prisma.payment.delete({ where: { id: localPayment.id } }).catch(() => {});
       return NextResponse.json({ error: "Mercado Pago no pudo crear el checkout" }, { status: 502 });
     }
+    await prisma.payment.update({ where: { id: localPayment.id }, data: { providerCheckoutId: data.id || null } });
     return NextResponse.json({ provider, url: data.init_point, checkoutId: data.id, paymentId: localPayment.id, reused: false });
   } catch (error) {
     await prisma.payment.delete({ where: { id: localPayment.id } }).catch(() => {});
