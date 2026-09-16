@@ -1,16 +1,9 @@
 "use client";
 
 import * as React from "react";
-import { Download, FileText, Share2, Printer } from "lucide-react";
+import { Download, FileText } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { useTranslation } from "@/hooks/use-translation";
 
 export interface ExportData {
@@ -55,7 +48,6 @@ export function ExportActions({
         format: selectedFormat,
         dateRange: { start: new Date(Date.now() - 90 * 24 * 60 * 60 * 1000), end: new Date() },
       };
-
       if (onExport) {
         await onExport(exportData);
       } else {
@@ -69,9 +61,7 @@ export function ExportActions({
           const payload = (await response.json().catch(() => null)) as { error?: string } | null;
           throw new Error(payload?.error || "No se pudieron exportar tus datos.");
         }
-        const blob = await response.blob();
-        const extension = selectedFormat;
-        downloadBlob(blob, `kinetixfitt-${selectedType}-${new Date().toISOString().slice(0, 10)}.${extension}`);
+        downloadBlob(await response.blob(), `kinetixfitt-${selectedType}-${new Date().toISOString().slice(0, 10)}.${selectedFormat}`);
       }
       setIsOpen(false);
     } catch (cause) {
@@ -92,10 +82,7 @@ export function ExportActions({
   return (
     <Dialog open={isOpen} onOpenChange={setIsOpen}>
       <DialogTrigger asChild>
-        <Button variant="outline" size="sm">
-          <Download className="mr-2 h-4 w-4" />
-          Exportar
-        </Button>
+        <Button variant="outline" size="sm"><Download className="mr-2 h-4 w-4" />Exportar</Button>
       </DialogTrigger>
       <DialogContent className="sm:max-w-[425px]">
         <DialogHeader>
@@ -107,13 +94,7 @@ export function ExportActions({
             <label className="text-sm font-medium">Tipo de datos</label>
             <div className="grid grid-cols-2 gap-2">
               {exportOptions.map((option) => (
-                <Button
-                  key={option.value}
-                  variant={selectedType === option.value ? "default" : "outline"}
-                  size="sm"
-                  onClick={() => setSelectedType(option.value)}
-                  className="justify-start"
-                >
+                <Button key={option.value} variant={selectedType === option.value ? "default" : "outline"} size="sm" onClick={() => setSelectedType(option.value)} className="justify-start">
                   {option.label}
                 </Button>
               ))}
@@ -122,26 +103,20 @@ export function ExportActions({
           <div className="space-y-2">
             <label className="text-sm font-medium">Formato</label>
             <div className="grid grid-cols-2 gap-2">
-              <Button variant={selectedFormat === "json" ? "default" : "outline"} size="sm" onClick={() => setSelectedFormat("json")} className="justify-center">
-                <FileText className="h-4 w-4 mr-1" /> JSON
-              </Button>
-              <Button variant={selectedFormat === "csv" ? "default" : "outline"} size="sm" onClick={() => setSelectedFormat("csv")} className="justify-center">
-                <FileText className="h-4 w-4 mr-1" /> CSV
-              </Button>
+              <Button variant={selectedFormat === "json" ? "default" : "outline"} size="sm" onClick={() => setSelectedFormat("json")}><FileText className="h-4 w-4 mr-1" />JSON</Button>
+              <Button variant={selectedFormat === "csv" ? "default" : "outline"} size="sm" onClick={() => setSelectedFormat("csv")}><FileText className="h-4 w-4 mr-1" />CSV</Button>
             </div>
           </div>
           {error && <p role="alert" className="text-sm text-red-400 rounded-lg border border-red-500/20 bg-red-500/10 p-3">{error}</p>}
           <div className="rounded-lg bg-muted p-4 text-sm text-muted-foreground space-y-1">
             <p>• Se exportan datos reales de tu cuenta.</p>
-            <p>• No se envía tu información a un proveedor externo.</p>
-            <p>• El servidor limita el tamaño de la exportación.</p>
+            <p>• El servidor determina qué registros pertenecen a tu sesión.</p>
+            <p>• La exportación se descarga directamente al dispositivo.</p>
           </div>
         </div>
         <div className="flex justify-end gap-2">
           <Button variant="outline" onClick={() => setIsOpen(false)}>Cancelar</Button>
-          <Button onClick={() => void handleExport()} disabled={isExporting}>
-            {isExporting ? "Exportando..." : <><Download className="mr-2 h-4 w-4" /> Exportar</>}
-          </Button>
+          <Button onClick={() => void handleExport()} disabled={isExporting}>{isExporting ? "Exportando..." : <><Download className="mr-2 h-4 w-4" />Exportar</>}</Button>
         </div>
       </DialogContent>
     </Dialog>
@@ -178,6 +153,5 @@ export function useDataExport() {
   };
 
   const printData = () => window.print();
-
   return { isExporting, lastExport, exportData, shareData, printData };
 }
