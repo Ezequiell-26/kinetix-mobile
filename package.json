@@ -29,7 +29,10 @@
     "mobile:build": "npm -w apps/mobile run build",
     "web:build": "npm --prefix apps/web run build",
     "clean": "npm run clean --workspaces && rm -rf node_modules .turbo",
-    "clean:web": "npm --prefix apps/web run clean --if-present"
+    "clean:web": "npm --prefix apps/web run clean --if-present",
+    "ai:audit": "node scripts/ai-repo-audit.mjs",
+    "ai:audit:json": "node scripts/ai-repo-audit.mjs --json",
+    "ai:audit:strict": "node scripts/ai-repo-audit.mjs --strict"
   },
   "devDependencies": {
     "@radix-ui/react-checkbox": "^1.3.11",
