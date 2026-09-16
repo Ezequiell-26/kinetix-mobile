@@ -389,10 +389,12 @@ model Payment {
   date      DateTime @default(now())
   description String?
   checkoutIdempotencyKey String? @unique
+  providerCheckoutId String?
 
   @@index([clientId])
   @@index([date])
   @@index([status])
+  @@index([providerCheckoutId])
 }
 
 model PaymentWebhookEvent {
