@@ -35,18 +35,22 @@ For every non-trivial task:
 1. Read `AGENTS.md`.
 2. Read `.ai/INDEX.md`.
 3. Read `.ai/PROJECT_STATE.md`.
-4. Read the most relevant contract/ADR.
-5. Inspect the actual branch/ref being changed.
-6. Search for existing implementations and all known consumers.
-7. Map affected UI, API, auth, domain, database, external services, cache, state, native, tests, and deployment surfaces.
-8. Record the intended change and its invariants before editing.
-9. Make the smallest compatible change.
-10. Run the narrowest useful checks first.
-11. Run the broader repository gates required by risk.
-12. Review the resulting diff for accidental deletion, duplication, contract drift, secret exposure, and unrelated churn.
-13. Re-run relevant gates after corrections.
-14. Update state/contract/ADR documentation when behavior or architecture changed.
-15. Verify the resulting branch/ref and exact commit.
+4. Read `.ai/AI_CONTROL_CENTER.md`.
+5. Read `.ai/FEATURE_LEDGER.md`.
+6. Read `.ai/INTEGRATION_REGISTRY.md`.
+7. Read `.ai/PERFORMANCE_BASELINES.md` when performance or a heavy feature is involved.
+8. Read the most relevant contract/ADR.
+9. Inspect the actual branch/ref being changed.
+10. Search for existing implementations and all known consumers.
+11. Map affected UI, API, auth, domain, database, external services, cache, state, native, tests, and deployment surfaces.
+12. Record the intended change and its invariants before editing.
+13. Make the smallest compatible change.
+14. Run the narrowest useful checks first.
+15. Run the broader repository gates required by risk.
+16. Review the resulting diff for accidental deletion, duplication, contract drift, secret exposure, and unrelated churn.
+17. Re-run relevant gates after corrections.
+18. Update state/contract/ADR/ledger documentation when behavior or architecture changed.
+19. Verify the resulting branch/ref and exact commit.
 
 ## 4. Preservation protocol
 
@@ -179,7 +183,7 @@ Never turn "code exists" into "feature works".
 
 ## 10. Feature ledger protocol
 
-Every important subsystem should be tracked by:
+Every important subsystem should be represented in `.ai/FEATURE_LEDGER.md` with:
 
 | Field | Required meaning |
 |---|---|
@@ -197,7 +201,17 @@ Every important subsystem should be tracked by:
 
 If evidence becomes stale after a meaningful code change, downgrade it until rechecked.
 
-## 11. Dependency and architecture discipline
+## 11. External integration registry protocol
+
+Every external API, SDK, provider, or repository must be represented in `.ai/INTEGRATION_REGISTRY.md` once actually adopted or discovered.
+
+Record at least:
+
+`source/version, license, capability, adapter, configuration, limits/cost, timeout/retry, fallback, platforms, security review, tests, runtime status, removal strategy`
+
+Provider-specific data must stop at the adapter boundary.
+
+## 12. Dependency and architecture discipline
 
 There must be one canonical implementation for each cross-cutting concern unless an ADR explicitly documents multiple implementations.
 
@@ -216,7 +230,7 @@ Before introducing a new:
 
 search the repository for an existing canonical implementation first.
 
-## 12. Database safety
+## 13. Database safety
 
 Schema changes require:
 
@@ -226,7 +240,7 @@ Never edit old production migration history to make a new migration easier.
 
 For destructive operations, document data impact and recovery/rollback before implementation.
 
-## 13. Authorization safety
+## 14. Authorization safety
 
 The server is authoritative.
 
@@ -241,7 +255,7 @@ For every multi-tenant resource, test at minimum:
 `B can read/write B`
 `B cannot read/write A`
 
-## 14. External integration truth
+## 15. External integration truth
 
 External services are not considered verified because an SDK call compiles.
 
@@ -254,7 +268,7 @@ Classify them separately as:
 
 Never fabricate credentials, webhook success, store approval, email delivery, push delivery, payment settlement, or AI-provider behavior.
 
-## 15. Runtime unknowns
+## 16. Runtime unknowns
 
 When runtime access is unavailable, preserve the distinction:
 
@@ -264,7 +278,47 @@ When runtime access is unavailable, preserve the distinction:
 
 Do not fill the runtime gap with intuition.
 
-## 16. AI task selection
+## 17. Performance governance
+
+Performance is measured continuously, not declared by percentage claims.
+
+Use `.ai/PERFORMANCE_BASELINES.md` for baseline and regression records.
+
+For meaningful changes, check the affected surface against the best available measurements for:
+
+- startup/cold start;
+- TTFB/LCP/INP/CLS where applicable;
+- JS and asset weight;
+- network request count;
+- API latency;
+- database query count;
+- memory growth;
+- CPU/frame stability;
+- media/3D cost;
+- battery-sensitive work on mobile.
+
+For mobile, consider low-end devices and slow/intermittent networks as first-class targets, not edge cases.
+
+Never claim "100% performance". Establish measurable budgets from actual baselines and fail or investigate meaningful regressions.
+
+## 18. Cross-device compatibility
+
+Any shared or user-facing change must be reviewed for:
+
+- narrow phones;
+- large phones;
+- tablets/foldables;
+- desktop browsers;
+- Android;
+- iOS;
+- PWA;
+- Windows/macOS desktop where applicable;
+- keyboard and assistive technology where applicable;
+- slow networks and offline conditions.
+
+Avoid browser-only, Node-only or native-only APIs in shared code unless the boundary is explicit.
+
+## 19. AI task selection
 
 When asked to "keep improving" the project, do NOT generate random enhancements.
 
@@ -282,7 +336,7 @@ Select work in this order:
 
 Only move downward after the higher class is sufficiently verified.
 
-## 17. Safe autonomous loop
+## 20. Safe autonomous loop
 
 For an open-ended "improve everything" task:
 
@@ -292,7 +346,7 @@ Do not batch unrelated edits into one giant rewrite.
 
 After each risk cluster, check that previously verified capabilities remain intact.
 
-## 18. Required final report
+## 21. Required final report
 
 Every AI change report must include:
 
@@ -304,14 +358,15 @@ Every AI change report must include:
 - evidence level;
 - known unverified areas;
 - migrations/deployment implications;
-- rollback information for risky work.
+- rollback information for risky work;
+- updated feature/integration/performance ledgers where applicable.
 
 A claim with no evidence must be labeled `UNVERIFIED`.
 
-## 19. Human control
+## 22. Human control
 
 The agent may improve implementation quality, but product, pricing, legal, medical, financial, branding, and other consequential decisions remain explicit human decisions unless already defined by project contracts.
 
-## 20. Golden rule
+## 23. Golden rule
 
-**Never make the project look more complete than it actually is. Make its real state easier to understand, safer to change, and harder to accidentally break.**
+**Never make the project look more complete than it actually is. Make its real state easier to understand, safer to change, easier to test, faster on supported devices, and harder to accidentally break.**
