@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { getSession } from "@/lib/auth";
-import { prisma } from "@/lib/db";
 import { assertTrainerOwnsClient } from "@/lib/authorization";
+import { prisma } from "@/lib/db";
 
 function numberOrNull(value: unknown, min: number, max: number) {
   if (value === null || value === undefined || value === "") return null;
@@ -17,11 +17,14 @@ export async function GET(_req: Request, { params }: { params: Promise<{ id: str
   const s = await getSession();
   if (!s) return NextResponse.json({ error: "No auth" }, { status: 401 });
   const { id } = await params;
+
   if (s.role === "CLIENT") {
     const own = await prisma.client.findFirst({ where: { OR: [{ userId: s.id }, { email: s.email }] }, select: { id: true } });
     if (!own || own.id !== id) return NextResponse.json({ error: "No autorizado" }, { status: 403 });
-  } else if (!(await assertTrainerOwnsClient(s.id, id))) {
-    return NextResponse.json({ error: "Cliente no encontrado" }, { status: 404 });
+  } else if (s.role === "TRAINER") {
+    if (!(await assertTrainerOwnsClient(s.id, id))) return NextResponse.json({ error: "Cliente no encontrado" }, { status: 404 });
+  } else {
+    return NextResponse.json({ error: "No autorizado" }, { status: 403 });
   }
 
   const client = await prisma.client.findUnique({
@@ -37,7 +40,11 @@ export async function GET(_req: Request, { params }: { params: Promise<{ id: str
     },
   });
   if (!client) return NextResponse.json({ error: "Cliente no encontrado" }, { status: 404 });
-  if (s.role === "CLIENT") delete client.trainerNotes;
+
+  if (s.role === "CLIENT") {
+    const { trainerNotes: _trainerNotes, ...safeClient } = client;
+    return NextResponse.json(safeClient);
+  }
   return NextResponse.json(client);
 }
 
@@ -48,7 +55,8 @@ export async function PATCH(req: Request, { params }: { params: Promise<{ id: st
   const client = await prisma.client.findUnique({ where: { id }, select: { id: true, userId: true } });
   if (!client) return NextResponse.json({ error: "Cliente no encontrado" }, { status: 404 });
   if (s.role === "CLIENT" && client.userId !== s.id) return NextResponse.json({ error: "No autorizado" }, { status: 403 });
-  if (s.role !== "CLIENT" && !(await assertTrainerOwnsClient(s.id, id))) return NextResponse.json({ error: "Cliente no encontrado" }, { status: 404 });
+  if (s.role !== "CLIENT" && s.role !== "TRAINER") return NextResponse.json({ error: "No autorizado" }, { status: 403 });
+  if (s.role === "TRAINER" && !(await assertTrainerOwnsClient(s.id, id))) return NextResponse.json({ error: "Cliente no encontrado" }, { status: 404 });
 
   try {
     const body = await req.json().catch(() => null) as Record<string, unknown> | null;
