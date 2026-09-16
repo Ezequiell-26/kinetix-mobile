@@ -10,8 +10,13 @@ const nextConfig = {
         hostname: '**',
       },
     ],
+    unoptimized: process.env.NODE_ENV === 'production',
   },
   transpilePackages: ['@kinetix/shared'],
+  output: 'standalone',
+  experimental: {
+    serverComponentsExternalPackages: ['@prisma/client'],
+  },
 };
 
 export default nextConfig;

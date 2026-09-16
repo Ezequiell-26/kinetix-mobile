@@ -1,285 +1,138 @@
-# Guía de Deploy a Producción - KinetixFitt
+# KinetixFitt — Deploy guide
 
-## Prerrequisitos
+**Última actualización:** 2026-09-16
 
-- Cuenta en Supabase (proyecto creado)
-- Cuenta en Stripe (modo live activado)
-- Cuenta en Mercado Pago (credenciales live)
-- Servicio SMTP configurado (Gmail, SendGrid, etc.)
-- Bucket S3 para backups (AWS o compatible)
-- Dominio propio configurado
+Esta guía describe el diseño actual del repositorio. No contiene credenciales reales ni asume que los servicios externos estén configurados.
 
-## 1. Configuración de Variables de Entorno
+## Arquitectura de despliegue
 
-### Copiar y configurar `.env` en la raíz del proyecto:
+KinetixFitt se compone de dos aplicaciones:
 
-```bash
-cp .env.example .env
-```
+- `apps/web`: web pública + dashboard web.
+- `apps/mobile`: aplicación dinámica, PWA, API, Capacitor y Electron.
 
-**Editar `.env` con tus credenciales reales:**
+Se recomienda utilizar dos proyectos Vercel sobre el mismo repositorio: uno con `vercel.json` para `apps/web` y otro con `apps/mobile/vercel.json` para la app/API.
 
-```env
-# Supabase Configuration
-NEXT_PUBLIC_SUPABASE_URL=https://tu-proyecto.supabase.co
-NEXT_PUBLIC_SUPABASE_ANON_KEY=tu-anon-key-aqui
-SUPABASE_SERVICE_ROLE_KEY=tu-service-role-key-aqui
+## Variables de entorno
 
-# Database URLs (desde Supabase > Settings > Database)
-DATABASE_URL="postgresql://postgres.[REF]:[PASSWORD]@aws-0-[REGION].pooler.supabase.com:6543/postgres?pgbouncer=true"
-DIRECT_URL="postgresql://postgres.[REF]:[PASSWORD]@aws-0-[REGION].pooler.supabase.com:6543/postgres?pgbouncer=true"
+La fuente de nombres y formatos es `apps/mobile/.env.example`.
 
-# JWT Secret (generar uno nuevo de 32+ caracteres)
-JWT_SECRET="tu-jwt-secret-seguro-de-32-caracteres-minimo"
+Producción necesita, según las funciones activadas:
 
-# Stripe (obtener desde Dashboard > Developers > API Keys)
-STRIPE_SECRET_KEY=sk_live_xxx
-STRIPE_WEBHOOK_SECRET=whsec_xxx
-NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY=pk_live_xxx
+- PostgreSQL: `DATABASE_URL`, `DIRECT_URL`.
+- Auth: `JWT_SECRET`, `TRUST_PROXY_HEADERS`.
+- Rate limiting: `UPSTASH_REDIS_REST_URL`, `UPSTASH_REDIS_REST_TOKEN`.
+- Push interno: `KINETIX_INTERNAL_API_SECRET`, VAPID keys.
+- Backups: `BACKUP_ADMIN_USER_IDS`, S3 credentials/buckets.
+- Pagos: Stripe y/o Mercado Pago.
+- Email: Resend o SMTP.
+- Storage: S3/R2 privado.
+- Observabilidad: Sentry/PostHog.
+- AI: proveedor OpenAI-compatible si se habilita.
 
-# Mercado Pago (obtener desde Panel > Credenciales)
-MP_ACCESS_TOKEN=APP_USR-xxx
-MP_WEBHOOK_SECRET=xxx
-NEXT_PUBLIC_MP_PUBLIC_KEY=xxx
+Nunca guardar estos valores en Git.
 
-# Email SMTP
-SMTP_HOST=smtp.gmail.com
-SMTP_PORT=587
-SMTP_USER=tucorreo@gmail.com
-SMTP_PASS=tu_app_password
-EMAIL_FROM="KINETIXFITT <noreply@tu-dominio.com>"
-
-# AWS S3 para Backups
-BACKUP_ENABLED=true
-BACKUP_SCHEDULE=0 3 * * *
-BACKUP_S3_BUCKET=tu-bucket-backups
-AWS_ACCESS_KEY_ID=xxx
-AWS_SECRET_ACCESS_KEY=xxx
-AWS_REGION=us-east-1
-
-# Sentry (opcional, para monitoreo de errores)
-SENTRY_DSN=https://xxx@sentry.io/xxx
-NEXT_PUBLIC_SENTRY_DSN=https://xxx@sentry.io/xxx
-
-# Redis (opcional, para rate limiting distribuido)
-REDIS_URL=redis://localhost:6379
-
-# Log level
-LOG_LEVEL=info
-
-# Firebase (si se usa autenticación)
-NEXT_PUBLIC_FIREBASE_API_KEY=TU_API_KEY_AQUI
-NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN=tu-proyecto.firebaseapp.com
-NEXT_PUBLIC_FIREBASE_PROJECT_ID=tu-proyecto
-NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET=tu-proyecto.appspot.com
-NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID=123456789
-NEXT_PUBLIC_FIREBASE_APP_ID=1:123456789:web:abcdef123456
-```
-
-### Copiar y configurar `apps/mobile/.env`:
+## Base de datos
 
 ```bash
-cp apps/mobile/.env.example apps/mobile/.env
+npm ci
+npx prisma migrate deploy --schema apps/mobile/prisma/schema.prisma
 ```
 
-Usar las mismas credenciales que arriba, asegurando que `NODE_ENV=production` y `NEXT_PUBLIC_APP_URL=https://tu-dominio.com`.
+No ejecutar `prisma migrate dev` contra producción.
 
-## 2. Migraciones de Base de Datos
+Antes del release hay que verificar una restauración real de backup, no solo que el job de backup termine correctamente.
 
-### Ejecutar migraciones en producción:
+## Vercel — web
 
-```bash
-cd apps/mobile
-npx prisma migrate deploy
+Crear un proyecto Vercel con el repositorio completo y conservar la configuración raíz:
+
+```text
+Build: npm --prefix apps/web run build
+Output: apps/web/.next
 ```
 
-**Nota:** No usar `prisma migrate dev` en producción porque el pooler de Supabase no soporta shadow database.
+Configurar únicamente las variables `NEXT_PUBLIC_*` necesarias por la web.
 
-### Cargar datos iniciales (seed):
+## Vercel — app/API
 
-```bash
-npx prisma db seed
+Crear un segundo proyecto Vercel con el mismo repositorio y establecer Root Directory a `apps/mobile`.
+
+La configuración `apps/mobile/vercel.json` debe utilizarse con ese Root Directory. Las variables privadas del backend deben configurarse únicamente en este proyecto.
+
+## Webhooks de pagos
+
+Ambos proveedores utilizan el endpoint común:
+
+```text
+POST /api/payments/webhook
 ```
 
-Esto cargará:
-- Ejercicios base (50+ ejercicios)
-- Programas template (principiante, intermedio, avanzado)
-- Usuario demo para testing
-- Configuraciones por defecto
+Stripe requiere `STRIPE_WEBHOOK_SECRET` y firma `stripe-signature`.
 
-## 3. Configurar Webhooks de Pagos
+Mercado Pago requiere `MP_WEBHOOK_SECRET` y firma `x-signature`, además de `MP_ACCESS_TOKEN` para consultar el pago antes de liquidarlo.
 
-### Stripe Webhook:
+Nunca probar un webhook de producción enviando un POST sin firma y esperar un `200`; el sistema debe rechazarlo.
 
-1. Ir a Stripe Dashboard > Developers > Webhooks
-2. Agregar endpoint: `https://tu-dominio.com/api/webhooks/stripe`
-3. Seleccionar eventos:
-   - `checkout.session.completed`
-   - `customer.subscription.created`
-   - `customer.subscription.updated`
-   - `customer.subscription.deleted`
-   - `invoice.payment.succeeded`
-   - `invoice.payment.failed`
-4. Copiar el `Signing Secret` y actualizar `STRIPE_WEBHOOK_SECRET` en `.env`
-
-### Mercado Pago Webhook:
-
-1. Ir a Mercado Pago Panel > Integraciones > Webhooks
-2. Agregar URL: `https://tu-dominio.com/api/webhooks/mercadopago`
-3. Seleccionar eventos:
-   - `payment.created`
-   - `payment.updated`
-   - `subscription.created`
-   - `subscription.updated`
-   - `subscription.cancelled`
-4. Copiar el secret y actualizar `MP_WEBHOOK_SECRET` en `.env`
-
-## 4. Build y Deploy
-
-### Opción A: Vercel (Recomendado)
-
-1. Conectar repositorio en Vercel
-2. Configurar variables de entorno en Vercel Dashboard
-3. Deploy automático con cada push a `main`
+## Validación local
 
 ```bash
+npm run typecheck
+npm run lint
+npm run test
 npm run build
 ```
 
-### Opción B: Docker
+Para la suite HTTP de seguridad:
 
 ```bash
-docker-compose up -d
+npm -w apps/mobile run build
+npm -w apps/mobile run start
+BASE_URL=http://127.0.0.1:3001 npm -w apps/mobile run test:security
 ```
 
-### Opción C: Kubernetes
+## Validación de producción
+
+Ejecutar además:
 
 ```bash
-kubectl apply -f k8s/
+npm -w apps/mobile run verify:production
+npm -w apps/mobile run test:e2e
 ```
 
-## 5. Configurar Dominio y SSL
+Verificar en staging:
 
-### En Vercel:
+- registro, login, logout y reset de contraseña;
+- ownership entre dos trainers y dos clientes;
+- creación/edición/asignación de programas;
+- workout logs, métricas y fotos;
+- mensajería y push;
+- Stripe/Mercado Pago con webhooks y duplicados;
+- backup + restauración;
+- PWA y artefactos nativos.
 
-1. Ir a Project Settings > Domains
-2. Agregar dominio: `tu-dominio.com`
-3. Configurar DNS según instrucciones de Vercel
-4. SSL automático provisto por Vercel
+## Native release
 
-### En servidor propio:
+Android de producción utiliza `.github/workflows/android-release.yml` para generar un AAB firmado.
 
-Usar Let's Encrypt:
+Desktop continúa con `.github/workflows/native.yml`.
 
-```bash
-certbot --nginx -d tu-dominio.com
-```
+iOS necesita macOS, certificados Apple y provisioning profiles; no se declara listo solo porque Capacitor esté configurado.
 
-## 6. Verificación Post-Deploy
+## Seguridad
 
-### Checklist de verificación:
+La aplicación ya incluye:
 
-- [ ] Landing page carga correctamente
-- [ ] Registro de usuario funciona
-- [ ] Login con email/password funciona
-- [ ] Login con Google funciona (si está configurado)
-- [ ] Recuperación de contraseña envía email
-- [ ] Dashboard de cliente carga
-- [ ] Crear sesión de entrenamiento funciona
-- [ ] Guardar progreso funciona
-- [ ] Notificaciones push se reciben
-- [ ] Webhook de Stripe recibe eventos
-- [ ] Webhook de Mercado Pago recibe eventos
-- [ ] Backups se ejecutan según schedule
-- [ ] Logs de errores aparecen en Sentry (si configurado)
+- cookies HTTP-only y sesiones persistentes revocables;
+- rate limiting distribuido con fallback local;
+- ownership server-side;
+- validación de uploads y storage privado;
+- verificación de firmas de webhook;
+- idempotencia atómica de eventos;
+- CSP/headers y health endpoints mínimos.
 
-### Comandos de verificación:
+Mantener las pruebas de regresión después de cada cambio de auth, pagos, uploads o autorización.
 
-```bash
-# Verificar salud de la API
-curl https://tu-dominio.com/api/health
+## Estado de lanzamiento
 
-# Verificar webhooks
-curl -X POST https://tu-dominio.com/api/webhooks/stripe \
-  -H "Content-Type: application/json" \
-  -d '{"type": "checkout.session.completed"}'
-
-# Verificar SSL
-openssl s_client -connect tu-dominio.com:443
-```
-
-## 7. Monitoreo y Mantenimiento
-
-### Logs:
-
-- Vercel: Dashboard > Deployments > Logs
-- Docker: `docker-compose logs -f`
-- Kubernetes: `kubectl logs -f deployment/kinetix`
-
-### Backups:
-
-Los backups automáticos se ejecutan diariamente a las 3 AM UTC.
-Verificar en el bucket S3 configurado.
-
-### Actualizaciones:
-
-```bash
-git pull origin main
-npm install
-npm run build
-# Reiniciar servicio según plataforma
-```
-
-## 8. Troubleshooting
-
-### Error: "Database connection failed"
-
-- Verificar que `DATABASE_URL` y `DIRECT_URL` son correctas
-- Confirmar que el pooler de Supabase está habilitado
-- Verificar que la IP del servidor está permitida en Supabase
-
-### Error: "Webhook signature verification failed"
-
-- Regenerar el webhook secret en Stripe/MercadoPago
-- Actualizar variable de entorno
-- Reiniciar el servicio
-
-### Error: "Email not sending"
-
-- Verificar credenciales SMTP
-- Si usa Gmail, generar App Password (no usar password normal)
-- Verificar puertos (587 para TLS, 465 para SSL)
-
-## 9. Seguridad
-
-### Headers de seguridad ya configurados:
-
-- Content Security Policy (CSP)
-- X-Frame-Options
-- X-Content-Type-Options
-- Strict-Transport-Security
-- Referrer-Policy
-
-### Rate Limiting:
-
-- 100 requests/minuto por IP
-- 1000 requests/hora por usuario autenticado
-
-### Recomendaciones adicionales:
-
-- Habilitar 2FA para cuentas admin
-- Rotar secrets cada 90 días
-- Monitorear logs de auditoría regularmente
-- Mantener dependencias actualizadas
-
-## 10. Soporte
-
-Para issues técnicos:
-- Revisar logs en Sentry
-- Verificar estado de servicios externos (Supabase, Stripe, etc.)
-- Contactar al equipo de desarrollo
-
----
-
-**Última actualización:** 2024
-**Versión del proyecto:** 3.0.0
+La presencia de una guía o configuración no demuestra un deploy funcional. El lanzamiento requiere evidencia de CI, staging, infraestructura y servicios externos reales.

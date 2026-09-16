@@ -1,20 +1,20 @@
 /**
- * BRAND — single source of truth KinetixFitt (web)
- * Usar siempre: import { BRAND } from "@/lib/branding" o "../lib/branding"
- * No hardcodear #D6FF2A / #09090B / nombres sueltos
+ * BRAND — single source of truth for the KinetixFitt web experience.
+ * Keep product identity centralized so web and app stay visually consistent.
  */
 export const BRAND = {
   name: 'KinetixFitt',
   shortName: 'KinetixFitt',
   displayName: 'KINETIXFITT',
-  tagline: 'Transforma tu Cuerpo, Domina tu Mente',
+  tagline: 'TU MEJOR VERSIÓN',
   colors: {
-    lime: '#D6FF2A',
-    limeHover: '#E0FF5A',
-    dark: '#09090B',
-    darkElevated: '#101012',
-    zinc: '#1A1A1E',
-    muted: '#A1A1AA',
+    lime: '#C6F91E',
+    limeHover: '#D8FF4A',
+    dark: '#081119',
+    darkElevated: '#0B151E',
+    zinc: '#12212D',
+    muted: '#8193A5',
+    border: '#1C3142',
   },
   app: {
     id: 'com.kinetixfitt.app',
@@ -27,8 +27,8 @@ export const BRAND = {
 } as const;
 
 export const BRAND_TOKENS = {
-  bgLime: 'bg-[#D6FF2A]',
-  textLime: 'text-[#D6FF2A]',
-  borderLime: 'border-[#D6FF2A]',
-  bgDark: 'bg-[#09090B]',
+  bgLime: 'bg-[#C6F91E]',
+  textLime: 'text-[#C6F91E]',
+  borderLime: 'border-[#C6F91E]',
+  bgDark: 'bg-[#081119]',
 } as const;

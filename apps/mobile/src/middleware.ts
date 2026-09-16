@@ -2,42 +2,22 @@ import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
 import * as jose from "jose";
 import { getJwtSecret } from "@/lib/secret";
-import {
-  checkRateLimit,
-  RATE_LIMIT_PROFILES,
-  getClientIp,
-} from "@/lib/rate-limiter";
+import { checkRateLimit, RATE_LIMIT_PROFILES, getClientIp } from "@/lib/rate-limiter";
 
 const SECRET = getJwtSecret();
+const MUTATING_METHODS = new Set(["POST", "PUT", "PATCH", "DELETE"]);
+const WEBHOOK_PATHS = new Set(["/api/payments/webhook"]);
 
 function generateNonce(): string {
-  try {
-    const c = globalThis.crypto as unknown as Crypto;
-    if (c && typeof c.getRandomValues === "function") {
-      const arr = new Uint8Array(16);
-      c.getRandomValues(arr);
-      // btoa está disponible en Edge/Workers y navegadores; en Node usamos Buffer
-      if (typeof btoa === "function") {
-        let binary = "";
-        arr.forEach((b) => (binary += String.fromCharCode(b)));
-        return btoa(binary);
-      } else {
-        // Node fallback
-        // eslint-disable-next-line @typescript-eslint/no-require-imports
-        return Buffer.from(arr).toString("base64");
-      }
-    }
-  } catch {}
-  try {
-    const gCrypto = globalThis.crypto as unknown as { randomUUID?: () => string };
-    const uuid = gCrypto?.randomUUID?.();
-    if (uuid) {
-      if (typeof btoa === "function") return btoa(uuid);
-      return Buffer.from(uuid).toString("base64");
-    }
-  } catch {}
-  // último fallback no criptográfico (solo para no romper)
-  return Math.random().toString(36).slice(2) + Date.now().toString(36);
+  const c = globalThis.crypto;
+  if (!c || typeof c.getRandomValues !== "function") {
+    throw new Error("Secure randomness is unavailable; refusing to create a CSP nonce without cryptographic randomness.");
+  }
+  const arr = new Uint8Array(16);
+  c.getRandomValues(arr);
+  let binary = "";
+  arr.forEach((b) => { binary += String.fromCharCode(b); });
+  return typeof btoa === "function" ? btoa(binary) : Buffer.from(arr).toString("base64");
 }
 
 function buildCsp(nonce: string): string {
@@ -53,11 +33,8 @@ function buildCsp(nonce: string): string {
     "https://eu.i.posthog.com",
     "https://app.posthog.com",
     isDev ? "'unsafe-eval'" : null,
-  ]
-    .filter(Boolean)
-    .join(" ");
-
-  const csp = [
+  ].filter(Boolean).join(" ");
+  return [
     "default-src 'self'",
     `script-src ${scriptSrc}`,
     "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://cdn.jsdelivr.net",
@@ -71,7 +48,6 @@ function buildCsp(nonce: string): string {
     "frame-ancestors 'none'",
     "upgrade-insecure-requests",
   ].join("; ");
-  return csp;
 }
 
 function applyCsp(response: NextResponse, nonce: string): NextResponse {
@@ -81,161 +57,112 @@ function applyCsp(response: NextResponse, nonce: string): NextResponse {
   return response;
 }
 
+function rateLimitResponse(resetMs: number) {
+  const retryAfter = Math.max(1, Math.ceil(resetMs / 1000));
+  return new NextResponse(JSON.stringify({ error: "Too many requests", retryAfterSeconds: retryAfter }), {
+    status: 429,
+    headers: { "Content-Type": "application/json", "Retry-After": String(retryAfter), "X-RateLimit-Remaining": "0" },
+  });
+}
+
+function getTrustedOrigins(req: NextRequest): Set<string> {
+  const origins = new Set<string>();
+  for (const candidate of [process.env.NEXT_PUBLIC_APP_URL, process.env.NEXT_PUBLIC_WEB_URL, process.env.WEB_URL]) {
+    if (!candidate) continue;
+    try { origins.add(new URL(candidate).origin); } catch { /* invalid optional config */ }
+  }
+  origins.add(req.nextUrl.origin);
+  return origins;
+}
+
+function csrfCheck(req: NextRequest): NextResponse | null {
+  if (!req.nextUrl.pathname.startsWith("/api/")) return null;
+  if (!MUTATING_METHODS.has(req.method)) return null;
+  if (WEBHOOK_PATHS.has(req.nextUrl.pathname)) return null;
+
+  const origin = req.headers.get("origin");
+  if (!origin) return null; // Native clients / same-process calls may omit Origin.
+  if (!getTrustedOrigins(req).has(origin)) {
+    return new NextResponse(JSON.stringify({ error: "Origin no permitido" }), {
+      status: 403,
+      headers: { "Content-Type": "application/json", "Cache-Control": "no-store" },
+    });
+  }
+  return null;
+}
+
 export async function middleware(req: NextRequest) {
   const path = req.nextUrl.pathname;
-  const nonce = generateNonce();
-
-  // Propagar nonce al Server Components vía header de request
+  let nonce: string;
+  try {
+    nonce = generateNonce();
+  } catch (error) {
+    console.error("[CSP] secure nonce generation failed", error);
+    return new NextResponse("Security configuration error", { status: 500 });
+  }
   const requestHeaders = new Headers(req.headers);
   requestHeaders.set("x-nonce", nonce);
   requestHeaders.set("x-csp-nonce", nonce);
-
-  // ────────────────────────────────────────────────────────────────
-  // 1. Rate limiting en rutas públicas sensibles (auth + API).
-  //    Se ejecuta antes del auth-check para ahorrar trabajo cuando
-  //    el cliente está abusando del endpoint. Usa Upstash Redis distribuido
-  //    con fallback en memoria (ver lib/rate-limiter.ts).
-  // ────────────────────────────────────────────────────────────────
   const ip = getClientIp(req);
 
+  const csrfResponse = csrfCheck(req);
+  if (csrfResponse) return applyCsp(csrfResponse, nonce);
+
   if (path.startsWith("/api/auth/login")) {
-    const r = await checkRateLimit(ip, "auth", RATE_LIMIT_PROFILES.auth);
-    if (!r.success) return applyCsp(rateLimitResponse(r.resetMs), nonce);
+    const r = await checkRateLimit(ip, "auth", RATE_LIMIT_PROFILES.auth); if (!r.success) return applyCsp(rateLimitResponse(r.resetMs), nonce);
   } else if (path.startsWith("/api/auth/register")) {
-    const r = await checkRateLimit(ip, "register", RATE_LIMIT_PROFILES.register);
-    if (!r.success) return applyCsp(rateLimitResponse(r.resetMs), nonce);
+    const r = await checkRateLimit(ip, "register", RATE_LIMIT_PROFILES.register); if (!r.success) return applyCsp(rateLimitResponse(r.resetMs), nonce);
   } else if (path.startsWith("/api/auth/forgot-password")) {
-    const r = await checkRateLimit(ip, "auth", RATE_LIMIT_PROFILES.auth);
-    if (!r.success) return applyCsp(rateLimitResponse(r.resetMs), nonce);
+    const r = await checkRateLimit(ip, "auth", RATE_LIMIT_PROFILES.auth); if (!r.success) return applyCsp(rateLimitResponse(r.resetMs), nonce);
   } else if (path.startsWith("/api/auth/reset-password")) {
-    const r = await checkRateLimit(ip, "auth", RATE_LIMIT_PROFILES.auth);
-    if (!r.success) return applyCsp(rateLimitResponse(r.resetMs), nonce);
+    const r = await checkRateLimit(ip, "auth", RATE_LIMIT_PROFILES.auth); if (!r.success) return applyCsp(rateLimitResponse(r.resetMs), nonce);
   } else if (path.startsWith("/api/uploads")) {
-    const r = await checkRateLimit(ip, "upload", RATE_LIMIT_PROFILES.upload);
-    if (!r.success) return applyCsp(rateLimitResponse(r.resetMs), nonce);
+    const r = await checkRateLimit(ip, "upload", RATE_LIMIT_PROFILES.upload); if (!r.success) return applyCsp(rateLimitResponse(r.resetMs), nonce);
   } else if (path.startsWith("/api/messages")) {
-    const r = await checkRateLimit(ip, "messages", RATE_LIMIT_PROFILES.messages);
-    if (!r.success) return applyCsp(rateLimitResponse(r.resetMs), nonce);
+    const r = await checkRateLimit(ip, "messages", RATE_LIMIT_PROFILES.messages); if (!r.success) return applyCsp(rateLimitResponse(r.resetMs), nonce);
   } else if (path.startsWith("/api/")) {
-    // Rate limit genérico para el resto de la API.
-    const r = await checkRateLimit(ip, "api", RATE_LIMIT_PROFILES.api);
-    if (!r.success) return applyCsp(rateLimitResponse(r.resetMs), nonce);
+    const r = await checkRateLimit(ip, "api", RATE_LIMIT_PROFILES.api); if (!r.success) return applyCsp(rateLimitResponse(r.resetMs), nonce);
   }
 
-  // ────────────────────────────────────────────────────────────────
-  // 2. Raíz "/" session-aware: con sesión válida va al panel (evita el
-  //    flash de landing). Se hace AQUÍ y no con redirect() en page.tsx:
-  //    el redirect del Server Component llegaba serializado como error
-  //    (digest NEXT_REDIRECT en el stream RSC) en vez de 307.
-  // ────────────────────────────────────────────────────────────────
   if (path === "/") {
     const token = req.cookies.get("ec_token")?.value;
     if (token) {
       try {
         const { payload } = await jose.jwtVerify(token, SECRET);
         const role = (payload as unknown as { role: string }).role;
-        if (role === "TRAINER") {
-          const res = NextResponse.redirect(new URL("/trainer/dashboard", req.url));
-          return applyCsp(res, nonce);
-        }
-        if (role === "CLIENT") {
-          const res = NextResponse.redirect(new URL("/client/dashboard", req.url));
-          return applyCsp(res, nonce);
-        }
-      } catch {
-        // Token inválido: se muestra la landing (el login la reemplaza).
-      }
+        if (role === "TRAINER") return applyCsp(NextResponse.redirect(new URL("/trainer/dashboard", req.url)), nonce);
+        if (role === "CLIENT") return applyCsp(NextResponse.redirect(new URL("/client/dashboard", req.url)), nonce);
+      } catch {}
     }
-    const res = NextResponse.next({ request: { headers: requestHeaders } });
-    return applyCsp(res, nonce);
+    return applyCsp(NextResponse.next({ request: { headers: requestHeaders } }), nonce);
   }
 
-  // ────────────────────────────────────────────────────────────────
-  // 2b. /login y /register con sesión válida van al panel (no al formulario).
-  // ────────────────────────────────────────────────────────────────
   if (path === "/login" || path === "/register") {
     const token = req.cookies.get("ec_token")?.value;
     if (token) {
       try {
         const { payload } = await jose.jwtVerify(token, SECRET);
         const role = (payload as unknown as { role: string }).role;
-        const res = NextResponse.redirect(
-          new URL(role === "TRAINER" ? "/trainer/dashboard" : "/client/dashboard", req.url)
-        );
-        return applyCsp(res, nonce);
-      } catch {
-        const res = NextResponse.next({ request: { headers: requestHeaders } });
-        return applyCsp(res, nonce);
-      }
+        return applyCsp(NextResponse.redirect(new URL(role === "TRAINER" ? "/trainer/dashboard" : "/client/dashboard", req.url)), nonce);
+      } catch {}
     }
-    const res = NextResponse.next({ request: { headers: requestHeaders } });
-    return applyCsp(res, nonce);
+    return applyCsp(NextResponse.next({ request: { headers: requestHeaders } }), nonce);
   }
 
-  // ────────────────────────────────────────────────────────────────
-  // 3. Auth + verificación de rol para rutas protegidas.
-  // ────────────────────────────────────────────────────────────────
   const isTrainer = path.startsWith("/trainer");
   const isClient = path.startsWith("/client");
-  if (!isTrainer && !isClient) {
-    const res = NextResponse.next({ request: { headers: requestHeaders } });
-    return applyCsp(res, nonce);
-  }
-
+  if (!isTrainer && !isClient) return applyCsp(NextResponse.next({ request: { headers: requestHeaders } }), nonce);
   const token = req.cookies.get("ec_token")?.value;
-  if (!token) {
-    const res = NextResponse.redirect(new URL("/login", req.url));
-    return applyCsp(res, nonce);
-  }
-
+  if (!token) return applyCsp(NextResponse.redirect(new URL("/login", req.url)), nonce);
   try {
     const { payload } = await jose.jwtVerify(token, SECRET);
     const role = (payload as unknown as { role: string }).role;
-    if (isTrainer && role !== "TRAINER") {
-      const res = NextResponse.redirect(new URL("/client/dashboard", req.url));
-      return applyCsp(res, nonce);
-    }
-    if (isClient && role !== "CLIENT") {
-      const res = NextResponse.redirect(new URL("/trainer/dashboard", req.url));
-      return applyCsp(res, nonce);
-    }
-    const res = NextResponse.next({ request: { headers: requestHeaders } });
-    return applyCsp(res, nonce);
+    if (isTrainer && role !== "TRAINER") return applyCsp(NextResponse.redirect(new URL("/client/dashboard", req.url)), nonce);
+    if (isClient && role !== "CLIENT") return applyCsp(NextResponse.redirect(new URL("/trainer/dashboard", req.url)), nonce);
+    return applyCsp(NextResponse.next({ request: { headers: requestHeaders } }), nonce);
   } catch {
-    const res = NextResponse.redirect(new URL("/login", req.url));
-    return applyCsp(res, nonce);
+    return applyCsp(NextResponse.redirect(new URL("/login", req.url)), nonce);
   }
 }
 
-/**
- * Respuesta estándar 429 con header Retry-After en segundos.
- */
-function rateLimitResponse(resetMs: number) {
-  const retryAfter = Math.max(1, Math.ceil(resetMs / 1000));
-  return new NextResponse(
-    JSON.stringify({
-      error: "Too many requests",
-      retryAfterSeconds: retryAfter,
-    }),
-    {
-      status: 429,
-      headers: {
-        "Content-Type": "application/json",
-        "Retry-After": String(retryAfter),
-        "X-RateLimit-Remaining": "0",
-      },
-    }
-  );
-}
-
-export const config = {
-  matcher: [
-    // Raíz session-aware (landing vs panel) + rutas protegidas + API.
-    "/",
-    "/login",
-    "/register",
-    "/trainer/:path*",
-    "/client/:path*",
-    "/api/:path*",
-  ],
-};
+export const config = { matcher: ["/", "/login", "/register", "/trainer/:path*", "/client/:path*", "/api/:path*"] };

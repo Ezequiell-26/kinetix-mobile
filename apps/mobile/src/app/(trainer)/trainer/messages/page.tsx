@@ -9,34 +9,14 @@ import { Badge } from "@/components/ui/badge";
 import { MessageFileButton } from "@/components/file-upload";
 import { Search, Send, MessageCircle, ArrowLeft, Check, CheckCheck, Paperclip } from "lucide-react";
 
-const quickReplies = [
-  "Excelente trabajo esta semana",
-  "Subamos 2.5kg en la próxima sesión.",
-  "Mantené el RIR controlado y descansá 90s.",
-  "Grabate un video de la serie pesada y enviamelo.",
-];
+const quickReplies = ["Excelente trabajo esta semana", "Subamos 2.5kg en la próxima sesión.", "Mantené el RIR controlado y descansá 90s.", "Grabate un video de la serie pesada y enviamelo."];
 
-type ClientWithUnread = {
-  id: string;
-  name: string;
-  email: string;
-  userId?: string | null;
-  unreadCount?: number;
-};
+type ClientWithUnread = { id: string; name: string; email: string; userId?: string | null; unreadCount?: number };
+type Msg = { id: string; senderId: string; receiverId: string; content: string; createdAt: string; read: boolean };
 
-type Msg = {
-  id: string;
-  senderId: string;
-  receiverId: string;
-  content: string;
-  createdAt: string;
-  read: boolean;
-};
-
-export default function TrainerMessagesPage(){
+export default function TrainerMessagesPage() {
   const searchParams = useSearchParams();
   const targetWithUserId = searchParams.get("with");
-
   const [clients, setClients] = useState<ClientWithUnread[]>([]);
   const [activeClient, setActiveClient] = useState<ClientWithUnread | null>(null);
   const [msgs, setMsgs] = useState<Msg[]>([]);
@@ -45,253 +25,86 @@ export default function TrainerMessagesPage(){
   const [meId, setMeId] = useState("");
   const [loading, setLoading] = useState(false);
   const [loadingClients, setLoadingClients] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   const [showListOnMobile, setShowListOnMobile] = useState(true);
-
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
 
-  async function loadInitial(){
-    setLoadingClients(true);
+  async function loadInitial() {
+    setLoadingClients(true); setError(null);
     try {
-      const [clientsRes, meRes] = await Promise.all([
-        fetch("/api/clients"),
-        fetch("/api/auth/me").then(r => r.json()).catch(() => null)
-      ]);
+      const [clientsRes, meRes] = await Promise.all([fetch("/api/clients", { cache: "no-store" }), fetch("/api/auth/me", { cache: "no-store" }).then(r => r.json()).catch(() => null)]);
       if (meRes?.user?.id) setMeId(meRes.user.id);
-      if (clientsRes.ok) {
-        const clientsData = await clientsRes.json();
-        if (Array.isArray(clientsData) && clientsData.length > 0) {
-          setClients(clientsData);
-          if (targetWithUserId) {
-            const found = clientsData.find((c: ClientWithUnread) => c.userId === targetWithUserId);
-            if (found) { setActiveClient(found); setShowListOnMobile(false); }
-            else setActiveClient(clientsData[0]);
-          } else {
-            setActiveClient(clientsData[0]);
-          }
-        }
-      }
-    } catch {}
-    setLoadingClients(false);
+      const clientsData = await clientsRes.json().catch(() => null);
+      if (!clientsRes.ok) throw new Error(clientsData?.error || "No se pudieron cargar los clientes.");
+      const items = Array.isArray(clientsData) ? clientsData : Array.isArray(clientsData?.items) ? clientsData.items : [];
+      setClients(items);
+      const found = targetWithUserId ? items.find((c: ClientWithUnread) => c.userId === targetWithUserId) : null;
+      const selected = found || items[0] || null;
+      setActiveClient(selected);
+      if (found) setShowListOnMobile(false);
+    } catch (cause) {
+      setError(cause instanceof Error ? cause.message : "No se pudieron cargar los clientes.");
+    } finally { setLoadingClients(false); }
   }
 
-  async function loadMsgs(){
+  async function loadMsgs() {
     if (!activeClient?.userId) return;
     try {
-      const res = await fetch(`/api/messages?with=${activeClient.userId}`);
-      if (res.ok) {
-        const data = await res.json();
-        if (Array.isArray(data)) setMsgs(data);
-      }
+      const res = await fetch(`/api/messages?with=${encodeURIComponent(activeClient.userId)}`, { cache: "no-store" });
+      const data = await res.json().catch(() => []);
+      if (res.ok && Array.isArray(data)) setMsgs(data);
     } catch {}
   }
 
-  useEffect(() => { loadInitial(); }, [targetWithUserId]);
+  useEffect(() => { void loadInitial(); }, [targetWithUserId]);
   useEffect(() => {
-    if (activeClient?.userId) {
-      loadMsgs();
-      const interval = setInterval(loadMsgs, 3000);
-      return () => clearInterval(interval);
-    } else {
-      setMsgs([]);
-    }
-  }, [activeClient]);
+    if (!activeClient?.userId) { setMsgs([]); return; }
+    void loadMsgs();
+    const interval = setInterval(() => { void loadMsgs(); }, 5000);
+    return () => clearInterval(interval);
+  }, [activeClient?.userId]);
   useEffect(() => { messagesEndRef.current?.scrollIntoView({ behavior: "smooth" }); }, [msgs]);
 
-  async function handleSend(textToSend?: string){
+  async function handleSend(textToSend?: string) {
     const messageContent = (textToSend || input).trim();
     if (!messageContent || !activeClient?.userId || loading) return;
-    setLoading(true);
-    setInput("");
-    const tempMsg: Msg = {
-      id: "tmp-" + Date.now(),
-      senderId: meId,
-      receiverId: activeClient.userId,
-      content: messageContent,
-      createdAt: new Date().toISOString(),
-      read: false
-    };
-    setMsgs(prev => [...prev, tempMsg]);
+    setLoading(true); setError(null); setInput("");
+    const tempMsg: Msg = { id: `tmp-${Date.now()}`, senderId: meId, receiverId: activeClient.userId, content: messageContent, createdAt: new Date().toISOString(), read: false };
+    setMsgs((prev) => [...prev, tempMsg]);
     try {
-      const res = await fetch("/api/messages", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ receiverId: activeClient.userId, clientId: activeClient.id, content: messageContent })
-      });
-      if (!res.ok) {
-        setMsgs(prev => prev.filter(m => m.id !== tempMsg.id));
-      } else {
-        loadMsgs();
-      }
-    } catch {
-      setMsgs(prev => prev.filter(m => m.id !== tempMsg.id));
-    } finally {
-      setLoading(false);
-      inputRef.current?.focus();
-    }
+      const res = await fetch("/api/messages", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ receiverId: activeClient.userId, clientId: activeClient.id, content: messageContent }) });
+      const data = await res.json().catch(() => null);
+      if (!res.ok) throw new Error(data?.error || "No se pudo enviar el mensaje.");
+      setMsgs((prev) => prev.filter((msg) => msg.id !== tempMsg.id).concat(data));
+    } catch (cause) {
+      setMsgs((prev) => prev.filter((msg) => msg.id !== tempMsg.id));
+      setError(cause instanceof Error ? cause.message : "No se pudo enviar el mensaje.");
+    } finally { setLoading(false); inputRef.current?.focus(); }
   }
 
-  function selectClient(c: ClientWithUnread){
-    setActiveClient(c);
-    setShowListOnMobile(false);
-  }
-
-  const filteredClients = clients.filter(c =>
-    c.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    c.email.toLowerCase().includes(searchQuery.toLowerCase())
-  );
+  const filteredClients = clients.filter((c) => c.name.toLowerCase().includes(searchQuery.toLowerCase()) || c.email.toLowerCase().includes(searchQuery.toLowerCase()));
 
   return (
-    <div className="flex flex-col h-[calc(100dvh-56px-0px)] lg:h-[calc(100dvh-56px-24px)] -mx-4 lg:mx-0 -mt-4 lg:mt-0">
-      <div className="shrink-0 px-4 lg:px-0 pt-4 lg:pt-0 pb-3">
-        <h1 className="text-xl lg:text-2xl font-display font-bold">Mensajes</h1>
-        <p className="text-xs text-zinc-500">Chat 1:1 con cada cliente • toques rápidos</p>
-      </div>
-
-      <div className="flex-1 grid lg:grid-cols-[320px_1fr] gap-0 lg:gap-4 overflow-hidden min-h-0">
-        {/* Sidebar - hidden on mobile when chat open */}
-        <Card className={`border-zinc-800 bg-zinc-950 flex flex-col overflow-hidden rounded-none lg:rounded-2xl border-x-0 lg:border shadow-[0_12px_40px_rgba(0,0,0,0.35)] ${showListOnMobile ? "flex" : "hidden lg:flex"}`}>
-          <div className="p-3 border-b border-zinc-800 shrink-0">
-            <div className="relative">
-              <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-zinc-500" />
-              <Input
-                placeholder="Buscar cliente..."
-                value={searchQuery}
-                onChange={e => setSearchQuery(e.target.value)}
-                className="pl-9 h-10 text-sm bg-zinc-900 border-zinc-800"
-              />
-            </div>
-          </div>
-          <div className="flex-1 overflow-y-auto divide-y divide-zinc-900 overscroll-contain" style={{ WebkitOverflowScrolling: "touch" }}>
-            {loadingClients ? (
-              <p className="p-8 text-center text-xs text-zinc-500">Cargando clientes...</p>
-            ) : filteredClients.length === 0 ? (
-              <p className="p-8 text-center text-xs text-zinc-500">No se encontraron clientes.</p>
-            ) : (
-              filteredClients.map(c => {
-                const isSelected = activeClient?.id === c.id;
-                return (
-                  <button
-                    key={c.id}
-                    onClick={() => selectClient(c)}
-                    className={`w-full text-left p-3.5 flex items-center gap-3 transition min-h-[64px] ${isSelected ? "bg-zinc-900 border-l-4 border-l-primary" : "hover:bg-zinc-900/50 active:bg-zinc-900"}`}
-                  >
-                    <div className="w-10 h-10 rounded-xl bg-white text-black flex items-center justify-center font-black text-sm shrink-0">
-                      {c.name?.[0]?.toUpperCase() || "C"}
-                    </div>
-                    <div className="min-w-0 flex-1 text-left">
-                      <p className={`text-sm font-bold truncate ${isSelected ? "text-primary" : "text-white"}`}>{c.name}</p>
-                      <p className="text-xs text-zinc-500 truncate">{c.email}</p>
-                    </div>
-                    {c.unreadCount ? <Badge variant="accent" className="shrink-0 text-[11px] px-2">{c.unreadCount}</Badge> : null}
-                  </button>
-                );
-              })
-            )}
+    <div className="flex h-[calc(100dvh-56px)] flex-col -mx-4 -mt-4 lg:mx-0 lg:mt-0 lg:h-[calc(100dvh-56px-24px)]">
+      <div className="shrink-0 px-4 pb-3 pt-4 lg:px-0 lg:pt-0"><h1 className="text-xl font-display font-bold lg:text-2xl">Mensajes</h1><p className="text-xs text-zinc-500">Chat 1:1 con cada cliente • toques rápidos</p></div>
+      {error && <div role="alert" className="mx-4 mb-3 rounded-xl border border-red-500/20 bg-red-500/5 p-3 text-xs text-red-200 lg:mx-0">{error}</div>}
+      <div className="grid min-h-0 flex-1 gap-4 overflow-hidden lg:grid-cols-[320px_1fr]">
+        <Card className={`${showListOnMobile ? "flex" : "hidden lg:flex"} min-h-0 flex-col overflow-hidden rounded-none border-x-0 border-zinc-800 bg-zinc-950 lg:rounded-2xl lg:border`}>
+          <div className="shrink-0 border-b border-zinc-800 p-3"><div className="relative"><Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-zinc-500"/><Input value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)} placeholder="Buscar cliente..." className="h-10 border-zinc-800 bg-zinc-900 pl-9"/></div></div>
+          <div className="flex-1 overflow-y-auto divide-y divide-zinc-900">
+            {loadingClients ? <p className="p-8 text-center text-xs text-zinc-500">Cargando clientes...</p> : filteredClients.length === 0 ? <p className="p-8 text-center text-xs text-zinc-500">No se encontraron clientes.</p> : filteredClients.map((client) => <button key={client.id} onClick={() => { setActiveClient(client); setShowListOnMobile(false); }} className={`flex min-h-[64px] w-full items-center gap-3 p-3.5 text-left transition ${activeClient?.id === client.id ? "border-l-4 border-l-primary bg-zinc-900" : "hover:bg-zinc-900/50"}`}><div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-white text-sm font-black text-black">{client.name?.[0]?.toUpperCase() || "C"}</div><div className="min-w-0 flex-1"><p className={`truncate text-sm font-bold ${activeClient?.id === client.id ? "text-primary" : "text-white"}`}>{client.name}</p><p className="truncate text-xs text-zinc-500">{client.email}</p></div>{client.unreadCount ? <Badge variant="accent" className="shrink-0 px-2 text-[11px]">{client.unreadCount}</Badge> : null}</button>)}
           </div>
         </Card>
-
-        {/* Chat Area - full mobile */}
-        <Card className={`border-zinc-800 bg-zinc-950 flex flex-col overflow-hidden rounded-none lg:rounded-2xl border-x-0 lg:border shadow-[0_12px_40px_rgba(0,0,0,0.35)] min-h-0 ${showListOnMobile ? "hidden lg:flex" : "flex"}`}>
-          {activeClient ? (
-            <>
-              {/* Header with back on mobile */}
-              <div className="shrink-0 p-3 border-b border-zinc-800 flex items-center gap-3 bg-zinc-900/80 backdrop-blur">
-                <button
-                  onClick={()=>setShowListOnMobile(true)}
-                  className="lg:hidden w-9 h-9 rounded-xl bg-zinc-900 border border-zinc-800 flex items-center justify-center text-zinc-400 active:scale-95"
-                >
-                  <ArrowLeft size={16}/>
-                </button>
-                <div className="w-9 h-9 rounded-xl bg-primary text-black flex items-center justify-center font-black text-sm shrink-0">
-                  {activeClient.name?.[0]?.toUpperCase() || "C"}
-                </div>
-                <div className="flex-1 min-w-0">
-                  <p className="font-bold text-sm text-white truncate">{activeClient.name}</p>
-                  <p className="text-xs text-zinc-500 truncate">{activeClient.email}</p>
-                </div>
-              </div>
-
-              {/* Messages */}
-              <div className="flex-1 overflow-y-auto px-3 sm:px-4 py-4 space-y-3 bg-[#080808] overscroll-contain" style={{ WebkitOverflowScrolling: "touch" }}>
-                {!activeClient.userId ? (
-                  <div className="py-16 text-center text-xs text-zinc-500 space-y-2 px-4">
-                    <p className="font-bold text-zinc-400">Cliente aún sin cuenta</p>
-                    <p>Cuando se registre con <span className="text-white">{activeClient.email}</span> podrán chatear aquí.</p>
-                  </div>
-                ) : msgs.length === 0 ? (
-                  <div className="py-16 text-center text-xs text-zinc-500">
-                    Sin mensajes aún. ¡Escribí el primero!
-                  </div>
-                ) : (
-                  msgs.map(m => {
-                    const isMe = m.senderId === meId;
-                    return (
-                      <div key={m.id} className={`flex ${isMe ? "justify-end" : "justify-start"}`}>
-                        <div className={`max-w-[82%] sm:max-w-[70%] px-3.5 py-2.5 rounded-2xl text-xs shadow-sm ${isMe ? "bg-primary text-black rounded-br-md font-medium" : "bg-zinc-900 text-white border border-zinc-800 rounded-bl-md"}`}>
-                          {m.content.startsWith("/uploads/") || m.content.startsWith("/api/uploads/") ? (
-                            /\.(jpg|jpeg|png|webp|gif)$/i.test(m.content) ? (
-                              <Image src={m.content} alt="Adjunto" width={220} height={220} className="rounded-xl max-w-[220px] max-h-[220px] object-cover" unoptimized />
-                            ) : (
-                              <a href={m.content} target="_blank" rel="noreferrer" className="underline font-bold flex items-center gap-1"><Paperclip size={12}/> Ver archivo ↗</a>
-                            )
-                          ) : (
-                            <p className="whitespace-pre-wrap leading-relaxed text-[13px]">{m.content}</p>
-                          )}
-                          <div className={`flex items-center justify-end gap-1 text-[10px] mt-1 ${isMe ? "text-black/60" : "text-zinc-500"}`}>
-                            <span>{new Date(m.createdAt).toLocaleTimeString("es-AR", { hour: "2-digit", minute: "2-digit" })}</span>
-                            {isMe && (m.read ? <CheckCheck size={12} className="text-black" /> : <Check size={12} />)}
-                          </div>
-                        </div>
-                      </div>
-                    );
-                  })
-                )}
-                <div ref={messagesEndRef} />
-              </div>
-
-              {/* Quick replies + Input */}
-              {activeClient.userId && (
-                <div className="shrink-0 border-t border-zinc-800 bg-zinc-950">
-                  <div className="px-3 py-2 border-b border-zinc-800/50">
-                    <div className="flex gap-1.5 overflow-x-auto scrollbar-none" style={{ WebkitOverflowScrolling: "touch" }}>
-                      {quickReplies.map((q, idx) => (
-                        <button
-                          key={idx}
-                          onClick={() => handleSend(q)}
-                          className="shrink-0 text-xs px-3 py-2 rounded-full bg-zinc-900 border border-zinc-800 text-zinc-300 hover:bg-zinc-800 hover:text-white active:scale-95 transition whitespace-nowrap font-medium"
-                        >
-                          {q}
-                        </button>
-                      ))}
-                    </div>
-                  </div>
-                  <div className="p-3 flex gap-2 items-end pb-[calc(0.75rem+env(safe-area-inset-bottom))] lg:pb-3">
-                    <MessageFileButton onFile={url => handleSend(url)} />
-                    <Input
-                      ref={inputRef}
-                      value={input}
-                      onChange={e => setInput(e.target.value)}
-                      placeholder={`A ${activeClient.name}...`}
-                      onKeyDown={e => { if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); handleSend(); } }}
-                      className="flex-1 min-h-[44px] h-11 text-[15px] sm:text-sm bg-zinc-900 border-zinc-800 text-white rounded-xl"
-                      disabled={loading}
-                    />
-                    <Button variant="accent" onClick={() => handleSend()} disabled={loading || !input.trim()} className="h-11 w-11 lg:w-auto lg:px-5 rounded-xl font-bold shrink-0">
-                      <Send size={18} /><span className="hidden lg:inline ml-1.5">Enviar</span>
-                    </Button>
-                  </div>
-                </div>
-              )}
-            </>
-          ) : (
-            <div className="flex flex-col items-center justify-center flex-1 text-center p-8 space-y-3 text-zinc-500">
-              <MessageCircle size={32} />
-              <p className="text-sm font-bold text-zinc-400">Seleccioná un cliente</p>
-              <p className="text-xs">Elegí a quién escribir</p>
-              <Button variant="outline" size="sm" className="lg:hidden mt-2" onClick={()=>setShowListOnMobile(true)}>Ver clientes</Button>
+        <Card className={`${showListOnMobile ? "hidden lg:flex" : "flex"} min-h-0 flex-col overflow-hidden rounded-none border-x-0 border-zinc-800 bg-zinc-950 lg:rounded-2xl lg:border`}>
+          {activeClient ? <>
+            <div className="flex shrink-0 items-center gap-3 border-b border-zinc-800 bg-zinc-900/80 p-3 backdrop-blur"><button onClick={() => setShowListOnMobile(true)} className="grid h-9 w-9 place-items-center rounded-xl border border-zinc-800 bg-zinc-900 text-zinc-400 lg:hidden"><ArrowLeft size={16}/></button><div className="grid h-9 w-9 shrink-0 place-items-center rounded-xl bg-primary text-sm font-black text-black">{activeClient.name?.[0]?.toUpperCase() || "C"}</div><div className="min-w-0 flex-1"><p className="truncate text-sm font-bold text-white">{activeClient.name}</p><p className="truncate text-xs text-zinc-500">{activeClient.email}</p></div></div>
+            <div className="flex-1 space-y-3 overflow-y-auto bg-[#080808] px-3 py-4">
+              {!activeClient.userId ? <div className="px-4 py-16 text-center text-xs text-zinc-500"><p className="font-bold text-zinc-400">Cliente aún sin cuenta</p><p className="mt-2">Cuando se registre con <span className="text-white">{activeClient.email}</span> podrán chatear aquí.</p></div> : msgs.length === 0 ? <div className="py-16 text-center text-xs text-zinc-500">Sin mensajes aún. ¡Escribí el primero!</div> : msgs.map((msg) => { const isMe = msg.senderId === meId; return <div key={msg.id} className={`flex ${isMe ? "justify-end" : "justify-start"}`}><div className={`max-w-[82%] rounded-2xl px-3.5 py-2.5 text-xs ${isMe ? "rounded-br-md bg-primary text-black" : "rounded-bl-md border border-zinc-800 bg-zinc-900 text-white"}`}><p className="whitespace-pre-wrap leading-relaxed text-[13px]">{msg.content}</p><div className={`mt-1 flex items-center justify-end gap-1 text-[10px] ${isMe ? "text-black/60" : "text-zinc-500"}`}><span>{new Date(msg.createdAt).toLocaleTimeString("es-AR", { hour: "2-digit", minute: "2-digit" })}</span>{isMe && (msg.read ? <CheckCheck size={12} /> : <Check size={12} />)}</div></div></div>; })}
+              <div ref={messagesEndRef}/>
             </div>
-          )}
+            {activeClient.userId && <div className="shrink-0 border-t border-zinc-800 bg-zinc-950"><div className="overflow-x-auto border-b border-zinc-800/50 px-3 py-2"><div className="flex gap-1.5">{quickReplies.map((reply) => <button key={reply} onClick={() => void handleSend(reply)} disabled={loading} className="shrink-0 rounded-full border border-zinc-800 bg-zinc-900 px-3 py-2 text-xs font-medium text-zinc-300 disabled:opacity-50">{reply}</button>)}</div></div><div className="flex items-end gap-2 p-3 pb-[calc(0.75rem+env(safe-area-inset-bottom))] lg:pb-3"><MessageFileButton onFile={(url) => void handleSend(url)} /><Input ref={inputRef} value={input} onChange={(e) => setInput(e.target.value)} placeholder={`A ${activeClient.name}...`} onKeyDown={(e) => { if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); void handleSend(); } }} className="h-11 flex-1 rounded-xl border-zinc-800 bg-zinc-900 text-[15px]" disabled={loading}/><Button variant="accent" onClick={() => void handleSend()} disabled={loading || !input.trim()} className="h-11 w-11 shrink-0 rounded-xl lg:w-auto lg:px-5"><Send size={18}/><span className="ml-1.5 hidden lg:inline">Enviar</span></Button></div></div>}
+          </> : <div className="flex flex-1 flex-col items-center justify-center space-y-3 p-8 text-center text-zinc-500"><MessageCircle size={32}/><p className="text-sm font-bold text-zinc-400">Seleccioná un cliente</p><Button variant="outline" size="sm" className="lg:hidden" onClick={() => setShowListOnMobile(true)}>Ver clientes</Button></div>}
         </Card>
       </div>
     </div>

@@ -1,72 +1,210 @@
-# PARALLEL_PROTOCOL — 10 agentes, 0 rupturas (V8 §84–§90)
+# KinetixFitt — Multi-Agent / Parallel Work Protocol
 
-## Respuesta corta a "¿10 Qwen a la vez está bien?"
+**Version:** 3.0.0  
+**Status:** Mandatory for concurrent AI/human sessions
 
-Solo con este protocolo. Sin él ya se rompió 3 veces en 30 commits
-(paths `../`, 500s de theme, `.gitignore` reescrito 4 veces).
+## Goal
 
-## Reglas (obligatorias para toda sesión, Qwen o humana)
+Allow multiple agents to work in parallel while minimizing conflicts, duplicated systems, broken builds, data corruption, and accidental overwrites.
 
-### 1. Una rama por sesión, jamás develop directo
+## 1. BRANCH ISOLATION
 
-```bash
-git checkout develop && git pull --ff-only origin develop
-git checkout -b feat/<dominio>-<n>   # o fix/<dominio>-<n>
-```
+Every session uses its own branch.
 
-Dominios sugeridos (V8 §85): `web-ux`, `backend-api`, `database`,
-`fitness-domain`, `ai`, `3d`, `native`, `rust-wasm`, `testing`, `integration`.
-Cada cuenta reclama UN dominio en `.ai/CLAIMS.md` (crear si no existe)
-antes de trabajar. Dos sesiones, mismo dominio = coordinar primero.
-
-### 2. Sincronizar antes de pushear
+Recommended:
 
 ```bash
-git fetch origin && git rebase origin/develop
-npm run typecheck && npm run test     # desde apps/mobile
-git push -u origin feat/<rama>
+git fetch origin
+ git switch -c feat/<domain>-<short-name> origin/develop
 ```
 
-PR contra `develop`. Merge solo con CI verde. Prohibido:
-`push --force`, `reset --hard`, `clean -fd`, `checkout -- .` sobre trabajo ajeno.
+Do not perform normal feature work directly on `develop` or `main`.
 
-### 3. Zonas calientes (un dueño a la vez)
+`main` is the stable integration/release branch.
 
-`next.config.mjs` · `tsconfig*.json` · `packages/shared/src/*` ·
-`src/components/theme*` · `src/lib/auth.ts` · `prisma/schema.prisma` ·
-`.gitignore` · `package*.json`.
+## 2. CLAIM A DOMAIN
 
-Si tu cambio toca una zona caliente: avísalo en el PR y espera CI verde.
-Nadie reescribe `.gitignore` sin leerlo antes (ya pasó 4 veces).
+Before parallel work, claim a domain in `.ai/CLAIMS.md`.
 
-### 4. Gate local antes de cada push (V8 §80)
+Suggested domains:
+
+- web-ui
+- mobile-ui
+- backend-api
+- database
+- auth-security
+- payments
+- storage
+- nutrition
+- recovery
+- training
+- analytics
+- ai
+- 3d
+- native
+- rust-wasm
+- testing
+- infra-deploy
+- documentation
+
+One active session should own one primary domain at a time.
+
+If two sessions need the same hot area, coordinate the change rather than overwriting each other.
+
+## 3. HOT FILES
+
+Treat these as conflict-prone:
+
+- `package.json`
+- `package-lock.json`
+- `apps/*/package.json`
+- Prisma schema/migrations
+- auth/security modules
+- payment modules
+- `next.config.*`
+- `tsconfig*`
+- `.gitignore`
+- shared packages
+- CI workflows
+- design tokens
+- service workers
+- routing/layout files
+
+Do not casually edit hot files for an unrelated feature.
+
+## 4. SYNC BEFORE PUSH
+
+Before pushing a branch:
 
 ```bash
-npx tsc --noEmit          # 0 errores (línea base 2026-09-12)
-npm run test              # stats + core
-npm run build             # si tocaste rutas, providers o next.config
-curl -s -o /dev/null -w "%{http_code}" http://localhost:3001/login  # 200
+git fetch origin
+git rebase origin/develop
 ```
 
-Si algo falla: FIX IT o repórtalo. Nunca fingir que pasó (AGENTS.md).
+If the branch is targeting `main` directly under an approved release workflow, sync with the current target first.
 
-### 5. Nunca commitear
+Never force-push shared branches.
 
-`.next/` · `*.tsbuildinfo` · `prisma/*.db` · `node_modules/` ·
-`public/uploads/*` · `.next-dev*/` · `.env*` (con valores reales).
+Never use destructive commands against work you did not create.
 
-### 6. Handoff obligatorio (V8 §86)
+## 5. FORBIDDEN DESTRUCTIVE COMMANDS
 
-Al cerrar sesión, actualizar `.ai/PROJECT_REALITY.md`:
-WHAT CHANGED / VERIFIED (comando + resultado) / REMAINS / RISKS / FILES.
+Do not run against shared/unfamiliar work:
 
-### 7. Fuente de verdad
+```bash
+git reset --hard
+ git clean -fd
+ git checkout -- .
+ git restore .
+```
 
-1. runtime real → 2. código → 3. tests → 4. schema/migraciones →
-2. contratos → 6. docs. Si un doc contradice al código, se arregla el doc.
+unless the exact files and consequences are explicitly known and belong to the current task.
 
-### 8. Prohibido (V8 §2, §95)
+## 6. NO PARALLEL DUPLICATE SYSTEMS
 
-Funcionalidad finta, APIs inventadas, claims (WebGPU, anatomía
-profesional, IA on-device, "100x") sin verificación, duplicar sistemas,
-segundos backends/stores, dependencias innecesarias, reescribir todo.
+Before creating a new:
+
+- auth system;
+- store;
+- API helper;
+- database client;
+- design primitive;
+- payment abstraction;
+- AI provider abstraction;
+- notification system;
+- cache;
+- sync engine;
+
+search first.
+
+If an existing implementation can be extended safely, extend it.
+
+## 7. SHARED CONTRACTS
+
+Changes to shared types, schemas, APIs, or design tokens have a wide blast radius.
+
+Treat them as integration changes and update consumers/tests before declaring completion.
+
+## 8. DATABASE COORDINATION
+
+Only one concurrent branch should normally own a given migration/schema change.
+
+Do not create two competing migrations for the same model change.
+
+Resolve migrations before merge.
+
+Never rewrite published migration history to resolve a merge conflict.
+
+## 9. DEPENDENCY COORDINATION
+
+Avoid simultaneous dependency upgrades from multiple branches.
+
+A dependency upgrade should be isolated, tested, and merged before unrelated branches depend on it when practical.
+
+## 10. HANDOFF
+
+Every completed session records:
+
+- domain;
+- branch;
+- files changed;
+- behavior changed;
+- tests run;
+- known issues;
+- migrations/API effects;
+- follow-up work.
+
+Update `.ai/PROJECT_REALITY.md` when the project reality materially changes.
+
+## 11. MERGE ORDER
+
+Prefer:
+
+`feature branches → CI → review → integration → main`
+
+Resolve high-risk foundation changes before dependent feature changes.
+
+Example:
+
+`database contract → API → UI`
+
+not the reverse.
+
+## 12. CONFLICT RESOLUTION
+
+When merge/rebase conflicts affect behavior, never choose a side blindly.
+
+Reconstruct intended behavior from:
+
+- current main/develop;
+- task requirement;
+- contracts;
+- tests;
+- ADRs.
+
+Then resolve intentionally and rerun the relevant gates.
+
+## 13. PARALLEL AGENT SAFETY RULE
+
+More agents do not automatically mean faster delivery.
+
+If parallelism increases merge conflicts or duplicated work, reduce concurrency.
+
+Prefer independent domains with low shared-file overlap.
+
+## 14. FINAL INTEGRATION GATE
+
+Before integration:
+
+- diff reviewed;
+- relevant tests pass;
+- no secrets;
+- no accidental deletions;
+- no migration conflict;
+- no API contract breakage;
+- no known authorization regression;
+- build passes for affected app(s).
+
+## 15. PRINCIPLE
+
+**Parallel work is safe only when ownership, contracts, isolation, and verification are explicit.**

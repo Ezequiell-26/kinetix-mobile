@@ -1,20 +1,17 @@
-import type { MetadataRoute } from 'next';
+import type { MetadataRoute } from "next";
+
+const BASE = process.env.NEXT_PUBLIC_WEB_URL || "https://kinetixfitt.com";
 
 export default function robots(): MetadataRoute.Robots {
-  const base = process.env.NEXT_PUBLIC_WEB_URL || 'https://kinetixfitt.com';
   return {
     rules: [
       {
-        userAgent: '*',
-        allow: '/',
-        disallow: ['/api/', '/dashboard/', '/auth/', '/_next/'],
-      },
-      {
-        userAgent: 'GPTBot',
-        disallow: '/',
+        userAgent: "*",
+        allow: "/",
+        disallow: ["/api/", "/_next/"],
       },
     ],
-    sitemap: `${base}/sitemap.xml`,
-    host: base,
+    sitemap: `${BASE}/sitemap.xml`,
+    host: BASE,
   };
 }

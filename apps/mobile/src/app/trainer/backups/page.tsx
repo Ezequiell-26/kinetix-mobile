@@ -1,232 +1,26 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDesc, CardHeader, CardTitle } from "@/components/ui/card";
-import { Download, Trash2, RefreshCw, Database, AlertCircle, CheckCircle } from "lucide-react";
+import { Download, Trash2, RefreshCw, Database, AlertCircle, CheckCircle, Loader2 } from "lucide-react";
 import { formatDistanceToNow } from "date-fns";
 import { es } from "date-fns/locale";
 
-interface Backup {
-  filename: string;
-  sizeBytes: number;
-  sizeMB: string;
-  createdAt: string;
-}
+interface Backup { filename: string; sizeBytes: number; sizeMB: string; createdAt: string; }
 
 export default function BackupsPage() {
-  const router = useRouter();
-  const [backups, setBackups] = useState<Backup[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [creating, setCreating] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-  const [success, setSuccess] = useState<string | null>(null);
-
-  const loadBackups = async () => {
-    try {
-      setLoading(true);
-      setError(null);
-      const res = await fetch("/api/backups");
-      if (!res.ok) {
-        throw new Error("Error al cargar backups");
-      }
-      const data = await res.json();
-      setBackups(data.backups || []);
-    } catch (err) {
-      setError(err instanceof Error ? err.message : "Error desconocido");
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  useEffect(() => {
-    loadBackups();
-  }, []);
-
-  const handleCreateBackup = async () => {
-    try {
-      setCreating(true);
-      setSuccess(null);
-      setError(null);
-      const res = await fetch("/api/backups", { method: "POST" });
-      if (!res.ok) {
-        const data = await res.json();
-        throw new Error(data.error || "Error al crear backup");
-      }
-      const data = await res.json();
-      setSuccess(`Backup creado exitosamente (${data.backup.sizeMB} MB)`);
-      await loadBackups();
-    } catch (err) {
-      setError(err instanceof Error ? err.message : "Error desconocido");
-    } finally {
-      setCreating(false);
-    }
-  };
-
-  const handleDeleteBackup = async (filename: string) => {
-    if (!confirm(`¿Estás seguro de eliminar el backup "${filename}"? Esta acción no se puede deshacer.`)) {
-      return;
-    }
-
-    try {
-      setError(null);
-      const res = await fetch(`/api/backups/${encodeURIComponent(filename)}`, {
-        method: "DELETE",
-      });
-      if (!res.ok) {
-        const data = await res.json();
-        throw new Error(data.error || "Error al eliminar backup");
-      }
-      setSuccess("Backup eliminado exitosamente");
-      await loadBackups();
-    } catch (err) {
-      setError(err instanceof Error ? err.message : "Error desconocido");
-    }
-  };
-
-  const handleDownload = (filename: string) => {
-    // En producción, esto debería ser un endpoint que sirva el archivo
-    alert(`Descarga iniciada para: ${filename}\n\nEn producción, este botón descargará el archivo desde S3 o el servidor.`);
-  };
-
-  return (
-    <div className="container mx-auto p-6 max-w-5xl">
-      <div className="mb-8">
-        <h1 className="text-3xl font-bold mb-2">Backups de Base de Datos</h1>
-        <p className="text-muted-foreground">
-          Gestiona las copias de seguridad de tu base de datos. Los backups se realizan automáticamente todos los días a las 3:00 AM.
-        </p>
-      </div>
-
-      {error && (
-        <Card className="mb-6 border-red-200 bg-red-50">
-          <CardContent className="pt-6 flex items-center gap-3">
-            <AlertCircle className="h-5 w-5 text-red-600" />
-            <p className="text-red-800 font-medium">{error}</p>
-          </CardContent>
-        </Card>
-      )}
-
-      {success && (
-        <Card className="mb-6 border-green-200 bg-green-50">
-          <CardContent className="pt-6 flex items-center gap-3">
-            <CheckCircle className="h-5 w-5 text-green-600" />
-            <p className="text-green-800 font-medium">{success}</p>
-          </CardContent>
-        </Card>
-      )}
-
-      <Card className="mb-6">
-        <CardHeader>
-          <CardTitle>Crear Backup Manual</CardTitle>
-          <CardDesc>
-            Genera una copia de seguridad completa de la base de datos ahora mismo.
-          </CardDesc>
-        </CardHeader>
-        <CardContent>
-          <Button onClick={handleCreateBackup} disabled={creating} className="gap-2">
-            {creating ? (
-              <>
-                <RefreshCw className="h-4 w-4 animate-spin" />
-                Creando backup...
-              </>
-            ) : (
-              <>
-                <Database className="h-4 w-4" />
-                Crear Backup Ahora
-              </>
-            )}
-          </Button>
-          <p className="text-sm text-muted-foreground mt-2">
-            Los backups se comprimen automáticamente y se suben a almacenamiento seguro si está configurado.
-          </p>
-        </CardContent>
-      </Card>
-
-      <Card>
-        <CardHeader>
-          <div className="flex items-center justify-between">
-            <div>
-              <CardTitle>Backups Existentes</CardTitle>
-              <CardDesc>
-                {backups.length} backup{backups.length !== 1 ? "s" : ""} disponible{backups.length !== 1 ? "s" : ""}
-              </CardDesc>
-            </div>
-            <Button variant="outline" size="sm" onClick={loadBackups} disabled={loading}>
-              <RefreshCw className={`h-4 w-4 mr-2 ${loading ? "animate-spin" : ""}`} />
-              Recargar
-            </Button>
-          </div>
-        </CardHeader>
-        <CardContent>
-          {loading ? (
-            <div className="text-center py-8 text-muted-foreground">Cargando backups...</div>
-          ) : backups.length === 0 ? (
-            <div className="text-center py-8 text-muted-foreground">
-              <Database className="h-12 w-12 mx-auto mb-3 opacity-50" />
-              <p>No hay backups disponibles</p>
-              <p className="text-sm mt-1">Crea tu primer backup manual o espera al próximo automático</p>
-            </div>
-          ) : (
-            <div className="space-y-3">
-              {backups.map((backup) => (
-                <div
-                  key={backup.filename}
-                  className="flex items-center justify-between p-4 border rounded-lg hover:bg-muted/50 transition-colors"
-                >
-                  <div className="flex-1 min-w-0">
-                    <p className="font-medium truncate">{backup.filename}</p>
-                    <div className="flex items-center gap-4 text-sm text-muted-foreground mt-1">
-                      <span>{backup.sizeMB} MB</span>
-                      <span>•</span>
-                      <span>{formatDistanceToNow(new Date(backup.createdAt), { addSuffix: true, locale: es })}</span>
-                    </div>
-                  </div>
-                  <div className="flex items-center gap-2 ml-4">
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={() => handleDownload(backup.filename)}
-                      title="Descargar"
-                    >
-                      <Download className="h-4 w-4" />
-                    </Button>
-                    <Button
-                      variant="danger"
-                      size="sm"
-                      onClick={() => handleDeleteBackup(backup.filename)}
-                      title="Eliminar"
-                    >
-                      <Trash2 className="h-4 w-4" />
-                    </Button>
-                  </div>
-                </div>
-              ))}
-            </div>
-          )}
-        </CardContent>
-      </Card>
-
-      <Card className="mt-6 bg-blue-50 border-blue-200">
-        <CardHeader>
-          <CardTitle className="text-blue-900">Información Importante</CardTitle>
-        </CardHeader>
-        <CardContent className="text-blue-800 space-y-2">
-          <p className="text-sm">
-            • Los backups automáticos se realizan diariamente a las 3:00 AM (hora del servidor)
-          </p>
-          <p className="text-sm">
-            • Se mantienen máximo 7 backups. Los más antiguos se eliminan automáticamente
-          </p>
-          <p className="text-sm">
-            • Si está configurado S3, los backups se suben automáticamente a la nube
-          </p>
-          <p className="text-sm">
-            • Para restaurar un backup, contacta al administrador del sistema
-          </p>
-        </CardContent>
-      </Card>
-    </div>
-  );
+  const [backups,setBackups]=useState<Backup[]>([]), [loading,setLoading]=useState(true), [creating,setCreating]=useState(false), [busyFile,setBusyFile]=useState<string|null>(null), [error,setError]=useState<string|null>(null), [success,setSuccess]=useState<string|null>(null);
+  const loadBackups=async()=>{try{setLoading(true);setError(null);const res=await fetch("/api/backups",{cache:"no-store"});const data=await res.json();if(!res.ok)throw new Error(data?.error||"Error al cargar backups");setBackups(Array.isArray(data.backups)?data.backups:[]);}catch(err){setError(err instanceof Error?err.message:"Error desconocido");}finally{setLoading(false)}};
+  useEffect(()=>{void loadBackups();},[]);
+  const handleCreateBackup=async()=>{try{setCreating(true);setSuccess(null);setError(null);const res=await fetch("/api/backups",{method:"POST"});const data=await res.json().catch(()=>null);if(!res.ok)throw new Error(data?.error||"Error al crear backup");setSuccess(`Backup creado correctamente (${data.backup?.sizeMB||"—"} MB)`);await loadBackups();}catch(err){setError(err instanceof Error?err.message:"Error desconocido");}finally{setCreating(false)}};
+  const handleDeleteBackup=async(filename:string)=>{if(!window.confirm(`¿Eliminar el backup "${filename}"? Esta acción no se puede deshacer.`))return;try{setBusyFile(filename);setError(null);const res=await fetch(`/api/backups/${encodeURIComponent(filename)}`,{method:"DELETE"});const data=await res.json().catch(()=>null);if(!res.ok)throw new Error(data?.error||"Error al eliminar backup");setSuccess("Backup eliminado correctamente");await loadBackups();}catch(err){setError(err instanceof Error?err.message:"Error desconocido");}finally{setBusyFile(null)}};
+  const handleDownload=async(filename:string)=>{try{setBusyFile(filename);setError(null);const res=await fetch(`/api/backups/${encodeURIComponent(filename)}`,{cache:"no-store"});if(!res.ok){const data=await res.json().catch(()=>null);throw new Error(data?.error||"Error al descargar backup");}const blob=await res.blob();const url=URL.createObjectURL(blob);const a=document.createElement("a");a.href=url;a.download=filename;document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),500);setSuccess(`Descarga iniciada: ${filename}`);}catch(err){setError(err instanceof Error?err.message:"Error al descargar backup");}finally{setBusyFile(null)}};
+  return <div className="min-h-screen bg-[#081119] px-4 py-6 text-white sm:px-6 lg:px-8"><div className="mx-auto max-w-5xl"><div className="mb-8"><p className="text-xs font-black uppercase tracking-[.2em] text-[#C6F91E]">Data protection</p><h1 className="mt-2 text-3xl font-black tracking-tight">Backups de base de datos</h1><p className="mt-2 max-w-2xl text-sm leading-6 text-[#8193A5]">Gestioná copias de seguridad comprimidas. El almacenamiento en nube se utiliza cuando está configurado.</p></div>
+    {error&&<Card className="mb-5 border-red-500/20 bg-red-500/[.05]"><CardContent className="flex items-start gap-3 pt-5 text-sm text-red-100"><AlertCircle className="mt-0.5 h-5 w-5 shrink-0 text-red-300"/>{error}</CardContent></Card>}
+    {success&&<Card className="mb-5 border-primary/20 bg-primary/[.04]"><CardContent className="flex items-start gap-3 pt-5 text-sm text-primary"><CheckCircle className="mt-0.5 h-5 w-5 shrink-0"/>{success}</CardContent></Card>}
+    <Card className="mb-5 border-white/[.07] bg-[#0B151E]"><CardHeader><CardTitle className="flex items-center gap-2"><Database className="h-5 w-5 text-[#C6F91E]"/> Crear backup manual</CardTitle><CardDesc className="text-[#8193A5]">Generá una copia ahora, además de la automatización configurada.</CardDesc></CardHeader><CardContent><Button variant="accent" onClick={()=>void handleCreateBackup()} disabled={creating} className="gap-2">{creating?<><RefreshCw className="h-4 w-4 animate-spin"/> Creando...</>:<><Database className="h-4 w-4"/> Crear backup</>}</Button><p className="mt-3 text-xs text-[#8193A5]">El archivo se comprime y se conserva según la política de rotación del servicio.</p></CardContent></Card>
+    <Card className="border-white/[.07] bg-[#0B151E]"><CardHeader><div className="flex items-center justify-between gap-4"><div><CardTitle>Backups existentes</CardTitle><CardDesc className="text-[#8193A5]">{backups.length} disponible{backups.length!==1?"s":""}</CardDesc></div><Button variant="outline" size="sm" onClick={()=>void loadBackups()} disabled={loading}><RefreshCw className={`mr-2 h-4 w-4 ${loading?"animate-spin":""}`}/> Recargar</Button></div></CardHeader><CardContent>{loading?<div className="flex items-center justify-center gap-2 py-10 text-sm text-[#8193A5]"><Loader2 className="h-4 w-4 animate-spin"/> Cargando backups...</div>:backups.length===0?<div className="py-10 text-center"><Database className="mx-auto mb-3 h-10 w-10 text-[#8193A5] opacity-50"/><p className="font-semibold">No hay backups disponibles</p><p className="mt-1 text-xs text-[#8193A5]">Creá el primero desde esta pantalla.</p></div>:<div className="space-y-3">{backups.map(backup=><div key={backup.filename} className="flex flex-col gap-4 rounded-2xl border border-white/[.06] bg-[#081119] p-4 sm:flex-row sm:items-center sm:justify-between"><div className="min-w-0"><p className="truncate text-sm font-bold">{backup.filename}</p><div className="mt-1 flex flex-wrap items-center gap-2 text-xs text-[#8193A5]"><span>{backup.sizeMB} MB</span><span>·</span><span>{formatDistanceToNow(new Date(backup.createdAt),{addSuffix:true,locale:es})}</span></div></div><div className="flex shrink-0 items-center gap-2"><Button variant="outline" size="sm" onClick={()=>void handleDownload(backup.filename)} disabled={busyFile===backup.filename} title="Descargar">{busyFile===backup.filename?<Loader2 className="h-4 w-4 animate-spin"/>:<Download className="h-4 w-4"/>}</Button><Button variant="danger" size="sm" onClick={()=>void handleDeleteBackup(backup.filename)} disabled={busyFile===backup.filename} title="Eliminar"><Trash2 className="h-4 w-4"/></Button></div></div>)}</div>}</CardContent></Card>
+    <div className="mt-5 rounded-2xl border border-[#1C3142] bg-[#0B151E] p-4 text-xs leading-5 text-[#8193A5]"><p className="font-bold text-white">Operación</p><p className="mt-2">Los backups locales dependen del filesystem disponible en el runtime. Para producción, el servicio debe tener almacenamiento persistente o S3/R2/Supabase Storage configurado.</p></div>
+  </div></div>;
 }

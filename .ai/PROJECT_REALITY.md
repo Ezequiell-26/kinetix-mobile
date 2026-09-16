@@ -1,118 +1,143 @@
-# .ai/PROJECT_REALITY.md — Mapa canónico de realidad (V8 §5)
+# KinetixFitt — Project Reality
 
-> Fuente de verdad operativa entre sesiones/agentes. El código manda;
-> si este archivo contradice al código, se corrige el archivo.
-> Estados: IMPLEMENTED · PARTIAL · NOT IMPLEMENTED · BLOCKED · VERIFIED · UNVERIFIED.
-> Última actualización: 2026-09-12 (sesión Hermes + 3 auditores).
+Última actualización: 2026-09-16.
 
-## Cómo usar este archivo (toda sesión Qwen/Hermes)
+Este archivo es un mapa operativo, no una promesa de producción. El código, las migraciones y los checks vivos son la fuente de verdad.
 
-1. Leerlo antes de tocar nada (V8 §84).
-2. Verificar en código lo que vayas a usar (no asumir).
-3. Al cerrar sesión, actualizar: WHAT CHANGED / VERIFIED / REMAINS / RISKS (V8 §86).
+## Estado global
 
-## Estado por subsistema
+- `main` es la rama operativa para los cambios de lanzamiento solicitados.
+- Prisma usa PostgreSQL (`DATABASE_URL` + `DIRECT_URL`).
+- Monorepo con `apps/mobile`, `apps/web` y paquetes compartidos.
+- `apps/web` y `apps/mobile` se despliegan como proyectos separados.
+- No afirmar `PRODUCTION READY`, `VERIFIED`, `AI-powered` o `COMPLETE` sin evidencia actual.
 
-### WEB APP — rutas (34 page.tsx en apps/mobile/src/app)
+## Deployment
 
-| Área                                          | Estado          | Verificación                                                                                                                                                                                                        |
-| --------------------------------------------- | --------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `/` landing + panel                         | IMPLEMENTED     | Sitio multipágina (2026-09-12): `/` + `/funciones` + `/planes` + `/descargar` con nav/footer compartidos (`components/landing/`). Redirect con sesión vía **middleware** (307). Sync web↔app nativa por URL viva (`capacitor.config: CAPACITOR_SERVER_URL`; `out/` estático NO sirve: sin login/API). Metadata/OG a KINETIXFITT. Pendiente: unificar identidad KinetixFitt vs KINETIXFITT. |
-| `(auth)/login`                                | VERIFIED        | HTTP 200 + `POST /api/auth/login` → `{"ok":true,"role":"CLIENT"}` con `martin@demo.com`. Demos: trainer `ezequiel@kinetixfitt.com/Admin123!`, cliente `martin@demo.com/cliente123`                             |
-| `(auth)/register`, `forgot-password`          | IMPLEMENTED     | register fuerza `role:"CLIENT"`; reset con token 1 uso TTL 30min (store en memoria — se pierde al reiniciar)                                                                                                        |
-| `(client)/*` 16 rutas                         | PARTIAL         | 500 `useTheme...` CORREGIDO y VERIFICADO en vivo 2026-09-12: `/client/workout`, `/client/progress`, `/client/dashboard` → 200 con sesión real (causa: provider sin valor en SSR; fix: Provider siempre renderizado) |
-| `(trainer)/*` 14 rutas                        | PARTIAL         | Mismo 500 (mismo chrome). Mismo fix                                                                                                                                                                                 |
-| `loading.tsx` / `error.tsx` / `not-found.tsx` | IMPLEMENTED 2026-09-12 | Creados a nivel `app/` (loading con spinner+aria, error con retry, 404 con volver) |
-| UX states por página                          | PARTIAL→70%     | progress: banner error + retry ✅; messages: banner offline + error envío ✅ + empty honesto ✅; dashboard: catch por fuente ✅; nutrition: comentado (sin red) |
+- `apps/web` se despliega como proyecto Vercel independiente usando el `vercel.json` raíz.
+- `apps/mobile` contiene la app dinámica y la API y tiene `apps/mobile/vercel.json` para un segundo proyecto Vercel.
+- La configuración de checkout y Capacitor usa URLs confiables configuradas por entorno, no hosts arbitrarios de requests.
+- El estado externo de Vercel requiere verificación; los status checks previos mostraron `build-rate-limit`.
 
-### DOMAIN (packages/shared/src)
+## Web
 
-| Pieza                                                                                                                                  | Estado                                                                                   |
-| -------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------- |
-| `domain/fitness` (MuscleId 15, MuscleRole, ExerciseDefinition, MovementPattern, Equipment, Difficulty, Laterality, COMMON_EXERCISES 6) | IMPLEMENTED + VERIFIED (tsc)                                                             |
-| `utils` (cn, fechas, cálculos, XP)                                                                                                     | IMPLEMENTED                                                                              |
-| `constants` (BRAND, colores, spacing…)                                                                                                 | IMPLEMENTED (2026-09-12: eliminado `APP_CONFIG` fantasma del default export → tsc verde) |
-| `components` (button, card, input, badge, skeleton, empty-state)                                                                       | IMPLEMENTED                                                                              |
-| `services/background-sync.ts`                                                                                                          | PARTIAL (registra SW, sin sync real verificada)                                          |
-| `types`                                                                                                                                | IMPLEMENTED                                                                              |
+- Landing `/es` y `/en` implementada con navegación, CTA, metadata, sitemap y robots.
+- `apps/web/auth/login`, `apps/web/auth/register` y `apps/web/dashboard` ya no contienen autenticación o métricas simuladas; derivan al producto vivo.
+- La homepage y SEO no deben usar ratings, usuarios, retención, rankings, reviews, precios o escasez inventados.
+- Structured data de producto solo incluye `offers` y `aggregateRating` cuando los datos se suministran explícitamente.
 
-**Regla**: `apps/mobile` importa dominio vía `@kinetix/shared` (tsconfig `paths` → `../../packages/shared/src/*`; el `../` anterior rompía todo con 500 — no repetir). No usar `name.includes("press")` como lógica canónica (V8 §19).
+## Auth / Seguridad
 
-### BACKEND / API (24 rutas en src/app/api)
+- Passwords con bcrypt.
+- JWT HS256 + sesión persistente en DB.
+- `getSession()` valida firma y sesión persistente.
+- Logout revoca sesión; logout global revoca todas.
+- Password reset usa `PasswordResetToken`, SHA-256, expiración y consumo atómico; invalida sesiones existentes al cambiar contraseña.
+- Rate limiting intenta Upstash Redis distribuido y usa fallback local para desarrollo/degradación.
+- El guard anti-fuerza-bruta por cuenta también usa Redis cuando está disponible.
+- `getClientIp()` solo confía en forwarded headers con `TRUST_PROXY_HEADERS=true`.
+- Registro, login y recuperación usan la política central de IP.
+- Health/readiness no devuelven excepciones, env faltantes ni metadata interna innecesaria.
+- Uploads usan allowlists, magic bytes y serving autenticado.
+- `/api/push/send` requiere `KINETIX_INTERNAL_API_SECRET` y admite IDs CUID reales.
+- Backups requieren identidades incluidas en `BACKUP_ADMIN_USER_IDS`.
+- `.env` NO debe versionarse. Solo ejemplos sin credenciales.
+- Toda API que use `clientId` debe verificar ownership server-side.
 
-Auth por `getSession()` en todas salvo `version` (pública intencional). Ownership REAL multi-trainer desde 2026-09-12 (rescatado del tar paralelo): `Client.trainerId` + `assertTrainerOwnsClient` estricto + `GET /api/clients` filtrado + POST asigna dueño + seed backfill. Verificado en vivo: trainer ve sus 3, cliente 403 en lista y en ficha ajena. Brecha: ramas TRAINER aceptan cualquier `clientId` sin verificar pertenencia (OK con 1 trainer; IDOR horizontal si hay 2+).
+## Multi-trainer
 
-### AUTH / SEGURIDAD
+- `Client.trainerId` define propiedad.
+- `assertTrainerOwnsClient()` es la guardia central.
+- Mensajes, check-ins, pagos, workout logs, mediciones, fotos, analytics y automatizaciones deben respetar ownership.
+- La automatización `/api/automation/risk` solo consulta la cartera del trainer autenticado.
 
-- bcrypt cost 10 ✅ · JWT HS256 7d ✅ (sin refresh; logout solo borra cookie — token robado vive hasta expirar).
-- Cookie `secure` environment-sensitive (fix 2026-09-12; antes `false` siempre).
-- `secret.ts` fail-closed en prod ✅.
-- `POST /api/uploads`: allowlist + firmas binarias (Qwen) + fuente única `@/lib/security.ts` (nuevo 2026-09-12: `sanitizePath`, allowlists, `sanitizeExtension`; testeado en E2E).
-- Rate-limit en memoria (se pierde al reiniciar).
-- Reset-password: token logueado en consola SOLO en dev (sin email real configurado) — riesgo aceptado y documentado.
-- CSP: solo producción (en dev dejaba página en blanco por React Refresh `eval`). `cdn.jsdelivr.net` permitido en `style-src`.
+## Database
 
-### DATABASE (Prisma SQLite, 19 modelos)
+- PostgreSQL authoritative.
+- Relaciones principales usan `onDelete` explícito.
+- `PaymentWebhookEvent` tiene unique `(provider, eventId)`.
+- Program replacement valida y limita el payload ANTES de borrar semanas existentes.
+- No commitear `dev.db`, `.next`, `.tsbuildinfo`, uploads ni artefactos locales.
 
-Migraciones aplicadas ✅ · seed OK (trainer + 3 clientes demo + programa + mensajes). Índices completos desde migración `add-missing-indexes` (2026-09-12): Notification(userId,read), Measurement/Photo(userId,clientId,date), Message.senderId, CheckIn.userId. `onDelete` Cascade/SetNull coherentes con historia ✅. Pendiente: `Payment` huérfana (sin relaciones); `Client.assignedProgramId` sin `onDelete` (borrar programa asignado falla).
+## Payments
 
-### 3D (packages/core/3d-engine + src/3d + Exercise3DViewer)
+- Registro manual de pagos usa `/api/payments`.
+- Checkout de Stripe y Mercado Pago está implementado a nivel de servidor.
+- URLs de checkout y webhook se construyen desde configuración confiable.
+- Webhooks Stripe y Mercado Pago exigen firma.
+- Los eventos se reclaman mediante insert atómico y el claim se elimina si el procesamiento falla para permitir retry seguro.
+- Mercado Pago consulta el pago real antes de liquidarlo y requiere access token configurado.
+- Los pagos asociados a un `Payment` existente pueden resolver `clientId` y renovar la suscripción.
+- `GET /api/payments/webhook` no expone proveedores y devuelve 405.
+- E2E de proveedores externos sigue UNVERIFIED hasta probar con credenciales y webhooks reales.
 
-- Renderer: **WebGL (three.js), NO WebGPU** — prohibido afirmarlo.
-- Sin OffscreenCanvas real (solo un `console.warn` engañoso en `engine.ts:60`).
-- Sin Web Workers de cómputo (solo Service Workers PWA).
-- Viewer migrado a `exercise: ExerciseDefinition` (f1d9759). Anatomía = geometría procedural, NO activo anatómico profesional (decirlo explícito en UI/docs).
-- Cámara: una autoridad (OrbitControls + reset determinista tras fix e252374).
+## Training / Progress
 
-### AI / PYTHON / RUST / NATIVE — verdad
+- Workout logs reales con sets, fecha, duración y comentarios.
+- Resúmenes calculan sesiones, streak, PRs, adherencia y analytics desde DB.
+- Calendar muestra historial real y debe evolucionar hacia sesiones programadas/eventos.
+- Importación Hevy/Strong crea logs históricos mediante API; debe seguir validando duplicados/mapeos.
 
-- AI: UI de chat existe; NO hay inferencia on-device verificada ni provider real integrado → marcar PARTIAL donde corresponda, nunca "AI-powered".
-- `packages/ai-models` (Python): archivado como referencia, no integrado al runtime web.
-- Rust/WASM: solo donde aporte valor medido; sin benchmarks no se afirma aceleración.
-- iOS/Android (`packages/native-modules`): fuentes existen, integración NO verificada → NOT VERIFIED.
-- PWA: manifest + icons + SW ✅. Capacitor/Electron: envoltorios existen, packaging no verificado end-to-end. NO hay `apps/web` real (restos untracked) — prohibido documentarlo como existente.
+## AI
 
-### DUPLICADOS conocidos (V8 §8)
+- `KinetixFitt AI` tiene endpoint autenticado `/api/ai/chat`.
+- Proveedor configurable mediante `AI_BASE_URL`, `AI_MODEL`, `AI_API_KEY` o aliases OpenAI/GLM.
+- Rate limit por usuario y timeout del proveedor están implementados.
+- El endpoint limita entrada/contexto y no devuelve errores internos del proveedor.
+- Si no hay credenciales, responde que la IA no está configurada y no inventa respuestas.
+- Form Check NO muestra scores ficticios; requiere un modelo real de pose.
+- Inferencia on-device, vision avanzada y tool-calling persistente siguen UNVERIFIED/PARTIAL.
 
-- `command-palette.tsx` = shim de `command-palette-pro.tsx` ✅ resuelto.
-- `photo-compare.tsx` vs `photo-ai-compare.tsx` → RESUELTO 2026-09-12: el AI tenía medidas hardcodeadas falsas ("118→121cm"); migrado a `PhotoCompare` real y archivo borrado.
-- Timers: `timers-hub.tsx` ⊃ `hiit-timer.tsx` + ruta `client/timers` → pendiente unificar en Hub.
-- Nutrición fragmentada (nutrition-pro / macro-timing / food-database / openfoodfacts-pro) → pendiente diseño único.
+## Trainer automation
 
-### HIGIENE (V8 §6)
+- Risk/Auto-Messages calcula riesgo usando `Client`, `WorkoutLog` y `CheckIn` reales.
+- El botón Enviar utiliza `/api/messages` y comprueba ownership en servidor.
+- No hay nombres de clientes ni métricas hardcodeadas en ese flujo.
+- Automatizaciones avanzadas, cohortes y MRR/LTV siguen parciales.
 
-Trackeados indebidos: `apps/mobile/.next/*`, `*.tsbuildinfo`, `prisma/*.db`, `packages/shared/node_modules/*`. Untracked basura: `.next-dev*/`, `.next-stale*/`, `test-core.db`, `public/uploads/*`. `.gitignore` reescrito 4 veces en 15 commits — congelado desde 2026-09-12 (ver ítems abajo). `dev.db` modificado en working tree = solo datos locales de seed, no commitear.
+## Health / Wearables
 
-### TESTS / CI
+- HealthBox no muestra números simulados.
+- Mientras no haya un conector real de HealthKit/Health Connect/wearable verificado, muestra `No conectado`.
+- La integración de wearables sigue UNVERIFIED.
 
-- Tests: `test:stats` + `test:core` + `test:domain` (24 asserts) + `test:security` E2E (nuevo 2026-09-12: 20 asserts con login REAL, fixtures aisladas y control positivo anti-vacuo; el test anterior usaba tokens mock y borraba la DB — reemplazado). Total 69 pass. `test:security` es OPT-IN (requiere servidor vivo). Sin pirámide E2E de journeys aún.
-- CI: `.github/workflows/ci.yml` (install+typecheck+migrate/seed+test+build) — **VERDE desde 433a1afe** (2026-09-12). Historial de la puesta en verde: lock desincronizado (next 15.5.24 sin lock) → lock verificado → doble-lock (CI usaba lock raíz obsoleto) → árbol único + shared sin devDeps (un solo @types/react) → build con lint integrado roto (sin config) → `ignoreDuringBuilds`. Si el CI falla, leer el paso exacto por API antes de adivinar.
-- Scripts raíz con `--if-present` + `typecheck` agregado (2026-09-12; antes `npm run build --workspaces` rompía por paquetes sin script y AGENTS exigía un `typecheck` inexistente).
-- DEUDA "doble lock" RESUELTA 2026-09-12: árbol único (workspaces con package.json en los 5 miembros, un solo lock raíz, lock de apps/mobile eliminado). El CI hace `npm ci` en raíz. No reintroducir un segundo lock.
+## Notifications / Messaging
 
-## Incidente 2026-09-12 16:17 — dev.db borrada por sesión paralela
+- Mensajes limitados al coach asignado y cliente propietario.
+- Check-ins y workout completions notifican al `trainerId` real.
+- Push subscriptions y preferencias existen.
+- La entrega end-to-end requiere pruebas por plataforma.
 
-`prisma/dev.db` apareció en 0 bytes (tablas inexistentes → login 500 P2021).
-Recuperación (2 min, sin parar nada más): `npx prisma migrate deploy &&
-npx tsx prisma/seed.ts` desde `apps/mobile`. NO commitear dev.db jamás
-(está untrackeada a propósito): cada clon la regenera con migrate+seed.
-Si el login devuelve `The table main.User does not exist`, es esto.
+## Offline
 
-## Fixes 2026-09-12 (sesión Hermes, subidos en b2e46b1 + 8f13224)
+- Cola local limitada a 200 operaciones y 256 KB por elemento.
+- Reintentos acotados a 3.
+- Errores 4xx permanentes se descartan para evitar loops.
+- El conflicto multi-dispositivo y la idempotencia server-side completa siguen pendientes.
 
-1. `apps/mobile/tsconfig.json`: `paths @kinetix/shared` `../` → `../../` (500 global).
-2. `apps/mobile/next.config.mjs`: CSP solo en prod + `cdn.jsdelivr.net` en style-src (blanco en dev).
-3. `packages/shared/src/constants/index.ts`: `APP_CONFIG` fantasma → `BRAND` (tsc verde).
-4. `src/components/theme-provider.tsx`: Provider siempre renderizado (500 /client+trainer).
-5. `src/lib/auth.ts`: cookie `secure` por entorno.
-6. `src/app/api/uploads/route.ts`: allowlists type/ext.
-7. `src/app/page.tsx`: verificación vía `getSession()` (sin secreto hardcodeado).
-8. `package.json` raíz: `--if-present` + `typecheck`. `apps/mobile/package.json`: script `typecheck`.
+## Native / PWA / 3D
 
-## Riesgos abiertos
+- PWA existe.
+- Capacitor/Electron existen como wrappers.
+- `CAPACITOR_SERVER_URL` controla la URL pública de los builds nativos.
+- Android de producción tiene workflow de AAB firmado basado en GitHub Secrets.
+- Packaging Android/iOS/macOS/Windows end-to-end sigue UNVERIFIED hasta generar y probar artefactos reales.
+- 3D usa Three.js/WebGL; no afirmar WebGPU/Web Workers/OffscreenCanvas sin implementación y medición.
 
-1. 10 sesiones en paralelo sin CI verde obligatorio → ver PARALLEL_PROTOCOL.md.
-2. `/analytics` sin auth; TRAINER sin segmentación por entrenador (IDOR futuro).
-3. Sesiones JWT 7d sin revocación; reset store en memoria.
-4. Duplicados photo/timers/nutrición pendientes.
-5. `apps/web` untracked: decidir si existe o se borra antes de que alguien lo reviva.
+## Quality gates
+
+- CI ejecuta install, typecheck, lint, migrations, seed, unit tests, build mobile, security HTTP E2E y build web.
+- `npm run test:unit` es la suite offline/unittest.
+- `npm run test:security` requiere un servidor Next real.
+- La suite de seguridad usa fixtures aisladas y no cuentas demo.
+- Para cambios importantes: READ → SEARCH → MAP IMPACT → PLAN → CHANGE → TEST → REVIEW DIFF → RE-TEST → DOCUMENT → COMMIT.
+- CI vivo y Vercel deben consultarse después de cambios; no asumir que un check anterior sigue verde.
+
+## Riesgos abiertos reales
+
+1. Vercel requiere que la cuenta/entorno de despliegue supere el límite de build y que los dos proyectos se configuren realmente.
+2. Integraciones externas de Stripe/Mercado Pago, email, push, storage S3/R2 y AI requieren credenciales reales para E2E.
+3. Falta completar la pirámide E2E de journeys completos.
+4. Falta terminar sincronización offline real y resolución de conflictos.
+5. Community, automatizaciones avanzadas y varias capacidades de IA siguen parciales.
+6. Native packaging y releases de stores siguen sin verificación end-to-end.

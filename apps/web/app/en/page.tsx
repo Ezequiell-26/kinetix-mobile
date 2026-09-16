@@ -1,24 +1,32 @@
 import type { Metadata } from "next";
-import Landing from "../../components/landing";
+import Landing from "../../components/landing-pro";
 
 export const metadata: Metadata = {
-  title: "KinetixFitt — Transform Your Body, Master Your Mind",
+  title: "KinetixFitt — Training, progress and coaching in one place",
   description:
-    "The all-in-one platform that blends sports science, personalized AI and community for results that last forever.",
+    "Plan workouts, log sessions, analyze progress and stay connected with your coach through one unified KinetixFitt experience.",
   alternates: {
     canonical: "https://kinetixfitt.com/en",
     languages: {
-      "en": "https://kinetixfitt.com/en",
-      "es": "https://kinetixfitt.com/es",
+      en: "https://kinetixfitt.com/en",
+      es: "https://kinetixfitt.com/es",
       "x-default": "https://kinetixfitt.com/es",
     },
   },
   openGraph: {
-    title: "KinetixFitt — Transform Your Body, Master Your Mind",
-    description: "Join 12k+ athletes transforming their lives. 4.9★ on App Store.",
+    title: "KinetixFitt — Training, progress and coaching",
+    description:
+      "A unified experience for athletes and coaches: programming, sessions, metrics, follow-up and community.",
     locale: "en_US",
     url: "https://kinetixfitt.com/en",
     alternateLocale: ["es_AR"],
+    type: "website",
+    siteName: "KinetixFitt",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "KinetixFitt — Training, progress and coaching",
+    description: "A unified experience for athletes and coaches.",
   },
 };
 

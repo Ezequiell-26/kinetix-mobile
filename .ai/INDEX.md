@@ -1,159 +1,189 @@
-# KinetixFitt - Índice de Documentación para IA
+# KinetixFitt — AI Governance Index
 
-Este archivo guía a los agentes de IA hacia la documentación relevante sin necesidad de leer todo el repositorio.
+**Version:** 3.2.0  
+**Status:** Mandatory navigation map  
+**Last updated:** 2026-09-16
 
----
+## Start every AI session here
 
-## 📚 Jerarquía de Documentos
+When an agent is asked to continue, improve, fix, finish, refactor, or audit the project, read:
 
-### Nivel 1: Autoridad Máxima (LEER SIEMPRE)
-- [`../AGENTS.md`](../AGENTS.md) - Reglas generales para todos los agentes
-- [`../QWEN.md`](../QWEN.md) - Configuración específica para Qwen
+1. `../AGENTS.md`
+2. `.ai/AI_CONTROL_CENTER.md`
+3. `.ai/AI_ENGINEERING_SYSTEM.md`
+4. `.ai/AI_EVALUATION_PROTOCOL.md`
+5. `.ai/AI_AGENT_HANDOFF.md`
+6. `.ai/PROJECT_STATE.md`
+7. `.ai/FEATURE_LEDGER.md`
+8. `.ai/INTEGRATION_REGISTRY.md`
+9. `.ai/PERFORMANCE_BASELINES.md`
+10. `.ai/DEFINITION_OF_DONE.md`
+11. the relevant contract(s)
+12. relevant ADRs
+13. the actual source/tests/config/schema/workflows affected by the task
 
-### Nivel 2: Estado del Proyecto (LEER PARA CONTEXTO)
-- [`PROJECT_STATE.md`](./PROJECT_STATE.md) - Estado actual, arquitectura, stack tecnológico
-- [`ROADMAP_STATE.md`](./ROADMAP_STATE.md) - Qué está completado, en progreso o pendiente
+Before changing code, run:
 
-### Nivel 3: Contratos por Área (LEER SEGÚN TAREA)
-
-#### Arquitectura General
-- [`ARCHITECTURE_CONTRACT.md`](./ARCHITECTURE_CONTRACT.md) - Límites entre componentes
-
-#### Diseño y UI
-- [`DESIGN_SYSTEM_CONTRACT.md`](./DESIGN_SYSTEM_CONTRACT.md) - Colores, tipografía, tokens
-- [`MOTION_CONTRACT.md`](./MOTION_CONTRACT.md) - Animaciones y transiciones
-
-#### Performance y 3D
-- [`PERFORMANCE_CONTRACT.md`](./PERFORMANCE_CONTRACT.md) - Optimización, budgets
-- [`3D_CONTRACT.md`](./3D_CONTRACT.md) - Three.js, WebGPU, modelos 3D
-
-#### Backend y Datos
-- [`DATABASE_CONTRACT.md`](./DATABASE_CONTRACT.md) - Prisma, migraciones, queries
-- [`API_CONTRACT.md`](./API_CONTRACT.md) - Endpoints, validación, respuestas
-
-#### Tecnologías Especiales
-- [`RUST_CONTRACT.md`](./RUST_CONTRACT.md) - Cuándo y cómo usar Rust
-- [`NATIVE_PLATFORM_CONTRACT.md`](./NATIVE_PLATFORM_CONTRACT.md) - Swift, Kotlin
-- [`AI_CONTRACT.md`](./AI_CONTRACT.md) - Inteligencia Artificial, contexto
-
-#### Calidad y Seguridad
-- [`SECURITY_CONTRACT.md`](./SECURITY_CONTRACT.md) - Auth, encriptación, secretos
-- [`TESTING_CONTRACT.md`](./TESTING_CONTRACT.md) - Tests unitarios, integración, E2E
-- [`GIT_CONTRACT.md`](./GIT_CONTRACT.md) - Commits, branches, merges
-
-### Nivel 4: Procesos y Definiciones
-- [`DEFINITION_OF_DONE.md`](./DEFINITION_OF_DONE.md) - Criterios de completitud
-- [`EXECUTION_PROTOCOL.md`](./EXECUTION_PROTOCOL.md) - Flujo de trabajo paso a paso
-
-### Nivel 5: Decisiones Arquitectónicas
-- [`DECISIONS/`](./DECISIONS/) - Registro de decisiones técnicas (ADRs)
-
----
-
-## 🎯 Guía Rápida por Tipo de Tarea
-
-### Si vas a modificar UI/UX
-1. `AGENTS.md` (reglas generales)
-2. `DESIGN_SYSTEM_CONTRACT.md` (tokens visuales)
-3. `MOTION_CONTRACT.md` (animaciones)
-4. Código existente del componente
-
-### Si vas a agregar feature nueva
-1. `AGENTS.md` (reglas generales)
-2. `ARCHITECTURE_CONTRACT.md` (dónde va el código)
-3. `PROJECT_STATE.md` (estado actual)
-4. `DEFINITION_OF_DONE.md` (criterios de aceptación)
-
-### Si vas a optimizar performance
-1. `AGENTS.md` (reglas generales)
-2. `PERFORMANCE_CONTRACT.md` (estrategias y budgets)
-3. `3D_CONTRACT.md` (si involucra gráficos 3D)
-4. Tests de benchmark existentes
-
-### Si vas a tocar base de datos
-1. `AGENTS.md` (reglas generales)
-2. `DATABASE_CONTRACT.md` (reglas de migración)
-3. `ARCHITECTURE_CONTRACT.md` (límites)
-4. Schema de Prisma existente
-
-### Si vas a implementar Rust/WASM
-1. `AGENTS.md` (reglas generales)
-2. `RUST_CONTRACT.md` (cuándo justifica usar Rust)
-3. `ARCHITECTURE_CONTRACT.md` (integración)
-4. Benchmarks existentes
-
-### Si vas a trabajar con IA
-1. `AGENTS.md` (reglas generales)
-2. `AI_CONTRACT.md` (límites y seguridad)
-3. `ARCHITECTURE_CONTRACT.md` (integración)
-4. Contexto existente
-
-### Si vas a hacer cambios de seguridad
-1. `AGENTS.md` (reglas generales)
-2. `SECURITY_CONTRACT.md` (reglas estrictas)
-3. `ARCHITECTURE_CONTRACT.md` (impacto)
-4. Tests de seguridad existentes
-
----
-
-## 📁 Ubicación de Archivos Clave
-
-### Código Fuente
-```
-/apps/mobile/          # App móvil
-/apps/web/             # Dashboard web
-/packages/shared/      # Código compartido
-/packages/core/rust/   # Core en Rust
-/packages/config/      # Configuraciones
-```
-
-### Documentación
-```
-/docs/                 # Documentación general
-/.ai/                  # Gobernanza IA
-/.ai/DECISIONS/        # Decisiones arquitectónicas
-```
-
-### Infraestructura
-```
-/infra/                # Docker, K8s, Terraform
-.github/workflows/     # CI/CD
-```
-
-### Configuración
-```
-package.json           # Raíz del monorepo
-apps/*/package.json    # Apps individuales
-packages/*/package.json # Packages compartidos
-```
-
----
-
-## 🔍 Búsqueda Rápida
-
-### Para encontrar componentes existentes
 ```bash
-# Buscar componente por nombre
-find /workspace -name "*.tsx" | grep -i "nombre"
-
-# Buscar imports de un módulo
-grep -r "from.*modulo" /workspace/apps /workspace/packages
-
-# Ver usos de una función
-grep -r "funcionNombre" /workspace --include="*.ts" --include="*.tsx"
+npm run ai:audit
+npm run ai:audit:json
 ```
 
-### Para verificar estado
-```bash
-git status
-git log --oneline -10
-npm run typecheck
-npm run lint
-npm run test
-npm run build
+The audit creates fresh static evidence. It does not prove runtime/provider/device/deployment behavior.
+
+## Skill routing
+
+Reusable domain skills live under `.github/skills/` and must be selected according to the task:
+
+- `architecture/SKILL.md`
+- `api-reliability/SKILL.md`
+- `database-migrations/SKILL.md`
+- `security-audit/SKILL.md`
+- `integration-review/SKILL.md`
+- `ai-integration/SKILL.md`
+- `performance-audit/SKILL.md`
+- `mobile-native/SKILL.md`
+- `ux-accessibility/SKILL.md`
+- `test-and-regression/SKILL.md`
+- `debugging/SKILL.md`
+- `dependency-governance/SKILL.md`
+- `release-observability/SKILL.md`
+- `code-review/SKILL.md`
+
+Use `.github/skills/README.md` as the registry and default routing guide. Skills are guidance only; repository state and executable evidence remain authoritative.
+
+## Authority order
+
+When documents disagree, use this order:
+
+1. `../AGENTS.md` — engineering constitution; highest repository-level authority.
+2. `.ai/DECISIONS/*` — accepted architectural decisions for their scope.
+3. Area contracts — normative rules for specific systems.
+4. `DEFINITION_OF_DONE.md` — completion gates.
+5. `EXECUTION_PROTOCOL.md` — required change workflow.
+6. `.ai/AI_*` governance and evaluation protocols for agent behavior.
+7. `PROJECT_STATE.md` / `ROADMAP_STATE.md` — current state/context, updated as reality changes.
+8. README and feature docs — user/developer guidance.
+
+If a conflict affects security, data, production behavior, or architecture, stop and resolve it through an ADR before taking a risky action.
+
+## Core AI safety documents
+
+- `AI_CONTROL_CENTER.md` — entry point for continuous improvement and anti-regression behavior.
+- `AI_ENGINEERING_SYSTEM.md` — persistent operating rules, evidence levels, preservation protocol, change budget, and completion truth.
+- `AI_EVALUATION_PROTOCOL.md` — layered evaluation, adversarial review, regression corpus and anti-self-approval rules.
+- `AI_AGENT_HANDOFF.md` — session handoff and context-recovery protocol.
+- `FEATURE_LEDGER.md` — evidence-based feature inventory.
+- `INTEGRATION_REGISTRY.md` — external API/SDK/repository inventory.
+- `PERFORMANCE_BASELINES.md` — measured performance guardrails.
+- `PROJECT_STATE.md` — evidence-based current-state context.
+- `DEFINITION_OF_DONE.md` — completion gates.
+- `EXECUTION_PROTOCOL.md` — incremental change workflow.
+
+## Contracts by area
+
+### Architecture
+- `ARCHITECTURE_CONTRACT.md`
+
+### UI / Design
+- `DESIGN_SYSTEM_CONTRACT.md`
+- `MOTION_CONTRACT.md`
+
+### Performance / 3D
+- `PERFORMANCE_CONTRACT.md`
+- `3D_CONTRACT.md`
+
+### Data / Backend
+- `DATABASE_CONTRACT.md`
+- `API_CONTRACT.md`
+
+### Security / Quality
+- `SECURITY_CONTRACT.md`
+- `TESTING_CONTRACT.md`
+- `GIT_CONTRACT.md`
+
+### Platforms / Specialized systems
+- `RUST_CONTRACT.md`
+- `NATIVE_PLATFORM_CONTRACT.md`
+- `AI_CONTRACT.md`
+
+## Mandatory process documents
+
+- `DEFINITION_OF_DONE.md`
+- `EXECUTION_PROTOCOL.md`
+- `DECISIONS/` — ADRs
+
+## Task routing
+
+### Continuous improvement / audit
+Read governance → select required skills → run audit → inspect current state → prioritize by risk → change one risk cluster → verify → independent review → re-audit.
+
+### Feature
+Read AGENTS → architecture skill → project state → relevant domain skill/contract → DoD → affected code/tests.
+
+### UI/UX
+Use `ux-accessibility` + `performance-audit` when motion/media/heavy rendering is involved.
+
+### Database
+Use `database-migrations` + `architecture` + `api-reliability` as applicable.
+
+### API
+Use `api-reliability` + `security-audit` + `integration-review` for external providers.
+
+### Auth / Security / Payments / Storage
+Use `security-audit` + relevant domain contract + `test-and-regression` + `code-review`.
+
+### AI
+Use `ai-integration` + `integration-review` + `security-audit` + `performance-audit` where applicable.
+
+### Performance / 3D
+Use `performance-audit` + `ux-accessibility` + `mobile-native` for device impact.
+
+### Mobile / Native / Desktop
+Use `mobile-native` + `architecture` + `performance-audit` + target-platform tests.
+
+### Broken / flaky behavior
+Use `debugging` + `test-and-regression` + independent `code-review`.
+
+### Dependencies
+Use `dependency-governance` before adding/upgrading/removing packages.
+
+### Release
+Use `release-observability` after affected tests/builds and before declaring completion.
+
+## Current repository map
+
+```text
+apps/        Product applications
+packages/    Shared/domain/infrastructure packages
+.ai/         AI governance, contracts, ADRs, project state
+.github/     CI/CD, instructions and reusable AI skills
+docs/        General documentation
+infra/       Infrastructure configuration where present
+scripts/     Repository verification and automation
 ```
 
----
+The actual repository structure always wins over this illustrative map.
 
-**Última actualización**: 2024
-**Mantenimiento**: Actualizar cuando se agregue nueva documentación importante
+## Required search behavior
+
+Before creating a new file/service/component:
+
+- search for existing names and equivalents;
+- inspect consumers;
+- inspect tests;
+- inspect exports;
+- inspect related API/DB contracts;
+- select the relevant skill before implementation.
+
+Do not create parallel implementations merely because the existing one is inconvenient.
+
+## State maintenance
+
+Update project-state documentation after material architectural, platform, data, security, release or agent-governance changes.
+
+Do not copy old claims into new documentation without verifying them.
+
+## Core principle
+
+**The repository should become more capable without becoming more fragile.**

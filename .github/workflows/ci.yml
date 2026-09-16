@@ -1,12 +1,7 @@
 name: CI
 
-# Gate anti-ruptura (V8 §80 + PARALLEL_PROTOCOL §4).
-# Ningún PR a develop/main se fusiona en rojo.
-# Árbol único: install en RAÍZ (workspaces), gates con -w apps/mobile.
-# DB de CI: Postgres efímero (services), NO sqlite (el schema es postgresql
-# desde 2026-09-13). Sin secrets: el servicio vive dentro del runner.
-# NOTA: no hay job de lint porque apps/mobile no tiene config de ESLint
-# (Next 15 lo pediría interactivo). `next build` ya valida tipos+compilación.
+# Quality gates del monorepo. La base efímera coincide con apps/mobile Prisma.
+# La suite de seguridad HTTP se ejecuta contra un servidor Next real levantado en CI.
 
 on:
   push:
@@ -26,14 +21,27 @@ jobs:
           POSTGRES_DB: postgres
         ports:
           - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U postgres -d postgres"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 20
 
     env:
       DATABASE_URL: postgresql://postgres:postgres@localhost:5432/postgres
       DIRECT_URL: postgresql://postgres:postgres@localhost:5432/postgres
       JWT_SECRET: ci-only-insecure-32chars-minimum
+      NODE_ENV: test
+      NEXT_PUBLIC_APP_URL: http://127.0.0.1:3001
+      NEXT_PUBLIC_WEB_URL: http://127.0.0.1:3001
+      TRUST_PROXY_HEADERS: "false"
+      KINETIX_INTERNAL_API_SECRET: ci-only-internal-secret-32chars-minimum
+      BACKUP_ADMIN_USER_IDS: "ci-backup-admin"
 
     steps:
       - uses: actions/checkout@v5
+        with:
+          fetch-depth: 2
 
       - uses: actions/setup-node@v5
         with:
@@ -41,28 +49,96 @@ jobs:
           cache: npm
           cache-dependency-path: package-lock.json
 
-      - name: Install (árbol único raíz)
+      - name: AI repository static guard
+        run: npm run ai:audit:strict
+
+      - name: AI change manifest guard
+        run: npm run ai:change:manifest
+
+      - name: AI API contract heuristic audit
+        run: npm run ai:api:audit
+
+      - name: AI evidence regression snapshot
+        run: |
+          mkdir -p "$RUNNER_TEMP/kinetix-evidence"
+          npm run ai:evidence:json > "$RUNNER_TEMP/kinetix-evidence/head.json"
+          npm run ai:evidence:compare > "$RUNNER_TEMP/kinetix-evidence/compare.json"
+          cat "$RUNNER_TEMP/kinetix-evidence/compare.json"
+
+      - name: Upload AI evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: kinetix-ai-evidence-${{ github.sha }}
+          path: ${{ runner.temp }}/kinetix-evidence/
+          if-no-files-found: error
+
+      - name: Install raíz (lock reproducible)
         run: npm ci
 
-      - name: Typecheck (0 errores)
+      - name: Install web (lock independiente)
+        run: npm ci --prefix apps/web
+
+      - name: Typecheck mobile
         run: npm run typecheck -w apps/mobile
 
-      - name: Esperar Postgres efímero
-        run: |
-          for i in $(seq 1 30); do
-            if echo "SELECT 1;" | npx prisma db execute --stdin --schema apps/mobile/prisma/schema.prisma >/dev/null 2>&1; then
-              echo "Postgres listo"; break
-            fi
-            sleep 3
-          done
+      - name: Lint mobile
+        run: npm run lint -w apps/mobile
 
-      - name: Migrate + seed (Postgres efímero de CI)
+      - name: Typecheck web
+        run: npm run typecheck --prefix apps/web
+
+      - name: Lint web
+        run: npm run lint --prefix apps/web
+
+      - name: Migrate + seed
         run: |
           npx prisma migrate deploy --schema apps/mobile/prisma/schema.prisma
           npm run db:seed -w apps/mobile
 
-      - name: Tests
-        run: npm run test -w apps/mobile
+      - name: Unit tests mobile
+        run: npm run test:unit -w apps/mobile
 
-      - name: Build
+      - name: Build mobile
         run: npm run build -w apps/mobile
+
+      - name: Start mobile server for security E2E
+        shell: bash
+        run: |
+          set -euo pipefail
+          nohup npm run start -w apps/mobile > "$RUNNER_TEMP/kinetix-next.log" 2>&1 &
+          echo $! > "$RUNNER_TEMP/kinetix-next.pid"
+          for i in {1..60}; do
+            if curl --fail --silent --show-error http://127.0.0.1:3001/api/health >/dev/null; then
+              exit 0
+            fi
+            sleep 2
+          done
+          cat "$RUNNER_TEMP/kinetix-next.log"
+          exit 1
+
+      - name: Security HTTP E2E
+        env:
+          BASE_URL: http://127.0.0.1:3001
+          TRUST_PROXY_HEADERS: "false"
+        run: npm run test:security -w apps/mobile
+
+      - name: Product E2E (Playwright)
+        if: ${{ hashFiles('apps/mobile/playwright.config.*', 'apps/mobile/tests/e2e/**', 'apps/web/playwright.config.*', 'apps/web/tests/e2e/**') != '' }}
+        env:
+          BASE_URL: http://127.0.0.1:3001
+        run: npm run test:e2e -w apps/mobile --if-present
+
+      - name: Stop mobile server
+        if: always()
+        shell: bash
+        run: |
+          if [ -f "$RUNNER_TEMP/kinetix-next.pid" ]; then
+            kill "$(cat "$RUNNER_TEMP/kinetix-next.pid")" || true
+          fi
+          if [ -f "$RUNNER_TEMP/kinetix-next.log" ]; then
+            tail -n 200 "$RUNNER_TEMP/kinetix-next.log" || true
+          fi
+
+      - name: Build web
+        run: npm run build --prefix apps/web

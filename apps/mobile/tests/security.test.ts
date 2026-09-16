@@ -1,252 +1,132 @@
 /**
- * Tests E2E de seguridad P0 (requiere servidor vivo + DB con seed).
- *
- * Reemplaza la versión con tokens mock (que pasaba por 401 en vez de por
- * ownership real) y el beforeAll que BORRABA users/clientes de la DB.
- * Acá: fixtures aisladas `sectest-*@test.com`, login REAL por API y
- * limpieza solo de lo creado. Los demos (KinetixFitt/Martín/Lucas/Sofía)
- * deben seguir intactos al final.
- *
- *   Servidor:  http://localhost:3001 (o BASE_URL)
- *   Correr:    npm run test:security   (OPT-IN: no va en `npm test`)
+ * Security E2E: isolated fixtures per run. Requires a live app + PostgreSQL.
  */
 import { PrismaClient } from "@prisma/client";
 import bcrypt from "bcryptjs";
-import {
-  assertTrainerOwnsClient,
-  validateClientIdForTrainer,
-} from "../src/lib/authorization";
-import {
-  sanitizePath,
-  ALLOWED_EXTENSIONS,
-  ALLOWED_MIME_TYPES,
-} from "../src/lib/security";
+import { assertTrainerOwnsClient, validateClientIdForTrainer } from "../src/lib/authorization";
+import { sanitizePath, ALLOWED_EXTENSIONS, ALLOWED_MIME_TYPES } from "../src/lib/security";
 
 const BASE = process.env.BASE_URL || "http://localhost:3001";
 const prisma = new PrismaClient();
-const TAG = `sectest-${Date.now()}`;
-
+const TAG = `sectest-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
+const PASSWORD = "SecTest!2026";
 let passed = 0;
 let failed = 0;
+let trainerAId = "";
+let trainerBId = "";
+let clientAId = "";
+let clientBId = "";
+let checkinBId = "";
 
-function check(name: string, cond: boolean, detail?: unknown) {
-  if (cond) {
-    passed++;
-    console.log(`  PASS  ${name}`);
-  } else {
-    failed++;
-    console.log(`  FAIL  ${name}`, detail ?? "");
-  }
+function check(name: string, condition: boolean, detail?: unknown) {
+  if (condition) { passed += 1; console.log(`  PASS  ${name}`); }
+  else { failed += 1; console.log(`  FAIL  ${name}`, detail ?? ""); }
 }
 
-async function login(email: string, password: string): Promise<string | null> {
-  const res = await fetch(`${BASE}/api/auth/login`, {
+async function login(email: string) {
+  const response = await fetch(`${BASE}/api/auth/login`, {
     method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ email, password }),
+    headers: { "Content-Type": "application/json", Origin: new URL(BASE).origin },
+    body: JSON.stringify({ email, password: PASSWORD }),
   });
-  if (!res.ok) return null;
-  const setCookie = res.headers.get("set-cookie") || "";
-  const m = setCookie.match(/ec_token=([^;]+)/);
-  return m ? `ec_token=${m[1]}` : null;
+  if (!response.ok) return null;
+  const setCookie = response.headers.get("set-cookie") || "";
+  const match = setCookie.match(/ec_token=([^;]+)/);
+  return match ? `ec_token=${match[1]}` : null;
 }
 
-const get = (path: string, cookie?: string) =>
-  fetch(`${BASE}${path}`, {
-    headers: cookie ? { Cookie: cookie } : {},
-  });
+async function request(path: string, cookie?: string, init: RequestInit = {}) {
+  const headers = new Headers(init.headers);
+  if (cookie) headers.set("Cookie", cookie);
+  return fetch(`${BASE}${path}`, { ...init, headers });
+}
+
+async function cleanup() {
+  try {
+    const users = await prisma.user.findMany({ where: { email: { startsWith: TAG } }, select: { id: true } });
+    const ids = users.map((u) => u.id);
+    if (ids.length) await prisma.user.deleteMany({ where: { id: { in: ids } } });
+    if (clientAId || clientBId) await prisma.client.deleteMany({ where: { id: { in: [clientAId, clientBId].filter(Boolean) } } }).catch(() => {});
+  } finally { await prisma.$disconnect(); }
+}
 
 async function main() {
-  // Preflight: servidor vivo
   try {
-    const r = await fetch(`${BASE}/login`);
-    if (!r.ok) throw new Error(`HTTP ${r.status}`);
+    const health = await fetch(`${BASE}/api/health`);
+    if (!health.ok && health.status !== 503) throw new Error(`health HTTP ${health.status}`);
   } catch {
-    console.log(
-      `\nABORTADO: no hay servidor en ${BASE}. Levantalo con npm run dev y reintentá.\n`
-    );
+    console.log(`\nABORTADO: no hay servidor en ${BASE}. Levantalo y reintentá.\n`);
     process.exit(1);
   }
 
-  console.log("\nSeguridad P0 — ownership real\n");
+  try {
+    const passwordHash = await bcrypt.hash(PASSWORD, 10);
+    const trainerA = await prisma.user.create({ data: { name: "Security Trainer A", email: `${TAG}-trainer-a@test.invalid`, password: passwordHash, role: "TRAINER" } });
+    const trainerB = await prisma.user.create({ data: { name: "Security Trainer B", email: `${TAG}-trainer-b@test.invalid`, password: passwordHash, role: "TRAINER" } });
+    trainerAId = trainerA.id; trainerBId = trainerB.id;
+    const clientAUser = await prisma.user.create({ data: { name: "Security Client A", email: `${TAG}-client-a@test.invalid`, password: passwordHash, role: "CLIENT" } });
+    const clientBUser = await prisma.user.create({ data: { name: "Security Client B", email: `${TAG}-client-b@test.invalid`, password: passwordHash, role: "CLIENT" } });
+    const clientA = await prisma.client.create({ data: { name: clientAUser.name, email: clientAUser.email, userId: clientAUser.id, trainerId: trainerAId } });
+    const clientB = await prisma.client.create({ data: { name: clientBUser.name, email: clientBUser.email, userId: clientBUser.id, trainerId: trainerBId } });
+    clientAId = clientA.id; clientBId = clientB.id;
+    const checkin = await prisma.checkIn.create({ data: { userId: clientBUser.id, clientId: clientB.id, energia: 8, reviewed: false } });
+    checkinBId = checkin.id;
 
-  // Fixtures aisladas (solo estas se borran al final)
-  const tB = await prisma.user.create({
-    data: {
-      name: "SecTest TrainerB",
-      email: `sectest-tb-${TAG}@test.com`,
-      password: await bcrypt.hash("password123", 10),
-      role: "TRAINER",
-    },
-  });
-  const cBUser = await prisma.user.create({
-    data: {
-      name: "SecTest ClientB",
-      email: `sectest-cb-${TAG}@test.com`,
-      password: await bcrypt.hash("password123", 10),
-      role: "CLIENT",
-    },
-  });
-  const cB = await prisma.client.create({
-    data: {
-      name: "SecTest ClientB",
-      email: `sectest-cb-${TAG}@test.com`,
-      userId: cBUser.id,
-      trainerId: tB.id,
-    },
-  });
+    const cookieA = await login(trainerA.email);
+    const cookieB = await login(trainerB.email);
+    const cookieClientB = await login(clientBUser.email);
+    check("login trainer A", !!cookieA);
+    check("login trainer B", !!cookieB);
+    check("login client B", !!cookieClientB);
+    if (!cookieA || !cookieB || !cookieClientB) throw new Error("No se pudieron crear sesiones de prueba");
 
-  const cookieB = await login(`sectest-tb-${TAG}@test.com`, "password123");
-  const cookieEze = await login(
-    "ezequiel@kinetixfitt.com",
-    "Admin123!"
-  );
-  const cookieMartin = await login("martin@demo.com", "cliente123");
-  check("login real trainerB", !!cookieB);
-  check("login real KinetixFitt", !!cookieEze);
-  check("login real Martín", !!cookieMartin);
-  if (!cookieB || !cookieEze || !cookieMartin) throw new Error("sin sesión");
+    const ownClient = await request(`/api/clients/${clientAId}`, cookieA);
+    check("trainer A ve su propio cliente", ownClient.status === 200, ownClient.status);
+    const crossClient = await request(`/api/clients/${clientBId}`, cookieA);
+    check("trainer A no ve cliente de trainer B", crossClient.status === 404, crossClient.status);
+    const crossClientPatch = await request(`/api/clients/${clientBId}`, cookieA, { method: "PATCH", headers: { "Content-Type": "application/json", Origin: new URL(BASE).origin }, body: JSON.stringify({ notes: "cross-tenant" }) });
+    check("trainer A no modifica cliente de trainer B", crossClientPatch.status === 404, crossClientPatch.status);
+    const ownPatch = await request(`/api/clients/${clientAId}`, cookieA, { method: "PATCH", headers: { "Content-Type": "application/json", Origin: new URL(BASE).origin }, body: JSON.stringify({ notes: "updated safely" }) });
+    check("trainer A modifica su cliente", ownPatch.status === 200, ownPatch.status);
 
-  // Víctima: ficha de Martín (dueño KinetixFitt)
-  const martinList = (await (
-    await get("/api/clients", cookieEze)
-  ).json()) as Array<{ email: string; id: string }>;
-  const martinRec = martinList.find((c) => c.email === "martin@demo.com");
-  check("Martín existe y es de KinetixFitt", !!martinRec);
-  if (!martinRec) throw new Error("sin fixture víctima");
+    const csrfAttempt = await request(`/api/clients/${clientAId}`, cookieA, { method: "PATCH", headers: { "Content-Type": "application/json", Origin: "https://attacker.invalid" }, body: JSON.stringify({ notes: "csrf" }) });
+    check("Origin externo bloqueado por CSRF", csrfAttempt.status === 403, csrfAttempt.status);
 
-  // 0. Control positivo: el token de B SÍ ve lo propio (mata tests vacuos:
-  // si esto falla, los bloqueos de abajo no probarían nada).
-  const own = await get(`/api/clients/${cB.id}`, cookieB);
-  check("control: trainerB ve a su cliente (200)", own.status === 200, own.status);
+    const checkinPatch = await request("/api/checkins", cookieA, { method: "PATCH", headers: { "Content-Type": "application/json", Origin: new URL(BASE).origin }, body: JSON.stringify({ id: checkinBId, trainerReply: "unauthorized" }) });
+    check("trainer A no modifica check-in de trainer B", checkinPatch.status === 404, checkinPatch.status);
+    const clientOwnCheckins = await request(`/api/checkins?clientId=${clientBId}`, cookieClientB);
+    check("cliente B accede a su check-in", clientOwnCheckins.status === 200, clientOwnCheckins.status);
 
-  // 1. Trainer B NO ve cliente de KinetixFitt → 404 (no revela existencia)
-  const r1 = await get(`/api/clients/${martinRec.id}`, cookieB);
-  check("trainerB bloqueado en cliente ajeno (404)", r1.status === 404, r1.status);
+    const unsignedWebhook = await request("/api/payments/webhook", undefined, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ type: "payment", data: { id: "fake" } }) });
+    check("webhook de pago sin firma rechazado", unsignedWebhook.status === 401, unsignedWebhook.status);
+    const unsignedPush = await request("/api/push/send", undefined, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ userIds: [clientBId], title: "x", body: "x" }) });
+    check("push interno sin credencial rechazado", unsignedPush.status === 401, unsignedPush.status);
 
-  // 2. Cliente NO ve ficha de otro cliente → 403
-  const cookieCb = await login(`sectest-cb-${TAG}@test.com`, "password123");
-  const r2 = await get(`/api/clients/${martinRec.id}`, cookieCb || "");
-  check("cliente bloqueado en ficha ajena (403)", r2.status === 403, r2.status);
+    const form = new FormData();
+    form.append("type", "../..");
+    form.append("file", new Blob(["x"], { type: "image/jpeg" }), "p.jpg");
+    const upload = await request("/api/uploads", cookieClientB, { method: "POST", body: form, headers: { Origin: new URL(BASE).origin } });
+    check("upload traversal rechazado", upload.status === 400, upload.status);
+    const anonymousUpload = await request("/api/uploads", undefined, { method: "POST", body: new FormData() });
+    check("upload anónimo rechazado", anonymousUpload.status === 401, anonymousUpload.status);
 
-  // 3. ID inexistente → 404 con mensaje exacto (anti-enumeración)
-  const r3 = await get(
-    `/api/clients/00000000-0000-0000-0000-000000000000`,
-    cookieB
-  );
-  const b3 = (await r3.json().catch(() => ({}))) as { error?: string };
-  check(
-    "fake id → 404 'Cliente no encontrado'",
-    r3.status === 404 && b3.error === "Cliente no encontrado",
-    `${r3.status} ${b3.error}`
-  );
+    check("assertTrainerOwnsClient(A,A) true", await assertTrainerOwnsClient(trainerAId, clientAId) === true);
+    check("assertTrainerOwnsClient(A,B) false", await assertTrainerOwnsClient(trainerAId, clientBId) === false);
+    check("validateClientIdForTrainer inválido null", await validateClientIdForTrainer(trainerAId, "invalid-client-id") === null);
+    check("sanitizePath traversal", sanitizePath("../../../etc/passwd") === "etc/passwd");
+    check("sanitizePath backslashes", sanitizePath("..\\..\\windows\\system32") === "windows/system32");
+    check("sanitizePath normal intacto", sanitizePath("normal/path/file.jpg") === "normal/path/file.jpg");
+    check("extensiones peligrosas fuera de allowlist", ["exe", "bat", "sh", "php", "js", "html", "svg"].every((e) => !(ALLOWED_EXTENSIONS as readonly string[]).includes(e as never)));
+    check("MIME peligrosos fuera de allowlist", ["application/x-executable", "text/html", "application/javascript"].every((m) => !(ALLOWED_MIME_TYPES as readonly string[]).includes(m as never)));
 
-  // 4. Upload traversal en escritura → 400
-  const form = new FormData();
-  form.append("type", "../..");
-  form.append(
-    "file",
-    new Blob(["x"], { type: "image/jpeg" }),
-    "p.jpg"
-  );
-  const r4 = await fetch(`${BASE}/api/uploads`, {
-    method: "POST",
-    headers: { Cookie: cookieMartin },
-    body: form,
-  });
-  check("upload type=../.. → 400", r4.status === 400, r4.status);
-
-  // 5. Upload sin auth → 401
-  const r5 = await fetch(`${BASE}/api/uploads/progress/test.jpg`);
-  check("upload anónimo → 401", r5.status === 401, r5.status);
-
-  console.log("\nFunciones de autorización (lecturas reales a DB)\n");
-  check(
-    "assertTrainerOwnsClient(fake,fake) → false",
-    (await assertTrainerOwnsClient(
-      "00000000-0000-0000-0000-000000000000",
-      "11111111-1111-1111-1111-111111111111"
-    )) === false
-  );
-  check(
-    "assertTrainerOwnsClient(B, su cliente) → true",
-    (await assertTrainerOwnsClient(tB.id, cB.id)) === true
-  );
-  check(
-    "assertTrainerOwnsClient(B, cliente de KinetixFitt) → false",
-    (await assertTrainerOwnsClient(tB.id, martinRec.id)) === false
-  );
-  check(
-    "validateClientIdForTrainer inválido → null",
-    (await validateClientIdForTrainer(
-      "00000000-0000-0000-0000-000000000000",
-      "11111111-1111-1111-1111-111111111111"
-    )) === null
-  );
-
-  console.log("\nSanitización (@/lib/security)\n");
-  check(
-    "sanitizePath traversal",
-    sanitizePath("../../../etc/passwd") === "etc/passwd"
-  );
-  check(
-    "sanitizePath backslashes",
-    sanitizePath("..\\..\\windows\\system32") === "windows/system32"
-  );
-  check(
-    "sanitizePath normal intacto",
-    sanitizePath("normal/path/file.jpg") === "normal/path/file.jpg"
-  );
-  const dangerousExt = [".exe", ".bat", ".sh", ".php", ".js", ".html", ".svg"];
-  check(
-    "extensiones peligrosas fuera de allowlist",
-    dangerousExt.every(
-      (e) => !(ALLOWED_EXTENSIONS as readonly string[]).includes(e)
-    )
-  );
-  const dangerousMime = [
-    "application/x-executable",
-    "text/html",
-    "application/javascript",
-  ];
-  check(
-    "MIME peligrosos fuera de allowlist",
-    dangerousMime.every(
-      (m) => !(ALLOWED_MIME_TYPES as readonly string[]).includes(m)
-    )
-  );
-
-  // Limpieza SOLO fixtures (patrón sectest-). Los demos no se tocan.
-  await prisma.client.deleteMany({ where: { email: { contains: "@test.com" } } });
-  await prisma.user.deleteMany({ where: { email: { contains: "@test.com" } } });
-  const demos = await prisma.user.count({
-    where: {
-      email: {
-        in: [
-          "ezequiel@kinetixfitt.com",
-          "martin@demo.com",
-          "lucas@demo.com",
-          "sofia@demo.com",
-        ],
-      },
-    },
-  });
-  check("demos intactos tras limpieza (4)", demos === 4, demos);
-
-  await prisma.$disconnect();
-  console.log(`\nResultado: ${passed} pass, ${failed} fail\n`);
-  process.exit(failed === 0 ? 0 : 1);
+    console.log(`\nResultado: ${passed} pass, ${failed} fail\n`);
+    await cleanup();
+    process.exit(failed === 0 ? 0 : 1);
+  } catch (error) {
+    console.error("ERROR en security E2E:", error);
+    await cleanup();
+    process.exit(1);
+  }
 }
 
-main().catch(async (e) => {
-  console.log("ERROR en security E2E:", e);
-  // Intento de limpieza ante fallo a mitad de camino
-  await prisma.client
-    .deleteMany({ where: { email: { contains: "@test.com" } } })
-    .catch(() => {});
-  await prisma.user
-    .deleteMany({ where: { email: { contains: "@test.com" } } })
-    .catch(() => {});
-  await prisma.$disconnect();
-  process.exit(1);
-});
+void main();

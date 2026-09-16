@@ -1,0 +1,42 @@
+{
+  "version": 1,
+  "task": "foundation-governance-v4",
+  "status": "template",
+  "owner": "ai-agent",
+  "allowedPaths": [
+    ".ai/**",
+    ".github/**",
+    "scripts/ai-*.mjs",
+    "package.json",
+    "apps/web/package.json"
+  ],
+  "forbiddenPaths": [
+    ".env",
+    ".env.*",
+    "**/node_modules/**",
+    "**/dist/**",
+    "**/.next/**"
+  ],
+  "requiredChecks": [
+    "ai:audit:strict",
+    "ai:evidence:compare",
+    "typecheck",
+    "lint",
+    "test",
+    "build"
+  ],
+  "preserve": [
+    "existing public APIs unless explicitly migrated",
+    "authorization boundaries",
+    "database migration history",
+    "existing CI gates"
+  ],
+  "highRiskPathsRequireExplicitApproval": [
+    "apps/mobile/prisma/**",
+    "apps/mobile/app/api/auth/**",
+    "apps/mobile/app/api/payments/**",
+    "apps/mobile/app/api/uploads/**",
+    "apps/mobile/middleware.*",
+    "**/*security*.*"
+  ]
+}

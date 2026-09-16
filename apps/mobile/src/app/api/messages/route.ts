@@ -1,16 +1,21 @@
 import { NextResponse } from "next/server";
+import { z } from "zod";
 import { prisma } from "@/lib/db";
 import { getSession } from "@/lib/auth";
 import { assertTrainerOwnsClient } from "@/lib/authorization";
 
-/**
- * Sanitiza contenido de mensajes para mitigar Stored XSS.
- * React escapa por defecto, pero si el contenido se usa en email, PDF,
- * notificaciones HTML o futuro dangerouslySetInnerHTML, el payload
- * <img onerror=...> debe quedar neutralizado. Se escapan < y >.
- * Límite duro 500 chars (PR2) para evitar DoS por payload gigante.
- */
 const MAX_MESSAGE_LENGTH = 500;
+const userSummarySelect = { id: true, name: true, email: true, avatar: true, role: true } as const;
+const messageResponseInclude = {
+  sender: { select: userSummarySelect },
+  receiver: { select: userSummarySelect },
+} as const;
+
+const sendMessageSchema = z.object({
+  content: z.string().trim().min(1).max(MAX_MESSAGE_LENGTH),
+  receiverId: z.string().min(1).optional(),
+  clientId: z.string().cuid().optional(),
+});
 
 function stripHtml(input: string): string {
   return input.replace(/</g, "&lt;").replace(/>/g, "&gt;");
@@ -20,111 +25,101 @@ function sanitizeMessageContent(input: string): string {
   return stripHtml(input).slice(0, MAX_MESSAGE_LENGTH);
 }
 
-export async function GET(req: Request){
+async function getClientForUser(userId: string, email: string) {
+  return prisma.client.findFirst({
+    where: { OR: [{ userId }, { email }] },
+    select: { id: true, trainerId: true, userId: true },
+  });
+}
+
+async function getTrainerForClient(clientId: string) {
+  const client = await prisma.client.findUnique({ where: { id: clientId }, select: { trainerId: true } });
+  if (!client?.trainerId) return null;
+  return prisma.user.findUnique({ where: { id: client.trainerId }, select: userSummarySelect });
+}
+
+export async function GET(req: Request) {
   const s = await getSession();
-  if(!s) return NextResponse.json({error:"No auth"},{status:401});
+  if (!s) return NextResponse.json({ error: "No auth" }, { status: 401 });
+
   const url = new URL(req.url);
   const withUserId = url.searchParams.get("with");
-  if(s.role==="CLIENT"){
-    const trainer = await prisma.user.findFirst({where:{role:"TRAINER"}});
-    if(!trainer) return NextResponse.json([]);
+
+  if (s.role === "CLIENT") {
+    const client = await getClientForUser(s.id, s.email);
+    const trainer = client?.trainerId ? await getTrainerForClient(client.id) : null;
+    if (!trainer) return NextResponse.json([]);
     const msgs = await prisma.message.findMany({
-      where:{
-        OR:[
-          {senderId: s.id, receiverId: trainer.id},
-          {senderId: trainer.id, receiverId: s.id},
-        ]
-      },
-      orderBy:{createdAt:"asc"},
-      take:100
+      where: { OR: [{ senderId: s.id, receiverId: trainer.id }, { senderId: trainer.id, receiverId: s.id }] },
+      orderBy: { createdAt: "asc" },
+      take: 100,
+      include: messageResponseInclude,
     });
-    // Mark trainer messages as read
-    await prisma.message.updateMany({where:{receiverId: s.id, read:false}, data:{read:true}});
+    await prisma.message.updateMany({ where: { receiverId: s.id, senderId: trainer.id, read: false }, data: { read: true } });
     return NextResponse.json(msgs);
   }
-  // Trainer - if with param, get conversation with that client user
-  if(withUserId){
-    // P0 Security: TRAINER solo puede ver mensajes con sus propios clientes
-    const clientUser = await prisma.client.findFirst({
-      where: { userId: withUserId },
-      select: { id: true }
-    });
-    if(clientUser){
-      const ownsClient = await assertTrainerOwnsClient(s.id, clientUser.id);
-      if(!ownsClient){
-        return NextResponse.json({error:"Cliente no encontrado"},{status:404});
-      }
-    } else if (withUserId !== s.id) {
-      // P0 fail-closed: sin fila Client no hay ownership que verificar
-      return NextResponse.json({error:"Cliente no encontrado"},{status:404});
-    }
+
+  if (withUserId) {
+    const clientUser = await prisma.client.findFirst({ where: { userId: withUserId }, select: { id: true } });
+    if (!clientUser) return NextResponse.json({ error: "Cliente no encontrado" }, { status: 404 });
+    if (!(await assertTrainerOwnsClient(s.id, clientUser.id))) return NextResponse.json({ error: "Cliente no encontrado" }, { status: 404 });
     const msgs = await prisma.message.findMany({
-      where:{
-        OR:[
-          {senderId: s.id, receiverId: withUserId},
-          {senderId: withUserId, receiverId: s.id},
-        ]
-      },
-      orderBy:{createdAt:"asc"},
-      take:100
+      where: { OR: [{ senderId: s.id, receiverId: withUserId }, { senderId: withUserId, receiverId: s.id }] },
+      orderBy: { createdAt: "asc" },
+      take: 100,
+      include: messageResponseInclude,
     });
-    await prisma.message.updateMany({where:{receiverId: s.id, senderId: withUserId, read:false}, data:{read:true}});
+    await prisma.message.updateMany({ where: { receiverId: s.id, senderId: withUserId, read: false }, data: { read: true } });
     return NextResponse.json(msgs);
   }
-  // All recent conversations
+
   const msgs = await prisma.message.findMany({
-    where:{ OR:[{senderId: s.id}, {receiverId: s.id}]},
-    orderBy:{createdAt:"desc"},
-    take:50,
-    include:{sender:true, receiver:true}
+    where: { OR: [{ senderId: s.id }, { receiverId: s.id }] },
+    orderBy: { createdAt: "desc" },
+    take: 50,
+    include: messageResponseInclude,
   });
   return NextResponse.json(msgs);
 }
 
-export async function POST(req: Request){
+export async function POST(req: Request) {
   const s = await getSession();
-  if(!s) return NextResponse.json({error:"No auth"},{status:401});
-  const body = await req.json().catch(() => null);
-  if(!body) return NextResponse.json({error:"Cuerpo requerido"},{status:400});
-  const { content } = body;
-  let { receiverId, clientId } = body;
-  if (typeof content !== "string" || !content.trim()) {
-    return NextResponse.json({error:"Faltan datos"},{status:400});
+  if (!s) return NextResponse.json({ error: "No auth" }, { status: 401 });
+
+  const parsed = sendMessageSchema.safeParse(await req.json().catch(() => null));
+  if (!parsed.success) return NextResponse.json({ error: "Datos de mensaje inválidos" }, { status: 400 });
+
+  const { content } = parsed.data;
+  let { receiverId, clientId } = parsed.data;
+  const safeContent = sanitizeMessageContent(content);
+
+  if (s.role === "CLIENT") {
+    const client = await getClientForUser(s.id, s.email);
+    if (!client) return NextResponse.json({ error: "Cliente no encontrado" }, { status: 404 });
+    const trainer = client.trainerId ? await getTrainerForClient(client.id) : null;
+    if (!trainer || receiverId !== trainer.id) return NextResponse.json({ error: "Solo podés escribirle a tu coach asignado" }, { status: 403 });
+    clientId = client.id;
+  } else {
+    if (!clientId) return NextResponse.json({ error: "Falta clientId" }, { status: 400 });
+    if (!(await assertTrainerOwnsClient(s.id, clientId))) return NextResponse.json({ error: "Cliente no encontrado" }, { status: 404 });
+    const client = await prisma.client.findUnique({ where: { id: clientId }, select: { userId: true } });
+    if (!client?.userId || receiverId !== client.userId) return NextResponse.json({ error: "Destinatario inválido" }, { status: 403 });
   }
-  const trimmed = content.trim();
-  if (trimmed.length > MAX_MESSAGE_LENGTH) {
-    return NextResponse.json({error:`Mensaje demasiado largo (máx ${MAX_MESSAGE_LENGTH})`},{status:400});
-  }
-  // Sanitización anti-XSS + límite duro
-  const safeContent = sanitizeMessageContent(trimmed);
-  if (!safeContent) return NextResponse.json({error:"Faltan datos"},{status:400});
-  // Auto-resolve trainer for CLIENT if no receiverId
-  if(s.role==="CLIENT" && !receiverId){
-    const trainer = await prisma.user.findFirst({where:{role:"TRAINER"}});
-    receiverId = trainer?.id;
-  }
-  if(!receiverId) return NextResponse.json({error:"Faltan datos"},{status:400});
-  // Security: CLIENT can only message their trainer
-  if(s.role==="CLIENT"){
-    const trainer = await prisma.user.findFirst({where:{role:"TRAINER"}});
-    if(receiverId !== trainer?.id) return NextResponse.json({error:"No autorizado"},{status:403});
-    const client = await prisma.client.findFirst({where:{OR:[{userId:s.id},{email:s.email}]}});
-    clientId = client?.id || null;
-  }
-  const msg = await prisma.message.create({data:{
-    senderId: s.id,
-    receiverId,
-    clientId: clientId || null,
-    content: safeContent,
-    read: false,
-  }});
-  // Notification for receiver (también sanitizada + slice)
-  await prisma.notification.create({data:{
-    userId: receiverId,
-    title: `Nuevo mensaje de ${s.name}`,
-    body: safeContent.slice(0,80),
-    type: "message",
-    link: s.role==="TRAINER" ? "/client/messages" : "/trainer/messages"
-  }});
-  return NextResponse.json(msg);
+
+  const msg = await prisma.message.create({
+    data: { senderId: s.id, receiverId: receiverId!, clientId: clientId || null, content: safeContent, read: false },
+    include: messageResponseInclude,
+  });
+
+  await prisma.notification.create({
+    data: {
+      userId: receiverId!,
+      title: `Nuevo mensaje de ${s.name}`,
+      body: safeContent.slice(0, 80),
+      type: "message",
+      link: s.role === "TRAINER" ? "/client/messages" : "/trainer/messages",
+    },
+  });
+
+  return NextResponse.json(msg, { status: 201 });
 }

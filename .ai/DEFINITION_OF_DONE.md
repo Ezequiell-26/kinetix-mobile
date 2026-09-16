@@ -1,120 +1,186 @@
-# KinetixFitt - Definición de "Terminado"
+# KinetixFitt — Definition of Done
 
-## ✅ Criterios Obligatorios
+**Version:** 3.0.0  
+**Status:** Mandatory  
+**Purpose:** prevent incomplete, unverified, or regression-prone work from being treated as finished.
 
-Una tarea se considera **COMPLETADA** solo cuando TODOS estos criterios se cumplen:
+## 1. A TASK IS NOT DONE BECAUSE CODE EXISTS
 
-### 1. Implementación Física
-- [ ] Archivos creados físicamente en el sistema de archivos
-- [ ] Archivos modificados físicamente (no solo planeado)
-- [ ] Imports/exports actualizados y funcionales
-- [ ] No hay código muerto o imports sin usar
+A task is complete only when the relevant behavior is implemented, integrated, verified, and documented.
 
-### 2. Validación de Código
-- [ ] `npm run typecheck` pasa sin errores
-- [ ] `npm run lint` pasa sin errores
-- [ ] Tests unitarios relevantes pasan
-- [ ] Tests de integración pasan (si aplica)
+Minimum chain:
 
-### 3. Build y Compilación
-- [ ] `npm run build` exitoso para apps afectadas
-- [ ] No hay warnings nuevos introducidos
-- [ ] Bundle size dentro de budgets establecidos
+`IMPLEMENT → INTEGRATE → TEST → BUILD → REVIEW → VERIFY`
 
-### 4. Funcionalidad
-- [ ] Feature funciona como se especificó
-- [ ] No hay regresiones en features existentes
-- [ ] Casos edge manejados correctamente
-- [ ] Estados de error implementados (loading, empty, error)
+## 2. UNIVERSAL CHECKLIST
 
-### 5. Integración
-- [ ] Componente integrado con el resto del sistema
-- [ ] API endpoints conectados (si aplica)
-- [ ] Base de datos actualizada (si aplica)
-- [ ] Migraciones ejecutadas y verificadas
+### Implementation
+- [ ] Existing implementation was searched before creating a new one.
+- [ ] No unnecessary duplicate system was introduced.
+- [ ] Files actually exist and contain the intended implementation.
+- [ ] Imports/exports compile.
+- [ ] No unrelated functionality was removed.
 
-### 6. Documentación
-- [ ] README actualizado (si es feature nueva)
-- [ ] Comentarios en código complejo
-- [ ] Types/interfaces documentados
-- [ ] `.ai/PROJECT_STATE.md` actualizado (si es cambio mayor)
+### Integration
+- [ ] UI/API/domain/data boundaries are respected.
+- [ ] All known consumers were checked.
+- [ ] Shared contracts/types were updated where necessary.
+- [ ] Database changes use tracked migrations.
+- [ ] External integrations use the real server-side flow when claimed as real.
 
-### 7. Seguridad
-- [ ] No hay secretos expuestos (.env, keys, tokens)
-- [ ] Inputs validados y sanitizados
-- [ ] Autorización verificada (si aplica)
-- [ ] Datos sensibles encriptados (si aplica)
+### Correctness
+- [ ] Happy path works.
+- [ ] Empty state works.
+- [ ] Loading state works.
+- [ ] Error state works.
+- [ ] Invalid input is handled.
+- [ ] Important edge cases are handled.
+- [ ] No known regression remains.
 
-### 8. Performance
-- [ ] No hay degradación de performance medible
-- [ ] Lazy loading implementado (si es componente pesado)
-- [ ] No hay memory leaks
-- [ ] FPS se mantienen en 60+ (si hay animaciones)
+### Security
+- [ ] Inputs are validated.
+- [ ] Server-side authorization is enforced.
+- [ ] Secrets are not exposed.
+- [ ] Sensitive logs are avoided.
+- [ ] Webhooks are verified where applicable.
+- [ ] Cross-user/cross-trainer access tests pass where applicable.
 
-### 9. Accesibilidad
-- [ ] Atributos ARIA correctos
-- [ ] Navegación por teclado funciona
-- [ ] Contraste de colores adecuado
-- [ ] Screen readers pueden leer contenido
+### Persistence
+- [ ] Data survives refresh when expected.
+- [ ] Data survives logout/login when expected.
+- [ ] Source of truth is the intended database/service.
+- [ ] No fake in-memory or local-only success path is presented as production behavior.
 
-### 10. Responsive
-- [ ] Mobile (320px+) funciona correctamente
-- [ ] Tablet (768px+) se ve bien
-- [ ] Desktop (1024px+) aprovecha el espacio
-- [ ] No hay overflow o clipping no deseado
+### Quality
+- [ ] Lint passes for affected project(s).
+- [ ] Typecheck passes for affected project(s).
+- [ ] Relevant tests pass.
+- [ ] Security tests pass for security-sensitive changes.
+- [ ] Build passes.
+- [ ] E2E passes for affected critical user journeys when applicable.
 
----
+### UX / Accessibility
+- [ ] Responsive behavior verified.
+- [ ] Keyboard/focus behavior verified where applicable.
+- [ ] Accessible labels/semantics are present.
+- [ ] Motion does not block usability.
+- [ ] Existing KinetixFitt design system is respected.
 
-## 🚫 Lo que NO cuenta como "Terminado"
+### Performance
+- [ ] No obvious N+1 queries introduced.
+- [ ] No unnecessary client-side work introduced.
+- [ ] Heavy features are lazy loaded where appropriate.
+- [ ] No obvious memory/resource leak introduced.
+- [ ] Meaningful performance changes were measured where applicable.
 
-- ❌ Solo escribir código sin verificar que compila
-- ❌ Solo describir la implementación sin hacerla
-- ❌ Solo crear archivos sin integrarlos
-- ❌ Ignorar errores de TypeScript/Lint
-- ❌ Dejar tests fallando
-- ❌ Romper builds existentes
-- ❌ Crear deuda técnica sin documentarla
+### Documentation
+- [ ] User-facing documentation updated if behavior changed.
+- [ ] `.ai/PROJECT_STATE.md` updated for material architectural/state changes.
+- [ ] Relevant contract updated.
+- [ ] ADR added for architectural decisions.
 
----
+## 3. HIGH-RISK CHANGE GATES
 
-## 📊 Niveles de Completitud
+### Auth / Security
+Require dedicated auth/security tests and regression coverage.
 
-### ✅ COMPLETADO (100%)
-Todos los criterios anteriores cumplidos.
+### Database
+Require migration review, compatibility review, and DB integration testing.
 
-### 🟡 PARCIAL (50-99%)
-Implementación funcional pero faltan validaciones, tests o documentación.
+### Payments
+Require provider verification, webhook tests, idempotency tests, and persisted state verification.
 
-### 🔴 NO COMPLETADO (<50%)
-Solo planeación o implementación incompleta sin funcionalidad real.
+### Storage
+Require authorization, file validation, private access, and lifecycle tests.
 
----
+### API
+Require contract tests and consumer review.
 
-## 🔄 Proceso de Verificación
+### Native / Platform
+Require platform-specific verification for affected targets.
 
-Antes de marcar tarea como completada:
+## 4. RELEASE-BLOCKING CONDITIONS
 
-```bash
-# 1. Verificar archivos existen
-ls -la <archivos-creados>
+A task or release is NOT complete when any applicable condition exists:
 
-# 2. Type checking
-npm run typecheck
+- known critical security issue;
+- data-loss risk;
+- broken production build;
+- failing required test;
+- failing required deployment;
+- unauthorized data access;
+- fake production integration presented as real;
+- untracked/destructive database change;
+- committed secret;
+- unresolved incompatible API/schema change.
 
-# 3. Lint
-npm run lint
+## 5. BUG FIX RULE
 
-# 4. Tests
-npm run test
+Every critical bug follows:
 
-# 5. Build
-npm run build
+`REPRODUCE → FIX → REGRESSION TEST → RE-VERIFY`
 
-# 6. Git status
-git status
-git diff
+A fix without a regression test is incomplete when automated regression coverage is feasible.
+
+## 6. FEATURE RULE
+
+Every new feature must identify:
+
+- owner/domain;
+- data source;
+- auth requirements;
+- persistence requirements;
+- failure behavior;
+- test strategy;
+- rollback considerations if risky.
+
+## 7. COMPLETENESS LEVELS
+
+### COMPLETE
+All applicable criteria are verified.
+
+### PARTIAL
+Useful implementation exists but one or more required verification/integration criteria remain.
+
+### BLOCKED_EXTERNAL
+Code is ready but requires external credentials, provider setup, device testing, store approval, or another dependency outside the repository.
+
+### BROKEN
+Behavior exists but fails required validation or runtime expectations.
+
+### NOT_IMPLEMENTED
+No meaningful implementation exists.
+
+## 8. EVIDENCE STANDARD
+
+A completion claim should point to concrete evidence:
+
+- command result;
+- test result;
+- build result;
+- deployment/preview result;
+- file/diff reviewed;
+- documented external limitation.
+
+Do not infer successful runtime behavior merely because TypeScript compiles.
+
+## 9. FINAL SIGN-OFF
+
+Before declaring COMPLETE:
+
+```text
+[ ] Implementation
+[ ] Integration
+[ ] Correctness
+[ ] Security
+[ ] Persistence
+[ ] Tests
+[ ] Build
+[ ] UX/A11y
+[ ] Performance
+[ ] Documentation
+[ ] Diff reviewed
+[ ] No known blocker
 ```
 
----
-
-**Nota**: Es mejor reportar "PARCIAL" honestamente que "COMPLETADO" falsamente.
+**Honest PARTIAL is always preferable to false COMPLETE.**

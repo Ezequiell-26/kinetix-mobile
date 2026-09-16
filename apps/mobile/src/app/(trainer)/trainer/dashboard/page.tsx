@@ -1,431 +1,139 @@
-import { prisma } from "@/lib/db";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { TrainerControlCenter } from "@/components/trainer-control-center";
-import { TrainerInsights } from "@/components/trainer-insights";
-import { PwaInstallDesktop } from "@/components/pwa-install-desktop";
-import { LiveSession } from "@/components/live-session";
-import { ExportCenter } from "@/components/export-center";
-import { LiftShiftAnalytics } from "@/components/liftshift-analytics";
-import { Badge } from "@/components/ui/badge";
-import { ChangelogNotification } from "@/components/changelog-notification";
-import { AdherenceChart, RevenueChart, CheckinDonut } from "@/components/analytics-charts";
-import { Progress } from "@/components/ui/progress";
-import { UiPremiumStrip, FadeIn, StaggerContainer, StaggerItem } from "@/components/ui-premium";
-import { CountUp, ProgressBar } from "@/components/animated-stats";
 import Link from "next/link";
+import { redirect } from "next/navigation";
+import { prisma } from "@/lib/db";
+import { getSession } from "@/lib/auth";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { TourLauncher } from "@/components/guided-tour";
-import { TRAINER_TOUR, TRAINER_TOUR_KEY } from "@/lib/tours";
-import { Tilt3D, Tilt3DSubtle } from "@/components/tilt-3d";
+import { Progress } from "@/components/ui/progress";
 import { BRAND } from "@/constants/branding";
-import { 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-  Users, 
-  Dumbbell, 
-  ClipboardCheck, 
-  MessageSquare, 
-  AlertTriangle, 
-  Plus, 
-  TrendingUp, 
-  ArrowRight,
-  Clock,
-  CheckCircle2,
-  AlertCircle,
-  Wrench
-} from "lucide-react";
+import { AlertCircle, ArrowRight, CheckCircle2, Clock, Dumbbell, MessageSquare, Plus, Users } from "lucide-react";
 
-export const dynamic = 'force-dynamic';
+export const dynamic = "force-dynamic";
 export const revalidate = 0;
 
+function startOfDay(date: Date) {
+  return new Date(date.getFullYear(), date.getMonth(), date.getDate());
+}
 
-export default async function TrainerDashboard(){
+export default async function TrainerDashboard() {
+  const session = await getSession();
+  if (!session) redirect("/login");
+  if (session.role !== "TRAINER") redirect("/client/dashboard");
+
   const now = new Date();
-  const startOfToday = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+  const today = startOfDay(now);
   const sevenDaysAgo = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
   const fourDaysAgo = new Date(now.getTime() - 4 * 24 * 60 * 60 * 1000);
 
-  // Parallel database queries for real data
-  const [
-    allClients,
-    pendingCheckins,
-    unreadMessages,
-    workoutsToday,
-    activeSubscriptions
-  ] = await Promise.all([
+  const [clients, pendingCheckins, unreadMessages, workoutsToday, activeSubscriptions] = await Promise.all([
     prisma.client.findMany({
-      include: {
-        assignedProgram: true,
-        workoutLogs: {
-          orderBy: { date: "desc" },
-          take: 1
-        }
+      where: { trainerId: session.id },
+      select: {
+        id: true,
+        name: true,
+        status: true,
+        createdAt: true,
+        workoutLogs: { orderBy: { date: "desc" }, take: 1, select: { date: true } },
       },
-      orderBy: { createdAt: "desc" }
-    }).catch(() => []),
-
-    prisma.checkIn.findMany({
-      where: { reviewed: false },
-      include: { client: true, user: true },
-      orderBy: { date: "desc" },
-      take: 10
-    }).catch(() => []),
-
-    prisma.message.findMany({
-      where: { read: false },
-      include: { sender: true, client: true },
       orderBy: { createdAt: "desc" },
-      take: 10
-    }).catch(() => []),
-
+    }),
+    prisma.checkIn.findMany({
+      where: { reviewed: false, client: { trainerId: session.id } },
+      select: { id: true, clientId: true, comentario: true, date: true, client: { select: { name: true } } },
+      orderBy: { date: "desc" },
+      take: 10,
+    }),
+    prisma.message.findMany({
+      where: { receiverId: session.id, read: false, client: { trainerId: session.id } },
+      select: { id: true, senderId: true, content: true, createdAt: true, sender: { select: { name: true } } },
+      orderBy: { createdAt: "desc" },
+      take: 10,
+    }),
     prisma.workoutLog.findMany({
-      where: { date: { gte: startOfToday } },
-      include: { client: true, workout: true },
-      orderBy: { date: "desc" }
-    }).catch(() => []),
-
+      where: { date: { gte: today }, client: { trainerId: session.id } },
+      select: { id: true, clientId: true, workoutName: true, durationMin: true, date: true, client: { select: { name: true } } },
+      orderBy: { date: "desc" },
+      take: 20,
+    }),
     prisma.subscription.findMany({
-      where: { status: "ACTIVA" }
-    }).catch(() => [])
+      where: { status: "ACTIVA", client: { trainerId: session.id } },
+      select: { price: true },
+    }),
   ]);
 
-  // Compute real KPIs
-  const activeClients = allClients.filter(c => c.status === "ACTIVO");
-  const newClientsThisWeek = allClients.filter(c => new Date(c.createdAt) >= sevenDaysAgo);
-  
-  // Inactive clients (active status, but last workout > 4 days ago or never)
-  const inactiveClients = activeClients.filter(c => {
-    const lastLog = c.workoutLogs[0]?.date;
-    if (!lastLog) return true;
-    return new Date(lastLog) < fourDaysAgo;
+  const activeClients = clients.filter((client) => client.status === "ACTIVO");
+  const newClientsThisWeek = clients.filter((client) => client.createdAt >= sevenDaysAgo);
+  const inactiveClients = activeClients.filter((client) => {
+    const lastWorkout = client.workoutLogs[0]?.date;
+    return !lastWorkout || lastWorkout < fourDaysAgo;
   });
+  const mrr = activeSubscriptions.reduce((total, sub) => total + (sub.price || 0), 0);
 
-  // MRR from real active subscriptions
-  const realMrr = activeSubscriptions.reduce((acc, s) => acc + (s.price || 0), 0);
-
-  // Attention needed items
-  type AttentionItem = {
-    id: string;
-    type: "CHECKIN" | "INACTIVE" | "MESSAGE";
-    title: string;
-    subtitle: string;
-    link: string;
-    badge: string;
-  };
-
-  const attentionItems: AttentionItem[] = [];
-
-  // 1. Pending checkins
-  pendingCheckins.forEach(ch => {
-    attentionItems.push({
-      id: `ch-${ch.id}`,
-      type: "CHECKIN",
-      title: ch.client?.name || ch.user?.name || "Cliente",
-      subtitle: ch.comentario ? `"${ch.comentario.slice(0, 60)}..."` : "Check-in semanal pendiente de revisión",
-      link: "/trainer/checkins",
-      badge: "Check-in pendiente"
-    });
-  });
-
-  // 2. Unread messages
-  unreadMessages.forEach(m => {
-    attentionItems.push({
-      id: `msg-${m.id}`,
-      type: "MESSAGE",
-      title: m.sender?.name || m.client?.name || "Mensaje sin leer",
-      subtitle: `"${m.content.slice(0, 60)}..."`,
-      link: `/trainer/messages?with=${m.senderId}`,
-      badge: "Mensaje nuevo"
-    });
-  });
-
-  // 3. Inactive clients
-  inactiveClients.slice(0, 3).forEach(c => {
-    const lastDate = c.workoutLogs[0]?.date;
-    attentionItems.push({
-      id: `inact-${c.id}`,
-      type: "INACTIVE",
-      title: c.name,
-      subtitle: lastDate 
-        ? `Sin entrenar desde ${new Date(lastDate).toLocaleDateString("es-AR", { day: "numeric", month: "short" })}` 
-        : "Aún no ha registrado su primer entrenamiento",
-      link: `/trainer/clients/${c.id}`,
-      badge: "Sin actividad"
-    });
-  });
+  const attention = [
+    ...pendingCheckins.map((item) => ({ id: `checkin-${item.id}`, title: item.client?.name || "Cliente", subtitle: item.comentario?.slice(0, 80) || "Check-in pendiente de revisión", label: "Check-in", href: "/trainer/checkins", variant: "warn" as const })),
+    ...unreadMessages.map((item) => ({ id: `message-${item.id}`, title: item.sender?.name || "Cliente", subtitle: item.content.slice(0, 80), label: "Mensaje", href: `/trainer/messages?with=${encodeURIComponent(item.senderId)}`, variant: "accent" as const })),
+    ...inactiveClients.slice(0, 3).map((item) => ({ id: `inactive-${item.id}`, title: item.name, subtitle: "Sin entrenamiento registrado en los últimos 4 días", label: "Sin actividad", href: `/trainer/clients/${item.id}`, variant: "muted" as const })),
+  ].slice(0, 8);
 
   return (
     <div className="space-y-6">
-      <ChangelogNotification />
-      <TourLauncher steps={TRAINER_TOUR} storageKey={TRAINER_TOUR_KEY} tourName="Tour entrenador" />
-      {/* Welcome & Top Actions */}
-      <div className="flex flex-col sm:flex-row justify-between sm:items-center gap-4">
+      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div>
-          <h1 className="text-2xl lg:text-3xl font-display font-bold tracking-tight text-white">
-            Panel del Entrenador
-          </h1>
-          <p className="text-sm text-zinc-400">
-            Resumen en tiempo real • Marca: <span className="text-primary font-bold">{BRAND.name}</span>
-          </p>
+          <p className="text-xs uppercase tracking-[0.2em] text-zinc-500">{BRAND.name}</p>
+          <h1 className="mt-1 text-2xl font-display font-bold tracking-tight text-white lg:text-3xl">Panel del Entrenador</h1>
+          <p className="text-sm text-zinc-400">Cartera, actividad y alertas de tus atletas.</p>
         </div>
-
-        <div className="flex items-center gap-2 flex-wrap">
-          <Link href="/trainer/clients/new">
-            <Button variant="accent" size="sm" className="font-bold min-h-[44px]">
-              <Plus size={16} className="mr-1" /> Nuevo Cliente
-            </Button>
-          </Link>
-          <Link href="/trainer/workouts">
-            <Button variant="outline" size="sm" className="min-h-[44px]">
-              <Dumbbell size={16} className="mr-1" /> Crear Rutina
-            </Button>
-          </Link>
+        <div className="flex flex-wrap gap-2">
+          <Link href="/trainer/clients/new"><Button variant="accent" size="sm" className="min-h-[44px]"><Plus size={16} className="mr-1" />Nuevo Cliente</Button></Link>
+          <Link href="/trainer/workouts"><Button variant="outline" size="sm" className="min-h-[44px]"><Dumbbell size={16} className="mr-1" />Crear Rutina</Button></Link>
         </div>
       </div>
 
-      {/* KPI Cards (100% Real Data) — contadores y barras animadas */}
-      <div data-tour="kpis">
-      <StaggerContainer className="grid grid-cols-2 lg:grid-cols-4 gap-3" stagger={0.08}>
-        <StaggerItem>
-        <Tilt3DSubtle>
-        <Card className="h-full">
-          <CardContent className="p-4">
-            <span className="text-[10px] font-bold tracking-widest text-zinc-500 uppercase block">
-              Clientes Activos
-            </span>
-            <p className="text-3xl font-black text-white mt-1 tabular-nums">
-              <CountUp value={activeClients.length} />
-            </p>
-            <p className="text-xs text-zinc-400 mt-0.5">
-              +{newClientsThisWeek.length} nuevos esta semana
-            </p>
-            <ProgressBar value={Math.min(100, activeClients.length * 10)} className="mt-3" />
-          </CardContent>
-        </Card>
-        </Tilt3DSubtle>
-        </StaggerItem>
-
-        <StaggerItem>
-        <Tilt3DSubtle>
-        <Card className={`h-full ${pendingCheckins.length > 0 ? "border-primary/30 bg-primary/[0.03]" : ""}`}>
-          <CardContent className="p-4">
-            <span className="text-[10px] font-bold tracking-widest text-zinc-500 uppercase block">
-              Check-ins Pendientes
-            </span>
-            <p className="text-3xl font-black text-white mt-1 tabular-nums">
-              <CountUp value={pendingCheckins.length} />
-            </p>
-            <p className={`text-xs mt-0.5 ${pendingCheckins.length > 0 ? "text-amber-400 font-medium" : "text-zinc-500"}`}>
-              {pendingCheckins.length > 0 ? "Requieren respuesta" : "Al día"}
-            </p>
-            <ProgressBar value={pendingCheckins.length > 0 ? 100 : 0} color={pendingCheckins.length > 0 ? "#fbbf24" : "#4ade80"} className="mt-3" />
-          </CardContent>
-        </Card>
-        </Tilt3DSubtle>
-        </StaggerItem>
-
-        <StaggerItem>
-        <Tilt3DSubtle>
-        <Card className="h-full">
-          <CardContent className="p-4">
-            <span className="text-[10px] font-bold tracking-widest text-zinc-500 uppercase block">
-              Entrenamientos Hoy
-            </span>
-            <p className="text-3xl font-black text-white mt-1 tabular-nums">
-              <CountUp value={workoutsToday.length} />
-            </p>
-            <p className="text-xs text-zinc-400 mt-0.5">
-              {workoutsToday.length === 1 ? "sesión finalizada" : "sesiones finalizadas"}
-            </p>
-            <ProgressBar value={Math.min(100, workoutsToday.length * 25)} className="mt-3" />
-          </CardContent>
-        </Card>
-        </Tilt3DSubtle>
-        </StaggerItem>
-
-        <StaggerItem>
-        <Tilt3DSubtle>
-        <Card className={`h-full ${unreadMessages.length > 0 ? "border-amber-500/30" : ""}`}>
-          <CardContent className="p-4">
-            <span className="text-[10px] font-bold tracking-widest text-zinc-500 uppercase block">
-              Mensajes Sin Leer
-            </span>
-            <p className="text-3xl font-black text-white mt-1 tabular-nums">
-              <CountUp value={unreadMessages.length} />
-            </p>
-            <p className="text-xs text-zinc-400 mt-0.5">
-              {unreadMessages.length > 0 ? "Conversaciones activas" : "Sin mensajes pendientes"}
-            </p>
-            <ProgressBar value={Math.min(100, unreadMessages.length * 20)} color="#fbbf24" className="mt-3" />
-          </CardContent>
-        </Card>
-        </Tilt3DSubtle>
-        </StaggerItem>
-      </StaggerContainer>
+      <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
+        <Card><CardContent className="p-4"><div className="flex items-center gap-2 text-zinc-500"><Users size={15} /><span className="text-[10px] font-bold uppercase tracking-widest">Activos</span></div><p className="mt-2 text-3xl font-black text-white">{activeClients.length}</p><p className="mt-1 text-xs text-zinc-500">+{newClientsThisWeek.length} esta semana</p></CardContent></Card>
+        <Card className={pendingCheckins.length ? "border-amber-500/30" : ""}><CardContent className="p-4"><div className="flex items-center gap-2 text-zinc-500"><AlertCircle size={15} /><span className="text-[10px] font-bold uppercase tracking-widest">Check-ins</span></div><p className="mt-2 text-3xl font-black text-white">{pendingCheckins.length}</p><p className="mt-1 text-xs text-zinc-500">{pendingCheckins.length ? "Requieren revisión" : "Al día"}</p></CardContent></Card>
+        <Card><CardContent className="p-4"><div className="flex items-center gap-2 text-zinc-500"><Dumbbell size={15} /><span className="text-[10px] font-bold uppercase tracking-widest">Hoy</span></div><p className="mt-2 text-3xl font-black text-white">{workoutsToday.length}</p><p className="mt-1 text-xs text-zinc-500">Entrenamientos registrados</p></CardContent></Card>
+        <Card><CardContent className="p-4"><div className="flex items-center gap-2 text-zinc-500"><MessageSquare size={15} /><span className="text-[10px] font-bold uppercase tracking-widest">Mensajes</span></div><p className="mt-2 text-3xl font-black text-white">{unreadMessages.length}</p><p className="mt-1 text-xs text-zinc-500">Sin leer</p></CardContent></Card>
       </div>
 
-      {/* Main Grid: Atención Necesaria & Actividad Reciente */}
-      <div className="grid lg:grid-cols-3 gap-5">
-        {/* Sección: Atención necesaria */}
-        <Card className="lg:col-span-2" data-tour="atencion">
-          <CardHeader className="flex flex-row items-center justify-between pb-3">
-            <CardTitle className="text-base flex items-center gap-2">
-              <AlertCircle size={18} className="text-primary" /> Atención Necesaria
-            </CardTitle>
-            {pendingCheckins.length > 0 && (
-              <Link href="/trainer/checkins" className="text-xs text-primary hover:underline font-bold">
-                Ver todos ({pendingCheckins.length}) →
-              </Link>
-            )}
+      <div className="grid gap-5 lg:grid-cols-3">
+        <Card className="lg:col-span-2">
+          <CardHeader className="flex-row items-center justify-between space-y-0">
+            <CardTitle className="flex items-center gap-2 text-base"><AlertCircle size={18} className="text-primary" /> Atención necesaria</CardTitle>
+            {attention.length > 0 && <Badge variant="muted">{attention.length}</Badge>}
           </CardHeader>
-
-          <CardContent className="space-y-3">
-            {attentionItems.length === 0 ? (
-              <div className="py-10 text-center space-y-2">
-                <CheckCircle2 size={32} className="text-emerald-400 mx-auto" />
-                <p className="font-bold text-sm text-white">Todo al día</p>
-                <p className="text-xs text-zinc-500">
-                  No hay check-ins pendientes, mensajes sin responder ni clientes en riesgo actualmente.
-                </p>
-              </div>
-            ) : (
-              attentionItems.slice(0, 5).map(item => (
-                <Link key={item.id} href={item.link} className="block group">
-                  <div className="p-3.5 rounded-xl bg-zinc-950/50 border border-subtle/60 hover:border-primary/30 transition flex items-center gap-3">
-                    <div className="w-10 h-10 rounded-xl bg-surface-elevated border border-subtle flex items-center justify-center font-bold text-sm text-white shrink-0 group-hover:bg-primary group-hover:text-black transition">
-                      {item.title?.[0]?.toUpperCase() || "C"}
-                    </div>
-                    <div className="min-w-0 flex-1">
-                      <div className="flex items-center justify-between gap-2">
-                        <p className="font-bold text-sm text-white truncate group-hover:text-primary transition">
-                          {item.title}
-                        </p>
-                        <Badge
-                          variant={item.type === "CHECKIN" ? "warn" : item.type === "MESSAGE" ? "accent" : "muted"}
-                          className="text-[10px] shrink-0"
-                        >
-                          {item.badge}
-                        </Badge>
-                      </div>
-                      <p className="text-xs text-zinc-400 truncate mt-0.5">{item.subtitle}</p>
-                    </div>
-                  </div>
-                </Link>
-              ))
-            )}
-          </CardContent>
-        </Card>
-
-        {/* Actividad Reciente */}
-        <Card className="flex flex-col justify-between">
-          <CardHeader className="pb-3">
-            <CardTitle className="text-base flex items-center gap-2">
-              <Clock size={18} className="text-primary" /> Actividad Reciente
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-3 flex-1">
-            {workoutsToday.length === 0 ? (
-              <div className="py-8 text-center text-xs text-zinc-500 space-y-1">
-                <p className="font-bold text-zinc-400">Sin entrenamientos hoy aún</p>
-                <p>Las sesiones finalizadas hoy aparecerán aquí en tiempo real.</p>
-              </div>
+          <CardContent>
+            {attention.length === 0 ? (
+              <div className="py-10 text-center"><CheckCircle2 size={32} className="mx-auto text-emerald-400" /><p className="mt-2 font-bold text-white">Todo al día</p><p className="mt-1 text-sm text-zinc-500">No hay alertas pendientes en tu cartera.</p></div>
             ) : (
               <div className="space-y-2">
-                <span className="text-[10px] uppercase font-bold tracking-wider text-zinc-500 block">
-                  Entrenamientos de hoy:
-                </span>
-                {workoutsToday.slice(0, 4).map(w => (
-                  <div key={w.id} className="p-2.5 bg-zinc-950/50 rounded-xl border border-subtle/60 text-xs flex justify-between items-center">
-                    <div>
-                      <p className="font-bold text-white">{w.client?.name || "Cliente"}</p>
-                      <p className="text-[11px] text-zinc-500">
-                        {w.workout?.name || w.workoutName || "Sesión"}{w.durationMin ? ` (${w.durationMin} min)` : ""}
-                      </p>
-                    </div>
-                    <Badge variant="success" className="text-[10px]">Completado</Badge>
-                  </div>
+                {attention.map((item) => (
+                  <Link key={item.id} href={item.href} className="block rounded-xl border border-subtle/60 bg-zinc-950/50 p-3 transition hover:border-primary/30">
+                    <div className="flex items-center gap-3"><div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-surface-elevated text-sm font-bold text-white">{item.title.slice(0,1).toUpperCase()}</div><div className="min-w-0 flex-1"><div className="flex items-center justify-between gap-2"><p className="truncate text-sm font-bold text-white">{item.title}</p><Badge variant={item.variant} className="shrink-0 text-[10px]">{item.label}</Badge></div><p className="mt-0.5 truncate text-xs text-zinc-400">{item.subtitle}</p></div><ArrowRight size={15} className="shrink-0 text-zinc-600" /></div>
+                  </Link>
                 ))}
               </div>
             )}
+          </CardContent>
+        </Card>
 
-            {/* Quick stats: MRR */}
-            <div className="pt-3 border-t border-subtle space-y-2">
-              <div className="flex justify-between items-baseline text-xs">
-                <span className="text-zinc-400">Ingresos Activos (MRR) — {BRAND.name}</span>
-                <span className="font-black text-white text-sm">
-                  ${realMrr.toLocaleString("es-AR")} ARS
-                </span>
-              </div>
-              <div className="flex justify-between items-baseline text-xs">
-                <span className="text-zinc-400">Total Clientes en Plataforma</span>
-                <span className="font-bold text-white">{allClients.length}</span>
-              </div>
-            </div>
+        <Card>
+          <CardHeader><CardTitle className="flex items-center gap-2 text-base"><Clock size={18} className="text-primary" /> Resumen de negocio</CardTitle></CardHeader>
+          <CardContent className="space-y-5">
+            <div><div className="flex items-center justify-between text-xs"><span className="text-zinc-500">MRR registrado</span><span className="font-bold text-white">$ {mrr.toLocaleString("es-AR")}</span></div><Progress value={mrr > 0 ? 100 : 0} className="mt-2" /></div>
+            <div><div className="flex items-center justify-between text-xs"><span className="text-zinc-500">Clientes activos</span><span className="font-bold text-white">{activeClients.length}</span></div><Progress value={Math.min(100, activeClients.length * 10)} className="mt-2" /></div>
+            <Link href="/trainer/payments"><Button variant="outline" className="w-full">Ver pagos <ArrowRight size={15} className="ml-2" /></Button></Link>
           </CardContent>
         </Card>
       </div>
 
-      {/* Clientes Activos Recientes */}
-      <Card data-tour="clientes">
-        <CardHeader className="flex flex-row items-center justify-between pb-3">
-          <CardTitle className="text-base flex items-center gap-2">
-            <Users size={18} className="text-primary" /> Clientes Recientes
-          </CardTitle>
-          <Link href="/trainer/clients" className="text-xs text-primary hover:underline font-bold">
-            Ver listado completo ({allClients.length}) →
-          </Link>
-        </CardHeader>
+      <Card>
+        <CardHeader className="flex-row items-center justify-between space-y-0"><CardTitle className="text-base">Actividad de hoy</CardTitle><Link href="/trainer/clients" className="text-xs font-bold text-primary hover:underline">Ver cartera</Link></CardHeader>
         <CardContent>
-          {allClients.length === 0 ? (
-            <div className="py-8 text-center text-xs text-zinc-500">
-              No hay clientes registrados todavía. Presioná &quot;+ Nuevo Cliente&quot; para agregar el primero.
-            </div>
-          ) : (
-            <div className="grid sm:grid-cols-3 gap-3">
-              {allClients.slice(0, 3).map(c => (
-                <Tilt3DSubtle key={c.id}>
-                <Link
-                  href={`/trainer/clients/${c.id}`}
-                  className="block p-3.5 rounded-xl bg-zinc-950/50 border border-subtle/60 hover:border-primary/30 hover:shadow-[0_8px_24px_rgba(0,0,0,0.15)] transition-all group"
-                >
-                  <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 rounded-xl pill-active flex items-center justify-center font-black text-sm group-hover:bg-primary transition shrink-0">
-                      {c.name?.[0]?.toUpperCase() || "C"}
-                    </div>
-                    <div className="min-w-0 flex-1">
-                      <p className="text-sm font-bold text-white truncate group-hover:text-primary transition">
-                        {c.name}
-                      </p>
-                      <p className="text-xs text-zinc-500 truncate">{c.email}</p>
-                    </div>
-                  </div>
-                  <div className="flex gap-1.5 mt-3">
-                    <Badge variant={c.status === "ACTIVO" ? "success" : "muted"} className="text-[10px]">
-                      {c.status}
-                    </Badge>
-                    <Badge variant="muted" className="text-[10px]">
-                      {c.plan}
-                    </Badge>
-                  </div>
-                </Link>
-                </Tilt3DSubtle>
-              ))}
-            </div>
-          )}
+          {workoutsToday.length === 0 ? <div className="py-8 text-center text-sm text-zinc-500">Todavía no hay entrenamientos registrados hoy.</div> : <div className="grid gap-2 sm:grid-cols-2">{workoutsToday.slice(0, 8).map((workout) => <div key={workout.id} className="rounded-xl border border-subtle/60 bg-zinc-950/50 p-3"><p className="text-sm font-bold text-white">{workout.client?.name || "Cliente"}</p><p className="mt-1 text-xs text-zinc-500">{workout.workoutName || "Sesión"}{workout.durationMin ? ` · ${workout.durationMin} min` : ""}</p></div>)}</div>}
         </CardContent>
       </Card>
-
-      {/* Herramientas avanzadas → Studio (CRM, Risk, plataformas, negocio) */}
-      <Link href="/trainer/studio" className="block">
-        <Tilt3D max={4} scale={1.01} radiusClass="rounded-2xl">
-        <div className="bg-gradient-to-br from-violet-500/8 via-surface to-surface-elevated border border-violet-500/20 rounded-2xl p-4 flex items-center gap-3 hover:border-violet-500/40 hover:shadow-[0_8px_28px_rgba(139,92,246,0.12)] transition-all surface-card">
-          <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-violet-500 to-violet-600 flex items-center justify-center text-white shrink-0 shadow-[0_4px_14px_rgba(139,92,246,0.35)]"><Wrench size={18} /></div>
-          <div className="flex-1">
-            <p className="font-bold text-sm text-white">Studio — herramientas avanzadas →</p>
-            <p className="text-xs text-zinc-500">CRM y retención, programación masiva, kits de plataformas y negocio</p>
-          </div>
-        </div>
-        </Tilt3D>
-      </Link>
     </div>
   );
 }

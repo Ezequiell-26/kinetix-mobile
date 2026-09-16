@@ -5,56 +5,34 @@ import { getSession } from "@/lib/auth";
 import { assertTrainerOwnsClient } from "@/lib/authorization";
 import { paymentSchema } from "@/lib/validations";
 
-/**
- * API de Pagos - Sistema completo de gestión de pagos y suscripciones.
- * 
- * Características:
- * - Registro manual de pagos (efectivo, transferencia, etc.)
- * - Integración lista para Stripe y Mercado Pago
- * - Webhooks para actualización automática de estados
- * - Historial completo de pagos por cliente
- * - Control de vencimientos y renovaciones
- */
+const PAYMENT_STATUSES = new Set<PaymentStatus>(["PAGADO", "PENDIENTE", "VENCIDO"]);
+const DEFAULT_LIMIT = 100;
+const MAX_LIMIT = 200;
 
-// POST /api/payments - Registrar un nuevo pago
+function parseStatus(value: string | null): PaymentStatus | null {
+  return value && PAYMENT_STATUSES.has(value as PaymentStatus) ? value as PaymentStatus : null;
+}
+
+function parseLimit(value: string | null, fallback: number, max = MAX_LIMIT) {
+  const parsed = Number.parseInt(value || String(fallback), 10);
+  return Number.isFinite(parsed) ? Math.min(max, Math.max(1, parsed)) : fallback;
+}
+
 export async function POST(req: Request) {
   const session = await getSession();
-  if (!session) {
-    return NextResponse.json({ error: "No autenticado" }, { status: 401 });
-  }
-
-  // Solo TRAINERS pueden registrar pagos manualmente
-  if (session.role !== "TRAINER") {
-    return NextResponse.json({ error: "Solo trainers pueden registrar pagos" }, { status: 403 });
-  }
+  if (!session) return NextResponse.json({ error: "No autenticado" }, { status: 401 });
+  if (session.role !== "TRAINER") return NextResponse.json({ error: "Solo trainers pueden registrar pagos" }, { status: 403 });
 
   try {
     const body = await req.json();
-    
-    // Validar con schema Zod
     const parsed = paymentSchema.safeParse(body);
-    if (!parsed.success) {
-      return NextResponse.json({ error: parsed.error.errors[0]?.message || "Datos inválidos" }, { status: 400 });
-    }
+    if (!parsed.success) return NextResponse.json({ error: parsed.error.errors[0]?.message || "Datos inválidos" }, { status: 400 });
     const data = parsed.data;
+    if (!(await assertTrainerOwnsClient(session.id, data.clientId))) return NextResponse.json({ error: "Cliente no encontrado" }, { status: 404 });
 
-    // Verificar ownership del cliente
-    const ownsClient = await assertTrainerOwnsClient(session.id, data.clientId);
-    if (!ownsClient) {
-      return NextResponse.json({ error: "Cliente no encontrado" }, { status: 404 });
-    }
+    const client = await prisma.client.findUnique({ where: { id: data.clientId }, include: { subscription: true } });
+    if (!client) return NextResponse.json({ error: "Cliente no encontrado" }, { status: 404 });
 
-    // Obtener cliente para actualizar suscripción si es necesario
-    const client = await prisma.client.findUnique({
-      where: { id: data.clientId },
-      include: { subscription: true }
-    });
-
-    if (!client) {
-      return NextResponse.json({ error: "Cliente no encontrado" }, { status: 404 });
-    }
-
-    // Crear registro de pago
     const payment = await prisma.payment.create({
       data: {
         clientId: data.clientId,
@@ -65,129 +43,63 @@ export async function POST(req: Request) {
         method: data.method,
         description: data.description || `Pago de ${client.plan || "servicio"}`,
       },
-      include: {
-        client: {
-          select: {
-            id: true,
-            name: true,
-            email: true,
-            plan: true
-          }
-        }
-      }
+      include: { client: { select: { id: true, name: true, email: true, plan: true } } },
     });
 
-    // Si el pago está confirmado, actualizar suscripción
     if (data.status === "PAGADO" && client.subscription) {
       const nextPayment = new Date();
-      nextPayment.setDate(nextPayment.getDate() + 30); // Próximo pago en 30 días
-
-      await prisma.subscription.update({
-        where: { clientId: data.clientId },
-        data: {
-          status: "ACTIVA",
-          nextPayment,
-          price: data.amount
-        }
-      });
+      nextPayment.setDate(nextPayment.getDate() + 30);
+      await prisma.subscription.update({ where: { clientId: data.clientId }, data: { status: "ACTIVA", nextPayment, price: data.amount } });
     }
 
     return NextResponse.json(payment, { status: 201 });
   } catch (error) {
     console.error("[PAYMENTS] Error al crear pago:", error);
-    return NextResponse.json(
-      { error: "Error al registrar pago" },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: "Error al registrar pago" }, { status: 500 });
   }
 }
 
-// GET /api/payments - Obtener historial de pagos
 export async function GET(req: Request) {
   const session = await getSession();
-  if (!session) {
-    return NextResponse.json({ error: "No autenticado" }, { status: 401 });
-  }
+  if (!session) return NextResponse.json({ error: "No autenticado" }, { status: 401 });
 
   const url = new URL(req.url);
   const clientId = url.searchParams.get("clientId");
-  const status = url.searchParams.get("status") as "PAGADO" | "PENDIENTE" | "VENCIDO" | null;
+  const rawStatus = url.searchParams.get("status");
+  const limit = parseLimit(url.searchParams.get("limit"), DEFAULT_LIMIT);
+  if (rawStatus && !PAYMENT_STATUSES.has(rawStatus as PaymentStatus)) return NextResponse.json({ error: "Estado de pago inválido" }, { status: 400 });
+  const status = parseStatus(rawStatus);
 
   try {
-    let payments;
-
     if (session.role === "CLIENT") {
-      // Los clientes solo ven sus propios pagos
-      const client = await prisma.client.findFirst({
-        where: { OR: [{ userId: session.id }, { email: session.email }] }
-      });
-
-      if (!client) {
-        return NextResponse.json([]);
-      }
-
-      payments = await prisma.payment.findMany({
-        where: { clientId: client.id },
-        orderBy: { date: "desc" },
-        take: 50
-      });
-
+      const client = await prisma.client.findFirst({ where: { OR: [{ userId: session.id }, { email: session.email }] }, select: { id: true } });
+      if (!client) return NextResponse.json([]);
+      const payments = await prisma.payment.findMany({ where: { clientId: client.id, ...(status ? { status } : {}) }, orderBy: { date: "desc" }, take: Math.min(50, limit) });
       return NextResponse.json(payments);
     }
 
-    // TRAINER
+    if (session.role !== "TRAINER") return NextResponse.json({ error: "No autorizado" }, { status: 403 });
+
     if (clientId) {
-      // Verificar ownership
-      const ownsClient = await assertTrainerOwnsClient(session.id, clientId);
-      if (!ownsClient) {
-        return NextResponse.json({ error: "Cliente no encontrado" }, { status: 404 });
-      }
-
-      const whereClause: { clientId: string; status?: PaymentStatus } = { clientId };
-      if (status) whereClause.status = status;
-
-      payments = await prisma.payment.findMany({
-        where: whereClause,
+      if (!(await assertTrainerOwnsClient(session.id, clientId))) return NextResponse.json({ error: "Cliente no encontrado" }, { status: 404 });
+      const payments = await prisma.payment.findMany({
+        where: { clientId, ...(status ? { status } : {}) },
         orderBy: { date: "desc" },
-        take: 50,
-        include: {
-          client: {
-            select: {
-              name: true,
-              email: true
-            }
-          }
-        }
+        take: Math.min(100, limit),
+        include: { client: { select: { name: true, email: true } } },
       });
-
       return NextResponse.json(payments);
     }
 
-    // Todos los pagos recientes para el trainer
-    const whereClause: { status?: PaymentStatus } = {};
-    if (status) whereClause.status = status;
-
-    payments = await prisma.payment.findMany({
-      where: whereClause,
+    const payments = await prisma.payment.findMany({
+      where: { client: { trainerId: session.id }, ...(status ? { status } : {}) },
       orderBy: { date: "desc" },
-      take: 100,
-      include: {
-        client: {
-          select: {
-            name: true,
-            email: true,
-            plan: true
-          }
-        }
-      }
+      take: limit,
+      include: { client: { select: { name: true, email: true, plan: true } } },
     });
-
     return NextResponse.json(payments);
   } catch (error) {
     console.error("[PAYMENTS] Error al obtener pagos:", error);
-    return NextResponse.json(
-      { error: "Error al obtener pagos" },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: "Error al obtener pagos" }, { status: 500 });
   }
 }

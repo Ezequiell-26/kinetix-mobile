@@ -1,80 +1,22 @@
 "use client";
-import { useState, useMemo } from "react";
+
+import Link from "next/link";
+import { useEffect, useMemo, useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { AlertTriangle, TrendingUp, TrendingDown, Users, Clock, Flame, Target, ArrowRight, Mail } from "lucide-react";
+import { AlertTriangle, TrendingUp, Users, Clock, Flame, Target, Mail, Loader2 } from "lucide-react";
 
-type ClientRow = { id:string; name:string; goal:string; adherence:number; lastWorkoutDaysAgo:number; streak:number; volumeWeek:number; prs:number; checkinPending:boolean; };
+type ApiClient = { id: string; userId?: string | null; name: string; goal: string; status: string; assignedProgram?: { frequency?: number | null } | null };
+type ApiLog = { id: string; clientId?: string | null; date: string; sets?: Array<{ exerciseName?: string; weight?: number | null; reps?: number | null }> };
 
-const MOCK_CLIENTS: ClientRow[] = [
-  {id:"1", name:"Martín Fernández", goal:"Pérdida grasa", adherence:92, lastWorkoutDaysAgo:1, streak:7, volumeWeek:18500, prs:2, checkinPending:false},
-  {id:"2", name:"Lucas Gómez", goal:"Hipertrofia", adherence:78, lastWorkoutDaysAgo:4, streak:2, volumeWeek:14200, prs:0, checkinPending:true},
-  {id:"3", name:"Sofía Rodríguez", goal:"Fuerza", adherence:85, lastWorkoutDaysAgo:6, streak:0, volumeWeek:9800, prs:1, checkinPending:true},
-  {id:"4", name:"Valentina Díaz", goal:"Recomposición", adherence:95, lastWorkoutDaysAgo:0, streak:12, volumeWeek:22100, prs:3, checkinPending:false},
-];
+function daysAgo(date: string) { const value = new Date(date).getTime(); if (!Number.isFinite(value)) return 999; return Math.max(0, Math.floor((Date.now() - value) / 86_400_000)); }
+function computeStreak(dates: string[]) { const unique = [...new Set(dates.map((date) => new Date(date).toISOString().slice(0, 10)))].sort().reverse(); if (!unique.length) return 0; let streak = 0; let cursor = new Date(unique[0] + "T12:00:00"); for (const day of unique) { const current = new Date(day + "T12:00:00"); const diff = Math.round((cursor.getTime() - current.getTime()) / 86_400_000); if (diff > 1) break; streak += 1; cursor = current; } return streak; }
+function computePrs(logs: ApiLog[]) { const byExercise = new Map<string, { recent: number; previous: number }>(); for (const log of logs) { const age = daysAgo(log.date); for (const set of log.sets || []) { const weight = typeof set.weight === "number" && Number.isFinite(set.weight) ? set.weight : 0; if (!weight) continue; const exercise = String(set.exerciseName || "Ejercicio").toLowerCase(); const entry = byExercise.get(exercise) || { recent: 0, previous: 0 }; if (age <= 30) entry.recent = Math.max(entry.recent, weight); else if (age <= 60) entry.previous = Math.max(entry.previous, weight); byExercise.set(exercise, entry); } } let prs = 0; for (const value of byExercise.values()) if (value.recent > 0 && value.recent > value.previous) prs += 1; return prs; }
 
-// Inspirado en Lyftr progression + Simple analytics + OptiLifts + Twenty CRM MIT
-// Control total: quién avanza, quién se estanca, quién en riesgo
-export function TrainerControlCenter(){
-  const [filter,setFilter]=useState<"todos"|"riesgo"|"estancado"|"top">("todos");
-
-  const enriched = useMemo(()=>{
-    return MOCK_CLIENTS.map(c=>{
-      let status:"ok"|"riesgo"|"estancado"|"top" = "ok";
-      let reason="";
-      if(c.lastWorkoutDaysAgo>=5 || c.adherence<80){ status="riesgo"; reason=`${c.lastWorkoutDaysAgo}d sin entrenar • ${c.adherence}% adherencia`; }
-      else if(c.prs===0 && c.volumeWeek<12000){ status="estancado"; reason="Sin PRs + volumen bajo — posible meseta"; }
-      else if(c.adherence>=90 && c.streak>=7){ status="top"; reason=`Racha ${c.streak}d • ${c.volumeWeek.toLocaleString("es-AR")}kg`; }
-      return {...c, status, reason};
-    });
-  },[]);
-
-  const filtered = enriched.filter(c=> filter==="todos" || c.status===filter);
-  const counts = {
-    todos: enriched.length,
-    riesgo: enriched.filter(c=>c.status==="riesgo").length,
-    estancado: enriched.filter(c=>c.status==="estancado").length,
-    top: enriched.filter(c=>c.status==="top").length,
-  };
-
-  return (
-    <Card className="border-violet-500/20">
-      <CardHeader><CardTitle className="flex items-center gap-2"><Users size={18} className="text-violet-400"/> Control Total Clientes</CardTitle>
-        <div className="flex gap-1.5 overflow-x-auto pb-1">
-          {[
-            {id:"todos", label:`Todos (${counts.todos})`},
-            {id:"riesgo", label:`Riesgo (${counts.riesgo})`},
-            {id:"estancado", label:`Estancados (${counts.estancado})`},
-            {id:"top", label:`Top (${counts.top})`},
-          ].map(f=>(
-            <button key={f.id} onClick={()=>setFilter(f.id as typeof filter)} className={`px-3 py-1.5 rounded-full text-xs font-bold border whitespace-nowrap ${filter===f.id?"bg-primary text-black border-primary":"bg-zinc-900 text-zinc-400 border-zinc-800"}`}>{f.label}</button>
-          ))}
-        </div>
-      </CardHeader>
-      <CardContent className="space-y-3">
-        {filtered.map(c=>(
-          <div key={c.id} className={`p-3 rounded-xl border flex gap-3 items-center ${c.status==="riesgo"?"bg-red-500/10 border-red-500/20": c.status==="estancado"?"bg-amber-500/10 border-amber-500/20": c.status==="top"?"bg-emerald-500/10 border-emerald-500/20":"bg-zinc-900 border-zinc-800"}`}>
-            <div className={`w-10 h-10 rounded-xl flex items-center justify-center font-black text-sm shrink-0 ${c.status==="riesgo"?"bg-red-500 text-white": c.status==="estancado"?"bg-amber-500 text-white": c.status==="top"?"bg-emerald-500 text-white":"bg-zinc-800 text-zinc-400"}`}>
-              {c.name[0]}
-            </div>
-            <div className="flex-1 min-w-0">
-              <p className="font-bold text-sm flex items-center gap-1.5">{c.name} {c.status==="top" && <Flame size={12} className="text-orange-400"/>} {c.checkinPending && <Badge variant="warn" className="text-[10px]">Check-in</Badge>}</p>
-              <p className="text-xs text-zinc-500 truncate">{c.goal} • {c.reason}</p>
-              <div className="flex gap-2 mt-1 text-[11px]">
-                <span className="flex items-center gap-1"><Target size={10}/> {c.adherence}%</span>
-                <span className="flex items-center gap-1"><Clock size={10}/> {c.lastWorkoutDaysAgo===0?"Hoy": `${c.lastWorkoutDaysAgo}d`}</span>
-                <span className="flex items-center gap-1"><TrendingUp size={10}/> {c.volumeWeek.toLocaleString("es-AR")}kg</span>
-              </div>
-            </div>
-            <div className="flex flex-col gap-1">
-              <Button size="sm" variant={c.status==="riesgo"?"accent":"outline"} className="h-7 text-xs" onClick={()=>alert(`Mensaje a ${c.name}: ¿Cómo vas? Noté ${c.reason.toLowerCase()}`)}><Mail size={12} className="mr-1"/> Mensaje</Button>
-              <Button size="sm" variant="ghost" className="h-6 text-[11px]">Ver ficha →</Button>
-            </div>
-          </div>
-        ))}
-        {filtered.length===0 && <p className="text-xs text-center text-zinc-500 py-6">Ningún cliente en {filter}</p>}
-      </CardContent>
-    </Card>
-  );
+export function TrainerControlCenter() {
+  const [clients, setClients] = useState<ApiClient[]>([]); const [logs, setLogs] = useState<ApiLog[]>([]); const [loading, setLoading] = useState(true); const [error, setError] = useState<string | null>(null); const [filter, setFilter] = useState<"todos" | "riesgo" | "estancado" | "top">("todos");
+  useEffect(() => { let cancelled = false; async function load() { try { setLoading(true); setError(null); const [clientsResponse, logsResponse] = await Promise.all([fetch("/api/clients?limit=200", { cache: "no-store" }), fetch("/api/workout-logs", { cache: "no-store" })]); const [clientsPayload, logsPayload] = await Promise.all([clientsResponse.json(), logsResponse.json()]); if (!clientsResponse.ok) throw new Error(clientsPayload?.error || "No se pudieron cargar los clientes."); if (!logsResponse.ok) throw new Error(logsPayload?.error || "No se pudieron cargar los entrenamientos."); if (!cancelled) { const items = Array.isArray(clientsPayload) ? clientsPayload : Array.isArray(clientsPayload?.items) ? clientsPayload.items : []; setClients(items); setLogs(Array.isArray(logsPayload) ? logsPayload : []); } } catch (cause) { if (!cancelled) setError(cause instanceof Error ? cause.message : "No se pudo cargar el control de clientes."); } finally { if (!cancelled) setLoading(false); } } void load(); return () => { cancelled = true; }; }, []);
+  const enriched = useMemo(() => clients.map((client) => { const clientLogs = logs.filter((log) => log.clientId === client.id); const recent28 = clientLogs.filter((log) => daysAgo(log.date) <= 28); const frequency = Math.max(1, Number(client.assignedProgram?.frequency || 3)); const expected = frequency * 4; const adherence = Math.min(100, Math.round((recent28.length / expected) * 100)); const streak = computeStreak(clientLogs.map((log) => log.date)); const lastWorkoutDaysAgo = clientLogs.length ? Math.min(...clientLogs.map((log) => daysAgo(log.date))) : 999; const volumeWeek = clientLogs.filter((log) => daysAgo(log.date) <= 7).reduce((total, log) => total + (log.sets || []).reduce((sum, set) => sum + (Number(set.weight) || 0) * (Number(set.reps) || 0), 0), 0); const prs = computePrs(clientLogs); const status = lastWorkoutDaysAgo >= 5 || adherence < 50 ? "riesgo" : prs === 0 && adherence < 75 ? "estancado" : adherence >= 90 && streak >= 7 ? "top" : "ok"; const reason = status === "riesgo" ? `${lastWorkoutDaysAgo >= 999 ? "Sin entrenamientos" : `${lastWorkoutDaysAgo}d sin entrenar`} • ${adherence}% adherencia` : status === "estancado" ? "Sin PRs recientes + adherencia por debajo del objetivo" : status === "top" ? `Racha ${streak}d • ${Math.round(volumeWeek).toLocaleString("es-AR")}kg` : `${adherence}% adherencia`; return { ...client, adherence, lastWorkoutDaysAgo, streak, volumeWeek: Math.round(volumeWeek), prs, status, reason }; }), [clients, logs]);
+  const filtered = enriched.filter((client) => filter === "todos" || client.status === filter); const counts = { todos: enriched.length, riesgo: enriched.filter((client) => client.status === "riesgo").length, estancado: enriched.filter((client) => client.status === "estancado").length, top: enriched.filter((client) => client.status === "top").length };
+  return <Card className="border-primary/20 bg-[#0B151E]"><CardHeader><CardTitle className="flex items-center gap-2 text-white"><Users size={18} className="text-primary"/> Control de clientes</CardTitle><p className="text-xs text-[#8193A5]">Señales calculadas a partir de tus clientes y entrenamientos registrados.</p><div className="flex gap-1.5 overflow-x-auto pb-1 pt-1">{[{id:"todos",label:`Todos (${counts.todos})`},{id:"riesgo",label:`Atención (${counts.riesgo})`},{id:"estancado",label:`Estancados (${counts.estancado})`},{id:"top",label:`Racha (${counts.top})`}].map((item)=><button key={item.id} type="button" onClick={()=>setFilter(item.id as typeof filter)} className={`rounded-full border px-3 py-1.5 text-xs font-bold whitespace-nowrap transition ${filter===item.id?"border-primary bg-primary text-black":"border-white/[0.06] bg-white/[0.02] text-zinc-400 hover:text-white"}`}>{item.label}</button>)}</div></CardHeader><CardContent className="space-y-3">{loading&&<div className="flex items-center justify-center gap-2 py-8 text-xs text-[#8193A5]"><Loader2 size={15} className="animate-spin"/> Cargando datos reales...</div>}{error&&<div role="alert" className="flex items-start gap-2 rounded-xl border border-red-500/20 bg-red-500/5 p-3 text-xs text-red-200"><AlertTriangle size={15} className="mt-0.5 shrink-0"/>{error}</div>}{!loading&&!error&&filtered.map((client)=><div key={client.id} className={`flex items-center gap-3 rounded-xl border p-3 ${client.status==="riesgo"?"border-red-500/20 bg-red-500/5":client.status==="estancado"?"border-amber-500/20 bg-amber-500/5":client.status==="top"?"border-primary/20 bg-primary/5":"border-white/[0.06] bg-white/[0.02]"}`}><div className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-xl text-sm font-black ${client.status==="riesgo"?"bg-red-500 text-white":client.status==="estancado"?"bg-amber-500 text-white":client.status==="top"?"bg-primary text-black":"bg-white/[0.06] text-zinc-300"}`}>{client.name.charAt(0).toUpperCase()}</div><div className="min-w-0 flex-1"><p className="flex items-center gap-1.5 text-sm font-bold text-white">{client.name}{client.status==="top"&&<Flame size={12} className="text-primary"/>}</p><p className="truncate text-xs text-[#8193A5]">{client.goal} • {client.reason}</p><div className="mt-1 flex flex-wrap gap-2 text-[11px] text-zinc-500"><span className="flex items-center gap-1"><Target size={10}/> {client.adherence}%</span><span className="flex items-center gap-1"><Clock size={10}/> {client.lastWorkoutDaysAgo===999?"Nunca":client.lastWorkoutDaysAgo===0?"Hoy":`${client.lastWorkoutDaysAgo}d`}</span><span className="flex items-center gap-1"><TrendingUp size={10}/> {client.volumeWeek.toLocaleString("es-AR")}kg</span><span>{client.prs} PRs</span></div></div><div className="flex flex-col gap-1"><Link href={`/trainer/messages?with=${encodeURIComponent(client.userId || "")}`}><Button size="sm" variant={client.status==="riesgo"?"accent":"outline"} className="h-8 text-xs" disabled={!client.userId}><Mail size={12}/> Mensaje</Button></Link><Link href={`/trainer/clients/${client.id}`}><Button size="sm" variant="ghost" className="h-7 text-[11px]">Ver ficha →</Button></Link></div></div>)}{!loading&&!error&&filtered.length===0&&<p className="py-8 text-center text-xs text-[#8193A5]">No hay clientes en esta categoría.</p>}</CardContent></Card>;
 }

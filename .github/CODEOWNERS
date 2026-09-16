@@ -1,0 +1,15 @@
+# KinetixFitt code ownership
+# These owners are enforcement metadata when GitHub branch/ruleset settings use CODEOWNERS.
+# Repository owner reviews all high-risk changes by default.
+
+* @Ezequiell-26
+
+# High-risk systems
+/apps/mobile/src/app/api/ @Ezequiell-26
+/apps/mobile/prisma/ @Ezequiell-26
+/apps/mobile/src/lib/auth* @Ezequiell-26
+/apps/mobile/src/lib/*security* @Ezequiell-26
+/apps/mobile/src/app/api/payments/ @Ezequiell-26
+/apps/mobile/src/app/api/backups/ @Ezequiell-26
+.github/ @Ezequiell-26
+.ai/ @Ezequiell-26

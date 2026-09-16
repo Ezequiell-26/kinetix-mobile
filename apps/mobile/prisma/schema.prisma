@@ -1,21 +1,25 @@
 generator client {
   provider = "prisma-client-js"
 }
+
 datasource db {
   provider  = "postgresql"
   url       = env("DATABASE_URL")
   directUrl = env("DIRECT_URL")
 }
+
 enum Role {
   TRAINER
   CLIENT
 }
+
 enum ClientStatus {
   ACTIVO
   PAUSADO
   PENDIENTE
   FINALIZADO
 }
+
 enum Goal {
   PERDIDA_GRASA
   HIPERTROFIA
@@ -23,17 +27,20 @@ enum Goal {
   RECOMPOSICION
   OTRO
 }
+
 enum SubscriptionPlan {
   BASICO
   PERSONALIZADO
   PREMIUM
 }
+
 enum SubscriptionStatus {
   ACTIVA
   VENCIDA
   CANCELADA
   PENDIENTE
 }
+
 enum PaymentStatus {
   PAGADO
   PENDIENTE
@@ -53,6 +60,7 @@ model User {
   client    Client?
   trainerProfile TrainerProfile?
   trainerClients Client[] @relation("TrainerClients")
+  trainerPrograms Program[] @relation("TrainerPrograms")
   messagesSent Message[] @relation("Sent")
   messagesReceived Message[] @relation("Received")
   notifications Notification[]
@@ -64,7 +72,6 @@ model User {
   progressMeasurements ProgressMeasurement[]
   progressPhotos ProgressPhoto[]
 
-  @@index([email])
   @@index([role])
 }
 
@@ -99,8 +106,6 @@ model Client {
   id            String       @id @default(cuid())
   userId        String?      @unique
   user          User?        @relation(fields: [userId], references: [id], onDelete: SetNull)
-  // Ownership multi-trainer (P0): un trainer solo opera sus clientes.
-  // Los clientes existentes (trainerId null) los adopta el seed/QA.
   trainerId     String?
   trainer       User?        @relation("TrainerClients", fields: [trainerId], references: [id], onDelete: SetNull)
   name          String
@@ -109,7 +114,7 @@ model Client {
   goal          Goal         @default(HIPERTROFIA)
   status        ClientStatus @default(ACTIVO)
   plan          SubscriptionPlan @default(PERSONALIZADO)
-  startDate     DateTime     @default(now())
+  startDate     DateTime @default(now())
   nextReview    DateTime?
   notes         String?
   trainerNotes  String?
@@ -119,8 +124,8 @@ model Client {
   experience    String?
   availability  Int?
   equipment     String?
-  createdAt     DateTime @default(now())
-  updatedAt     DateTime @updatedAt
+  createdAt     DateTime     @default(now())
+  updatedAt     DateTime     @updatedAt
   assignedProgramId String?
   assignedProgram Program? @relation(fields: [assignedProgramId], references: [id], onDelete: SetNull)
   workoutLogs   WorkoutLog[]
@@ -129,7 +134,7 @@ model Client {
   progressMeasurements ProgressMeasurement[]
   progressPhotos ProgressPhoto[]
   subscription  Subscription?
-  payments    Payment[]
+  payments      Payment[]
 
   @@index([email])
   @@index([status])
@@ -157,6 +162,8 @@ model Exercise {
 
 model Program {
   id          String @id @default(cuid())
+  trainerId   String?
+  trainer     User? @relation("TrainerPrograms", fields: [trainerId], references: [id], onDelete: Cascade)
   name        String
   description String?
   durationWeeks Int @default(4)
@@ -166,6 +173,9 @@ model Program {
   phases      Phase[]
   weeks       ProgramWeek[]
   clients     Client[]
+
+  @@index([trainerId])
+  @@index([updatedAt])
 }
 
 model Phase {
@@ -188,6 +198,7 @@ model ProgramWeek {
   phase     Phase? @relation(fields: [phaseId], references: [id], onDelete: SetNull)
   weekNumber Int
   workouts  Workout[]
+
   @@unique([programId, weekNumber])
 }
 
@@ -231,8 +242,6 @@ model WorkoutLog {
   user       User? @relation(fields: [userId], references: [id], onDelete: SetNull)
   clientId   String?
   client     Client? @relation(fields: [clientId], references: [id], onDelete: SetNull)
-  // Opcional con SetNull: editar la estructura de un programa no borra el
-  // historial del atleta; workoutName preserva el nombre original de la sesión.
   workoutId  String?
   workout    Workout? @relation(fields: [workoutId], references: [id], onDelete: SetNull)
   workoutName String?
@@ -379,13 +388,25 @@ model Payment {
   method    String?
   date      DateTime @default(now())
   description String?
+  checkoutIdempotencyKey String? @unique
+  providerCheckoutId String?
+
   @@index([clientId])
+  @@index([date])
+  @@index([status])
+  @@index([providerCheckoutId])
 }
 
-// Recuperación de contraseña persistente (reemplaza el Map en memoria, que
-// se perdía en cada reinicio del server y no funcionaba con más de una
-// instancia). Se guarda un HASH del token (sha256), nunca el token en
-// texto plano, por si la base de datos se filtra alguna vez.
+model PaymentWebhookEvent {
+  id        String   @id @default(cuid())
+  provider  String
+  eventId   String   
+  createdAt DateTime @default(now())
+
+  @@unique([provider, eventId])
+  @@index([createdAt])
+}
+
 model PasswordResetToken {
   id        String   @id @default(cuid())
   email     String
@@ -415,30 +436,22 @@ model Session {
   @@index([revoked])
 }
 
-// Preferencias de notificaciones del usuario
 model NotificationPreference {
   id        String   @id @default(cuid())
   userId    String   @unique
   user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  
-  // Canales habilitados
   emailEnabled     Boolean @default(true)
   pushEnabled      Boolean @default(true)
   smsEnabled       Boolean @default(false)
   whatsappEnabled  Boolean @default(false)
-  
-  // Tipos de notificaciones
   workoutReminders    Boolean @default(true)
   nutritionTips       Boolean @default(true)
   progressUpdates     Boolean @default(true)
   messageNotifications Boolean @default(true)
   paymentReminders    Boolean @default(true)
-  
-  // Configuración de schedule
   timezone       String  @default("America/Argentina/Buenos_Aires")
-  quietStart     String  @default("22:00") // Hora de inicio de modo no molestar
-  quietEnd       String  @default("08:00") // Hora de fin de modo no molestar
-  
+  quietStart     String  @default("22:00")
+  quietEnd       String  @default("08:00")
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
@@ -457,4 +470,18 @@ model PushSubscription {
 
   @@index([userId])
   @@index([active])
+}
+
+model PrivateAsset {
+  id          String   @id @default(cuid())
+  userId      String
+  clientId    String?
+  type        String
+  filename    String   @unique
+  contentType String
+  sizeBytes   Int
+  createdAt   DateTime @default(now())
+
+  @@index([userId, type, createdAt])
+  @@index([clientId, type, createdAt])
 }

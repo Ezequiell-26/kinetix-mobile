@@ -1,67 +1,53 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
 import { hashPassword } from "@/lib/auth";
-import { validateResetToken, consumeResetToken } from "@/lib/password-reset-store";
+import { hashToken, validateResetToken } from "@/lib/password-reset-store";
 
-/**
- * Reset de contraseña con token válido.
- * 
- * Seguridad:
- * - Valida token contra DB (existencia, expiración, uso)
- * - Token one-time-use (se invalida después de usar)
- * - Password mínimo 6 caracteres
- * - No revela si el token es inválido vs email no existe
- */
-export async function POST(req: Request){
-  const { token, password } = await req.json().catch(()=>({}));
-  
-  // Validaciones básicas
-  if(!token || typeof token !== "string") {
-    return NextResponse.json({error:"Token requerido"},{status:400});
+function validPassword(value: unknown): value is string {
+  return typeof value === "string"
+    && value.length >= 8
+    && value.length <= 128
+    && /[A-Z]/.test(value)
+    && /[a-z]/.test(value)
+    && /[0-9]/.test(value);
+}
+
+export async function POST(req: Request) {
+  const body = await req.json().catch(() => null) as { token?: unknown; password?: unknown } | null;
+  const token = typeof body?.token === "string" ? body.token.trim() : "";
+  const password = body?.password;
+
+  if (!token || token.length > 128) {
+    return NextResponse.json({ error: "Token inválido" }, { status: 400 });
   }
-  if(!password || password.length < 6) {
-    return NextResponse.json({error:"Mínimo 6 caracteres"},{status:400});
+  if (!validPassword(password)) {
+    return NextResponse.json({ error: "La contraseña debe tener 8–128 caracteres, una mayúscula, una minúscula y un número" }, { status: 400 });
   }
 
   try {
-    // Validar token contra DB
     const email = await validateResetToken(token);
-    
-    if(!email) {
-      // Token inválido, expirado o ya usado
-      return NextResponse.json({error:"Token inválido o expirado"},{status:400});
-    }
+    if (!email) return NextResponse.json({ error: "Token inválido o expirado" }, { status: 400 });
 
-    // Buscar usuario
-    const user = await prisma.user.findUnique({where:{email}});
-    if(!user) {
-      return NextResponse.json({error:"Usuario no encontrado"},{status:404});
-    }
+    const user = await prisma.user.findUnique({ where: { email }, select: { id: true } });
+    if (!user) return NextResponse.json({ error: "Token inválido o expirado" }, { status: 400 });
 
-    // Hashear nueva contraseña
     const hashed = await hashPassword(password);
+    const consumed = await prisma.$transaction(async (tx) => {
+      const tokenResult = await tx.passwordResetToken.updateMany({
+        where: { token: hashToken(token), used: false, expiresAt: { gt: new Date() } },
+        data: { used: true },
+      });
+      if (tokenResult.count !== 1) return false;
 
-    // Actualizar password y marcar token como usado (transaccional)
-    await prisma.$transaction([
-      prisma.user.update({
-        where:{email},
-        data:{password: hashed}
-      }),
-      prisma.passwordResetToken.updateMany({
-        where:{token},
-        data:{used: true}
-      })
-    ]);
-
-    // Invalidar TODAS las sesiones del usuario (seguridad post-rotación)
-    await prisma.session.updateMany({
-      where:{userId: user.id},
-      data:{revoked: true}
+      await tx.user.update({ where: { id: user.id }, data: { password: hashed } });
+      await tx.session.updateMany({ where: { userId: user.id }, data: { revoked: true } });
+      return true;
     });
 
-    return NextResponse.json({ok:true, message:"Contraseña actualizada"});
+    if (!consumed) return NextResponse.json({ error: "Token inválido o expirado" }, { status: 400 });
+    return NextResponse.json({ ok: true, message: "Contraseña actualizada" });
   } catch (error) {
-    console.error("[RESET-PASSWORD] Error:", error);
-    return NextResponse.json({error:"Error al resetear contraseña"},{status:500});
+    console.error("[RESET-PASSWORD] request failed", error);
+    return NextResponse.json({ error: "Error al resetear contraseña" }, { status: 500 });
   }
 }
