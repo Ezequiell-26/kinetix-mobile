@@ -1,159 +1,155 @@
-# 🏋️ Kinetix - Unified Fitness Platform
+# KINETIXFITT
 
-**Monorepo** containing both the mobile app and web dashboard for Kinetix fitness coaching platform.
+Plataforma unificada de fitness para atletas y entrenadores, con aplicación web, aplicación móvil/PWA, backend API, IA, seguimiento de entrenamiento, pagos, notificaciones y herramientas de coaching.
 
-## 📁 Structure
+## Arquitectura actual
 
-```
-kinetix/
+```text
+kinetixFitt-mobile-and-web/
 ├── apps/
-│   ├── mobile/          # Next.js + Electron mobile app (Capacitor)
-│   └── web/             # Next.js web dashboard
+│   ├── web/            # Next.js — web pública + dashboard
+│   └── mobile/         # Next.js — aplicación dinámica + API + PWA + Capacitor + Electron
 ├── packages/
-│   ├── shared/          # Shared components, utilities, types
-│   └── config/          # Shared configuration (ESLint, Prettier, etc)
-├── docs/                # Documentation
-└── package.json         # Monorepo root configuration
+│   ├── shared/
+│   ├── ai-models/
+│   ├── core/
+│   └── native-modules/
+├── docs/
+├── scripts/
+└── package.json
 ```
 
-## 🚀 Quick Start
+`apps/web` y `apps/mobile` se despliegan como aplicaciones separadas. El proyecto web usa `vercel.json` en la raíz; el backend/app móvil tiene `apps/mobile/vercel.json` para un segundo proyecto Vercel apuntando al mismo repositorio.
 
-### Prerequisites
-- Node.js >= 18.0.0
-- npm >= 9.0.0
+## Requisitos
 
-### Installation
+- Node.js 22 recomendado (CI usa Node 22)
+- npm 10+ recomendado
+- PostgreSQL/Supabase para producción
+- Upstash Redis para rate limiting distribuido
+- Proveedor de email para transaccionales
+- Stripe y/o Mercado Pago para pagos
+- S3 compatible para assets/backups privados
+- Sentry/PostHog para observabilidad/analytics
+
+## Desarrollo
+
+Instalación del monorepo:
 
 ```bash
-# Install dependencies for all apps
-npm install
-
-# OR install specific app
-npm -w apps/mobile install
-npm -w apps/web install
+npm ci
+npm ci --prefix apps/web
 ```
 
-### Development
+Web:
 
 ```bash
-# Run mobile app (on separate terminal)
+npm run web:dev
+```
+
+Mobile/app dinámica:
+
+```bash
 npm run mobile
-
-# Run web dashboard (on separate terminal)
-npm run web
-
-# Run both
-npm run dev
 ```
 
-### Building
+Build web:
 
 ```bash
-# Build mobile app
-npm run mobile:build
-
-# Build web dashboard
 npm run web:build
+```
 
-# Build all
+Build mobile/backend:
+
+```bash
+npm run mobile:build
+```
+
+## Quality gates
+
+```bash
+npm run typecheck
+npm run lint
+npm run test
 npm run build
 ```
 
-## 📱 Apps Overview
-
-### Mobile App (`apps/mobile`)
-- **Framework**: Next.js 14 + React 18
-- **Desktop**: Electron (Windows/Mac/Linux)
-- **Mobile**: Capacitor (iOS/Android)
-- **Features**: Fitness coaching, workout tracking, AI coach, achievements
-- **Start**: `npm run mobile`
-- **More Info**: [Mobile README](./apps/mobile/README.md)
-
-### Web Dashboard (`apps/web`)
-- **Framework**: Next.js 14 + React 18
-- **Purpose**: Trainer dashboard & client management
-- **Features**: Analytics, client management, program creation, real-time stats
-- **Start**: `npm run web`
-- **More Info**: [Web README](./apps/web/README.md)
-
-## 📦 Shared Packages
-
-### `packages/shared`
-Shared components, utilities, types, and constants used by both apps
-
-### `packages/config`
-Shared configuration files (ESLint, Prettier, TypeScript base)
-
-## 🧪 Testing
+Para validación de producción de la aplicación móvil/backend:
 
 ```bash
-# Run tests for all apps
-npm run test
-
-# Run tests for specific app
-npm -w apps/mobile test
-npm -w apps/web test
+npm -w apps/mobile run verify:production
+npm -w apps/mobile run test:e2e
 ```
 
-## 📚 Documentation
+Las migraciones de producción se ejecutan con `prisma migrate deploy`; no se utiliza `prisma migrate dev` contra producción.
 
-See individual app READMEs:
-- [Mobile App README](./apps/mobile/README.md)
-- [Web Dashboard README](./apps/web/README.md)
+## Variables de entorno
 
-## � Important: Two Repos Unified Into One
+La referencia está en `apps/mobile/.env.example`. Nunca se deben commitear credenciales reales.
 
-**Background**: 
-- `apps/mobile/` = Originally `kinetix-mobile` repository
-- `apps/web/` = Originally `kinetix-web` repository  
-- **NOW**: Both are in single `kinetix-mobile` monorepo
+En producción son especialmente críticas:
 
-**This means**:
-- Changes to either app affect this single repository
-- Both apps share `package.json` (root) via npm workspaces
-- Opportunity to consolidate duplicated code into `packages/shared/`
+- `DATABASE_URL` y `DIRECT_URL`
+- `JWT_SECRET`
+- `UPSTASH_REDIS_REST_URL` / `UPSTASH_REDIS_REST_TOKEN`
+- claves de Stripe/Mercado Pago si están habilitados
+- credenciales S3
+- proveedor de email
+- Sentry/PostHog
+- `CAPACITOR_SERVER_URL` para builds nativos
 
-## 🔄 Workflow
+## Despliegue Vercel
 
-1. **Feature Development**: Create branch from `develop`
-2. **Testing**: Test both apps before merging
-3. **Consolidation**: Look for duplicate code to move to `packages/shared/`
-4. **Monorepo Awareness**: Ensure changes don't break other app
-5. **PR**: Create PR with both apps tested
-6. **Merge**: Merge to `develop`, then to `main` for releases
+### Web
 
-## 📝 Scripts
+Crear un proyecto Vercel con este repositorio y mantener la raíz del proyecto en el repositorio. El `vercel.json` raíz instala el lock de `apps/web` y ejecuta:
 
-| Script | Description |
-|--------|-------------|
-| `npm run dev` | Run all apps in dev mode |
-| `npm run build` | Build all apps |
-| `npm run test` | Run tests for all apps |
-| `npm run lint` | Lint all apps |
-| `npm run format` | Format code in all apps |
-| `npm run mobile` | Run only mobile app |
-| `npm run web` | Run only web dashboard |
-| `npm run mobile:build` | Build only mobile app |
-| `npm run web:build` | Build only web dashboard |
-| `npm run clean` | Clean all dependencies and build artifacts |
+```bash
+npm --prefix apps/web run build
+```
 
-## 🤝 Contributing
+### Mobile/backend/API
 
-1. Create feature branch: `git checkout -b feature/your-feature`
-2. Test both apps
-3. Commit changes: `git commit -m "feat: your feature"`
-4. Push and create PR
+Crear un segundo proyecto Vercel usando el mismo repositorio. Su configuración es `apps/mobile/vercel.json` y ejecuta:
 
-## 📄 License
+```bash
+npm run mobile:build
+```
 
-MIT License - See LICENSE file for details
+Este proyecto debe tener las variables privadas del backend. No se deben copiar secretos del backend al proyecto web si la web no los necesita.
 
-## 👥 Team
+## Native release
 
-- Ezequiel (Developer)
-- Contributors welcome!
+El workflow `.github/workflows/native.yml` sigue destinado a builds de distribución de escritorio y APK de prueba.
 
----
+Para Android de producción, `.github/workflows/android-release.yml` genera un AAB firmado. Requiere los secrets de GitHub:
 
-**Last Updated**: September 12, 2026
-**Monorepo Status**: Active Unification (Qwen Enhancement Phase)
+```text
+ANDROID_KEYSTORE_BASE64
+ANDROID_KEY_ALIAS
+ANDROID_KEYSTORE_PASSWORD
+ANDROID_KEY_PASSWORD
+```
+
+Para iOS, el build de App Store requiere un entorno macOS con certificados/provisioning profiles de Apple; se documenta en `docs/RELEASE_RUNBOOK.md`.
+
+## Producción: regla de lanzamiento
+
+El repositorio contiene infraestructura de producción, pero el lanzamiento no se considera verificado hasta que CI, staging, base de datos, dominios, credenciales, pagos, email, storage, observabilidad y pruebas E2E hayan sido comprobados con servicios reales.
+
+Consulta:
+
+- `PRODUCTION_READINESS.md`
+- `DEPLOYMENT_CHECKLIST.md`
+- `docs/RELEASE_RUNBOOK.md`
+- `.ai/PROJECT_REALITY.md`
+
+## Rama operativa
+
+`main` es la rama operativa para los cambios de lanzamiento solicitados en este proyecto. `develop` sigue existiendo en GitHub como rama de desarrollo histórica y no debe considerarse automáticamente equivalente a `main`.
+
+## Licencia
+
+MIT — ver `LICENSE`.
+
+**Actualizado:** 2026-09-16
