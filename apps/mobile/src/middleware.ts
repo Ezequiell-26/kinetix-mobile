@@ -5,6 +5,8 @@ import { getJwtSecret } from "@/lib/secret";
 import { checkRateLimit, RATE_LIMIT_PROFILES, getClientIp } from "@/lib/rate-limiter";
 
 const SECRET = getJwtSecret();
+const MUTATING_METHODS = new Set(["POST", "PUT", "PATCH", "DELETE"]);
+const WEBHOOK_PATHS = new Set(["/api/payments/webhook"]);
 
 function generateNonce(): string {
   const c = globalThis.crypto;
@@ -63,6 +65,32 @@ function rateLimitResponse(resetMs: number) {
   });
 }
 
+function getTrustedOrigins(req: NextRequest): Set<string> {
+  const origins = new Set<string>();
+  for (const candidate of [process.env.NEXT_PUBLIC_APP_URL, process.env.NEXT_PUBLIC_WEB_URL, process.env.WEB_URL]) {
+    if (!candidate) continue;
+    try { origins.add(new URL(candidate).origin); } catch { /* invalid optional config */ }
+  }
+  origins.add(req.nextUrl.origin);
+  return origins;
+}
+
+function csrfCheck(req: NextRequest): NextResponse | null {
+  if (!req.nextUrl.pathname.startsWith("/api/")) return null;
+  if (!MUTATING_METHODS.has(req.method)) return null;
+  if (WEBHOOK_PATHS.has(req.nextUrl.pathname)) return null;
+
+  const origin = req.headers.get("origin");
+  if (!origin) return null; // Native clients / same-process calls may omit Origin.
+  if (!getTrustedOrigins(req).has(origin)) {
+    return new NextResponse(JSON.stringify({ error: "Origin no permitido" }), {
+      status: 403,
+      headers: { "Content-Type": "application/json", "Cache-Control": "no-store" },
+    });
+  }
+  return null;
+}
+
 export async function middleware(req: NextRequest) {
   const path = req.nextUrl.pathname;
   let nonce: string;
@@ -76,6 +104,9 @@ export async function middleware(req: NextRequest) {
   requestHeaders.set("x-nonce", nonce);
   requestHeaders.set("x-csp-nonce", nonce);
   const ip = getClientIp(req);
+
+  const csrfResponse = csrfCheck(req);
+  if (csrfResponse) return applyCsp(csrfResponse, nonce);
 
   if (path.startsWith("/api/auth/login")) {
     const r = await checkRateLimit(ip, "auth", RATE_LIMIT_PROFILES.auth); if (!r.success) return applyCsp(rateLimitResponse(r.resetMs), nonce);
