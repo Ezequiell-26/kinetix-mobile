@@ -1,8 +1,6 @@
 import { NextResponse } from "next/server";
-import { z } from "zod";
 import { prisma } from "@/lib/db";
 import { hashPassword, createAuthSession, setAuthCookie } from "@/lib/auth";
-import { headers } from "next/headers";
 import { getClientIp } from "@/lib/rate-limiter";
 import { registerSchema } from "@/lib/validations";
 
@@ -66,9 +64,8 @@ export async function POST(req: Request) {
       });
     }
 
-    const h = await headers();
-    const userAgent = h.get("user-agent") || undefined;
-    const ipAddress = getClientIp({ headers: h, ip: "" });
+    const userAgent = req.headers.get("user-agent") || undefined;
+    const ipAddress = getClientIp({ headers: req.headers });
     const token = await createAuthSession(
       {
         id: user.id,
@@ -87,10 +84,6 @@ export async function POST(req: Request) {
     }
 
     // Nunca devolver mensajes internos de Prisma/infraestructura al cliente.
-    if (error instanceof z.ZodError) {
-      return NextResponse.json({ error: "Datos de registro inválidos" }, { status: 400 });
-    }
-
     console.error("[auth/register] request failed", error);
     return NextResponse.json({ error: "No se pudo completar el registro" }, { status: 500 });
   }
