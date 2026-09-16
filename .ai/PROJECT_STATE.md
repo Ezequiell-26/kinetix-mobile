@@ -19,7 +19,10 @@ For AI-driven continuous improvement, start with `.ai/AI_CONTROL_CENTER.md`, `.a
 The repository now contains a persistent operating layer intended to prevent regression and hallucinated completion claims:
 
 - `.ai/AI_CONTROL_CENTER.md` — first entry point for open-ended improvement/audit work.
-- `.ai/AI_ENGINEERING_SYSTEM.md` — preservation, evidence, anti-hallucination, risk, verification, and rollback rules.
+- `.ai/AI_ENGINEERING_SYSTEM.md` — preservation, evidence, anti-hallucination, risk, verification, rollback and performance rules.
+- `.ai/FEATURE_LEDGER.md` — canonical living ledger for important product capabilities and evidence.
+- `.ai/INTEGRATION_REGISTRY.md` — canonical registry for external APIs, SDKs, providers and repositories.
+- `.ai/PERFORMANCE_BASELINES.md` — canonical registry for cross-device performance baselines and regressions.
 - `scripts/ai-repo-audit.mjs` — dependency-free static repository inventory and risk-signal audit.
 - `npm run ai:audit` / `ai:audit:json` / `ai:audit:strict` — repeatable audit commands.
 - CI executes the strict static audit before dependency installation and the normal quality gates.
@@ -97,6 +100,12 @@ A state claim requires evidence from current code/tests/build/deployment/runtime
 
 `.ai/AI_ENGINEERING_SYSTEM.md` defines evidence levels and preservation/verification rules.
 
+`.ai/FEATURE_LEDGER.md` defines the feature evidence ledger.
+
+`.ai/INTEGRATION_REGISTRY.md` defines external dependency governance.
+
+`.ai/PERFORMANCE_BASELINES.md` defines measured performance tracking.
+
 `.ai/DEFINITION_OF_DONE.md` defines completion gates.
 
 `.ai/EXECUTION_PROTOCOL.md` defines the mandatory incremental change workflow.
@@ -166,6 +175,8 @@ Update this document after material changes to:
 - deployment
 - major product capabilities
 - AI governance or repository verification tooling
+- external integrations
+- performance baselines
 
 Use exact dates and verifiable statements.
 
