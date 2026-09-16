@@ -1,166 +1,211 @@
-# ✅ Checklist de Despliegue - Kinetix
+# KINETIXFITT — Deployment Checklist
 
-## Cambios Realizados (Commit: f47cbfc)
+**Fecha:** 2026-09-16  
+**Rama operativa:** `main`
 
-### 1. Error de Migración Corregido
-- **Problema**: La migración `20260914_push_notifications` referenciaba `users` en lugar de `"User"`
-- **Solución**: Corregido el nombre de la tabla en el SQL
-- **Archivo**: `apps/mobile/prisma/migrations/20260914_push_notifications/migration.sql`
+Este documento es un checklist operativo. Marcar una casilla solo después de comprobarla en el entorno correspondiente.
 
-### 2. CI Mejorado con Manejo de Errores
-- **Problema**: Las migraciones fallaban sin recuperación en CI
-- **Solución**: Añadido fallback con `migrate reset` automático
-- **Archivo**: `.github/workflows/ci.yml`
+## 1. Código y CI
 
-### 3. Vercel Configuración Optimizada
-- **Mejoras**:
-  - GitHub integration habilitada
-  - Auto job cancelation activado
-  - Funciones API con maxDuration: 60s
-- **Archivo**: `vercel.json`
+- [ ] CI de `main` en verde.
+- [ ] `npm ci` termina sin modificar locks.
+- [ ] `npm run typecheck` sin errores.
+- [ ] `npm run lint` sin errores bloqueantes.
+- [ ] `npm run test` en verde.
+- [ ] `npm run web:build` en verde.
+- [ ] `npm run mobile:build` en verde.
+- [ ] `npm -w apps/mobile run verify:production` en verde con variables reales de staging.
+- [ ] `npm -w apps/mobile run test:e2e` ejecutado contra staging.
 
----
+## 2. Vercel — Web
 
-## 📋 Pasos para Completar el Deploy
+Crear un proyecto Vercel para la web usando este repositorio.
 
-### 1. Configurar Variables de Entorno en Vercel
-
-Ve al dashboard de Vercel → Project Settings → Environment Variables y añade:
+El `vercel.json` raíz debe ejecutar:
 
 ```bash
-# Base de datos
-DATABASE_URL=postgresql://user:pass@host:5432/kinetix_prod
-DIRECT_URL=postgresql://user:pass@host:5432/kinetix_prod
-
-# Supabase
-SUPABASE_URL=https://tu-proyecto.supabase.co
-SUPABASE_ANON_KEY=tu_anon_key
-SUPABASE_SERVICE_ROLE_KEY=tu_service_role_key
-
-# Stripe
-STRIPE_SECRET_KEY=sk_live_...
-NEXT_PUBLIC_STRIPE_PUBLIC_KEY=pk_live_...
-STRIPE_WEBHOOK_SECRET=whsec_...
-
-# Mercado Pago
-MERCADO_PAGO_ACCESS_TOKEN=APP_USR-...
-NEXT_PUBLIC_MERCADO_PAGO_PUBLIC_KEY=APP_USR-...
-MERCADO_PAGO_WEBHOOK_SECRET=...
-
-# PostHog (Analytics)
-NEXT_PUBLIC_POSTHOG_KEY=phc_...
-NEXT_PUBLIC_POSTHOG_HOST=https://app.posthog.com
-
-# App URL
-NEXT_PUBLIC_APP_URL=https://tudominio.com
+npm install && npm --prefix apps/web ci
+npm --prefix apps/web run build
 ```
 
-### 2. Ejecutar Migraciones en Producción
+Variables mínimas de la web:
+
+```text
+NEXT_PUBLIC_APP_URL
+NEXT_PUBLIC_POSTHOG_KEY
+NEXT_PUBLIC_POSTHOG_HOST
+```
+
+Agregar solo las claves públicas de pagos que realmente consuma el frontend.
+
+## 3. Vercel — App/API
+
+Crear un segundo proyecto Vercel para el mismo repositorio, usando la configuración `apps/mobile/vercel.json`.
+
+Build:
 
 ```bash
-# Conecta a tu DB de producción y ejecuta:
-npx prisma migrate deploy --schema apps/mobile/prisma/schema.prisma
+npm ci
+npm run mobile:build
 ```
 
-### 3. Configurar Webhooks
+Variables privadas mínimas:
 
-#### Stripe Webhook
-- URL: `https://tudominio.com/api/stripe/webhook`
-- Eventos: `payment_intent.succeeded`, `customer.subscription.*`, `checkout.session.completed`
-- Secret: Copia de `STRIPE_WEBHOOK_SECRET` en Vercel
-
-#### Mercado Pago Webhook
-- URL: `https://tudominio.com/api/mercadopago/webhook`
-- Secret: Copia de `MERCADO_PAGO_WEBHOOK_SECRET` en Vercel
-
-### 4. Configurar Dominio en Vercel
-
-1. Ve a Project Settings → Domains
-2. Añade tu dominio (ej: `kinetix.app`)
-3. Configura DNS según instrucciones de Vercel
-4. SSL se configura automáticamente
-
-### 5. Push a GitHub
-
-```bash
-# Añade tu remote (reemplaza con tu repo)
-git remote add origin https://github.com/tu-usuario/kinetix.git
-
-# Push a main para trigger deploy
-git checkout main
-git merge qwen-code-28fbf0ed-5e41-4971-b2ef-cb460e0d7d87
-git push origin main
+```text
+DATABASE_URL
+DIRECT_URL
+JWT_SECRET
+TRUST_PROXY_HEADERS
+UPSTASH_REDIS_REST_URL
+UPSTASH_REDIS_REST_TOKEN
 ```
 
-### 6. Verificar Deploy en Vercel
+Y, según funcionalidades activadas:
 
-1. El deploy comenzará automáticamente
-2. Monitorea logs en Vercel Dashboard
-3. Verifica que las migraciones se apliquen correctamente
-
----
-
-## 🧪 Testing Post-Deploy
-
-### Endpoints Críticos
-- [ ] `GET /api/health` - Health check
-- [ ] `POST /api/auth/login` - Login funciona
-- [ ] `POST /api/stripe/webhook` - Webhook Stripe responde 200
-- [ ] `POST /api/mercadopago/webhook` - Webhook MP responde 200
-
-### Flujos de Usuario
-- [ ] Registro de nuevo usuario
-- [ ] Creación de cliente
-- [ ] Asignación de programa
-- [ ] Checkout de suscripción
-- [ ] Recepción de notificaciones push
-
-### Performance
-- [ ] LCP < 2.5s
-- [ ] FID < 100ms
-- [ ] CLS < 0.1
-
----
-
-## 🚀 Comandos Útiles
-
-```bash
-# Check de migraciones pendientes
-npx prisma migrate status --schema apps/mobile/prisma/schema.prisma
-
-# Reset de DB local (desarrollo)
-npx prisma migrate reset --schema apps/mobile/prisma/schema.prisma
-
-# Seed de datos
-npm run db:seed -w apps/mobile
-
-# Build de producción
-npm run build -w apps/mobile
-
-# Typecheck
-npm run typecheck -w apps/mobile
+```text
+STRIPE_SECRET_KEY
+STRIPE_WEBHOOK_SECRET
+MP_ACCESS_TOKEN
+MP_WEBHOOK_SECRET
+RESEND_API_KEY
+EMAIL_FROM
+AWS_ACCESS_KEY_ID
+AWS_SECRET_ACCESS_KEY
+ASSETS_S3_BUCKET
+BACKUP_S3_BUCKET
+SENTRY_DSN
 ```
 
----
+## 4. URLs y nativo
 
-## ⚠️ Troubleshooting
+- [ ] `NEXT_PUBLIC_APP_URL` apunta a la URL web real.
+- [ ] `NEXT_PUBLIC_WEB_URL` apunta a la URL web real.
+- [ ] `API_URL` apunta al proyecto Vercel de app/API.
+- [ ] `CAPACITOR_SERVER_URL` apunta a la URL pública de la app Next.js que debe cargar Capacitor.
+- [ ] No existe ningún preview URL hardcodeado en configuración nativa.
 
-### Error: "relation users does not exist"
-✅ Ya corregido en este commit. Si persiste, verifica que:
-- Las migraciones anteriores se aplicaron correctamente
-- El schema de Prisma coincide con las migraciones
+## 5. PostgreSQL
 
-### Error: "Database URL not found"
-- Verifica variables de entorno en Vercel
-- Asegúrate de que DATABASE_URL y DIRECT_URL estén configuradas
+- [ ] Base de datos de producción creada.
+- [ ] `DATABASE_URL` usa pooler/runtime si corresponde.
+- [ ] `DIRECT_URL` usa conexión directa.
+- [ ] `npx prisma migrate deploy --schema apps/mobile/prisma/schema.prisma` ejecutado.
+- [ ] Índices críticos verificados.
+- [ ] Pool/conexiones máximas revisados.
+- [ ] Backup automático activo.
+- [ ] Restauración de prueba completada.
 
-### Webhooks no funcionan
-- Verifica que los secrets coincidan exactamente
-- Usa herramientas como stripe listen para testing local
-- Revisa logs de Vercel para errores
+## 6. Autenticación y seguridad
 
----
+- [ ] `JWT_SECRET` es aleatorio, exclusivo de producción y no está en Git.
+- [ ] `TRUST_PROXY_HEADERS=true` solo cuando el proxy sobrescribe headers de cliente.
+- [ ] Redis/Upstash operativo.
+- [ ] Login, registro, forgot-password, reset-password y logout probados.
+- [ ] Ownership/IDOR probado con al menos un trainer y dos clientes distintos.
+- [ ] Upload/download probado con usuario autorizado y no autorizado.
+- [ ] CSP/security headers comprobados.
+- [ ] No existen secretos expuestos en historial, logs o respuestas públicas.
 
-**Estado**: ✅ Listo para deploy
-**Última actualización**: 2025-01-15
-**Commit**: f47cbfc
+## 7. Pagos
+
+Webhook único del backend:
+
+```text
+POST https://<API_DOMAIN>/api/payments/webhook
+```
+
+- [ ] Stripe live conectado.
+- [ ] Firma Stripe verificada.
+- [ ] Mercado Pago conectado si se habilita.
+- [ ] Firma Mercado Pago verificada.
+- [ ] Idempotencia probada.
+- [ ] Checkout y estado final de suscripción probados.
+- [ ] Reintentos de webhook no duplican pagos.
+
+## 8. Email y notificaciones
+
+- [ ] Dominio de envío verificado.
+- [ ] Recuperación de contraseña entrega el correo real.
+- [ ] Sentry recibe eventos de error.
+- [ ] Push subscription registrada correctamente.
+- [ ] Entrega push real comprobada en dispositivo.
+
+## 9. PWA / Android / iOS / Desktop
+
+### PWA
+
+- [ ] Instalación probada en Android.
+- [ ] Instalación probada en iOS.
+- [ ] Manifest, icons, service worker y offline behavior comprobados.
+
+### Android
+
+El workflow `.github/workflows/android-release.yml` genera un AAB firmado. Configurar estos secrets:
+
+```text
+ANDROID_KEYSTORE_BASE64
+ANDROID_KEY_ALIAS
+ANDROID_KEYSTORE_PASSWORD
+ANDROID_KEY_PASSWORD
+```
+
+- [ ] AAB generado.
+- [ ] Firma verificada.
+- [ ] Package id `com.kinetixfitt.app` coincide con Play Console.
+- [ ] Release interno probado en dispositivo real.
+- [ ] Play Console listing, privacy URL y Data Safety completados.
+
+### iOS
+
+- [ ] Apple Developer configurado.
+- [ ] Bundle identifier `com.kinetixfitt.app` registrado.
+- [ ] Certificates/provisioning profiles configurados.
+- [ ] Archive/IPA generado en macOS.
+- [ ] TestFlight probado en dispositivo real.
+- [ ] App Store privacy information completada.
+
+### Desktop
+
+- [ ] Windows EXE probado.
+- [ ] macOS DMG probado.
+- [ ] Code signing/notarization configurados antes de distribución pública.
+
+## 10. Dominio y SEO
+
+- [ ] DNS configurado.
+- [ ] HTTPS activo.
+- [ ] `/robots.txt` comprobado.
+- [ ] `/sitemap.xml` comprobado.
+- [ ] OpenGraph/Twitter cards comprobados.
+- [ ] Favicon y manifest correctos.
+- [ ] Canonicals e idioma comprobados.
+
+## 11. Observabilidad y rollback
+
+- [ ] Alertas de errores 5xx.
+- [ ] Alertas de base de datos.
+- [ ] Alertas de pagos/webhooks.
+- [ ] Health endpoint monitorizado: `GET /api/health`.
+- [ ] Procedimiento de rollback probado.
+- [ ] Backup y restore probados antes del lanzamiento.
+
+## 12. Go / No-Go
+
+### GO
+
+Solo cuando todos los bloques anteriores tengan evidencia y no existan fallos críticos abiertos.
+
+### NO-GO
+
+Detener el lanzamiento si falla cualquiera de estas condiciones:
+
+- CI/build roto.
+- Migraciones no reproducibles.
+- Autenticación/ownership no verificados.
+- Pagos sin firma/idempotencia verificadas.
+- Backups sin restore probado.
+- Secretos sin gestión segura.
+- Dominio/HTTPS roto.
+- E2E crítico roto.
+
+**Estado actual del repositorio:** preparado para completar estos gates; este archivo no certifica que servicios externos o credenciales reales estén configurados.
