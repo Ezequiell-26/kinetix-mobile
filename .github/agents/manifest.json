@@ -1,0 +1,26 @@
+{
+  "version": 1,
+  "agents": [
+    { "id": "repo-architect", "risk": "architecture", "file": "repo-architect.md" },
+    { "id": "security-guardian", "risk": "security", "file": "security-guardian.md" },
+    { "id": "reliability-engineer", "risk": "reliability", "file": "reliability-engineer.md" },
+    { "id": "performance-engineer", "risk": "performance", "file": "performance-engineer.md" },
+    { "id": "ux-product-engineer", "risk": "ux", "file": "ux-product-engineer.md" },
+    { "id": "ai-systems-engineer", "risk": "ai", "file": "ai-systems-engineer.md" },
+    { "id": "mobile-platform-engineer", "risk": "mobile", "file": "mobile-platform-engineer.md" },
+    { "id": "test-engineer", "risk": "testing", "file": "test-engineer.md" },
+    { "id": "release-engineer", "risk": "release", "file": "release-engineer.md" },
+    { "id": "code-reviewer", "risk": "independent-review", "file": "code-reviewer.md" }
+  ],
+  "routing": {
+    "release-blocked": ["release-engineer", "security-guardian"],
+    "auth-or-ownership": ["security-guardian", "test-engineer"],
+    "api-failure": ["reliability-engineer", "test-engineer"],
+    "ai-provider": ["ai-systems-engineer", "security-guardian"],
+    "slow-render-or-bundle": ["performance-engineer", "ux-product-engineer"],
+    "pwa-native": ["mobile-platform-engineer", "reliability-engineer"],
+    "architecture": ["repo-architect", "test-engineer"],
+    "visual-ux": ["ux-product-engineer", "performance-engineer"],
+    "independent-review": ["code-reviewer"]
+  }
+}
