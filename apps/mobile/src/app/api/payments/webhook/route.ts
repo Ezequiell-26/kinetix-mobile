@@ -71,8 +71,6 @@ async function settlePayment(input: {
     },
   });
 
-  // Solo el primer paso pendiente -> pagado puede renovar el período.
-  // Esto evita doble extensión cuando Stripe emite dos eventos para el mismo cobro.
   if (updated.count > 0 && input.status === "PAGADO" && input.clientId) {
     const subscription = await prisma.subscription.findUnique({ where: { clientId: input.clientId } });
     if (subscription) {
@@ -92,6 +90,13 @@ async function settlePayment(input: {
   return updated.count > 0;
 }
 
+function subscriptionStatus(status: string) {
+  if (status === "active" || status === "trialing") return "ACTIVA" as const;
+  if (status === "canceled") return "CANCELADA" as const;
+  if (status === "past_due" || status === "unpaid" || status === "incomplete_expired") return "VENCIDA" as const;
+  return "PENDIENTE" as const;
+}
+
 export async function POST(req: Request) {
   try {
     const body = await req.text();
@@ -100,7 +105,9 @@ export async function POST(req: Request) {
     const mpSignature = req.headers.get("x-signature");
 
     if (stripeSignature) {
-      if (!process.env.STRIPE_SECRET_KEY || !process.env.STRIPE_WEBHOOK_SECRET) return NextResponse.json({ error: "Stripe no configurado" }, { status: 500 });
+      if (!process.env.STRIPE_SECRET_KEY || !process.env.STRIPE_WEBHOOK_SECRET) {
+        return NextResponse.json({ error: "Stripe no configurado" }, { status: 500 });
+      }
       const Stripe = (await import("stripe")).default;
       const stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
       let event: import("stripe").default.Event;
@@ -111,13 +118,14 @@ export async function POST(req: Request) {
       }
 
       if (await isClaimed("stripe", event.id)) return NextResponse.json({ received: true, duplicate: true });
-      const payload = event.data.object as unknown as Record<string, any>;
+      const payload = event.data.object as unknown as Record<string, unknown>;
+      const metadata = payload.metadata && typeof payload.metadata === "object" ? payload.metadata as Record<string, unknown> : {};
       switch (event.type) {
         case "checkout.session.completed":
         case "checkout.session.async_payment_succeeded":
           await settlePayment({
-            paymentId: typeof payload.metadata?.paymentId === "string" ? payload.metadata.paymentId : null,
-            clientId: typeof payload.metadata?.clientId === "string" ? payload.metadata.clientId : null,
+            paymentId: typeof metadata.paymentId === "string" ? metadata.paymentId : null,
+            clientId: typeof metadata.clientId === "string" ? metadata.clientId : null,
             status: "PAGADO",
             method: "STRIPE",
             externalDescription: `Pago vía Stripe · ${event.id}`,
@@ -126,8 +134,8 @@ export async function POST(req: Request) {
           break;
         case "payment_intent.succeeded":
           await settlePayment({
-            paymentId: typeof payload.metadata?.paymentId === "string" ? payload.metadata.paymentId : null,
-            clientId: typeof payload.metadata?.clientId === "string" ? payload.metadata.clientId : null,
+            paymentId: typeof metadata.paymentId === "string" ? metadata.paymentId : null,
+            clientId: typeof metadata.clientId === "string" ? metadata.clientId : null,
             status: "PAGADO",
             method: "STRIPE",
             externalDescription: `PaymentIntent · ${event.id}`,
@@ -136,8 +144,8 @@ export async function POST(req: Request) {
           break;
         case "payment_intent.payment_failed":
           await settlePayment({
-            paymentId: typeof payload.metadata?.paymentId === "string" ? payload.metadata.paymentId : null,
-            clientId: typeof payload.metadata?.clientId === "string" ? payload.metadata.clientId : null,
+            paymentId: typeof metadata.paymentId === "string" ? metadata.paymentId : null,
+            clientId: typeof metadata.clientId === "string" ? metadata.clientId : null,
             status: "VENCIDO",
             method: "STRIPE",
             externalDescription: `Pago rechazado · ${event.id}`,
@@ -145,7 +153,7 @@ export async function POST(req: Request) {
           break;
         case "customer.subscription.updated":
         case "customer.subscription.deleted": {
-          const clientId = typeof payload.metadata?.clientId === "string" ? payload.metadata.clientId : null;
+          const clientId = typeof metadata.clientId === "string" ? metadata.clientId : null;
           if (clientId) {
             await prisma.subscription.updateMany({
               where: { clientId },
@@ -168,9 +176,9 @@ export async function POST(req: Request) {
       if (!MP_WEBHOOK_SECRET) return NextResponse.json({ error: "Mercado Pago no configurado" }, { status: 500 });
       const dataId = url.searchParams.get("data.id") || url.searchParams.get("data_id");
       if (!verifyMpSignature(req, dataId, MP_WEBHOOK_SECRET)) return NextResponse.json({ error: "Invalid MP signature" }, { status: 401 });
-      let data: Record<string, any>;
+      let data: Record<string, unknown>;
       try {
-        data = JSON.parse(body);
+        data = JSON.parse(body) as Record<string, unknown>;
       } catch {
         return NextResponse.json({ error: "Invalid JSON" }, { status: 400 });
       }
@@ -182,7 +190,7 @@ export async function POST(req: Request) {
           cache: "no-store",
         });
         if (!response.ok) return NextResponse.json({ error: "No se pudo verificar el pago con Mercado Pago" }, { status: 502 });
-        const payment = await response.json() as Record<string, any>;
+        const payment = await response.json() as Record<string, unknown>;
         const externalReference = typeof payment.external_reference === "string" ? payment.external_reference : null;
         const status = payment.status === "approved" ? "PAGADO" : payment.status === "pending" || payment.status === "in_process" ? "PENDIENTE" : "VENCIDO";
         await settlePayment({
@@ -197,20 +205,13 @@ export async function POST(req: Request) {
       return NextResponse.json({ received: true });
     }
 
-    return NextResponse.json({ received: true });
+    return NextResponse.json({ error: "Missing webhook signature" }, { status: 401 });
   } catch (error) {
     console.error("[WEBHOOK] processing failed", error);
     return NextResponse.json({ error: "Webhook processing failed" }, { status: 500 });
   }
 }
 
-function subscriptionStatus(status: string) {
-  if (status === "active" || status === "trialing") return "ACTIVA" as const;
-  if (status === "canceled") return "CANCELADA" as const;
-  if (status === "past_due" || status === "unpaid" || status === "incomplete_expired") return "VENCIDA" as const;
-  return "PENDIENTE" as const;
-}
-
 export async function GET() {
-  return NextResponse.json({ status: "ok", providers: ["stripe", "mercadopago"] });
+  return NextResponse.json({ error: "Method not allowed" }, { status: 405, headers: { Allow: "POST" } });
 }
