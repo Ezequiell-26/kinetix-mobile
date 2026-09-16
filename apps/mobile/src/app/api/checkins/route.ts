@@ -24,7 +24,6 @@ export async function GET(req: Request){
     return NextResponse.json(checkins);
   }
 
-  // Trainer global: aislamiento por cartera, nunca todos los clientes del sistema.
   const checkins=await prisma.checkIn.findMany({where:{client:{trainerId:s.id}},include:{client:true,user:true},orderBy:{date:"desc"},take:50});
   return NextResponse.json(checkins);
 }
@@ -47,7 +46,6 @@ export async function POST(req:Request){
 
   const checkin=await prisma.checkIn.create({data:{userId:s.id,clientId,energia:body.energia?fin(body.energia):null,sueno:body.sueno?fin(body.sueno):null,estres:body.estres?fin(body.estres):null,entrenos:body.entrenos?fin(body.entrenos):null,rendimiento:body.rendimiento?fin(body.rendimiento):null,molestias:body.molestias||null,alimentacion:body.alimentacion||null,progreso:body.progreso?fin(body.progreso):null,comentario:body.comentario||null,fotos:body.fotos||null,reviewed:false}});
 
-  // El destinatario se resuelve desde la relación del cliente, nunca desde el primer trainer global.
   if(clientId){
     const owner=await prisma.client.findUnique({where:{id:clientId},select:{trainerId:true}});
     if(owner?.trainerId){
@@ -77,5 +75,8 @@ export async function PATCH(req:Request){
       await prisma.notification.create({data:{userId:clientUserId,title:"Tu coach respondió tu check-in",body:String(trainerReply).slice(0,80),type:"checkin_reply",link:"/client/checkins"}}).catch(()=>{});
     }
     return NextResponse.json(updated);
-  }catch(error:unknown){return NextResponse.json({error:error instanceof Error?error.message:"Error al actualizar check-in"},{status:500});}
+  }catch(error:unknown){
+    console.error("[checkins PATCH] failed", error);
+    return NextResponse.json({error:"No se pudo actualizar el check-in"},{status:500});
+  }
 }
