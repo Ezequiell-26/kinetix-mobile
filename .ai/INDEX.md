@@ -1,8 +1,30 @@
 # KinetixFitt — AI Governance Index
 
-**Version:** 3.0.0  
+**Version:** 3.1.0  
 **Status:** Mandatory navigation map  
-**Last updated:** 2026-09-15
+**Last updated:** 2026-09-16
+
+## Start every AI session here
+
+When an agent is asked to continue, improve, fix, finish, refactor, or audit the project, read:
+
+1. `../AGENTS.md`
+2. `.ai/AI_CONTROL_CENTER.md`
+3. `.ai/AI_ENGINEERING_SYSTEM.md`
+4. `.ai/PROJECT_STATE.md`
+5. `.ai/DEFINITION_OF_DONE.md`
+6. the relevant contract(s)
+7. relevant ADRs
+8. the actual source/tests/config/schema/workflows affected by the task
+
+Before changing code, run:
+
+```bash
+npm run ai:audit
+npm run ai:audit:json
+```
+
+The audit creates fresh static evidence. It does not prove runtime/provider/device/deployment behavior.
 
 ## Authority order
 
@@ -18,14 +40,13 @@ When documents disagree, use this order:
 
 If a conflict affects security, data, production behavior, or architecture, stop and resolve it through an ADR before taking a risky action.
 
-## Read before every task
+## Core AI safety documents
 
-- `../AGENTS.md`
-- `.ai/INDEX.md`
-- `.ai/PROJECT_STATE.md`
-- `.ai/DEFINITION_OF_DONE.md`
-- the contract(s) relevant to the task
-- relevant ADRs
+- `AI_CONTROL_CENTER.md` — entry point for continuous improvement and anti-regression behavior.
+- `AI_ENGINEERING_SYSTEM.md` — persistent operating rules, evidence levels, preservation protocol, change budget, and completion truth.
+- `PROJECT_STATE.md` — evidence-based current-state context.
+- `DEFINITION_OF_DONE.md` — completion gates.
+- `EXECUTION_PROTOCOL.md` — incremental change workflow.
 
 ## Contracts by area
 
@@ -62,6 +83,9 @@ If a conflict affects security, data, production behavior, or architecture, stop
 
 ## Task routing
 
+### Continuous improvement / audit
+Read AGENTS → AI_CONTROL_CENTER → AI_ENGINEERING_SYSTEM → run audit → inspect current state → prioritize by risk → change one risk cluster → verify → re-audit.
+
 ### Feature
 Read AGENTS → architecture → project state → relevant contracts → DoD → affected code/tests.
 
@@ -95,6 +119,7 @@ packages/    Shared/domain/infrastructure packages
 docs/        General documentation
 .github/     CI/CD and repository automation
 infra/       Infrastructure configuration where present
+scripts/     Repository verification and automation
 ```
 
 The actual repository structure always wins over this illustrative map.
