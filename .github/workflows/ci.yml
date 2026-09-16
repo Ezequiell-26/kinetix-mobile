@@ -41,14 +41,14 @@ jobs:
     steps:
       - uses: actions/checkout@v5
 
-      - name: AI repository static guard
-        run: npm run ai:audit:strict
-
       - uses: actions/setup-node@v5
         with:
           node-version: 22
           cache: npm
           cache-dependency-path: package-lock.json
+
+      - name: AI repository static guard
+        run: npm run ai:audit:strict
 
       - name: Install raíz (lock reproducible)
         run: npm ci
