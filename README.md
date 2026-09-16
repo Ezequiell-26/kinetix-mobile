@@ -41,27 +41,34 @@ npm ci
 npm ci --prefix apps/web
 ```
 
-Web:
+Ejecutar ambas aplicaciones:
 
 ```bash
-npm run web:dev
+npm run dev
 ```
 
-Mobile/app dinámica:
+Solo web:
+
+```bash
+npm run web
+```
+
+Solo mobile/app dinámica:
 
 ```bash
 npm run mobile
 ```
 
-Build web:
+Build completo:
+
+```bash
+npm run build
+```
+
+Build individual:
 
 ```bash
 npm run web:build
-```
-
-Build mobile/backend:
-
-```bash
 npm run mobile:build
 ```
 
@@ -85,13 +92,14 @@ Las migraciones de producción se ejecutan con `prisma migrate deploy`; no se ut
 
 ## Variables de entorno
 
-La referencia está en `apps/mobile/.env.example`. Nunca se deben commitear credenciales reales.
+La referencia principal está en `apps/mobile/.env.example`; el root también incluye un ejemplo mínimo. Nunca se deben commitear credenciales reales.
 
 En producción son especialmente críticas:
 
 - `DATABASE_URL` y `DIRECT_URL`
 - `JWT_SECRET`
 - `UPSTASH_REDIS_REST_URL` / `UPSTASH_REDIS_REST_TOKEN`
+- `KINETIX_INTERNAL_API_SECRET` y `BACKUP_ADMIN_USER_IDS` cuando esos servicios estén habilitados
 - claves de Stripe/Mercado Pago si están habilitados
 - credenciales S3
 - proveedor de email
@@ -102,7 +110,7 @@ En producción son especialmente críticas:
 
 ### Web
 
-Crear un proyecto Vercel con este repositorio y mantener la raíz del proyecto en el repositorio. El `vercel.json` raíz instala el lock de `apps/web` y ejecuta:
+Crear un proyecto Vercel con este repositorio y mantener la raíz del proyecto en el repositorio. El `vercel.json` raíz instala las dependencias de `apps/web` y ejecuta:
 
 ```bash
 npm --prefix apps/web run build
@@ -122,14 +130,7 @@ Este proyecto debe tener las variables privadas del backend. No se deben copiar 
 
 El workflow `.github/workflows/native.yml` sigue destinado a builds de distribución de escritorio y APK de prueba.
 
-Para Android de producción, `.github/workflows/android-release.yml` genera un AAB firmado. Requiere los secrets de GitHub:
-
-```text
-ANDROID_KEYSTORE_BASE64
-ANDROID_KEY_ALIAS
-ANDROID_KEYSTORE_PASSWORD
-ANDROID_KEY_PASSWORD
-```
+Para Android de producción, `.github/workflows/android-release.yml` genera un AAB firmado. Requiere los secrets de GitHub correspondientes al keystore y firma.
 
 Para iOS, el build de App Store requiere un entorno macOS con certificados/provisioning profiles de Apple; se documenta en `docs/RELEASE_RUNBOOK.md`.
 
