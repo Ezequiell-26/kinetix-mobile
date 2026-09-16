@@ -1,12 +1,12 @@
 "use client";
-import { useSearchParams } from "next/navigation";
+import { useSearchParams, useRouter } from "next/navigation";
 import { useSessionUserKey, useUserPrefs } from "@/lib/user-prefs";
-import { Suspense, useState } from "react";
+import { Suspense, useEffect, useState } from "react";
 import Link from "next/link";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { FadeIn, StaggerContainer, StaggerItem } from "@/components/ui-premium";
-import { Gamepad2, HeartPulse, Footprints, BarChart3, Users, BookOpen, Settings2, Star, type LucideIcon } from "lucide-react";
+import { StaggerContainer, StaggerItem } from "@/components/ui-premium";
+import { Gamepad2, HeartPulse, Footprints, BarChart3, Users, BookOpen, Settings2, Star } from "lucide-react";
 import { HabiticaGamify } from "@/components/habitica-gamify";
 import { HabitStore } from "@/components/habit-store";
 import { HabitCalendar } from "@/components/habit-calendar";
@@ -114,15 +114,28 @@ const CATEGORIES = [
 
 function ToolsContent() {
   const params = useSearchParams();
+  const router = useRouter();
   const catParam = params.get("cat");
   const [active, setActive] = useState<string>(
     catParam && CATEGORIES.some(c => c.id === catParam) ? catParam : CATEGORIES[0].id
   );
-  const cat = CATEGORIES.find(c => c.id === active) ?? CATEGORIES[0];
 
-  // Favoritos + recientes por usuario (apuntan a la ubicación canónica)
+  // Keep the selected tab in sync with deep-links and browser back/forward.
+  useEffect(() => {
+    if (catParam && CATEGORIES.some(c => c.id === catParam)) {
+      setActive(catParam);
+    }
+  }, [catParam]);
+
+  const cat = CATEGORIES.find(c => c.id === active) ?? CATEGORIES[0];
   const userKey = useSessionUserKey();
-  const { favs, recent, isFav, toggleFav, pushRecent } = useUserPrefs(userKey);
+  const { recent, isFav, toggleFav, pushRecent } = useUserPrefs(userKey);
+
+  const selectCategory = (id: string, label: string) => {
+    setActive(id);
+    pushRecent({ href: `/client/tools?cat=${id}`, label });
+    router.replace(`/client/tools?cat=${id}`, { scroll: false });
+  };
 
   return (
     <div className="space-y-4">
@@ -131,21 +144,17 @@ function ToolsContent() {
         <p className="text-sm text-zinc-500">Todo lo que la app puede hacer, ordenado por categoría.</p>
       </div>
 
-      {/* Chips de categoría: una fila scrolleable, jerarquía clara */}
       <div className="flex gap-1.5 overflow-x-auto pb-1" role="tablist" aria-label="Categorías de herramientas">
         {CATEGORIES.map(c => {
           const fav = isFav(`/client/tools?cat=${c.id}`);
-          const select = () => { setActive(c.id); pushRecent({ href: `/client/tools?cat=${c.id}`, label: c.label }); };
           return (
-            // div con role="tab": un <button> dentro de otro <button> es HTML inválido
-            // y provoca error de hidratación. Así la estrella sigue siendo un botón real.
             <div
               key={c.id}
               role="tab"
               tabIndex={0}
               aria-selected={active === c.id}
-              onClick={select}
-              onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); select(); } }}
+              onClick={() => selectCategory(c.id, c.label)}
+              onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); selectCategory(c.id, c.label); } }}
               className={`cursor-pointer px-3 py-2 rounded-full text-xs font-bold border whitespace-nowrap transition ${
                 active === c.id
                   ? "bg-primary text-black border-primary"
@@ -179,7 +188,7 @@ function ToolsContent() {
               <div className="flex flex-wrap items-center gap-1.5">
                 <span className="text-[10px] font-bold tracking-widest text-zinc-500 uppercase mr-1 flex items-center gap-1"><Star size={10} className="fill-primary text-primary" /> Favoritos</span>
                 {favCats.map(c => (
-                  <button key={c.id} onClick={() => setActive(c.id)} className="px-2.5 py-1 rounded-full bg-zinc-950 border border-primary/30 text-[11px] font-bold text-zinc-200 hover:border-primary/60 transition">
+                  <button key={c.id} onClick={() => selectCategory(c.id, c.label)} className="px-2.5 py-1 rounded-full bg-zinc-950 border border-primary/30 text-[11px] font-bold text-zinc-200 hover:border-primary/60 transition">
                     <c.icon size={11} className="inline mr-1 -mt-0.5 text-primary" />{c.label}
                   </button>
                 ))}
@@ -221,7 +230,7 @@ function ToolsContent() {
 
 export default function ToolsPage() {
   return (
-    <Suspense fallback={<div className="py-12 text-center text-xs text-zinc-500">Cargando herramientas…</div>}>
+    <Suspense fallback={<div className="py-12 text-center text-xs text-zinc-500" role="status" aria-live="polite">Cargando herramientas…</div>}>
       <ToolsContent />
     </Suspense>
   );
