@@ -1,18 +1,15 @@
 import { NextResponse } from "next/server";
 import { readFile } from "fs/promises";
-import { join, extname } from "path";
+import { join, extname, resolve } from "path";
 import { getSession, type JWTPayload } from "@/lib/auth";
 import { prisma } from "@/lib/db";
 import { assertTrainerOwnsClient } from "@/lib/authorization";
+import { isUploadType, getUploadDir } from "@/lib/security";
 
 /**
- * Lectura autenticada de archivos subidos.
- *
- * Antes los archivos vivían en `public/uploads/` y se servían como estáticos:
- * cualquiera con la URL podía leerlos sin sesión (las fotos de progreso
- * marcadas `isPrivate` eran, en la práctica, públicas). Ahora el archivo vive
- * fuera de `public/` y solo se entrega si hay sesión y el usuario tiene
- * derecho sobre ese recurso.
+ * Lectura autenticada de archivos subidos — handler unificado PR3.
+ * Directorio canónico storage/uploads (igual que POST y serve).
+ * Tipos estrictos via @/lib/security (sin svg, sin document/genérico).
  */
 
 const MIME: Record<string, string> = {
@@ -33,31 +30,35 @@ export async function GET(
   if (!s) return new NextResponse("No autorizado", { status: 401 });
 
   const { path } = await params;
-  const type = path[0];
+  const typeRaw = path[0];
   const filename = path.slice(1).join("/");
 
-  // Validación: tipo conocido y sin traversal.
-  if (!type || !filename) return new NextResponse("Solicitud inválida", { status: 400 });
-  if (!["progress", "checkin", "message"].includes(type)) {
-    return new NextResponse("No encontrado", { status: 404 });
-  }
+  if (!typeRaw || !filename) return new NextResponse("Solicitud inválida", { status: 400 });
+  if (!isUploadType(typeRaw)) return new NextResponse("No encontrado", { status: 404 });
+  const type = typeRaw;
   if (filename.includes("..") || filename.includes("/") || filename.includes("\\")) {
+    return new NextResponse("Solicitud inválida", { status: 400 });
+  }
+  if (filename.replace(/[^a-zA-Z0-9._-]/g, "") !== filename) {
     return new NextResponse("Solicitud inválida", { status: 400 });
   }
 
   const requestedUrl = `/api/uploads/${type}/${filename}`;
   const allowed = await canAccess(s, type, requestedUrl);
-  // 404 (no 403) para no revelar la existencia del archivo.
   if (!allowed) return new NextResponse("No encontrado", { status: 404 });
 
   try {
-    const filepath = join(process.cwd(), "uploads", type, filename);
+    const uploadDir = getUploadDir(type);
+    const baseResolved = resolve(uploadDir);
+    const filepath = resolve(join(uploadDir, filename));
+    if (!filepath.startsWith(baseResolved + "/") && filepath !== baseResolved) {
+      return new NextResponse("Solicitud inválida", { status: 400 });
+    }
     const buf = await readFile(filepath);
     const mime = MIME[extname(filename).toLowerCase()] || "application/octet-stream";
     return new NextResponse(new Uint8Array(buf), {
       headers: {
         "Content-Type": mime,
-        // Contenido privado: nunca cachear en proxies/CDN.
         "Cache-Control": "private, max-age=0, no-store",
         "X-Content-Type-Options": "nosniff",
       },
@@ -68,72 +69,89 @@ export async function GET(
 }
 
 async function canAccess(s: JWTPayload, type: string, url: string): Promise<boolean> {
-  // El trainer solo puede acceder a archivos de sus propios clientes
+  const filename = url.split("/").pop() || "";
   if (s.role === "TRAINER") {
-    // Extraer clientId del archivo y verificar ownership
     if (type === "progress") {
       const photo = await prisma.progressPhoto.findFirst({
-        where: { url },
+        where: { OR: [{ url }, { url: { contains: filename } }] },
         select: { clientId: true },
       });
       if (!photo) return false;
       if (!photo.clientId) return false;
       return assertTrainerOwnsClient(s.id, photo.clientId);
     }
-
     if (type === "checkin") {
       const checkin = await prisma.checkIn.findFirst({
-        where: { fotos: { contains: url } },
+        where: { OR: [{ fotos: { contains: url } }, { fotos: { contains: filename } }] },
         select: { clientId: true },
       });
       if (!checkin) return false;
       if (!checkin.clientId) return false;
       return assertTrainerOwnsClient(s.id, checkin.clientId);
     }
-
     if (type === "message") {
       const msg = await prisma.message.findFirst({
-        where: { image: url },
+        where: { OR: [{ image: url }, { image: { contains: filename } }] },
         select: { senderId: true, receiverId: true },
       });
       if (!msg) return false;
       return msg.senderId === s.id || msg.receiverId === s.id;
     }
-
+    if (type === "avatar") return true;
     return false;
   }
 
-  // CLIENT solo puede ver sus propios archivos
   const client = await prisma.client.findFirst({
     where: { OR: [{ userId: s.id }, { email: s.email }] },
     select: { id: true },
   });
 
-  if (!client) return false;
+  if (!client) {
+    if (type === "message") {
+      const msg = await prisma.message.findFirst({
+        where: {
+          image: { contains: filename },
+          OR: [{ senderId: s.id }, { receiverId: s.id }],
+        },
+        select: { id: true },
+      });
+      return !!msg;
+    }
+    if (type === "avatar") return true;
+    return false;
+  }
 
   if (type === "progress") {
-    const photo = await prisma.progressPhoto.findFirst({
+    const p1 = await prisma.progressPhoto.findFirst({
       where: { url, clientId: client.id },
       select: { id: true },
     });
-    return !!photo;
+    if (p1) return true;
+    const p2 = await prisma.progressPhoto.findFirst({
+      where: { url: { contains: filename }, clientId: client.id },
+      select: { id: true },
+    });
+    return !!p2;
   }
-
   if (type === "checkin") {
-    const checkin = await prisma.checkIn.findFirst({
+    const c1 = await prisma.checkIn.findFirst({
       where: { fotos: { contains: url }, clientId: client.id },
       select: { id: true },
     });
-    return !!checkin;
-  }
-
-  if (type === "message") {
-    const msg = await prisma.message.findFirst({
-      where: { image: url, OR: [{ senderId: s.id }, { receiverId: s.id }] },
+    if (c1) return true;
+    const c2 = await prisma.checkIn.findFirst({
+      where: { fotos: { contains: filename }, clientId: client.id },
       select: { id: true },
     });
-    return !!msg;
+    return !!c2;
   }
-
+  if (type === "message") {
+    const m = await prisma.message.findFirst({
+      where: { image: { contains: filename }, OR: [{ senderId: s.id }, { receiverId: s.id }] },
+      select: { id: true },
+    });
+    return !!m;
+  }
+  if (type === "avatar") return true;
   return false;
 }

@@ -27,7 +27,7 @@ import {
   Settings,
   Sparkles,
 } from "lucide-react";
-import { trackOnboardingStarted, trackOnboardingStep, trackOnboardingCompleted, capture } from "@/lib/posthog";
+import { trackOnboardingStarted, trackOnboardingStep, trackOnboardingFunnelStep, trackOnboardingCompleted, capture } from "@/lib/posthog";
 
 interface OnboardingWizardProps {
   onComplete: (data: OnboardingData) => void;
@@ -45,8 +45,15 @@ export function OnboardingWizard({ onComplete }: OnboardingWizardProps) {
   const progress = getOnboardingProgress(data);
   const isLastStep = currentStepIndex === steps.length - 1;
 
-  useEffect(()=>{ trackOnboardingStarted({ source: "onboarding_wizard", total_steps: steps.length }); }, []);
-  useEffect(()=>{ if(currentStep) trackOnboardingStep(currentStepIndex + 1, { step_id: currentStep.id, step_title: currentStep.titleES }); }, [currentStepIndex]);
+  useEffect(()=>{ trackOnboardingStarted({ source: "onboarding_wizard", total_steps: steps.length, funnel: "onboarding_main" }); }, []);
+  useEffect(()=>{
+    if(currentStep) {
+      trackOnboardingStep(currentStepIndex + 1, { step_id: currentStep.id, step_title: currentStep.titleES, funnel: "onboarding_main" });
+      if (currentStepIndex < 4) {
+        trackOnboardingFunnelStep((currentStepIndex + 1) as 1|2|3|4, { step_id: currentStep.id, wizard_step: currentStepIndex + 1 });
+      }
+    }
+  }, [currentStepIndex]);
 
   const updateData = (updates: Partial<OnboardingData>) => {
     setData((prev) => ({ ...prev, ...updates }));
@@ -54,20 +61,20 @@ export function OnboardingWizard({ onComplete }: OnboardingWizardProps) {
 
   const nextStep = () => {
     if (isLastStep) {
-      trackOnboardingCompleted({ ...data, total_steps: steps.length, source: "onboarding_wizard" } as any);
+      trackOnboardingCompleted({ ...data, total_steps: steps.length, source: "onboarding_wizard", funnel: "onboarding_main" } as any);
       setShowConfetti(true);
       setTimeout(() => {
         onComplete({ ...data, completedAt: new Date() });
       }, 2000);
     } else {
-      capture("onboarding_next", { from_step: currentStepIndex + 1, to_step: currentStepIndex + 2, step_id: currentStep.id } as any);
+      capture("onboarding_next", { from_step: currentStepIndex + 1, to_step: currentStepIndex + 2, step_id: currentStep.id, funnel: "onboarding_main" } as any);
       setCurrentStepIndex((prev) => prev + 1);
     }
   };
 
   const prevStep = () => {
     if (currentStepIndex > 0) {
-      capture("onboarding_back", { from_step: currentStepIndex + 1, to_step: currentStepIndex } as any);
+      capture("onboarding_back", { from_step: currentStepIndex + 1, to_step: currentStepIndex, funnel: "onboarding_main" } as any);
       setCurrentStepIndex((prev) => prev - 1);
     }
   };

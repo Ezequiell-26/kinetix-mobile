@@ -201,7 +201,7 @@ interface Particle {
 }
 
 // ============================================
-| ✨ EFECTOS DE BRILLO Y GRADIENTES
+// ✨ EFECTOS DE BRILLO Y GRADIENTES
 // ============================================
 
 export class GlowEffect {
@@ -272,7 +272,7 @@ export class GlowEffect {
 }
 
 // ============================================
-| 🌊 EFECTO DE ONDA/RIPPLE
+// 🌊 EFECTO DE ONDA/RIPPLE
 // ============================================
 
 export class RippleEffect {
@@ -326,7 +326,7 @@ export class RippleEffect {
 }
 
 // ============================================
-| 🎭 EFECTO PARALLAX 3D
+// 🎭 EFECTO PARALLAX 3D
 // ============================================
 
 export class Parallax3D {
@@ -394,7 +394,7 @@ export class Parallax3D {
 }
 
 // ============================================
-| 🌈 GENERADOR DE GRADIENTES ANIMADOS
+// 🌈 GENERADOR DE GRADIENTES ANIMADOS
 // ============================================
 
 export class AnimatedGradient {
@@ -457,7 +457,7 @@ export class AnimatedGradient {
 }
 
 // ============================================
-| 💫 EFECTO DE TEXTO BRILLANTE
+// 💫 EFECTO DE TEXTO BRILLANTE
 // ============================================
 
 export class ShinyTextEffect {
@@ -523,7 +523,7 @@ export class ShinyTextEffect {
 }
 
 // ============================================
-| 🎯 HOOKS DE REACT PARA EFECTOS
+// 🎯 HOOKS DE REACT PARA EFECTOS
 // ============================================
 
 export function useParticleSystem(
@@ -585,7 +585,7 @@ export function useParallax3D(elementRef: React.RefObject<HTMLElement>, intensit
 }
 
 // ============================================
-| 🚀 CLASE PRINCIPAL DE EFECTOS
+// 🚀 CLASE PRINCIPAL DE EFECTOS
 // ============================================
 
 export class VisualEffectsEngine {

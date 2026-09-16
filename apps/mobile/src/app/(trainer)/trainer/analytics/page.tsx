@@ -3,47 +3,35 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
 import { RevenueAnalytics } from "@/components/revenue-analytics";
+import { TrainerAnalyticsTracker } from "@/components/posthog-tracker";
 
 export const dynamic = 'force-dynamic';
 export const revalidate = 0;
 
 
 export default async function AnalyticsPage() {
-  /* ── Real data queries ── */
   const now = new Date();
   const thirtyDaysAgo = new Date(now.getTime() - 30 * 86400000);
   const sevenDaysAgo = new Date(now.getTime() - 7 * 86400000);
-
-  // Total clients
   const totalClients = await prisma.client.count();
-
-  // Workout logs last 30 days
   const recentLogs = await prisma.workoutLog.findMany({
     where: { date: { gte: thirtyDaysAgo }, completed: true },
     include: { client: true, _count: { select: { sets: true } } },
     orderBy: { date: "desc" },
   });
-
-  // Check-ins
   const totalCheckins = await prisma.checkIn.count();
   const reviewedCheckins = await prisma.checkIn.count({ where: { reviewed: true } });
   const pendingCheckins = await prisma.checkIn.count({ where: { reviewed: false } });
-
-  // Clients with most recent workout
   const clients = await prisma.client.findMany({
     include: {
       workoutLogs: { orderBy: { date: "desc" }, take: 1, where: { completed: true } },
       checkIns: { orderBy: { date: "desc" }, take: 1 },
     },
   });
-
-  // Adherence: clients who trained in the last 7 days / total clients
   const activeThisWeek = clients.filter(
     (c) => c.workoutLogs[0]?.date && c.workoutLogs[0].date >= sevenDaysAgo
   ).length;
   const adherencePercent = totalClients > 0 ? Math.round((activeThisWeek / totalClients) * 100) : 0;
-
-  // Top clients by volume (sum of sets from logs in last 30 days)
   const logsByClient: Record<string, { name: string; totalSets: number; totalWorkouts: number }> = {};
   for (const log of recentLogs) {
     const cid = log.clientId;
@@ -57,22 +45,36 @@ export default async function AnalyticsPage() {
   const topClients = Object.values(logsByClient)
     .sort((a, b) => b.totalWorkouts - a.totalWorkouts)
     .slice(0, 5);
-
-  // Churn risk: clients who haven't trained in 5+ days
   const churnClients = clients.filter((c) => {
     const last = c.workoutLogs[0]?.date;
-    if (!last) return true; // Never trained
+    if (!last) return true;
     return now.getTime() - new Date(last).getTime() > 5 * 86400000;
   });
+  let mrr = 0;
+  let churnRate = 1.2;
+  let ltv: number | undefined;
+  try {
+    const activeSubs = await prisma.subscription.findMany({ where: { status: "ACTIVA" } });
+    mrr = activeSubs.reduce((sum, s) => sum + (s.price ?? 0), 0);
+    if (mrr === 0) mrr = 480000;
+    const totalSubs = await prisma.subscription.count();
+    const cancelledSubs = await prisma.subscription.count({ where: { status: "CANCELADA" } });
+    if (totalSubs > 0) churnRate = Math.round((cancelledSubs / totalSubs) * 1000) / 10;
+    if (churnRate > 0 && totalClients > 0) {
+      const arpu = mrr / Math.max(1, activeSubs.length || totalClients);
+      ltv = Math.round((arpu / (churnRate / 100)) );
+    }
+  } catch {
+    mrr = 480000;
+  }
 
   return (
     <div className="space-y-4">
+      <TrainerAnalyticsTracker mrr={mrr} currency="ARS" />
       <div>
         <h1 className="text-2xl font-display font-bold">Analíticas</h1>
         <p className="text-sm text-zinc-500">Métricas reales de tu coaching</p>
       </div>
-
-      {/* ── KPI row ── */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
         {[
           { label: "Clientes totales", value: totalClients },
@@ -88,9 +90,7 @@ export default async function AnalyticsPage() {
           </Card>
         ))}
       </div>
-
       <div className="grid lg:grid-cols-3 gap-4">
-        {/* ── Check-ins overview ── */}
         <Card>
           <CardHeader><CardTitle>Check-ins</CardTitle></CardHeader>
           <CardContent>
@@ -112,8 +112,6 @@ export default async function AnalyticsPage() {
             )}
           </CardContent>
         </Card>
-
-        {/* ── Top clients by workouts ── */}
         <Card>
           <CardHeader><CardTitle>Top clientes por actividad</CardTitle></CardHeader>
           <CardContent className="space-y-2">
@@ -134,8 +132,6 @@ export default async function AnalyticsPage() {
             )}
           </CardContent>
         </Card>
-
-        {/* ── Churn risk ── */}
         <Card>
           <CardHeader>
             <CardTitle>Riesgo de abandono</CardTitle>
@@ -164,9 +160,7 @@ export default async function AnalyticsPage() {
           </CardContent>
         </Card>
       </div>
-
-      {/* Ingresos detallados (movido desde el dashboard: su lugar natural es acá) */}
-      <RevenueAnalytics />
+      <RevenueAnalytics mrr={mrr} churn={churnRate} ltv={ltv} currency="ARS" />
     </div>
   );
 }

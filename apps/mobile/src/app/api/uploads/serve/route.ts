@@ -2,17 +2,18 @@ import { NextResponse } from "next/server";
 import { getSession } from "@/lib/auth";
 import { prisma } from "@/lib/db";
 import { readFile } from "fs/promises";
-import { join } from "path";
+import { join, resolve } from "path";
 import { existsSync } from "fs";
+import { UPLOAD_TYPES, isUploadType, getUploadDir } from "@/lib/security";
 
 /**
- * Serve archivos subidos con validación de ownership.
- * 
- * Seguridad:
- * - Requiere autenticación
- * - Verifica ownership del archivo
- * - Path fijo sin interpolación peligrosa
- * - Headers seguros (no ejecución)
+ * Serve archivos subidos — handler unificado PR3.
+ * Usa fuente única UPLOAD_TYPES + directorio canónico storage/uploads.
+ * Soporta URL canónica `/api/uploads/<type>/<filename>` generada por POST
+ * y también query `?type=&filename=` para compatibilidad.
+ *
+ * Seguridad: auth + ownership (progress), path resuelto y prefijo check,
+ * MIME allowlist sin svg, headers nosniff.
  */
 export async function GET(req: Request) {
   const s = await getSession();
@@ -20,69 +21,62 @@ export async function GET(req: Request) {
 
   try {
     const { searchParams } = new URL(req.url);
-    const type = searchParams.get("type");
-    const filename = searchParams.get("filename");
+    const typeRaw = searchParams.get("type");
+    const filenameRaw = searchParams.get("filename");
 
-    if (!type || !filename) {
+    if (!typeRaw || !filenameRaw) {
       return NextResponse.json({ error: "Parámetros inválidos" }, { status: 400 });
     }
 
-    // Validar tipo contra whitelist
-    const allowedTypes = ["progress", "avatar", "document"];
-    if (!allowedTypes.includes(type)) {
+    if (!isUploadType(typeRaw)) {
       return NextResponse.json({ error: "Tipo inválido" }, { status: 400 });
     }
+    const type = typeRaw;
 
-    // Sanitizar filename (solo alphanumeric, guiones, puntos)
-    const sanitizedFilename = filename.replace(/[^a-zA-Z0-9._-]/g, "");
-    if (!sanitizedFilename || sanitizedFilename !== filename) {
+    // Sanitizar filename (solo alfanumérico, guiones, puntos); sin path
+    const sanitizedFilename = filenameRaw.replace(/[^a-zA-Z0-9._-]/g, "");
+    if (!sanitizedFilename || sanitizedFilename !== filenameRaw) {
+      return NextResponse.json({ error: "Nombre inválido" }, { status: 400 });
+    }
+    if (sanitizedFilename.includes("..") || sanitizedFilename.includes("/") || sanitizedFilename.includes("\\")) {
       return NextResponse.json({ error: "Nombre inválido" }, { status: 400 });
     }
 
-    // Construir path seguro
-    const uploadDir = join(process.cwd(), "storage", "uploads", type);
-    const filepath = join(uploadDir, sanitizedFilename);
+    // Construir path seguro con prefijo check (unificado storage/uploads)
+    const uploadDir = getUploadDir(type);
+    const baseResolved = resolve(uploadDir);
+    const filepath = resolve(join(uploadDir, sanitizedFilename));
+    if (!filepath.startsWith(baseResolved + "/") && filepath !== baseResolved) {
+      return NextResponse.json({ error: "Solicitud inválida" }, { status: 400 });
+    }
 
-    // Verificar que el archivo existe
     if (!existsSync(filepath)) {
       return NextResponse.json({ error: "Archivo no encontrado" }, { status: 404 });
     }
 
-    // Verificar ownership en DB para fotos de progreso
+    // Ownership para fotos de progreso (y futuros tipos)
     if (type === "progress") {
+      const expectedUrl = `/api/uploads/${type}/${sanitizedFilename}`;
+      // Compat: buscar por URL exacta canónica o por contains (legado serve URL)
       const photo = await prisma.progressPhoto.findFirst({
-        where: { url: { contains: filename } },
+        where: { OR: [{ url: expectedUrl }, { url: { contains: sanitizedFilename } }] },
       });
-
-      if (!photo) {
-        return NextResponse.json({ error: "No autorizado" }, { status: 403 });
-      }
-
-      // Verificar que el usuario es dueño o tiene acceso
+      if (!photo) return NextResponse.json({ error: "No autorizado" }, { status: 403 });
       const isOwner = photo.userId === s.id;
-      const isClientOwner = photo.clientId ? Boolean(await prisma.client.findFirst({
-        where: { id: photo.clientId, userId: s.id },
-      })) : false;
-
-      // Los trainers SOLO pueden ver fotos de sus propios clientes (P0 IDOR)
+      const isClientOwner = photo.clientId
+        ? Boolean(await prisma.client.findFirst({ where: { id: photo.clientId, userId: s.id } }))
+        : false;
       const isTrainerWithAccess =
         s.role === "TRAINER" && photo.clientId
-          ? Boolean(
-              await prisma.client.findFirst({
-                where: { id: photo.clientId, trainerId: s.id },
-              })
-            )
+          ? Boolean(await prisma.client.findFirst({ where: { id: photo.clientId, trainerId: s.id } }))
           : false;
-
       if (!isOwner && !isClientOwner && !isTrainerWithAccess) {
         return NextResponse.json({ error: "No autorizado" }, { status: 403 });
       }
     }
 
-    // Leer archivo
     const buffer = await readFile(filepath);
 
-    // Determinar MIME type por extensión
     const ext = sanitizedFilename.split(".").pop()?.toLowerCase() || "";
     const mimeTypes: Record<string, string> = {
       jpg: "image/jpeg",
@@ -95,21 +89,15 @@ export async function GET(req: Request) {
     };
     const mimeType = mimeTypes[ext] || "application/octet-stream";
 
-    // Headers seguros
     const headers = new Headers();
     headers.set("Content-Type", mimeType);
     headers.set("Cache-Control", "private, max-age=3600");
     headers.set("X-Content-Type-Options", "nosniff");
-    
-    // Prevenir ejecución de scripts en imágenes
     if (mimeType.startsWith("image/")) {
       headers.set("Content-Security-Policy", "default-src 'none'");
     }
 
-    return new NextResponse(buffer, {
-      status: 200,
-      headers,
-    });
+    return new NextResponse(buffer, { status: 200, headers });
   } catch (error) {
     console.error("[UPLOAD-SERVE] Error:", error);
     return NextResponse.json({ error: "Error al servir archivo" }, { status: 500 });

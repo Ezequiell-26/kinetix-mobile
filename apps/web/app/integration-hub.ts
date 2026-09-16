@@ -184,7 +184,7 @@ export const AnalyticsAPIs = {
     endpoints: {
       stats: '/stats',
       breakdown: '/breakdown',
-      real-time: '/realtime'
+      "real-time": '/realtime'
     }
   },
 

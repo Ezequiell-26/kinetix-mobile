@@ -1,0 +1,19 @@
+extends: relaxed
+rules:
+  line-length:
+    max: 140
+    level: warning
+  truthy:
+    allowed-values: ["true", "false", "on"]
+    check-keys: false
+  document-start: disable
+  comments:
+    min-spaces-from-content: 1
+  brackets:
+    max-spaces-inside: 1
+  braces:
+    max-spaces-inside: 1
+ignore: |
+  node_modules/
+  .next/
+  dist/

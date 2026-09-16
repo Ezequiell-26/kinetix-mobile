@@ -447,7 +447,7 @@ export class SentimentAnalyzer {
 }
 
 // ============================================
-| 🎯 PREDICTOR DE PROGRESO
+// 🎯 PREDICTOR DE PROGRESO
 // ============================================
 
 export class ProgressPredictor {
@@ -517,7 +517,7 @@ export class ProgressPredictor {
 }
 
 // ============================================
-| 🔄 SISTEMA DE APRENDIZAJE CONTINUO
+// 🔄 SISTEMA DE APRENDIZAJE CONTINUO
 // ============================================
 
 export class ContinuousLearningSystem {

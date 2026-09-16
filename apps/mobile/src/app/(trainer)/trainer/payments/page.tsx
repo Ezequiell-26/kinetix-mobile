@@ -5,6 +5,7 @@ import { Badge } from "@/components/ui/badge";
 import { BRAND } from "@/constants/branding";
 import { Button } from "@/components/ui/button";
 import { Lock } from "lucide-react";
+import { TrainerPaymentsTracker } from "@/components/posthog-tracker";
 
 export const dynamic = 'force-dynamic';
 export const revalidate = 0;
@@ -17,22 +18,25 @@ export default async function PaymentsPage() {
   const pays = (await prisma.payment.findMany({ orderBy: { date: "desc" }, take: 20 }).catch(() => [])) as Array<{
     id: string; email: string | null; amount: number; status: string; method: string | null; date: Date;
   }>;
+  let mrr = 0;
+  try {
+    const activeSubs = await prisma.subscription.findMany({ where: { status: "ACTIVA" } });
+    mrr = activeSubs.reduce((s, sub) => s + (sub.price ?? 0), 0);
+  } catch {}
 
   return (
     <div className="space-y-4">
+      <TrainerPaymentsTracker mrr={mrr} totalPayments={pays.length} />
       <div className="flex justify-between items-center">
         <div>
           <h1 className="text-2xl font-display font-bold">Pagos y suscripciones</h1>
-          <p className="text-sm text-zinc-500">Preparado para Stripe / Mercado Pago</p>
+          <p className="text-sm text-zinc-500">Preparado para Stripe / Mercado Pago — tracking MRR en PostHog</p>
         </div>
         {subs.length === 0 && pays.length === 0 && (
           <Badge variant="warn">Sin datos de pagos</Badge>
         )}
       </div>
-
       <PaymentsPro />
-
-      {/* Plan cards */}
       <div className="grid sm:grid-cols-3 gap-3">
         {[
           { plan: "BÁSICO", price: 12000, desc: "Seguimiento básico" },
@@ -51,10 +55,8 @@ export default async function PaymentsPage() {
           </Card>
         ))}
       </div>
-
-      {/* Real subscriptions */}
       <Card>
-        <CardHeader><CardTitle>Suscripciones activas</CardTitle></CardHeader>
+        <CardHeader><CardTitle>Suscripciones activas {mrr > 0 && <Badge variant="success">MRR ${(mrr).toLocaleString("es-AR")}</Badge>}</CardTitle></CardHeader>
         <CardContent className="space-y-2">
           {subs.length === 0 ? (
             <p className="text-sm text-zinc-500 text-center py-6">No hay suscripciones registradas todavía.</p>
@@ -74,8 +76,6 @@ export default async function PaymentsPage() {
           )}
         </CardContent>
       </Card>
-
-      {/* Real payment history */}
       <Card>
         <CardHeader><CardTitle>Historial de pagos</CardTitle></CardHeader>
         <CardContent className="space-y-2">

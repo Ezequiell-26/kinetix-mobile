@@ -1,4 +1,3 @@
-"use client";
 
 import { SkeletonCard, SkeletonMetricCard } from "@kinetix/shared/components";
 

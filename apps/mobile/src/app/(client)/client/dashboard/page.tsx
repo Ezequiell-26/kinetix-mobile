@@ -3,6 +3,7 @@ import nextDynamic from "next/dynamic";
 import { prisma } from "@/lib/db";
 import { getClientForSession } from "@/lib/getClient";
 import { Button } from "@/components/ui/button";
+import { ChartSkeleton } from "@/components/charts/chart-skeleton";
 const AiCoachChat = nextDynamic(() => import("@/components/ai-coach-chat").then((m) => m.AiCoachChat), {
   loading: () => <div className="rounded-3xl border border-subtle bg-surface/40 p-6 text-xs text-zinc-500">Cargando coach IA…</div>,
 });
@@ -25,8 +26,8 @@ import { CLIENT_TOUR, CLIENT_TOUR_KEY } from "@/lib/tours";
 import { CountUp, ProgressBar, ProgressRing } from "@/components/animated-stats";
 import { Gamepad2, HeartPulse, Footprints, BarChart3, Users, Settings2 } from "lucide-react";
 import { lastSessionLoads, computeStreak, computeAdherence } from "@/lib/stats";
-import { WeeklyProgress } from "@/components/weekly-progress";
-import { SmartwatchWidget } from "@/components/smartwatch-widget";
+const WeeklyProgress = nextDynamic(() => import("@/components/weekly-progress").then(m => m.WeeklyProgress), { loading: () => <ChartSkeleton height={160} /> });
+const SmartwatchWidget = nextDynamic(() => import("@/components/smartwatch-widget").then(m => m.SmartwatchWidget), { loading: () => <ChartSkeleton height={120} /> });
 import { Tilt3D, Tilt3DSubtle } from "@/components/tilt-3d";
 import { BRAND } from "@/constants/branding";
 import {

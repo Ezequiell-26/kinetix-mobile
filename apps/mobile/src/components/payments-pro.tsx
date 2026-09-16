@@ -1,36 +1,46 @@
 "use client";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Input, Label } from "@/components/ui/input";
 import { CreditCard, DollarSign, ExternalLink, Check } from "lucide-react";
-import { trackCheckoutStarted, trackCheckoutCompleted, capture } from "@/lib/posthog";
+import { trackCheckoutStarted, trackCheckoutCompleted, trackPaymentCompleted, capture } from "@/lib/posthog";
 
-// Inspirado en Stripe + Mercado Pago docs (supremacía monetización)
-// Checkout real listo para prod: solo falta STRIPE_SECRET_KEY y MP_ACCESS_TOKEN en .env
 const PLANS = [
-  {id:"basico", name:"Plan Básico", price:25000, features:["Rutina 3d","Check-in mensual","Chat"]},
-  {id:"personalizado", name:"Personalizado", price:45000, features:["Rutina 5d","Check-in semanal","Chat + video","Nutrición"]},
-  {id:"premium", name:"Premium", price:75000, features:["Todo Personalizado","1:1 semanal","Plan nutrición","Prioridad"]},
-];
+  {id:"basico", name:"Plan Básico", price:25000, mrr:25000, features:["Rutina 3d","Check-in mensual","Chat"]},
+  {id:"personalizado", name:"Personalizado", price:45000, mrr:45000, features:["Rutina 5d","Check-in semanal","Chat + video","Nutrición"]},
+  {id:"premium", name:"Premium", price:75000, mrr:75000, features:["Todo Personalizado","1:1 semanal","Plan nutrición","Prioridad"]},
+] as const;
 
 export function PaymentsPro({ onSelect }:{ onSelect?: (plan:string)=>void }){
   const [selected,setSelected]=useState("personalizado");
   const [email,setEmail]=useState("");
   const [loading,setLoading]=useState<string | null>(null);
 
+  useEffect(() => {
+    capture("trainer_payments_viewed", { source: "payments_pro_component", selected_plan: selected });
+  }, []);
+
   function checkout(provider:"stripe"|"mp"){
     const planData = PLANS.find(p=>p.id===selected);
     const price = planData?.price;
-    // PostHog: tracking checkout_started (evento clave para retención/monetización)
+    const mrr = planData?.mrr ?? price;
     trackCheckoutStarted({ plan: selected, provider, price, currency: "ARS", email: email || undefined });
-    capture("payment_started", { plan: selected, provider, price } as any);
+    capture("payment_started", { plan: selected, provider, price, amount: price, revenue: price, currency: "ARS", mrr, billing_period: "monthly" });
     setLoading(provider);
     setTimeout(()=>{
       setLoading(null);
-      // En prod: fetch POST /api/payments/checkout {plan, provider, email} → redirect a Stripe/MP
       trackCheckoutCompleted({ plan: selected, provider, price, currency: "ARS" });
+      trackPaymentCompleted({
+        amount: price ?? 0,
+        currency: "ARS",
+        plan: selected,
+        provider,
+        email: email || undefined,
+        mrr,
+        billing_period: "monthly",
+      });
       alert(`Checkout ${provider.toUpperCase()} para ${selected} — en prod redirige a ${provider==="stripe"?"Stripe Checkout":"Mercado Pago Checkout"} con webhook. Email: ${email||"cliente@ejemplo.com"}`);
       onSelect?.(selected);
     }, 800);
@@ -46,13 +56,13 @@ export function PaymentsPro({ onSelect }:{ onSelect?: (plan:string)=>void }){
             return (
               <button key={p.id} onClick={()=>{
                 setSelected(p.id);
-                capture("checkout_plan_selected", { plan: p.id, price: p.price } as any);
+                capture("checkout_plan_selected", { plan: p.id, price: p.price, mrr: p.mrr, currency: "ARS" });
               }} className={`text-left p-3 rounded-xl border flex justify-between items-center ${isSel?"bg-primary text-black border-primary":"bg-zinc-900 border-zinc-800 hover:border-zinc-700"}`}>
                 <div>
                   <p className={`font-bold text-sm ${isSel?"text-black":"text-white"}`}>{p.name} {isSel && <Check size={12} className="inline ml-1"/>}</p>
                   <p className={`text-xs ${isSel?"text-black/70":"text-zinc-500"}`}>{p.features.join(" • ")}</p>
                 </div>
-                <span className={`font-black ${isSel?"text-black":"text-white"}`}>${p.price.toLocaleString("es-AR")}</span>
+                <span className={`font-black ${isSel?"text-black":"text-white"}`}>${p.price.toLocaleString("es-AR")} <span className="text-[10px] font-normal opacity-60">/mes</span></span>
               </button>
             );
           })}

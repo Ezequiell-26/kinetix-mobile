@@ -12,16 +12,26 @@ export type PostHogEvent =
   | "cta_clicked"
   | "checkout_started"
   | "checkout_completed"
+  | "checkout_plan_selected"
   | "onboarding_started"
   | "onboarding_step"
+  | "onboarding_step_viewed"
+  | "onboarding_funnel_step"
+  | "onboarding_abandoned"
   | "onboarding_completed"
   | "workout_completed"
   | "workout_started"
   | "checkin_completed"
   | "checkin_sent"
   | "subscription_started"
+  | "subscription_cancelled"
+  | "payment_started"
   | "payment_completed"
   | "payment_failed"
+  | "revenue_tracked"
+  | "revenue_mrr_updated"
+  | "revenue_dashboard_viewed"
+  | "mrr_dashboard_viewed"
   | "feature_discovered"
   | "lead_captured"
   | "pricing_viewed"
@@ -36,7 +46,6 @@ export function initPostHog(): void {
 
   const key = process.env.NEXT_PUBLIC_POSTHOG_KEY || "phc_placeholder_posthog_key_replace_me";
   const host = process.env.NEXT_PUBLIC_POSTHOG_HOST || "https://us.i.posthog.com";
-
   try {
     posthog.init(key, {
       api_host: host,
@@ -97,8 +106,6 @@ export function reset(): void {
   } catch {}
 }
 
-// ── Helpers específicos ──
-
 export function trackPageView(url?: string, props?: Record<string, unknown>): void {
   const path = url || (typeof window !== "undefined" ? window.location.pathname + window.location.search : "/");
   capture("pageview", {
@@ -112,6 +119,15 @@ export function trackPageView(url?: string, props?: Record<string, unknown>): vo
 export function trackCtaClicked(cta: string, location?: string, props?: Record<string, unknown>): void {
   capture("cta_clicked", { cta, location, ...props });
 }
+
+export const ONBOARDING_FUNNEL_STEPS = [
+  { step: 1, id: "welcome", name: "Bienvenida" },
+  { step: 2, id: "goal", name: "Objetivo" },
+  { step: 3, id: "days", name: "Días por semana" },
+  { step: 4, id: "place", name: "Lugar de entreno" },
+] as const;
+
+export type OnboardingFunnelStepId = (typeof ONBOARDING_FUNNEL_STEPS)[number]["id"];
 
 export function trackCheckoutStarted(params: {
   plan: string;
@@ -127,6 +143,7 @@ export function trackCheckoutStarted(params: {
     price: params.price,
     currency: params.currency || "USD",
     location: params.location,
+    revenue: params.price,
   });
 }
 
@@ -137,19 +154,87 @@ export function trackCheckoutCompleted(params: { plan: string; provider: string;
     provider: params.provider,
     price: params.price,
     currency: params.currency || "USD",
+    revenue: params.price,
+    $revenue: params.price,
   });
 }
 
 export function trackOnboardingStarted(props?: Record<string, unknown>): void {
-  capture("onboarding_started", props);
+  capture("onboarding_started", { funnel: "onboarding_main", total_steps: 4, ...props });
 }
 
 export function trackOnboardingStep(step: number | string, props?: Record<string, unknown>): void {
-  capture("onboarding_step", { step, ...props });
+  capture("onboarding_step", { step, funnel: "onboarding_main", ...props });
+  if (typeof step === "number" && step >= 1 && step <= 4) {
+    const def = ONBOARDING_FUNNEL_STEPS.find((s) => s.step === step);
+    capture("onboarding_step_viewed", {
+      step,
+      step_name: def?.id ?? String(step),
+      funnel: "onboarding_main",
+      funnel_order: step,
+      ...props,
+    });
+    capture("onboarding_funnel_step", {
+      step,
+      step_name: def?.id ?? String(step),
+      funnel: "onboarding_main",
+      funnel_order: step,
+      ...props,
+    });
+  }
+}
+
+export function trackOnboardingFunnelStep(step: 1 | 2 | 3 | 4, props?: Record<string, unknown>): void {
+  const def = ONBOARDING_FUNNEL_STEPS.find((s) => s.step === step);
+  capture("onboarding_step_viewed", {
+    step,
+    step_name: def?.id ?? String(step),
+    funnel: "onboarding_main",
+    funnel_order: step,
+    ...props,
+  });
+  capture("onboarding_funnel_step", {
+    step,
+    step_name: def?.id ?? String(step),
+    funnel: "onboarding_main",
+    funnel_order: step,
+    ...props,
+  });
+  capture("onboarding_step", { step, step_name: def?.id ?? String(step), funnel: "onboarding_main", ...props });
 }
 
 export function trackOnboardingCompleted(data: Record<string, unknown>): void {
-  capture("onboarding_completed", data);
+  capture("onboarding_completed", { funnel: "onboarding_main", funnel_order: 5, ...data });
+}
+
+export function trackPaymentCompleted(params: {
+  amount: number;
+  currency?: string;
+  plan: string;
+  provider: string;
+  mrr?: number;
+}): void {
+  const currency = params.currency || "USD";
+  const mrr = params.mrr ?? params.amount;
+  capture("payment_completed", {
+    plan_id: params.plan,
+    plan: params.plan,
+    provider: params.provider,
+    price: params.amount,
+    amount: params.amount,
+    revenue: params.amount,
+    $revenue: params.amount,
+    currency,
+    mrr,
+    monthly_recurring_revenue: mrr,
+  });
+  capture("revenue_tracked", { plan: params.plan, revenue: params.amount, currency, mrr });
+  capture("revenue_mrr_updated", { mrr, currency, plan: params.plan, delta_mrr: mrr });
+}
+
+export function trackMRRViewed(params: { mrr: number; currency?: string; source?: string }): void {
+  capture("mrr_dashboard_viewed", { mrr: params.mrr, currency: params.currency || "USD", source: params.source || "web" });
+  capture("revenue_dashboard_viewed", { mrr: params.mrr, currency: params.currency || "USD", source: params.source || "web" });
 }
 
 export function trackWorkoutCompleted(params: {
@@ -180,7 +265,6 @@ export function trackCheckin(params: { mood: number; fatigue: number; notes?: st
   });
 }
 
-// ── Web Vitals RUM ───────────────────────────────────────────────
 export type WebVitalMetric = {
   name: "CLS" | "LCP" | "FCP" | "INP" | "TTFB" | string;
   value: number;
@@ -203,14 +287,12 @@ export function trackWebVital(metric: WebVitalMetric): void {
     value: metric.value,
     rating: metric.rating,
   };
-  // PostHog recommends $web_vitals as event name for RUM dashboards
   capture("$web_vitals", props as Record<string, unknown>);
   capture("web_vitals", props as Record<string, unknown>);
 }
 
 export function initWebVitals(): void {
   if (typeof window === "undefined") return;
-  // Lazy import web-vitals to avoid SSR issues
   import("web-vitals")
     .then((mod: unknown) => {
       const m = mod as Record<string, (cb: (metric: WebVitalMetric) => void) => void>;
