@@ -162,7 +162,17 @@ At minimum:
 
 Payment, authorization, secret-management, and deployment failures are release blockers.
 
-## 12. Updating this document
+## 12. 2026-09-16 verified change record
+
+- `/client/tools` category navigation now synchronizes its `?cat=` URL state with browser back/forward and shared category links.
+- Web Push activation in `PushCenter` now obtains the VAPID public key, registers the Service Worker subscription, and persists the subscription through `/api/push/subscribe`.
+- `/api/push/public-key` exposes only the non-secret VAPID public key and returns `503` when push infrastructure is not configured.
+- The Push Center no longer treats browser notification permission alone as proof that a push subscription exists.
+- The global mobile 404 experience now follows the KinetixFitt visual system and keeps the primary recovery path accessible.
+- The changes were merged to `main` in commit `663ef2c775523d38d2292c37855ab06a4d03a7ad`.
+- Vercel status checks for the change reported `build-rate-limit`; that external deployment limitation is distinct from a code build failure and still requires a successful deployment check before production release.
+
+## 13. Updating this document
 
 Update this document after material changes to:
 
@@ -180,6 +190,6 @@ Update this document after material changes to:
 
 Use exact dates and verifiable statements.
 
-## 13. Principle
+## 14. Principle
 
 **KinetixFitt should gain capabilities over time without losing reliability.**
