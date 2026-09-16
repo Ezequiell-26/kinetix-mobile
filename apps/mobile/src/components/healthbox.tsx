@@ -28,7 +28,7 @@ export function HealthBox() {
               Conectá un proveedor compatible para importar métricas. KinetixFitt no mostrará valores estimados como si fueran datos reales.
             </p>
           </div>
-          <Badge variant="outline" className="ml-auto shrink-0">No conectado</Badge>
+          <Badge variant="muted" className="ml-auto shrink-0">No conectado</Badge>
         </div>
         <div className="grid grid-cols-3 gap-2 text-center">
           <div className="rounded-lg border border-zinc-800 p-3">
