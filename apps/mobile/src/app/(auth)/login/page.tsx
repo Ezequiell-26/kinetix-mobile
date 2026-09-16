@@ -2,7 +2,7 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
-import { Eye, EyeOff, Loader2, TriangleAlert, Star, ArrowRight, Dumbbell } from "lucide-react";
+import { Eye, EyeOff, Loader2, TriangleAlert, Star, ArrowRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input, Label } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle, CardDesc } from "@/components/ui/card";
@@ -10,8 +10,6 @@ import { motion } from "framer-motion";
 
 export default function LoginPage() {
   const r = useRouter();
-  // P0: sin credenciales precargadas (quedaban expuestas en el HTML/JS).
-  // Los botones demo más abajo las completan a demanda.
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [showPw, setShowPw] = useState(false);
@@ -30,26 +28,19 @@ export default function LoginPage() {
       });
       const j = (await res.json()) as { ok?: boolean; role?: string; error?: string };
       if (!res.ok || !j.ok) {
-        setErr((j.error as string) || "Error");
+        setErr(j.error || "No se pudo iniciar sesión");
         setLoading(false);
         return;
       }
       if (j.role === "TRAINER") {
         r.push("/trainer/dashboard");
       } else {
-        // FTUE: si onboarding incompleto, va al wizard; si no, dashboard.
         try {
-          const ob = await fetch("/api/onboarding");
+          const ob = await fetch("/api/onboarding", { cache: "no-store" });
           if (ob.ok) {
             const oj = (await ob.json()) as { profile?: { onboardingCompleted?: boolean } };
-            if (oj?.profile && oj.profile.onboardingCompleted === false) {
-              r.push("/client/onboarding");
-            } else if (oj?.profile && oj.profile.onboardingCompleted === true) {
-              r.push("/client/dashboard");
-            } else {
-              // perfil nuevo sin onboarding -> iniciar FTUE
-              r.push("/client/onboarding");
-            }
+            if (oj.profile?.onboardingCompleted === false) r.push("/client/onboarding");
+            else r.push("/client/dashboard");
           } else {
             r.push("/client/onboarding");
           }
@@ -64,14 +55,8 @@ export default function LoginPage() {
     }
   }
 
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    void submit(e);
-  };
-
   return (
     <div className="min-h-[100dvh] flex items-center justify-center p-4 bg-[#080808] relative overflow-hidden">
-      {/* Background effects */}
       <div className="absolute inset-0 pointer-events-none">
         <div className="absolute top-0 left-1/4 w-[600px] h-[600px] bg-primary/[0.03] rounded-full blur-[120px]" />
         <div className="absolute bottom-0 right-1/4 w-[500px] h-[500px] bg-primary/[0.04] rounded-full blur-[100px]" />
@@ -86,7 +71,6 @@ export default function LoginPage() {
       >
         <Card className="w-full border-subtle/50 shadow-[0_20px_60px_rgba(0,0,0,0.4),inset_0_1px_0_rgba(255,255,255,0.05)]">
           <CardHeader className="text-center space-y-4 pt-8 pb-2">
-            {/* Logo with glow */}
             <motion.div
               initial={{ scale: 0.8, opacity: 0 }}
               animate={{ scale: 1, opacity: 1 }}
@@ -95,7 +79,7 @@ export default function LoginPage() {
             >
               <div className="absolute inset-0 w-16 h-16 mx-auto rounded-2xl bg-primary/20 blur-xl" />
               <div className="relative w-16 h-16 rounded-2xl bg-gradient-to-br from-primary to-primary-hover flex items-center justify-center font-black text-black text-2xl shadow-[inset_0_1px_0_rgba(255,255,255,0.4),0_8px_32px_rgba(52,211,153,0.35)]">
-                E
+                K
               </div>
             </motion.div>
 
@@ -104,7 +88,6 @@ export default function LoginPage() {
               <CardDesc>Entrenamiento personalizado online</CardDesc>
             </div>
 
-            {/* Social proof */}
             <motion.div
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
@@ -118,38 +101,12 @@ export default function LoginPage() {
                 <Star size={12} fill="currentColor" />
                 <Star size={12} fill="currentColor" />
               </span>
-              Atletas entrenando cada semana con KinetixFitt
+              Tu entrenamiento y seguimiento, en un solo lugar
             </motion.div>
-
-            {/* Demo accounts */}
-            <div className="flex gap-2 justify-center pt-2">
-              <button
-                type="button"
-                onClick={() => {
-                  setEmail("ezequiel@kinetixfitt.com");
-                  setPassword("Admin123!");
-                }}
-                className="group text-[11px] font-bold px-3.5 py-2 rounded-full bg-zinc-900/80 text-zinc-400 hover:text-white hover:bg-zinc-800 border border-zinc-800 hover:border-zinc-700 min-h-[36px] transition-all flex items-center gap-1.5"
-              >
-                <Dumbbell size={12} />
-                Trainer demo
-              </button>
-              <button
-                type="button"
-                onClick={() => {
-                  setEmail("martin@demo.com");
-                  setPassword("cliente123");
-                }}
-                className="group text-[11px] font-bold px-3.5 py-2 rounded-full bg-zinc-900/80 text-zinc-400 hover:text-white hover:bg-zinc-800 border border-zinc-800 hover:border-zinc-700 min-h-[36px] transition-all flex items-center gap-1.5"
-              >
-                <ArrowRight size={12} />
-                Cliente demo
-              </button>
-            </div>
           </CardHeader>
 
           <CardContent className="pb-8 pt-4">
-            <form onSubmit={handleSubmit} className="space-y-4">
+            <form onSubmit={submit} className="space-y-4">
               <div className="space-y-2">
                 <Label htmlFor="email">Email</Label>
                 <Input
@@ -201,7 +158,6 @@ export default function LoginPage() {
                 </motion.div>
               )}
 
-              {/* Primary CTA */}
               <Button
                 type="submit"
                 variant="accent"
@@ -224,16 +180,10 @@ export default function LoginPage() {
               </Button>
 
               <div className="flex justify-between pt-2">
-                <Link
-                  href="/register"
-                  className="text-xs font-bold text-zinc-400 hover:text-primary transition-colors min-h-[44px] inline-flex items-center px-1"
-                >
+                <Link href="/register" className="text-xs font-bold text-zinc-400 hover:text-primary transition-colors min-h-[44px] inline-flex items-center px-1">
                   Crear cuenta
                 </Link>
-                <Link
-                  href="/forgot-password"
-                  className="text-xs font-bold text-zinc-400 hover:text-primary transition-colors min-h-[44px] inline-flex items-center px-1"
-                >
+                <Link href="/forgot-password" className="text-xs font-bold text-zinc-400 hover:text-primary transition-colors min-h-[44px] inline-flex items-center px-1">
                   ¿Olvidaste tu contraseña?
                 </Link>
               </div>
@@ -241,7 +191,6 @@ export default function LoginPage() {
           </CardContent>
         </Card>
 
-        {/* Footer */}
         <p className="text-center text-[11px] text-zinc-600 mt-4">
           KINETIXFITT © 2026 · Tu mejor versión, cada día
         </p>
