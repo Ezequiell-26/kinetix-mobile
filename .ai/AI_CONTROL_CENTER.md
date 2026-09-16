@@ -1,6 +1,6 @@
 # KinetixFitt — AI Control Center
 
-This is the first document a coding agent should read when asked to **continue improving, fix bugs, finish the project, integrate an API/repository, or review everything**.
+This is the first document a coding agent should read when asked to continue improving, fix bugs, finish the project, integrate an API/repository, or review everything.
 
 ## Start here
 
@@ -17,31 +17,82 @@ Then read, in order:
 1. `AGENTS.md`
 2. `.ai/INDEX.md`
 3. `.ai/AI_ENGINEERING_SYSTEM.md`
-4. `.ai/PROJECT_STATE.md`
-5. `.ai/FEATURE_LEDGER.md`
-6. `.ai/INTEGRATION_REGISTRY.md`
-7. `.ai/PERFORMANCE_BASELINES.md`
-8. the relevant contract in `.ai/`
-9. the relevant ADR in `.ai/DECISIONS/`
-10. the actual source, tests, schema, workflows and deployment configuration
+4. `.ai/AI_EVALUATION_PROTOCOL.md`
+5. `.ai/AI_AGENT_HANDOFF.md`
+6. `.ai/PROJECT_STATE.md`
+7. `.ai/FEATURE_LEDGER.md`
+8. `.ai/INTEGRATION_REGISTRY.md`
+9. `.ai/PERFORMANCE_BASELINES.md`
+10. the relevant contract in `.ai/`
+11. the relevant ADR in `.ai/DECISIONS/`
+12. the relevant skill(s) in `.github/skills/`
+13. the actual source, tests, schema, workflows and deployment configuration
 
 The audit is a map generator, not a claim that the software works.
+
+## Skill routing
+
+Select skills by risk instead of asking one generic prompt to solve every problem:
+
+- debugging → `.github/skills/debugging/SKILL.md`
+- architecture → `.github/skills/architecture/SKILL.md`
+- API reliability → `.github/skills/api-reliability/SKILL.md`
+- DB/migrations → `.github/skills/database-migrations/SKILL.md`
+- security → `.github/skills/security-audit/SKILL.md`
+- external APIs/repos → `.github/skills/integration-review/SKILL.md`
+- AI/model providers → `.github/skills/ai-integration/SKILL.md`
+- performance → `.github/skills/performance-audit/SKILL.md`
+- mobile/native/PWA/desktop → `.github/skills/mobile-native/SKILL.md`
+- UX/accessibility → `.github/skills/ux-accessibility/SKILL.md`
+- dependency changes → `.github/skills/dependency-governance/SKILL.md`
+- tests/regressions → `.github/skills/test-and-regression/SKILL.md`
+- release/observability → `.github/skills/release-observability/SKILL.md`
+- independent review → `.github/skills/code-review/SKILL.md`
+
+For high-risk work, the implementing agent must not be the only evaluator. Use an independent review pass.
 
 ## Mandatory durable registries
 
 ### Feature truth
-
 `.ai/FEATURE_LEDGER.md` is the canonical place to record important product capabilities and their evidence.
 
 ### External integrations
-
 `.ai/INTEGRATION_REGISTRY.md` is the canonical place to record APIs, SDKs, providers and external repositories.
 
 ### Performance
-
 `.ai/PERFORMANCE_BASELINES.md` is the canonical place to record measured performance and cross-device baselines.
 
 When these registries become stale after a meaningful change, downgrade the affected evidence until re-verified.
+
+## Current state model
+
+For every important claim distinguish:
+
+`KNOWN_GOOD | KNOWN_BROKEN | UNKNOWN | BLOCKED_EXTERNAL`
+
+Never treat UNKNOWN as an invitation to guess.
+
+## Change ownership
+
+Every iteration must name one risk cluster and one accountable change surface. Do not mix unrelated architecture, UI and dependency rewrites into one large autonomous change.
+
+## Independent verification
+
+For substantial changes:
+
+```text
+IMPLEMENT
+↓
+FOCUSED TESTS
+↓
+AFFECTED GATES
+↓
+INDEPENDENT ADVERSARIAL REVIEW
+↓
+RE-AUDIT
+```
+
+The reviewer must actively attempt to falsify the implementation rather than merely summarize it.
 
 ## The rule that prevents AI from breaking good code
 
@@ -150,67 +201,15 @@ Never invent:
 
 When uncertain, search the repository first. If still uncertain, label it `UNKNOWN` and avoid destructive changes.
 
-## Anti-bug protocol
-
-For each bug:
-
-### Reproduce
-
-Find the exact failing path or the strongest available static evidence.
-
-### Isolate
-
-Identify the smallest responsible boundary.
-
-### Fix
-
-Prefer a local, compatible correction over a rewrite.
-
-### Regression test
-
-Add a test that fails before the fix and passes after it whenever practical.
-
-### Re-audit
-
-Search for the same bug pattern elsewhere before closing the issue.
-
-## High-risk mandatory checks
-
-### Auth/authorization
-
-Validate ownership server-side. At minimum test tenant A vs tenant B.
-
-### Payments
-
-Validate trusted provider state, signed webhooks, duplicate delivery, idempotency, and persistent state transitions.
-
-### Database
-
-Check schema, migration ordering, constraints, indexes, destructive behavior and compatibility with existing data.
-
-### Storage/uploads
-
-Validate type/signature/size, path safety, ownership, private access and cleanup lifecycle.
-
-### AI
-
-Validate provider selection, timeout/retry policy, input limits, output handling, cost/rate controls, privacy, and failure behavior. Never turn an AI placeholder into a claimed production integration.
-
-### Offline/native/PWA
-
-Check cache invalidation, stale writes, conflict policy, bridge compatibility, permissions, secure storage and platform-specific failure states.
-
 ## API/repository integration gate
 
-When a new API or external repository is proposed, do not integrate immediately.
-
-First classify it:
+When a new API or external repository is proposed, classify it:
 
 `USE | ADAPT | EXTRACT | REJECT`
 
-Then record the decision and evidence in `.ai/INTEGRATION_REGISTRY.md`.
+Then register the decision in `.ai/INTEGRATION_REGISTRY.md`.
 
-Every integration should have:
+The integration must have:
 
 ```text
 purpose
@@ -231,48 +230,15 @@ runtime verification
 removal strategy
 ```
 
-A new external dependency is not considered production-ready solely because installation succeeds.
-
 ## Performance gate
 
-Every meaningful performance optimization must be measured when measurement is available.
+Every meaningful performance optimization must be measured when measurement is available and must preserve correctness, accessibility and security.
 
-Record results in `.ai/PERFORMANCE_BASELINES.md`.
-
-Check at least:
-
-- startup;
-- TTFB/LCP/INP/CLS where applicable;
-- JS weight;
-- network requests;
-- API latency;
-- database query count;
-- memory;
-- CPU/frame drops;
-- image/media cost;
-- mobile battery-sensitive behavior.
-
-Never use an unsupported `100% performance` claim. Use measurable budgets and regression thresholds instead.
+Never use an unsupported `100% performance` claim. Use measured budgets and regression thresholds.
 
 ## Change budget
 
 A single AI iteration should target one coherent risk cluster.
-
-Example clusters:
-
-- auth/security;
-- database/migrations;
-- payments;
-- API contracts;
-- uploads/storage;
-- CI/build;
-- E2E;
-- performance;
-- accessibility;
-- UI/UX;
-- external integrations.
-
-Do not combine a high-risk backend rewrite with unrelated design work.
 
 ## Required verification ladder
 
@@ -283,10 +249,11 @@ After editing:
 2. focused typecheck/lint
 3. affected integration/security tests
 4. affected build
-5. broader repository gates
-6. diff review
-7. registry/state update
-8. final branch/commit verification
+5. independent code review for substantial/high-risk changes
+6. broader repository gates
+7. diff review
+8. registry/state update
+9. final branch/commit verification
 ```
 
 For runtime-dependent functionality, add the real runtime/provider/device check when available.
@@ -309,12 +276,14 @@ Do not:
 
 ## Open-ended improvement algorithm
 
-When the human says **“seguí mejorando todo”** or equivalent:
+When the human says “seguí mejorando todo” or equivalent:
 
 ```text
 AUDIT CURRENT REPO
 ↓
 READ DURABLE REGISTRIES
+↓
+SELECT REQUIRED SKILLS
 ↓
 FIND RELEASE BLOCKERS
 ↓
@@ -331,6 +300,8 @@ IMPROVE RELIABILITY/OBSERVABILITY/PERFORMANCE/ACCESSIBILITY
 IMPROVE PRODUCT FLOWS
 ↓
 POLISH UI/UX
+↓
+INDEPENDENT REVIEW
 ↓
 RE-AUDIT FROM SCRATCH
 ```
@@ -355,12 +326,14 @@ Every iteration must end with:
 BRANCH:
 COMMIT:
 CHANGE CLUSTER:
+SKILLS USED:
 FILES CHANGED:
 KNOWN-GOOD BEHAVIOR PRESERVED:
 NEW BEHAVIOR:
 TESTS ACTUALLY RUN:
 BUILD ACTUALLY RUN:
 RUNTIME/PROVIDER CHECKS ACTUALLY RUN:
+INDEPENDENT REVIEW:
 EVIDENCE LEVEL:
 KNOWN UNVERIFIED AREAS:
 MIGRATION/DEPLOYMENT IMPACT:
