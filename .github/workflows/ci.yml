@@ -40,6 +40,8 @@ jobs:
 
     steps:
       - uses: actions/checkout@v5
+        with:
+          fetch-depth: 2
 
       - uses: actions/setup-node@v5
         with:
@@ -49,6 +51,21 @@ jobs:
 
       - name: AI repository static guard
         run: npm run ai:audit:strict
+
+      - name: AI evidence regression snapshot
+        run: |
+          mkdir -p "$RUNNER_TEMP/kinetix-evidence"
+          npm run ai:evidence:json > "$RUNNER_TEMP/kinetix-evidence/head.json"
+          npm run ai:evidence:compare > "$RUNNER_TEMP/kinetix-evidence/compare.json"
+          cat "$RUNNER_TEMP/kinetix-evidence/compare.json"
+
+      - name: Upload AI evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: kinetix-ai-evidence-${{ github.sha }}
+          path: ${{ runner.temp }}/kinetix-evidence/
+          if-no-files-found: error
 
       - name: Install raíz (lock reproducible)
         run: npm ci
