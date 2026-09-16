@@ -1,24 +1,24 @@
 import { NextRequest, NextResponse } from "next/server";
-import { requireRole } from "@/lib/auth";
+import { getSession, requireRole } from "@/lib/auth";
 import { prisma } from "@/lib/db";
 import { assertTrainerOwnsClient } from "@/lib/authorization";
-import { checkRateLimit } from "@/lib/rate-limiter";
+import { checkRateLimit, getClientIp } from "@/lib/rate-limiter";
 
 const MAX_EVENT_LENGTH = 80;
 const MAX_PROPERTIES = 30;
-
-function clientIp(req: Request) {
-  return req.headers.get("x-real-ip") || req.headers.get("x-forwarded-for")?.split(",")[0]?.trim() || "unknown";
-}
+const MAX_ANALYTICS_LOGS = 5000;
 
 /** POST /api/analytics — telemetría autenticada y acotada. */
 export async function POST(req: NextRequest) {
-  const session = await (await import("@/lib/auth")).getSession();
+  const session = await getSession();
   if (!session) return NextResponse.json({ error: "No auth" }, { status: 401 });
 
-  const limit = await checkRateLimit(clientIp(req), `analytics:${session.id}`, { max: 120, windowMs: 60 * 60 * 1000 });
+  const limit = await checkRateLimit(getClientIp(req), `analytics:${session.id}`, { max: 120, windowMs: 60 * 60 * 1000 });
   if (!limit.success) {
-    return NextResponse.json({ error: "Límite de eventos alcanzado" }, { status: 429, headers: { "Retry-After": String(Math.ceil(limit.resetMs / 1000)) } });
+    return NextResponse.json(
+      { error: "Límite de eventos alcanzado" },
+      { status: 429, headers: { "Retry-After": String(Math.ceil(limit.resetMs / 1000)) } },
+    );
   }
 
   try {
@@ -27,14 +27,20 @@ export async function POST(req: NextRequest) {
     const timestamp = typeof body?.timestamp === "string" ? body.timestamp : "";
     const properties = body?.properties && typeof body.properties === "object" && !Array.isArray(body.properties) ? body.properties : {};
 
-    if (!event || event.length > MAX_EVENT_LENGTH || !timestamp) {
+    if (!event || event.length > MAX_EVENT_LENGTH || !timestamp || Number.isNaN(Date.parse(timestamp))) {
       return NextResponse.json({ error: "Evento inválido" }, { status: 400 });
     }
 
-    const propertyEntries = Object.entries(properties).slice(0, MAX_PROPERTIES).map(([key, value]) => [
-      String(key).slice(0, 80),
-      typeof value === "string" ? value.slice(0, 500) : typeof value === "number" || typeof value === "boolean" || value === null ? value : String(value).slice(0, 500),
-    ]);
+    const propertyEntries = Object.entries(properties)
+      .slice(0, MAX_PROPERTIES)
+      .map(([key, value]) => [
+        key.slice(0, 80),
+        typeof value === "string"
+          ? value.slice(0, 500)
+          : typeof value === "number" || typeof value === "boolean" || value === null
+            ? value
+            : String(value).slice(0, 500),
+      ] as const);
 
     if (process.env.NODE_ENV === "development") {
       console.log("[Analytics Event]", { event, userId: session.id, properties: Object.fromEntries(propertyEntries) });
@@ -75,7 +81,9 @@ export async function GET(req: NextRequest) {
       completed: true,
       client: { trainerId: t.id },
       ...(clientId ? { clientId } : {}),
-      ...(startDate || endDate ? { date: { ...(startDate ? { gte: startDate } : {}), ...(endDate ? { lte: endDate } : {}) } } : {}),
+      ...(startDate || endDate
+        ? { date: { ...(startDate ? { gte: startDate } : {}), ...(endDate ? { lte: endDate } : {}) } }
+        : {}),
     };
 
     const [totalWorkouts, logs] = await Promise.all([
@@ -83,7 +91,8 @@ export async function GET(req: NextRequest) {
       prisma.workoutLog.findMany({
         where,
         select: { durationMin: true, sets: { select: { exerciseName: true, weight: true, reps: true } } },
-        take: 10000,
+        take: MAX_ANALYTICS_LOGS,
+        orderBy: { date: "desc" },
       }),
     ]);
 
@@ -92,7 +101,10 @@ export async function GET(req: NextRequest) {
     let durationN = 0;
     const byExercise = new Map<string, number>();
     for (const log of logs) {
-      if (log.durationMin != null) { durationSum += log.durationMin; durationN++; }
+      if (log.durationMin != null) {
+        durationSum += log.durationMin;
+        durationN++;
+      }
       for (const set of log.sets) {
         totalVolume += (set.weight ?? 0) * (set.reps ?? 0);
         byExercise.set(set.exerciseName, (byExercise.get(set.exerciseName) ?? 0) + 1);
@@ -103,7 +115,10 @@ export async function GET(req: NextRequest) {
       totalWorkouts,
       totalVolume: Math.round(totalVolume * 100) / 100,
       averageDuration: durationN ? Math.round((durationSum / durationN) * 10) / 10 : 0,
-      mostPopularExercises: [...byExercise.entries()].sort((a, b) => b[1] - a[1]).slice(0, 5).map(([name, sets]) => ({ name, sets })),
+      mostPopularExercises: [...byExercise.entries()]
+        .sort((a, b) => b[1] - a[1])
+        .slice(0, 5)
+        .map(([name, sets]) => ({ name, sets })),
       truncated: totalWorkouts > logs.length,
     });
   } catch (error) {
