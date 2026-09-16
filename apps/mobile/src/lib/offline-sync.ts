@@ -29,7 +29,6 @@ export function isOnline(): boolean {
 
 export function useOnlineStatus(): boolean {
   const [online, setOnline] = useState(true);
-
   useEffect(() => {
     const handleOnline = () => setOnline(true);
     const handleOffline = () => setOnline(false);
@@ -41,7 +40,6 @@ export function useOnlineStatus(): boolean {
       window.removeEventListener("offline", handleOffline);
     };
   }, []);
-
   return online;
 }
 
@@ -66,7 +64,6 @@ export async function queueOperation(operation: Omit<PendingOperation, "id" | "t
   if (typeof window === "undefined") throw new Error("Offline queue solo está disponible en el navegador");
   const serialized = JSON.stringify(operation.data);
   if (serialized.length > MAX_ITEM_BYTES) throw new Error("La operación offline es demasiado grande");
-
   const id = typeof crypto !== "undefined" && "randomUUID" in crypto ? crypto.randomUUID() : `op_${Date.now()}_${Math.random().toString(36).slice(2)}`;
   const pendingOp: PendingOperation = { ...operation, id, timestamp: Date.now(), retryCount: 0 };
   const existing = readQueue();
@@ -94,7 +91,6 @@ export async function syncPendingOperations(): Promise<{ success: number; failed
       failed++;
       continue;
     }
-
     try {
       const response = await fetch(operation.endpoint, {
         method: operation.method,
@@ -109,8 +105,9 @@ export async function syncPendingOperations(): Promise<{ success: number; failed
         continue;
       }
 
-      // 4xx normalmente indica payload/auth inválidos; no martillar el servidor.
+      // Errores permanentes no deben volver a enviarse en cada ciclo.
       if (response.status >= 400 && response.status < 500 && response.status !== 408 && response.status !== 429) {
+        await removeOperation(operation.id);
         failed++;
         continue;
       }
@@ -130,7 +127,6 @@ export async function syncPendingOperations(): Promise<{ success: number; failed
 
 export function useAutoSync() {
   const online = useOnlineStatus();
-
   useEffect(() => {
     if (!online) return;
     const syncNow = async () => {
