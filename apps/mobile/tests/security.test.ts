@@ -17,6 +17,7 @@ let trainerAId = "";
 let trainerBId = "";
 let clientAId = "";
 let clientBId = "";
+let clientBUserId = "";
 let checkinBId = "";
 
 function check(name: string, condition: boolean, detail?: unknown) {
@@ -76,6 +77,7 @@ async function main() {
 
     const clientAUser = await prisma.user.create({ data: { name: "Security Client A", email: `${TAG}-client-a@test.invalid`, password: passwordHash, role: "CLIENT" } });
     const clientBUser = await prisma.user.create({ data: { name: "Security Client B", email: `${TAG}-client-b@test.invalid`, password: passwordHash, role: "CLIENT" } });
+    clientBUserId = clientBUser.id;
     const clientA = await prisma.client.create({ data: { name: clientAUser.name, email: clientAUser.email, userId: clientAUser.id, trainerId: trainerAId } });
     const clientB = await prisma.client.create({ data: { name: clientBUser.name, email: clientBUser.email, userId: clientBUser.id, trainerId: trainerBId } });
     clientAId = clientA.id;
@@ -121,6 +123,14 @@ async function main() {
     const clientOwnCheckins = await request(`/api/checkins?clientId=${clientBId}`, cookieClientB);
     check("cliente B accede a su check-in", clientOwnCheckins.status === 200, clientOwnCheckins.status);
 
+    const riskA = await request("/api/automation/risk", cookieA);
+    check("trainer A accede a automatización de riesgo", riskA.status === 200, riskA.status);
+    if (riskA.ok) {
+      const riskData = await riskA.json() as { risks?: Array<{ id?: string; userId?: string | null }> };
+      const risks = Array.isArray(riskData.risks) ? riskData.risks : [];
+      check("riesgo de trainer A no incluye clientes de trainer B", !risks.some((risk) => risk.id === clientBId || risk.userId === clientBUserId));
+    }
+
     const unsignedWebhook = await request("/api/payments/webhook", undefined, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
@@ -131,7 +141,7 @@ async function main() {
     const unsignedPush = await request("/api/push/send", undefined, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ userIds: [clientBId], title: "x", body: "x" }),
+      body: JSON.stringify({ userIds: [clientBUserId], title: "x", body: "x" }),
     });
     check("push interno sin credencial rechazado", unsignedPush.status === 401, unsignedPush.status);
 
