@@ -1,6 +1,6 @@
 # KinetixFitt — AI Control Center
 
-This is the first document a coding agent should read when asked to **continue improving, fix bugs, finish the project, or review everything**.
+This is the first document a coding agent should read when asked to **continue improving, fix bugs, finish the project, integrate an API/repository, or review everything**.
 
 ## Start here
 
@@ -9,6 +9,7 @@ Run the repository audit before making changes:
 ```bash
 node scripts/ai-repo-audit.mjs
 node scripts/ai-repo-audit.mjs --json
+node scripts/ai-repo-audit.mjs --strict
 ```
 
 Then read, in order:
@@ -17,11 +18,30 @@ Then read, in order:
 2. `.ai/INDEX.md`
 3. `.ai/AI_ENGINEERING_SYSTEM.md`
 4. `.ai/PROJECT_STATE.md`
-5. the relevant contract in `.ai/`
-6. the relevant ADR in `.ai/DECISIONS/`
-7. the actual source, tests, schema, workflows and deployment configuration
+5. `.ai/FEATURE_LEDGER.md`
+6. `.ai/INTEGRATION_REGISTRY.md`
+7. `.ai/PERFORMANCE_BASELINES.md`
+8. the relevant contract in `.ai/`
+9. the relevant ADR in `.ai/DECISIONS/`
+10. the actual source, tests, schema, workflows and deployment configuration
 
 The audit is a map generator, not a claim that the software works.
+
+## Mandatory durable registries
+
+### Feature truth
+
+`.ai/FEATURE_LEDGER.md` is the canonical place to record important product capabilities and their evidence.
+
+### External integrations
+
+`.ai/INTEGRATION_REGISTRY.md` is the canonical place to record APIs, SDKs, providers and external repositories.
+
+### Performance
+
+`.ai/PERFORMANCE_BASELINES.md` is the canonical place to record measured performance and cross-device baselines.
+
+When these registries become stale after a meaningful change, downgrade the affected evidence until re-verified.
 
 ## The rule that prevents AI from breaking good code
 
@@ -109,6 +129,7 @@ search by domain concept
 search by route/path
 search by database model
 search by environment variable
+search by integration/provider name
 ```
 
 There should be one canonical cross-cutting implementation unless an ADR explicitly permits more than one.
@@ -179,6 +200,60 @@ Validate provider selection, timeout/retry policy, input limits, output handling
 
 Check cache invalidation, stale writes, conflict policy, bridge compatibility, permissions, secure storage and platform-specific failure states.
 
+## API/repository integration gate
+
+When a new API or external repository is proposed, do not integrate immediately.
+
+First classify it:
+
+`USE | ADAPT | EXTRACT | REJECT`
+
+Then record the decision and evidence in `.ai/INTEGRATION_REGISTRY.md`.
+
+Every integration should have:
+
+```text
+purpose
+source/version
+license/terms
+security review
+compatibility
+adapter boundary
+input validation
+output normalization
+timeout
+retry/backoff
+rate limits
+fallback
+observability
+tests
+runtime verification
+removal strategy
+```
+
+A new external dependency is not considered production-ready solely because installation succeeds.
+
+## Performance gate
+
+Every meaningful performance optimization must be measured when measurement is available.
+
+Record results in `.ai/PERFORMANCE_BASELINES.md`.
+
+Check at least:
+
+- startup;
+- TTFB/LCP/INP/CLS where applicable;
+- JS weight;
+- network requests;
+- API latency;
+- database query count;
+- memory;
+- CPU/frame drops;
+- image/media cost;
+- mobile battery-sensitive behavior.
+
+Never use an unsupported `100% performance` claim. Use measurable budgets and regression thresholds instead.
+
 ## Change budget
 
 A single AI iteration should target one coherent risk cluster.
@@ -194,7 +269,8 @@ Example clusters:
 - E2E;
 - performance;
 - accessibility;
-- UI/UX.
+- UI/UX;
+- external integrations.
 
 Do not combine a high-risk backend rewrite with unrelated design work.
 
@@ -209,7 +285,8 @@ After editing:
 4. affected build
 5. broader repository gates
 6. diff review
-7. final branch/commit verification
+7. registry/state update
+8. final branch/commit verification
 ```
 
 For runtime-dependent functionality, add the real runtime/provider/device check when available.
@@ -236,6 +313,8 @@ When the human says **“seguí mejorando todo”** or equivalent:
 
 ```text
 AUDIT CURRENT REPO
+↓
+READ DURABLE REGISTRIES
 ↓
 FIND RELEASE BLOCKERS
 ↓
