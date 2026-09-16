@@ -5,6 +5,7 @@
  * Goals:
  * - create a fresh, evidence-based snapshot before an AI changes code;
  * - inventory apps, packages, routes, schemas, tests and workflows;
+ * - verify durable AI governance/ledger files exist;
  * - detect common regression/hallucination signals without requiring dependencies;
  * - distinguish observed facts from inferred/unknown state;
  * - never mutate product source code.
@@ -25,46 +26,15 @@ const strict = args.has("--strict");
 const jsonOnly = args.has("--json");
 
 const IGNORE_DIRS = new Set([
-  ".git",
-  "node_modules",
-  ".next",
-  "dist",
-  "build",
-  "coverage",
-  ".turbo",
-  ".cache",
-  ".vercel",
-  "vendor",
-  "target",
+  ".git", "node_modules", ".next", "dist", "build", "coverage", ".turbo", ".cache", ".vercel", "vendor", "target"
 ]);
 
 const SOURCE_EXTENSIONS = new Set([
-  ".ts",
-  ".tsx",
-  ".js",
-  ".jsx",
-  ".mjs",
-  ".cjs",
-  ".json",
-  ".prisma",
-  ".sql",
-  ".yml",
-  ".yaml",
-  ".md",
+  ".ts", ".tsx", ".js", ".jsx", ".mjs", ".cjs", ".json", ".prisma", ".sql", ".yml", ".yaml", ".md"
 ]);
 
 const HIGH_RISK_DIRS = [
-  "/api/",
-  "/prisma/",
-  "/middleware",
-  "/auth",
-  "/payments",
-  "/uploads",
-  "/storage",
-  "/native",
-  "/electron",
-  "/capacitor",
-  "/.github/workflows/",
+  "/api/", "/prisma/", "/middleware", "/auth/", "/payments/", "/uploads/", "/storage/", "/native/", "/electron/", "/capacitor/", "/.github/workflows/"
 ];
 
 const MUST_READ = [
@@ -72,15 +42,19 @@ const MUST_READ = [
   ".ai/INDEX.md",
   ".ai/PROJECT_STATE.md",
   ".ai/AI_ENGINEERING_SYSTEM.md",
+  ".ai/AI_CONTROL_CENTER.md",
+  ".ai/FEATURE_LEDGER.md",
+  ".ai/INTEGRATION_REGISTRY.md",
+  ".ai/PERFORMANCE_BASELINES.md",
 ];
 
-function exists(rel) {
-  return fs.existsSync(path.join(ROOT, rel));
+function exists(relPath) {
+  return fs.existsSync(path.join(ROOT, relPath));
 }
 
-function read(rel) {
+function read(relPath) {
   try {
-    return fs.readFileSync(path.join(ROOT, rel), "utf8");
+    return fs.readFileSync(path.join(ROOT, relPath), "utf8");
   } catch {
     return null;
   }
@@ -128,9 +102,7 @@ function collectPackages() {
   const packagesDir = path.join(ROOT, "packages");
   if (fs.existsSync(packagesDir)) {
     for (const entry of fs.readdirSync(packagesDir, { withFileTypes: true })) {
-      if (entry.isDirectory() && exists(`packages/${entry.name}/package.json`)) {
-        packageFiles.push(`packages/${entry.name}/package.json`);
-      }
+      if (entry.isDirectory() && exists(`packages/${entry.name}/package.json`)) packageFiles.push(`packages/${entry.name}/package.json`);
     }
   }
   return packageFiles.map((file) => {
@@ -147,17 +119,11 @@ function collectPackages() {
 }
 
 function collectRoutes(files) {
-  return files
-    .filter((file) => /(^|\/)route\.(ts|tsx|js|jsx)$/.test(file) || /(^|\/)(page|layout)\.(ts|tsx|js|jsx)$/.test(file))
-    .map(rel)
-    .sort();
+  return files.filter((file) => /(^|\/)route\.(ts|tsx|js|jsx)$/.test(file) || /(^|\/)(page|layout)\.(ts|tsx|js|jsx)$/.test(file)).map(rel).sort();
 }
 
 function collectTests(files) {
-  return files
-    .filter((file) => /(test|spec)\.(ts|tsx|js|jsx)$/.test(file) || /(^|\/)tests?\//.test(rel(file)))
-    .map(rel)
-    .sort();
+  return files.filter((file) => /(test|spec)\.(ts|tsx|js|jsx)$/.test(file) || /(^|\/)tests?\//.test(rel(file))).map(rel).sort();
 }
 
 function collectSchemas(files) {
@@ -189,9 +155,7 @@ function grepSignals(files) {
     const highRisk = HIGH_RISK_DIRS.some((part) => normalizedPath.includes(part));
     for (const pattern of patterns) {
       const matches = text.match(pattern.re);
-      if (matches?.length) {
-        signals.push({ file: rel(file), signal: pattern.key, count: matches.length, highRisk });
-      }
+      if (matches?.length) signals.push({ file: rel(file), signal: pattern.key, count: matches.length, highRisk });
     }
   }
   return signals;
@@ -221,13 +185,18 @@ function requiredChecks() {
   const checks = [
     { name: "root package.json", ok: exists("package.json") },
     { name: "AI constitution", ok: exists("AGENTS.md") },
-    { name: "AI control system", ok: exists(".ai/AI_ENGINEERING_SYSTEM.md") },
+    { name: "AI control system", ok: exists(".ai/AI_CONTROL_CENTER.md") },
+    { name: "AI engineering system", ok: exists(".ai/AI_ENGINEERING_SYSTEM.md") },
+    { name: "feature ledger", ok: exists(".ai/FEATURE_LEDGER.md") },
+    { name: "integration registry", ok: exists(".ai/INTEGRATION_REGISTRY.md") },
+    { name: "performance baselines", ok: exists(".ai/PERFORMANCE_BASELINES.md") },
     { name: "project state", ok: exists(".ai/PROJECT_STATE.md") },
     { name: "CI workflow", ok: exists(".github/workflows/ci.yml") },
     { name: "mobile package", ok: exists("apps/mobile/package.json") },
     { name: "web package", ok: exists("apps/web/package.json") },
     { name: "root typecheck script", ok: Boolean(scripts.typecheck) },
     { name: "root test script", ok: Boolean(scripts.test) },
+    { name: "AI strict audit script", ok: Boolean(scripts["ai:audit:strict"]) },
   ];
   return { missing, checks };
 }
@@ -256,16 +225,8 @@ const errors = [
 const snapshot = {
   generatedAt: new Date().toISOString(),
   evidence: "E2_STATIC",
-  git: {
-    branch,
-    commit,
-    workingTree: status,
-    clean: status === "",
-  },
-  governance: {
-    mustRead: MUST_READ,
-    missing: required.missing,
-  },
+  git: { branch, commit, workingTree: status, clean: status === "" },
+  governance: { mustRead: MUST_READ, missing: required.missing },
   inventory: {
     sourceFileCount: allFiles.length,
     packages,
@@ -274,6 +235,11 @@ const snapshot = {
     schemas,
     workflows,
     envNames,
+  },
+  durableMemory: {
+    featureLedger: ".ai/FEATURE_LEDGER.md",
+    integrationRegistry: ".ai/INTEGRATION_REGISTRY.md",
+    performanceBaselines: ".ai/PERFORMANCE_BASELINES.md",
   },
   signals,
   errors,
@@ -301,20 +267,15 @@ if (jsonOnly) {
   console.log(`CI workflows: ${workflows.length}`);
   console.log(`Environment variables referenced: ${envNames.length}`);
   console.log("");
-
   console.log("Governance");
   for (const check of required.checks) console.log(`${check.ok ? "[OK]" : "[FAIL]"} ${check.name}`);
   if (required.missing.length) console.log(`Missing: ${required.missing.join(", ")}`);
-
   console.log("\nRisk signals");
   if (!signals.length) console.log("[OK] No static signals matched the audit patterns.");
   else {
-    for (const item of signals.slice(0, 100)) {
-      console.log(`[${item.highRisk ? "HIGH" : "INFO"}] ${item.signal}: ${item.file} (${item.count})`);
-    }
+    for (const item of signals.slice(0, 100)) console.log(`[${item.highRisk ? "HIGH" : "INFO"}] ${item.signal}: ${item.file} (${item.count})`);
     if (signals.length > 100) console.log(`... ${signals.length - 100} additional signals omitted from terminal output.`);
   }
-
   console.log("\nResult");
   if (snapshot.strictPass) console.log("[PASS] Static AI guard passed. This is not runtime verification.");
   else console.log(`[BLOCK] ${errors.length} blocking finding(s). Fix or explicitly resolve before declaring the repository verified.`);
