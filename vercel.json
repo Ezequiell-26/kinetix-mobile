@@ -1,26 +1,17 @@
 {
   "$schema": "https://openapi.vercel.sh/vercel.json",
   "framework": "nextjs",
-  "installCommand": "npm install",
-  "buildCommand": "npm run build --workspace=@kinetix/web",
+  "installCommand": "npm install && npm --prefix apps/web ci",
+  "buildCommand": "npm --prefix apps/web run build",
   "outputDirectory": "apps/web/.next",
-  "ignoreCommand": "git diff --quiet \"$VERCEL_GIT_PREVIOUS_SHA\" \"$VERCEL_GIT_COMMIT_SHA\" -- apps/web vercel.json package.json package-lock.json packages",
+  "ignoreCommand": "git diff --quiet \"$VERCEL_GIT_PREVIOUS_SHA\" \"$VERCEL_GIT_COMMIT_SHA\" -- apps/web vercel.json package.json package-lock.json",
   "regions": ["sfo1"],
   "env": {
     "NEXT_PUBLIC_APP_URL": "${NEXT_PUBLIC_APP_URL}",
     "NEXT_PUBLIC_STRIPE_PUBLIC_KEY": "${NEXT_PUBLIC_STRIPE_PUBLIC_KEY}",
     "NEXT_PUBLIC_MERCADO_PAGO_PUBLIC_KEY": "${NEXT_PUBLIC_MERCADO_PAGO_PUBLIC_KEY}",
     "NEXT_PUBLIC_POSTHOG_KEY": "${NEXT_PUBLIC_POSTHOG_KEY}",
-    "NEXT_PUBLIC_POSTHOG_HOST": "${NEXT_PUBLIC_POSTHOG_HOST}",
-    "STRIPE_SECRET_KEY": "${STRIPE_SECRET_KEY}",
-    "MERCADO_PAGO_ACCESS_TOKEN": "${MERCADO_PAGO_ACCESS_TOKEN}",
-    "STRIPE_WEBHOOK_SECRET": "${STRIPE_WEBHOOK_SECRET}",
-    "MERCADO_PAGO_WEBHOOK_SECRET": "${MERCADO_PAGO_WEBHOOK_SECRET}",
-    "SUPABASE_URL": "${SUPABASE_URL}",
-    "SUPABASE_ANON_KEY": "${SUPABASE_ANON_KEY}",
-    "SUPABASE_SERVICE_ROLE_KEY": "${SUPABASE_SERVICE_ROLE_KEY}",
-    "DATABASE_URL": "${DATABASE_URL}",
-    "DIRECT_URL": "${DIRECT_URL}"
+    "NEXT_PUBLIC_POSTHOG_HOST": "${NEXT_PUBLIC_POSTHOG_HOST}"
   },
   "headers": [
     {
@@ -28,7 +19,6 @@
       "headers": [
         { "key": "X-Content-Type-Options", "value": "nosniff" },
         { "key": "X-Frame-Options", "value": "DENY" },
-        { "key": "X-XSS-Protection", "value": "1; mode=block" },
         { "key": "Referrer-Policy", "value": "strict-origin-when-cross-origin" },
         { "key": "Permissions-Policy", "value": "camera=(self), microphone=(self), geolocation=(self), payment=(self)" }
       ]
@@ -37,8 +27,5 @@
   "github": {
     "silent": false,
     "autoJobCancelation": true
-  },
-  "functions": {
-    "app/api/**/*.ts": { "maxDuration": 60 }
   }
 }
