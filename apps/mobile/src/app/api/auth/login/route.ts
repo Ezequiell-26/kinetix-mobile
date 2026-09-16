@@ -13,7 +13,7 @@ export async function POST(req: Request) {
 
     const { email, password } = parsed.data;
     const normalizedEmail = email.toLowerCase().trim();
-    const lock = isLoginLocked(normalizedEmail);
+    const lock = await isLoginLocked(normalizedEmail);
     if (lock.locked) {
       const retryAfterSec = Math.max(1, Math.ceil(lock.retryAfterMs / 1000));
       return NextResponse.json(
@@ -24,10 +24,10 @@ export async function POST(req: Request) {
 
     const user = await prisma.user.findUnique({ where: { email: normalizedEmail } });
     if (!user || !(await verifyPassword(password, user.password))) {
-      recordFailedLogin(normalizedEmail);
+      await recordFailedLogin(normalizedEmail);
       return NextResponse.json({ error: "Credenciales inválidas" }, { status: 401 });
     }
-    clearLoginAttempts(normalizedEmail);
+    await clearLoginAttempts(normalizedEmail);
 
     const userAgent = req.headers.get("user-agent") || undefined;
     const ipAddress = getClientIp({ headers: req.headers, ip: (req as Request & { ip?: string }).ip });
