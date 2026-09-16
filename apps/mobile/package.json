@@ -65,7 +65,7 @@
     "jose": "^6.0.11",
     "lucide-react": "^0.511.0",
     "next": "15.5.24",
-    "nodemailer": "^6.10.1",
+    "nodemailer": "^10.0.9",
     "posthog-js": "^1.430.3",
     "prisma": "^6.8.2",
     "react": "19.1.0",
