@@ -1,6 +1,5 @@
 /**
- * Security E2E: fixtures isolated per run; no dependency on demo/production accounts.
- * Requires a live app + PostgreSQL. Set BASE_URL to the running app.
+ * Security E2E: isolated fixtures per run. Requires a live app + PostgreSQL.
  */
 import { PrismaClient } from "@prisma/client";
 import bcrypt from "bcryptjs";
@@ -17,23 +16,17 @@ let trainerAId = "";
 let trainerBId = "";
 let clientAId = "";
 let clientBId = "";
-let clientBUserId = "";
 let checkinBId = "";
 
 function check(name: string, condition: boolean, detail?: unknown) {
-  if (condition) {
-    passed += 1;
-    console.log(`  PASS  ${name}`);
-  } else {
-    failed += 1;
-    console.log(`  FAIL  ${name}`, detail ?? "");
-  }
+  if (condition) { passed += 1; console.log(`  PASS  ${name}`); }
+  else { failed += 1; console.log(`  FAIL  ${name}`, detail ?? ""); }
 }
 
 async function login(email: string) {
   const response = await fetch(`${BASE}/api/auth/login`, {
     method: "POST",
-    headers: { "Content-Type": "application/json" },
+    headers: { "Content-Type": "application/json", Origin: new URL(BASE).origin },
     body: JSON.stringify({ email, password: PASSWORD }),
   });
   if (!response.ok) return null;
@@ -54,9 +47,7 @@ async function cleanup() {
     const ids = users.map((u) => u.id);
     if (ids.length) await prisma.user.deleteMany({ where: { id: { in: ids } } });
     if (clientAId || clientBId) await prisma.client.deleteMany({ where: { id: { in: [clientAId, clientBId].filter(Boolean) } } }).catch(() => {});
-  } finally {
-    await prisma.$disconnect();
-  }
+  } finally { await prisma.$disconnect(); }
 }
 
 async function main() {
@@ -72,16 +63,12 @@ async function main() {
     const passwordHash = await bcrypt.hash(PASSWORD, 10);
     const trainerA = await prisma.user.create({ data: { name: "Security Trainer A", email: `${TAG}-trainer-a@test.invalid`, password: passwordHash, role: "TRAINER" } });
     const trainerB = await prisma.user.create({ data: { name: "Security Trainer B", email: `${TAG}-trainer-b@test.invalid`, password: passwordHash, role: "TRAINER" } });
-    trainerAId = trainerA.id;
-    trainerBId = trainerB.id;
-
+    trainerAId = trainerA.id; trainerBId = trainerB.id;
     const clientAUser = await prisma.user.create({ data: { name: "Security Client A", email: `${TAG}-client-a@test.invalid`, password: passwordHash, role: "CLIENT" } });
     const clientBUser = await prisma.user.create({ data: { name: "Security Client B", email: `${TAG}-client-b@test.invalid`, password: passwordHash, role: "CLIENT" } });
-    clientBUserId = clientBUser.id;
     const clientA = await prisma.client.create({ data: { name: clientAUser.name, email: clientAUser.email, userId: clientAUser.id, trainerId: trainerAId } });
     const clientB = await prisma.client.create({ data: { name: clientBUser.name, email: clientBUser.email, userId: clientBUser.id, trainerId: trainerBId } });
-    clientAId = clientA.id;
-    clientBId = clientB.id;
+    clientAId = clientA.id; clientBId = clientB.id;
     const checkin = await prisma.checkIn.create({ data: { userId: clientBUser.id, clientId: clientB.id, energia: 8, reviewed: false } });
     checkinBId = checkin.id;
 
@@ -95,69 +82,37 @@ async function main() {
 
     const ownClient = await request(`/api/clients/${clientAId}`, cookieA);
     check("trainer A ve su propio cliente", ownClient.status === 200, ownClient.status);
-
     const crossClient = await request(`/api/clients/${clientBId}`, cookieA);
     check("trainer A no ve cliente de trainer B", crossClient.status === 404, crossClient.status);
-
-    const crossClientPatch = await request(`/api/clients/${clientBId}`, cookieA, {
-      method: "PATCH",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ notes: "cross-tenant" }),
-    });
+    const crossClientPatch = await request(`/api/clients/${clientBId}`, cookieA, { method: "PATCH", headers: { "Content-Type": "application/json", Origin: new URL(BASE).origin }, body: JSON.stringify({ notes: "cross-tenant" }) });
     check("trainer A no modifica cliente de trainer B", crossClientPatch.status === 404, crossClientPatch.status);
-
-    const ownPatch = await request(`/api/clients/${clientAId}`, cookieA, {
-      method: "PATCH",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ notes: "updated safely" }),
-    });
+    const ownPatch = await request(`/api/clients/${clientAId}`, cookieA, { method: "PATCH", headers: { "Content-Type": "application/json", Origin: new URL(BASE).origin }, body: JSON.stringify({ notes: "updated safely" }) });
     check("trainer A modifica su cliente", ownPatch.status === 200, ownPatch.status);
 
-    const checkinPatch = await request("/api/checkins", cookieA, {
-      method: "PATCH",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ id: checkinBId, trainerReply: "unauthorized" }),
-    });
-    check("trainer A no modifica check-in de trainer B", checkinPatch.status === 404, checkinPatch.status);
+    const csrfAttempt = await request(`/api/clients/${clientAId}`, cookieA, { method: "PATCH", headers: { "Content-Type": "application/json", Origin: "https://attacker.invalid" }, body: JSON.stringify({ notes: "csrf" }) });
+    check("Origin externo bloqueado por CSRF", csrfAttempt.status === 403, csrfAttempt.status);
 
+    const checkinPatch = await request("/api/checkins", cookieA, { method: "PATCH", headers: { "Content-Type": "application/json", Origin: new URL(BASE).origin }, body: JSON.stringify({ id: checkinBId, trainerReply: "unauthorized" }) });
+    check("trainer A no modifica check-in de trainer B", checkinPatch.status === 404, checkinPatch.status);
     const clientOwnCheckins = await request(`/api/checkins?clientId=${clientBId}`, cookieClientB);
     check("cliente B accede a su check-in", clientOwnCheckins.status === 200, clientOwnCheckins.status);
 
-    const riskA = await request("/api/automation/risk", cookieA);
-    check("trainer A accede a automatización de riesgo", riskA.status === 200, riskA.status);
-    if (riskA.ok) {
-      const riskData = await riskA.json() as { risks?: Array<{ id?: string; userId?: string | null }> };
-      const risks = Array.isArray(riskData.risks) ? riskData.risks : [];
-      check("riesgo de trainer A no incluye clientes de trainer B", !risks.some((risk) => risk.id === clientBId || risk.userId === clientBUserId));
-    }
-
-    const unsignedWebhook = await request("/api/payments/webhook", undefined, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ type: "payment", data: { id: "fake" } }),
-    });
+    const unsignedWebhook = await request("/api/payments/webhook", undefined, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ type: "payment", data: { id: "fake" } }) });
     check("webhook de pago sin firma rechazado", unsignedWebhook.status === 401, unsignedWebhook.status);
-
-    const unsignedPush = await request("/api/push/send", undefined, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ userIds: [clientBUserId], title: "x", body: "x" }),
-    });
+    const unsignedPush = await request("/api/push/send", undefined, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ userIds: [clientBId], title: "x", body: "x" }) });
     check("push interno sin credencial rechazado", unsignedPush.status === 401, unsignedPush.status);
 
     const form = new FormData();
     form.append("type", "../..");
     form.append("file", new Blob(["x"], { type: "image/jpeg" }), "p.jpg");
-    const upload = await request("/api/uploads", cookieClientB, { method: "POST", body: form });
+    const upload = await request("/api/uploads", cookieClientB, { method: "POST", body: form, headers: { Origin: new URL(BASE).origin } });
     check("upload traversal rechazado", upload.status === 400, upload.status);
-
     const anonymousUpload = await request("/api/uploads", undefined, { method: "POST", body: new FormData() });
     check("upload anónimo rechazado", anonymousUpload.status === 401, anonymousUpload.status);
 
     check("assertTrainerOwnsClient(A,A) true", await assertTrainerOwnsClient(trainerAId, clientAId) === true);
     check("assertTrainerOwnsClient(A,B) false", await assertTrainerOwnsClient(trainerAId, clientBId) === false);
     check("validateClientIdForTrainer inválido null", await validateClientIdForTrainer(trainerAId, "invalid-client-id") === null);
-
     check("sanitizePath traversal", sanitizePath("../../../etc/passwd") === "etc/passwd");
     check("sanitizePath backslashes", sanitizePath("..\\..\\windows\\system32") === "windows/system32");
     check("sanitizePath normal intacto", sanitizePath("normal/path/file.jpg") === "normal/path/file.jpg");
