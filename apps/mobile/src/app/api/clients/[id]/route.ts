@@ -37,6 +37,7 @@ export async function GET(_req: Request, { params }: { params: Promise<{ id: str
     },
   });
   if (!client) return NextResponse.json({ error: "Cliente no encontrado" }, { status: 404 });
+  if (s.role === "CLIENT") delete client.trainerNotes;
   return NextResponse.json(client);
 }
 
